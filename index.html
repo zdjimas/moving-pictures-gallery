@@ -26,6 +26,8 @@
     .x { border:0; background:transparent; color:#9aa0a6; font-size:22px; cursor:pointer }
     .player { position:relative; aspect-ratio:16/9; background:#000 }
     .player video { width:100%; height:100% }
+    .diag { margin:10px 0; font:12px/1.3 system-ui; color:#cbd5e1 }
+    .diag b { color:#fff }
   </style>
 </head>
 <body>
@@ -33,9 +35,15 @@
     <h1>Moving Pictures — Gallery</h1>
     <div class="note">Hover to preview (muted). Click to open with sound. On iPad, tap to open the lightbox.</div>
 
+    <div id="diag" class="diag"></div>
+
     <div class="gallery">
-      <article class="tile" tabindex="0" data-title="Xavier's Perspectives" data-video="Xaviers-perspectives.mp4">
-        <img class="thumb" src="Xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" />
+      <!-- IMPORTANT: these filenames are EXACTLY your repo names (lowercase) -->
+      <article class="tile" tabindex="0"
+               data-title="Xavier's Perspectives"
+               data-video="xaviers-perspectives.mp4?v=1">
+        <img class="thumb" src="xaviers-perspectives-poster.png?v=1"
+             alt="Poster: Xavier's Perspectives" />
         <video class="clip" preload="none" playsinline muted loop></video>
         <div class="overlay">
           <div class="title">Xavier's Perspectives</div>
@@ -58,6 +66,23 @@
   </div>
 
 <script>
+  // --- simple diagnostics to confirm files are reachable ---
+  const diag = document.getElementById('diag');
+  const posterPath = 'xaviers-perspectives-poster.png?v=1';
+  const videoPath  = 'xaviers-perspectives.mp4?v=1';
+  (async () => {
+    try {
+      const [p, v] = await Promise.all([fetch(posterPath), fetch(videoPath)]);
+      const msgs = [];
+      msgs.push(`<b>Poster</b> (${posterPath}): ${p.ok ? 'OK' : 'NOT FOUND'}`);
+      msgs.push(`<b>Video</b> (${videoPath}): ${v.ok ? 'OK' : 'NOT FOUND'}`);
+      diag.innerHTML = msgs.join(' &nbsp;|&nbsp; ');
+    } catch (e) {
+      diag.textContent = 'Fetch test failed (network/browser) — continue testing the tile below.';
+    }
+  })();
+
+  // --- hover/tap preview (muted) ---
   const tiles = document.querySelectorAll('.tile');
   function loadAndPlayPreview(tile){
     const v = tile.querySelector('video.clip');
@@ -76,6 +101,7 @@
     tile.addEventListener('blur', () => pausePreview(tile));
   });
 
+  // --- lightbox with sound ---
   const lb = document.getElementById('lightbox');
   const lbVideo = document.getElementById('lbVideo');
   const lbTitle = document.getElementById('lbTitle');
@@ -93,8 +119,12 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && lb.classList.contains('open')) closeLightbox(); });
 
   tiles.forEach(tile => {
-    tile.addEventListener('click', () => openLightbox(tile.dataset.title, tile.dataset.video, tile.querySelector('img.thumb')?.src));
-    tile.addEventListener('keyup', (e) => { if (e.key === 'Enter' || e.key === ' ') openLightbox(tile.dataset.title, tile.dataset.video, tile.querySelector('img.thumb')?.src); });
+    tile.addEventListener('click', () =>
+      openLightbox(tile.dataset.title, tile.dataset.video, tile.querySelector('img.thumb')?.src));
+    tile.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter' || e.key === ' ')
+        openLightbox(tile.dataset.title, tile.dataset.video, tile.querySelector('img.thumb')?.src);
+    });
   });
 </script>
 </body>
