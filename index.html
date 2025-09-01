@@ -1,15 +1,18 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Moving Pictures — Gallery</title>
+  <title>Moving Pictures — Gallery (Sound on Hover)</title>
   <style>
     :root { --bg:#0b0c10; --card:#121317; --text:#e8eaed; --muted:#9aa0a6; --accent:#7cc6ff; --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35); }
     html,body { height:100% } body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
     .wrap { max-width:1100px; margin:auto; padding:28px 18px 80px }
     h1 { margin:0 0 8px; font-size:clamp(22px,2.6vw,34px); }
     .note { color:var(--muted); font-size:14px; margin-bottom:14px }
+    .controls { display:flex; gap:10px; margin:8px 0 18px }
+    .btn { appearance:none; border:1px solid #2a2f3a; background:#171a21; color:var(--text); padding:10px 14px; border-radius:10px; cursor:pointer; box-shadow:var(--shadow) }
+    .btn[aria-pressed="true"] { border-color:#3a84ff; background:#1b2436 }
     .gallery { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:18px }
     .tile { position:relative; background:var(--card); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
     .thumb, .clip { display:block; width:100%; height:100%; object-fit:cover }
@@ -26,33 +29,39 @@
     .x { border:0; background:transparent; color:#9aa0a6; font-size:22px; cursor:pointer }
     .player { position:relative; aspect-ratio:16/9; background:#000 }
     .player video { width:100%; height:100% }
-    .diag { margin:10px 0; font:12px/1.3 system-ui; color:#cbd5e1 }
-    .diag b { color:#fff }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Moving Pictures — Gallery</h1>
-    <div class="note">Hover to preview (muted). Click to open with sound. On iPad, tap to open the lightbox.</div>
+    <div class="note">
+      Previews are muted until you click <b>Enable Sound Previews</b>. After that, hover (desktop) or touch/hold (iPad) plays audio in the tile.
+      Click a tile to open the lightbox for full playback.
+    </div>
 
-    <div id="diag" class="diag"></div>
+    <div class="controls">
+      <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
+      <button id="refresh" class="btn" onclick="location.reload()">↻ Refresh</button>
+    </div>
 
     <div class="gallery">
-      <!-- IMPORTANT: these filenames are EXACTLY your repo names (lowercase) -->
+      <!-- Uses exact lowercase filenames in the SAME folder as index.html -->
       <article class="tile" tabindex="0"
                data-title="Xavier's Perspectives"
-               data-video="xaviers-perspectives.mp4?v=1">
-        <img class="thumb" src="xaviers-perspectives-poster.png?v=1"
-             alt="Poster: Xavier's Perspectives" />
+               data-video="./xaviers-perspectives.mp4">
+        <img class="thumb" src="./xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" />
         <video class="clip" preload="none" playsinline muted loop></video>
         <div class="overlay">
           <div class="title">Xavier's Perspectives</div>
           <div class="badge">Hover to preview</div>
         </div>
       </article>
+
+      <!-- Duplicate <article> blocks here for more works -->
     </div>
   </div>
 
+  <!-- Lightbox -->
   <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Video player">
     <div class="lightbox-card">
       <div class="lightbox-head">
@@ -66,66 +75,87 @@
   </div>
 
 <script>
-  // --- simple diagnostics to confirm files are reachable ---
-  const diag = document.getElementById('diag');
-  const posterPath = 'xaviers-perspectives-poster.png?v=1';
-  const videoPath  = 'xaviers-perspectives.mp4?v=1';
-  (async () => {
-    try {
-      const [p, v] = await Promise.all([fetch(posterPath), fetch(videoPath)]);
-      const msgs = [];
-      msgs.push(`<b>Poster</b> (${posterPath}): ${p.ok ? 'OK' : 'NOT FOUND'}`);
-      msgs.push(`<b>Video</b> (${videoPath}): ${v.ok ? 'OK' : 'NOT FOUND'}`);
-      diag.innerHTML = msgs.join(' &nbsp;|&nbsp; ');
-    } catch (e) {
-      diag.textContent = 'Fetch test failed (network/browser) — continue testing the tile below.';
-    }
-  })();
+  // ---- Gate: iOS/desktop need a user gesture before playing audio automatically
+  let soundEnabled = false;
+  let audioCtx = null;
 
-  // --- hover/tap preview (muted) ---
-  const tiles = document.querySelectorAll('.tile');
-  function loadAndPlayPreview(tile){
-    const v = tile.querySelector('video.clip');
-    if (!v.src) v.src = tile.dataset.video;
-    v.currentTime = 0;
-    v.play().catch(()=>{});
-  }
-  function pausePreview(tile){
-    const v = tile.querySelector('video.clip');
-    if (v){ v.pause(); v.currentTime = 0; }
-  }
-  tiles.forEach(tile => {
-    tile.addEventListener('mouseenter', () => loadAndPlayPreview(tile));
-    tile.addEventListener('focus', () => loadAndPlayPreview(tile));
-    tile.addEventListener('mouseleave', () => pausePreview(tile));
-    tile.addEventListener('blur', () => pausePreview(tile));
+  const soundToggle = document.getElementById('soundToggle');
+  soundToggle.addEventListener('click', async () => {
+    try {
+      // WebAudio "unlock" improves reliability across browsers
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') await audioCtx.resume();
+      soundEnabled = true;
+      soundToggle.textContent = '🔇 Disable Sound Previews';
+      soundToggle.setAttribute('aria-pressed', 'true');
+    } catch (e) {
+      // If WebAudio is blocked, we still flip the flag; videos will play unmuted after this gesture.
+      soundEnabled = true;
+      soundToggle.textContent = '🔇 Disable Sound Previews';
+      soundToggle.setAttribute('aria-pressed', 'true');
+    }
   });
 
-  // --- lightbox with sound ---
+  // ---- Hover/touch preview
+  const tiles = document.querySelectorAll('.tile');
+
+  function startPreview(tile) {
+    const v = tile.querySelector('video.clip');
+    if (!v.src) v.src = tile.dataset.video;        // lazy assign
+    v.muted = !soundEnabled ? true : false;        // audio only after opt-in
+    v.currentTime = 0;
+    v.play().catch(()=>{ /* autoplay might still fail on some setups; user can click */ });
+  }
+  function stopPreview(tile) {
+    const v = tile.querySelector('video.clip');
+    if (v) { v.pause(); v.currentTime = 0; }
+  }
+
+  tiles.forEach(tile => {
+    // Desktop hover/focus
+    tile.addEventListener('mouseenter', () => startPreview(tile));
+    tile.addEventListener('focus', () => startPreview(tile));
+    tile.addEventListener('mouseleave', () => stopPreview(tile));
+    tile.addEventListener('blur', () => stopPreview(tile));
+
+    // Mobile/iPad "hover": treat first touch as hover, stop when touching elsewhere
+    tile.addEventListener('touchstart', () => startPreview(tile), {passive:true});
+    tile.addEventListener('touchend', () => stopPreview(tile), {passive:true});
+
+    // Click opens lightbox with full controls (sound)
+    tile.addEventListener('click', () => openLightbox(
+      tile.dataset.title,
+      tile.dataset.video,
+      tile.querySelector('img.thumb')?.getAttribute('src')
+    ));
+    tile.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter' || e.key === ' ')
+        openLightbox(
+          tile.dataset.title,
+          tile.dataset.video,
+          tile.querySelector('img.thumb')?.getAttribute('src')
+        );
+    });
+  });
+
+  // ---- Lightbox
   const lb = document.getElementById('lightbox');
   const lbVideo = document.getElementById('lbVideo');
   const lbTitle = document.getElementById('lbTitle');
   const lbClose = document.getElementById('lbClose');
+
   function openLightbox(title, src, poster){
     lbTitle.textContent = title || 'Untitled';
     lbVideo.src = src; lbVideo.poster = poster || '';
     lb.classList.add('open');
-    lbVideo.muted = false; lbVideo.loop = false;
-    lbVideo.play().catch(()=>{});
+    // Do not auto-play with sound here; the user will press Play (satisfies iOS policy).
   }
-  function closeLightbox(){ lbVideo.pause(); lbVideo.src = ''; lb.classList.remove('open'); }
+  function closeLightbox(){
+    lbVideo.pause(); lbVideo.src = ''; lb.classList.remove('open');
+  }
   lbClose.addEventListener('click', closeLightbox);
   lb.addEventListener('click', (e) => { if (e.target === lb) closeLightbox(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && lb.classList.contains('open')) closeLightbox(); });
-
-  tiles.forEach(tile => {
-    tile.addEventListener('click', () =>
-      openLightbox(tile.dataset.title, tile.dataset.video, tile.querySelector('img.thumb')?.src));
-    tile.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter' || e.key === ' ')
-        openLightbox(tile.dataset.title, tile.dataset.video, tile.querySelector('img.thumb')?.src);
-    });
-  });
 </script>
 </body>
 </html>
