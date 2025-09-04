@@ -3,44 +3,68 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Moving Pictures — Evening Eve (Revid Test)</title>
+  <title>Moving Pictures — Revid MP4 Test</title>
   <style>
-    :root { --bg:#0b0c10; --card:#121317; --text:#e8eaed; --muted:#9aa0a6; --accent:#7cc6ff; --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35); }
+    :root { --bg:#0b0c10; --card:#121317; --text:#e8eaed; --muted:#9aa0a6; --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35); }
     html,body { height:100% }
     body { margin:0; background:var(--bg); color:var(--text);
            font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
-    .wrap { max-width:1100px; margin:auto; padding:28px 18px 80px }
+    .wrap { max-width:900px; margin:auto; padding:28px 18px 80px }
     h1 { margin:0 0 8px; font-size:clamp(22px,2.6vw,34px); }
-    .note { color:var(--muted); font-size:14px; margin-bottom:14px }
-    .gallery { display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:18px }
-    .tile { position:relative; background:var(--card); border-radius:var(--radius);
-            overflow:hidden; box-shadow:var(--shadow); aspect-ratio:16/9 }
-    .overlay { position:absolute; inset:auto 0 0 0; background:linear-gradient(180deg, transparent, rgba(0,0,0,.75));
-               padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px }
-    .title { font-weight:600; font-size:14px }
-    .badge { font-size:12px; color:#c5e4ff; background:rgba(124,198,255,.08);
-             border:1px solid rgba(124,198,255,.3); padding:4px 8px; border-radius:999px }
-    iframe { position:absolute; inset:0; width:100%; height:100%; border:0; border-radius:var(--radius) }
+    .note, .diag { color:var(--muted); font-size:14px; margin:10px 0 16px }
+    .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden }
+    .player { position:relative; width:100%; aspect-ratio:16/9; background:#000 }
+    .player video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Moving Pictures — Evening Eve</h1>
-    <div class="note">This test uses a Revid-hosted embed URL. Playback is handled by their player inside an iframe.</div>
+    <h1>Revid MP4 — Inline Playback Test</h1>
+    <div class="note">
+      This page embeds your Revid-hosted MP4 directly in a <code>&lt;video&gt;</code> element (no iframe).
+      Click Play to start. If it doesn’t play, see the diagnostic line below.
+    </div>
 
-    <div class="gallery">
-      <!-- Revid embed -->
-      <article class="tile">
-        <iframe
+    <!-- Diagnostics: quick HEAD request to check reachability/headers -->
+    <div id="diag" class="diag">Checking remote file…</div>
+
+    <div class="card">
+      <div class="player">
+        <video
+          id="vid"
           src="https://cdn.revid.ai/renders/b7HmVQsXrNEKjxU4Z99w/0x5OsebPTT09V2dSkpoa-1756260135614.mp4"
-          allow="autoplay; fullscreen; picture-in-picture">
-        </iframe>
-        <div class="overlay">
-          <div class="title">Evening Eve</div>
-          <div class="badge">Embedded player</div>
-        </div>
-      </article>
+          controls
+          playsinline
+          preload="metadata"
+          crossorigin="anonymous"
+          controlsList="nodownload"
+        >
+          Your browser does not support HTML5 video.
+        </video>
+      </div>
+    </div>
+
+    <div class="note">
+      If you still don’t get playback, try opening the raw file in a new tab to confirm it’s reachable:
+      <a href="https://cdn.revid.ai/renders/b7HmVQsXrNEKjxU4Z99w/0x5OsebPTT09V2dSkpoa-1756260135614.mp4" target="_blank" rel="noopener">Open Revid MP4</a>
     </div>
   </div>
+
+  <script>
+    (async () => {
+      const url = "https://cdn.revid.ai/renders/b7HmVQsXrNEKjxU4Z99w/0x5OsebPTT09V2dSkpoa-1756260135614.mp4";
+      const el = document.getElementById('diag');
+      try {
+        const res = await fetch(url, { method: 'HEAD', mode: 'cors' });
+        const ok = res.ok ? 'OK' : `NOT OK (status ${res.status})`;
+        const ct = res.headers.get('content-type') || 'unknown';
+        const disp = res.headers.get('content-disposition') || 'none';
+        const ranges = res.headers.get('accept-ranges') || 'none';
+        el.textContent = `HEAD ${ok} — content-type: ${ct}; content-disposition: ${disp}; accept-ranges: ${ranges}`;
+      } catch (e) {
+        el.textContent = 'HEAD request failed (possible CORS/network issue). The video may still play via <video>.';
+      }
+    })();
+  </script>
 </body>
 </html>
