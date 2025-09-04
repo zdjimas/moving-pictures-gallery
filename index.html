@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Moving Pictures — Gallery (Sound on Hover)</title>
+  <title>Moving Pictures — Gallery</title>
   <style>
     :root { --bg:#0b0c10; --card:#121317; --text:#e8eaed; --muted:#9aa0a6; --accent:#7cc6ff; --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35); }
     html,body { height:100% } body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
@@ -12,15 +12,16 @@
     .note { color:var(--muted); font-size:14px; margin-bottom:14px }
     .controls { display:flex; gap:10px; margin:8px 0 18px }
     .btn { appearance:none; border:1px solid #2a2f3a; background:#171a21; color:var(--text); padding:10px 14px; border-radius:10px; cursor:pointer; box-shadow:var(--shadow) }
-    .btn[aria-pressed="true"] { border-color:#3a84ff; background:#1b2436 }
+
     .gallery { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:18px }
-    .tile { position:relative; background:var(--card); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+    .tile { position:relative; background:var(--card); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow) }
     .thumb, .clip { display:block; width:100%; height:100%; object-fit:cover }
     .clip { position:absolute; inset:0; opacity:0; transition:opacity .25s ease-out }
     .tile:hover .clip, .tile:focus-within .clip { opacity:1 }
     .overlay { position:absolute; inset:auto 0 0 0; background:linear-gradient(180deg, transparent, rgba(0,0,0,.75)); padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px }
     .title { font-weight:600; font-size:14px }
     .badge { font-size:12px; color:#c5e4ff; background:rgba(124,198,255,.08); border:1px solid rgba(124,198,255,.3); padding:4px 8px; border-radius:999px }
+
     .lightbox { position:fixed; inset:0; background:rgba(8,10,14,.72); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; padding:24px; z-index:50 }
     .lightbox.open { display:flex }
     .lightbox-card { width:min(1100px,92vw); background:#0f1218; border:1px solid #222936; border-radius:20px; overflow:hidden; box-shadow:var(--shadow) }
@@ -34,30 +35,47 @@
 <body>
   <div class="wrap">
     <h1>Moving Pictures — Gallery</h1>
-    <div class="note">
-      Previews are muted until you click <b>Enable Sound Previews</b>. After that, hover (desktop) or touch/hold (iPad) plays audio in the tile.
-      Click a tile to open the lightbox for full playback.
-    </div>
-
-    <div class="controls">
-      <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
-      <button id="refresh" class="btn" onclick="location.reload()">↻ Refresh</button>
-    </div>
+    <div class="note">Hover (desktop) or touch/hold (iPad) to preview silently for 30s. Click a tile to open with sound.</div>
 
     <div class="gallery">
-      <!-- Uses exact lowercase filenames in the SAME folder as index.html -->
+      <!-- Existing work: Xavier's Perspectives -->
       <article class="tile" tabindex="0"
                data-title="Xavier's Perspectives"
-               data-video="./xaviers-perspectives.mp4">
+               data-video="./xaviers-perspectives.mp4"
+               data-preview-duration="30">
         <img class="thumb" src="./xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" />
-        <video class="clip" preload="none" playsinline muted loop></video>
+        <video class="clip" preload="none" playsinline muted></video>
         <div class="overlay">
           <div class="title">Xavier's Perspectives</div>
           <div class="badge">Hover to preview</div>
         </div>
       </article>
 
-      <!-- Duplicate <article> blocks here for more works -->
+      <!-- New work #1: Evening Eve -->
+      <article class="tile" tabindex="0"
+               data-title="Evening Eve"
+               data-video="./eveningeve.mp4"
+               data-preview-duration="30">
+        <img class="thumb" src="./eveningeve-poster.jpg" alt="Poster: Evening Eve" />
+        <video class="clip" preload="none" playsinline muted></video>
+        <div class="overlay">
+          <div class="title">Evening Eve</div>
+          <div class="badge">Hover to preview</div>
+        </div>
+      </article>
+
+      <!-- New work #2: 27 Years Expressed in Days -->
+      <article class="tile" tabindex="0"
+               data-title="27 Years Expressed in Days"
+               data-video="./27yearsasdays.mp4"
+               data-preview-duration="30">
+        <img class="thumb" src="./27yearsasdays-poster.jpg" alt="Poster: 27 Years Expressed in Days" />
+        <video class="clip" preload="none" playsinline muted></video>
+        <div class="overlay">
+          <div class="title">27 Years Expressed in Days</div>
+          <div class="badge">Hover to preview</div>
+        </div>
+      </article>
     </div>
   </div>
 
@@ -75,54 +93,51 @@
   </div>
 
 <script>
-  // ---- Gate: iOS/desktop need a user gesture before playing audio automatically
-  let soundEnabled = false;
-  let audioCtx = null;
-
-  const soundToggle = document.getElementById('soundToggle');
-  soundToggle.addEventListener('click', async () => {
-    try {
-      // WebAudio "unlock" improves reliability across browsers
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') await audioCtx.resume();
-      soundEnabled = true;
-      soundToggle.textContent = '🔇 Disable Sound Previews';
-      soundToggle.setAttribute('aria-pressed', 'true');
-    } catch (e) {
-      // If WebAudio is blocked, we still flip the flag; videos will play unmuted after this gesture.
-      soundEnabled = true;
-      soundToggle.textContent = '🔇 Disable Sound Previews';
-      soundToggle.setAttribute('aria-pressed', 'true');
-    }
-  });
-
-  // ---- Hover/touch preview
+  const DEFAULT_PREVIEW_SECONDS = 30;
   const tiles = document.querySelectorAll('.tile');
 
-  function startPreview(tile) {
+  function startPreview(tile){
     const v = tile.querySelector('video.clip');
-    if (!v.src) v.src = tile.dataset.video;        // lazy assign
-    v.muted = !soundEnabled ? true : false;        // audio only after opt-in
-    v.currentTime = 0;
-    v.play().catch(()=>{ /* autoplay might still fail on some setups; user can click */ });
+    if (!v.src) v.src = tile.dataset.video;
+    v.muted = true;        // hover previews are muted (sound requires a user click)
+    v.loop = false;
+
+    const maxSec = parseFloat(tile.dataset.previewDuration || DEFAULT_PREVIEW_SECONDS);
+    v._previewStart = 0;
+    v.currentTime = v._previewStart;
+    v._previewEnd = isFinite(maxSec) ? v._previewStart + maxSec : Infinity;
+
+    if (v._onTimeUpdate) v.removeEventListener('timeupdate', v._onTimeUpdate);
+    v._onTimeUpdate = () => {
+      if (v.currentTime >= v._previewEnd) {
+        v.pause();
+        v.currentTime = v._previewStart;
+      }
+    };
+    v.addEventListener('timeupdate', v._onTimeUpdate);
+
+    v.play().catch(()=>{});
   }
-  function stopPreview(tile) {
+
+  function stopPreview(tile){
     const v = tile.querySelector('video.clip');
-    if (v) { v.pause(); v.currentTime = 0; }
+    if (!v) return;
+    v.pause();
+    if (v._onTimeUpdate) { v.removeEventListener('timeupdate', v._onTimeUpdate); v._onTimeUpdate = null; }
+    v.currentTime = 0;
   }
 
   tiles.forEach(tile => {
-    // Desktop hover/focus
     tile.addEventListener('mouseenter', () => startPreview(tile));
     tile.addEventListener('focus', () => startPreview(tile));
     tile.addEventListener('mouseleave', () => stopPreview(tile));
     tile.addEventListener('blur', () => stopPreview(tile));
 
-    // Mobile/iPad "hover": treat first touch as hover, stop when touching elsewhere
+    // iPad "hover" approximation
     tile.addEventListener('touchstart', () => startPreview(tile), {passive:true});
     tile.addEventListener('touchend', () => stopPreview(tile), {passive:true});
 
-    // Click opens lightbox with full controls (sound)
+    // Click opens lightbox with sound
     tile.addEventListener('click', () => openLightbox(
       tile.dataset.title,
       tile.dataset.video,
@@ -138,7 +153,7 @@
     });
   });
 
-  // ---- Lightbox
+  // Lightbox
   const lb = document.getElementById('lightbox');
   const lbVideo = document.getElementById('lbVideo');
   const lbTitle = document.getElementById('lbTitle');
@@ -148,7 +163,7 @@
     lbTitle.textContent = title || 'Untitled';
     lbVideo.src = src; lbVideo.poster = poster || '';
     lb.classList.add('open');
-    // Do not auto-play with sound here; the user will press Play (satisfies iOS policy).
+    // User presses Play for audio (iOS policy compliant)
   }
   function closeLightbox(){
     lbVideo.pause(); lbVideo.src = ''; lb.classList.remove('open');
