@@ -1,70 +1,148 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Moving Pictures — Revid MP4 Test</title>
-  <style>
-    :root { --bg:#0b0c10; --card:#121317; --text:#e8eaed; --muted:#9aa0a6; --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35); }
-    html,body { height:100% }
-    body { margin:0; background:var(--bg); color:var(--text);
-           font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
-    .wrap { max-width:900px; margin:auto; padding:28px 18px 80px }
-    h1 { margin:0 0 8px; font-size:clamp(22px,2.6vw,34px); }
-    .note, .diag { color:var(--muted); font-size:14px; margin:10px 0 16px }
-    .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden }
-    .player { position:relative; width:100%; aspect-ratio:16/9; background:#000 }
-    .player video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Revid MP4 — Blob-URL Playback Test</title>
+<style>
+  :root { --bg:#0b0c10; --card:#121317; --text:#e8eaed; --muted:#9aa0a6; --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35); }
+  html,body { height:100% }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
+  .wrap { max-width:900px; margin:auto; padding:28px 18px 80px }
+  h1 { margin:0 0 8px; font-size:clamp(22px,2.6vw,34px); }
+  .note, .diag { color:var(--muted); font-size:14px; margin:10px 0 16px }
+  .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden }
+  .player { position:relative; width:100%; aspect-ratio:16/9; background:#000 }
+  .player video, .player img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block }
+  .controls { display:flex; gap:8px; align-items:center; padding:12px; border-top:1px solid #222936 }
+  .btn { appearance:none; border:1px solid #2a3442; background:#1c2431; color:#e8eaed; padding:10px 14px; border-radius:10px; cursor:pointer }
+  .btn:disabled { opacity:.6; cursor:not-allowed }
+  .progress { flex:1; height:8px; background:#1a2230; border-radius:999px; overflow:hidden }
+  .bar { height:100%; width:0%; background:#3fa9ff; transition:width .15s linear }
+  .status { min-width:120px; text-align:right; font-size:12px; color:#cbd5e1 }
+</style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Revid MP4 — Inline Playback Test</h1>
+    <h1>Revid MP4 — Inline Playback (Blob URL)</h1>
     <div class="note">
-      This page embeds your Revid-hosted MP4 directly in a <code>&lt;video&gt;</code> element (no iframe).
-      Click Play to start. If it doesn’t play, see the diagnostic line below.
+      Click <b>Load &amp; Play</b> to fetch the remote MP4 as a Blob and play it inline.
+      This avoids “download” behavior caused by <code>Content-Disposition: attachment</code>.
     </div>
 
-    <!-- Diagnostics: quick HEAD request to check reachability/headers -->
-    <div id="diag" class="diag">Checking remote file…</div>
+    <div id="diag" class="diag">Ready.</div>
 
     <div class="card">
-      <div class="player">
-        <video
-          id="vid"
-          src="https://cdn.revid.ai/renders/b7HmVQsXrNEKjxU4Z99w/0x5OsebPTT09V2dSkpoa-1756260135614.mp4"
-          controls
-          playsinline
-          preload="metadata"
-          crossorigin="anonymous"
-          controlsList="nodownload"
-        >
-          Your browser does not support HTML5 video.
-        </video>
+      <div class="player" id="player">
+        <!-- Optional poster (use your own poster file or leave blank) -->
+        <img id="poster" alt="Poster" src="" style="display:none" />
+        <video id="vid" playsinline controls preload="metadata"></video>
+      </div>
+      <div class="controls">
+        <button id="loadBtn" class="btn">▶ Load &amp; Play</button>
+        <button id="muteBtn" class="btn">🔇</button>
+        <div class="progress"><div id="bar" class="bar"></div></div>
+        <div id="status" class="status">idle</div>
       </div>
     </div>
 
     <div class="note">
-      If you still don’t get playback, try opening the raw file in a new tab to confirm it’s reachable:
-      <a href="https://cdn.revid.ai/renders/b7HmVQsXrNEKjxU4Z99w/0x5OsebPTT09V2dSkpoa-1756260135614.mp4" target="_blank" rel="noopener">Open Revid MP4</a>
+      Direct file (for sanity check): 
+      <a id="rawLink" href="#" target="_blank" rel="noopener">open raw MP4</a>
     </div>
   </div>
 
-  <script>
-    (async () => {
-      const url = "https://cdn.revid.ai/renders/b7HmVQsXrNEKjxU4Z99w/0x5OsebPTT09V2dSkpoa-1756260135614.mp4";
-      const el = document.getElementById('diag');
-      try {
-        const res = await fetch(url, { method: 'HEAD', mode: 'cors' });
-        const ok = res.ok ? 'OK' : `NOT OK (status ${res.status})`;
-        const ct = res.headers.get('content-type') || 'unknown';
-        const disp = res.headers.get('content-disposition') || 'none';
-        const ranges = res.headers.get('accept-ranges') || 'none';
-        el.textContent = `HEAD ${ok} — content-type: ${ct}; content-disposition: ${disp}; accept-ranges: ${ranges}`;
-      } catch (e) {
-        el.textContent = 'HEAD request failed (possible CORS/network issue). The video may still play via <video>.';
+<script>
+  // --- CONFIG: your Revid MP4 URL ---
+  const REMOTE_MP4 = "https://cdn.revid.ai/renders/b7HmVQsXrNEKjxU4Z99w/0x5OsebPTT09V2dSkpoa-1756260135614.mp4";
+
+  // Wire up UI
+  const diag = document.getElementById('diag');
+  const loadBtn = document.getElementById('loadBtn');
+  const muteBtn = document.getElementById('muteBtn');
+  const statusEl = document.getElementById('status');
+  const barEl = document.getElementById('bar');
+  const vid = document.getElementById('vid');
+  const rawLink = document.getElementById('rawLink');
+  rawLink.href = REMOTE_MP4;
+
+  let objUrl = null;
+
+  function setStatus(text) { statusEl.textContent = text; }
+  function setDiag(text) { diag.textContent = text; }
+
+  async function fetchAsBlobWithProgress(url) {
+    const res = await fetch(url, { mode: 'cors' }); // requires CORS from host
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const contentLength = res.headers.get('content-length');
+    const total = contentLength ? parseInt(contentLength, 10) : 0;
+    const reader = res.body.getReader();
+    const chunks = [];
+    let received = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      received += value.length;
+      if (total) {
+        const pct = Math.round((received / total) * 100);
+        barEl.style.width = pct + "%";
+        setStatus(`${pct}%`);
+      } else {
+        // Unknown length; show MB downloaded
+        const mb = (received / (1024*1024)).toFixed(2);
+        setStatus(`${mb} MB`);
       }
-    })();
-  </script>
+    }
+    return new Blob(chunks, { type: "video/mp4" });
+  }
+
+  async function loadAndPlay() {
+    loadBtn.disabled = true;
+    setDiag("Fetching video… (this uses CORS + streaming to a Blob)");
+    barEl.style.width = "0%";
+    setStatus("0%");
+
+    try {
+      const blob = await fetchAsBlobWithProgress(REMOTE_MP4);
+      if (objUrl) URL.revokeObjectURL(objUrl);
+      objUrl = URL.createObjectURL(blob);
+      vid.src = objUrl;
+      // start unmuted? iOS requires a gesture anyway; you just clicked, so this qualifies.
+      vid.muted = false;
+      await vid.play().catch(() => {/* user can press play */});
+      setDiag("Loaded from remote URL via Blob. Playing inline.");
+    } catch (err) {
+      setDiag("Failed to fetch video. Likely a CORS restriction from the host. " +
+              "If this persists, the host must allow cross-origin GET for this file, or you must use their embed/player.");
+      console.error(err);
+    } finally {
+      loadBtn.disabled = false;
+    }
+  }
+
+  loadBtn.addEventListener('click', loadAndPlay);
+  muteBtn.addEventListener('click', () => {
+    vid.muted = !vid.muted;
+    muteBtn.textContent = vid.muted ? "🔇" : "🔊";
+    if (vid.paused) vid.play().catch(()=>{});
+  });
+
+  // Optional: a quick HEAD probe so you can see headers
+  (async () => {
+    try {
+      const head = await fetch(REMOTE_MP4, { method: 'HEAD', mode: 'cors' });
+      setDiag(`HEAD ${head.ok ? "OK" : "NOT OK ("+head.status+")"} · `
+        + `type: ${head.headers.get('content-type')||"?"} · `
+        + `ranges: ${head.headers.get('accept-ranges')||"no"} · `
+        + `disposition: ${head.headers.get('content-disposition')||"none"}`);
+    } catch {
+      setDiag("HEAD failed (possible CORS). Click Load & Play to try Blob fetch anyway.");
+    }
+  })();
+</script>
 </body>
 </html>
+
