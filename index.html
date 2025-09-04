@@ -1,16 +1,22 @@
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Moving Pictures — 2×2 Gallery</title>
+  <title>Moving Pictures — 2×2 Gallery (Hover with Sound Toggle)</title>
   <style>
     :root { --bg:#0b0c10; --card:#121317; --text:#e8eaed; --muted:#9aa0a6; --accent:#7cc6ff; --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35); }
     html,body { height:100% }
     body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
     .wrap { max-width:1100px; margin:auto; padding:28px 18px 80px }
     h1 { margin:0 0 8px; font-size:clamp(22px,2.6vw,34px) }
-    .note { color:var(--muted); font-size:14px; margin-bottom:18px }
+    .note { color:var(--muted); font-size:14px; margin:6px 0 16px }
+
+    /* Controls */
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 18px }
+    .btn { appearance:none; border:1px solid #2a2f3a; background:#171a21; color:var(--text); padding:10px 14px; border-radius:10px; cursor:pointer; box-shadow:var(--shadow) }
+    .btn[aria-pressed="true"] { border-color:#3a84ff; background:#1b2436 }
 
     /* 2×2 grid (collapses to 1 column on small screens) */
     .gallery {
@@ -45,51 +51,56 @@
 <body>
   <div class="wrap">
     <h1>Moving Pictures — Gallery</h1>
-    <div class="note">Hover any tile to preview (muted). Click to open with sound. Files are loaded from the same folder as this page.</div>
+    <div class="note">Hover to preview. Click to open with sound. Use the button to allow sound during hover previews.</div>
+
+    <div class="controls">
+      <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
+      <button class="btn" onclick="location.reload()">↻ Refresh</button>
+    </div>
 
     <div class="gallery">
-      <!-- Tile 1: existing work -->
+      <!-- Tile 1 -->
       <article class="tile" tabindex="0"
                data-title="Xavier's Perspectives"
                data-video="./xaviers-perspectives.mp4">
         <img class="thumb" src="./xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" />
-        <video class="clip" preload="none" playsinline muted></video>
+        <video class="clip" preload="none" playsinline muted loop></video>
         <div class="overlay">
           <div class="title">Xavier's Perspectives</div>
           <div class="badge">Hover to preview</div>
         </div>
       </article>
 
-      <!-- Tile 2: Reflections from a Jazz Club -->
+      <!-- Tile 2 -->
       <article class="tile" tabindex="0"
                data-title="Reflections from a Jazz Club"
                data-video="./Reflections from a Jazz Club.mp4">
         <img class="thumb" src="./Jazz.png" alt="Poster: Reflections from a Jazz Club" />
-        <video class="clip" preload="none" playsinline muted></video>
+        <video class="clip" preload="none" playsinline muted loop></video>
         <div class="overlay">
           <div class="title">Reflections from a Jazz Club</div>
           <div class="badge">Hover to preview</div>
         </div>
       </article>
 
-      <!-- Tile 3: Vacancy — AI cover of Dream Theater -->
+      <!-- Tile 3 -->
       <article class="tile" tabindex="0"
                data-title="Vacancy — an AI cover of Dream Theater"
                data-video="./Vacancy - an AI cover of Dream Theater.mp4">
-        <img class="thumb" src="./vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" />
-        <video class="clip" preload="none" playsinline muted></video>
+        <img class="thumb" src="./vacany.png" alt="Poster: Vacancy — an AI cover of Dream Theater" />
+        <video class="clip" preload="none" playsinline muted loop></video>
         <div class="overlay">
           <div class="title">Vacancy — AI cover (Dream Theater)</div>
           <div class="badge">Hover to preview</div>
         </div>
       </article>
 
-      <!-- Tile 4: Wings for Marie -->
+      <!-- Tile 4 -->
       <article class="tile" tabindex="0"
                data-title="Wings for Marie"
                data-video="./Wings For Marie.mp4">
         <img class="thumb" src="./Wings.png" alt="Poster: Wings for Marie" />
-        <video class="clip" preload="none" playsinline muted></video>
+        <video class="clip" preload="none" playsinline muted loop></video>
         <div class="overlay">
           <div class="title">Wings for Marie</div>
           <div class="badge">Hover to preview</div>
@@ -112,30 +123,54 @@
   </div>
 
   <script>
-    // --- Hover/touch preview (muted) ---
+    /* ===========
+       Sound opt-in for hover previews
+       =========== */
+    let soundEnabled = false;
+    let audioCtx = null;
+    const soundToggle = document.getElementById('soundToggle');
+    soundToggle.addEventListener('click', async () => {
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
+      } catch(e) { /* ignore; the click itself is enough for many browsers */ }
+      soundEnabled = !soundEnabled;
+      soundToggle.setAttribute('aria-pressed', String(soundEnabled));
+      soundToggle.textContent = soundEnabled ? '🔇 Disable Sound Previews' : '🔊 Enable Sound Previews';
+    });
+
+    /* ===========
+       Hover/touch preview (full video, loops)
+       =========== */
     const tiles = document.querySelectorAll('.tile');
 
-    function loadAndPlayPreview(tile) {
+    function startPreview(tile) {
       const v = tile.querySelector('video.clip');
-      if (!v.src) v.src = tile.dataset.video;     // lazy set src
-      v.muted = true;                              // muted preview
-      v.loop = false;                              // stop when user leaves
-      v.currentTime = 0;
-      v.play().catch(()=>{ /* autoplay may be blocked on some setups; click still works */ });
+      if (!v.src) v.src = tile.dataset.video;  // lazy load
+      v.muted = !soundEnabled;                 // unmute after opt-in
+      v.loop = true;                           // keep playing full video
+      v.play().catch(()=>{ /* autoplay may still be blocked in some setups */ });
     }
     function stopPreview(tile) {
       const v = tile.querySelector('video.clip');
-      if (v) { v.pause(); v.currentTime = 0; }
+      if (v) { v.pause(); } // keep current frame; set v.currentTime=0 if you prefer rewind
     }
 
     tiles.forEach(tile => {
-      tile.addEventListener('mouseenter', () => loadAndPlayPreview(tile));
-      tile.addEventListener('focus', () => loadAndPlayPreview(tile));
+      // Desktop hover/focus
+      tile.addEventListener('mouseenter', () => startPreview(tile));
+      tile.addEventListener('focus', () => startPreview(tile));
       tile.addEventListener('mouseleave', () => stopPreview(tile));
       tile.addEventListener('blur', () => stopPreview(tile));
+
+      // Mobile/iPad: treat touch as hover
+      tile.addEventListener('touchstart', () => startPreview(tile), {passive:true});
+      tile.addEventListener('touchend', () => stopPreview(tile), {passive:true});
     });
 
-    // --- Lightbox with sound ---
+    /* ===========
+       Lightbox with sound
+       =========== */
     const lb = document.getElementById('lightbox');
     const lbVideo = document.getElementById('lbVideo');
     const lbTitle = document.getElementById('lbTitle');
@@ -146,7 +181,7 @@
       lbVideo.src = src;
       lbVideo.poster = poster || '';
       lb.classList.add('open');
-      // Do not force autoplay-with-sound; user clicks Play (iOS policy friendly)
+      // User will press Play; complies with iOS audio policy
       lbVideo.muted = false;
     }
     function closeLightbox() {
