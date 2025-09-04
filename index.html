@@ -1,122 +1,180 @@
- <!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Remote Video — Revid Test Modes</title>
-<style>
-  :root { --bg:#0b0c10; --card:#121317; --text:#e8eaed; --muted:#9aa0a6; --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35); }
-  html,body { height:100% }
-  body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
-  .wrap { max-width:1000px; margin:auto; padding:28px 18px 80px }
-  h1 { margin:0 0 8px; font-size:clamp(22px,2.6vw,34px); }
-  .muted { color:#9aa0a6; font-size:14px; margin-bottom:12px }
-  .row { display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 18px }
-  .btn { appearance:none; border:1px solid #2a3442; background:#1c2431; color:#e8eaed; padding:10px 14px; border-radius:10px; cursor:pointer }
-  .btn[disabled]{opacity:.5; cursor:not-allowed}
-  .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
-  .area { position:relative; width:100%; aspect-ratio:16/9; background:#000; }
-  video, iframe { position:absolute; inset:0; width:100%; height:100%; border:0; display:block; object-fit:cover; }
-  .diag { color:#cbd5e1; font-size:13px; margin:10px 0 16px; white-space:pre-wrap }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Moving Pictures — 2×2 Gallery</title>
+  <style>
+    :root { --bg:#0b0c10; --card:#121317; --text:#e8eaed; --muted:#9aa0a6; --accent:#7cc6ff; --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35); }
+    html,body { height:100% }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; }
+    .wrap { max-width:1100px; margin:auto; padding:28px 18px 80px }
+    h1 { margin:0 0 8px; font-size:clamp(22px,2.6vw,34px) }
+    .note { color:var(--muted); font-size:14px; margin-bottom:18px }
+
+    /* 2×2 grid (collapses to 1 column on small screens) */
+    .gallery {
+      display:grid;
+      grid-template-columns: repeat(2, minmax(280px, 1fr));
+      gap:18px;
+    }
+    @media (max-width: 720px) {
+      .gallery { grid-template-columns: 1fr; }
+    }
+
+    .tile { position:relative; background:var(--card); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+    .thumb, .clip { display:block; width:100%; height:100%; object-fit:cover }
+    .clip { position:absolute; inset:0; opacity:0; transition:opacity .25s ease-out }
+    .tile:hover .clip, .tile:focus-within .clip { opacity:1 }
+
+    .overlay { position:absolute; inset:auto 0 0 0; background:linear-gradient(180deg, transparent, rgba(0,0,0,.75)); padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px }
+    .title { font-weight:600; font-size:14px }
+    .badge { font-size:12px; color:#c5e4ff; background:rgba(124,198,255,.08); border:1px solid rgba(124,198,255,.3); padding:4px 8px; border-radius:999px }
+
+    /* Lightbox */
+    .lightbox { position:fixed; inset:0; background:rgba(8,10,14,.72); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; padding:24px; z-index:50 }
+    .lightbox.open { display:flex }
+    .lightbox-card { width:min(1100px,92vw); background:#0f1218; border:1px solid #222936; border-radius:20px; overflow:hidden; box-shadow:var(--shadow) }
+    .lightbox-head { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid #1b222e }
+    .lightbox-title { font-weight:600 }
+    .x { border:0; background:transparent; color:#9aa0a6; font-size:22px; cursor:pointer }
+    .player { position:relative; aspect-ratio:16/9; background:#000 }
+    .player video { position:absolute; inset:0; width:100%; height:100%; }
+  </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Remote Video — Revid Test Modes</h1>
-    <div class="muted">
-      Test three ways to load a remote video. Use your Revid link(s) below, then click a mode.
-      <br>• Mode 1: <code>&lt;video src=…&gt;</code> (works only if host permits inline streaming)
-      <br>• Mode 2: Blob fetch (requires CORS)
-      <br>• Mode 3: <code>&lt;iframe&gt;</code> to a <b>player/embed</b> URL (not raw mp4)
-    </div>
+    <h1>Moving Pictures — Gallery</h1>
+    <div class="note">Hover any tile to preview (muted). Click to open with sound. Files are loaded from the same folder as this page.</div>
 
-    <!-- PASTE YOUR URL(S) HERE -->
-    <div class="muted">Raw MP4 URL:</div>
-    <input id="mp4url" style="width:100%; padding:10px; border-radius:8px; border:1px solid #2a3442; background:#0f151e; color:#e8eaed"
-           value="https://cdn.revid.ai/renders/b7HmVQsXrNEKjxU4Z99w/0x5OsebPTT09V2dSkpoa-1756260135614.mp4" />
+    <div class="gallery">
+      <!-- Tile 1: existing work -->
+      <article class="tile" tabindex="0"
+               data-title="Xavier's Perspectives"
+               data-video="./xaviers-perspectives.mp4">
+        <img class="thumb" src="./xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" />
+        <video class="clip" preload="none" playsinline muted></video>
+        <div class="overlay">
+          <div class="title">Xavier's Perspectives</div>
+          <div class="badge">Hover to preview</div>
+        </div>
+      </article>
 
-    <div class="muted" style="margin-top:10px">Embed/Player URL (if Revid provides one):</div>
-    <input id="embedurl" style="width:100%; padding:10px; border-radius:8px; border:1px solid #2a3442; background:#0f151e; color:#e8eaed"
-           value="" placeholder="e.g., https://revid.ai/…/embed or share Player URL" />
+      <!-- Tile 2: Reflections from a Jazz Club -->
+      <article class="tile" tabindex="0"
+               data-title="Reflections from a Jazz Club"
+               data-video="./Reflections from a Jazz Club.mp4">
+        <img class="thumb" src="./Jazz.png" alt="Poster: Reflections from a Jazz Club" />
+        <video class="clip" preload="none" playsinline muted></video>
+        <div class="overlay">
+          <div class="title">Reflections from a Jazz Club</div>
+          <div class="badge">Hover to preview</div>
+        </div>
+      </article>
 
-    <div class="row">
-      <button id="modeVideo" class="btn">Mode 1 — &lt;video src&gt;</button>
-      <button id="modeBlob" class="btn">Mode 2 — Blob fetch</button>
-      <button id="modeIframe" class="btn">Mode 3 — &lt;iframe&gt; embed</button>
-    </div>
+      <!-- Tile 3: Vacancy — AI cover of Dream Theater -->
+      <article class="tile" tabindex="0"
+               data-title="Vacancy — an AI cover of Dream Theater"
+               data-video="./Vacancy - an AI cover of Dream Theater.mp4">
+        <img class="thumb" src="./vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" />
+        <video class="clip" preload="none" playsinline muted></video>
+        <div class="overlay">
+          <div class="title">Vacancy — AI cover (Dream Theater)</div>
+          <div class="badge">Hover to preview</div>
+        </div>
+      </article>
 
-    <div id="diag" class="diag">Diagnostics will appear here.</div>
-
-    <div class="card">
-      <div class="area" id="area"></div>
-    </div>
-
-    <div class="muted" style="margin-top:14px">
-      Tip: If Modes 1–2 fail, your host is blocking cross-origin playback. Use a real embed/player URL in Mode 3
-      or move the video to a CDN with CORS (Cloudflare Stream / Bunny Stream / S3+CloudFront).
+      <!-- Tile 4: Wings for Marie -->
+      <article class="tile" tabindex="0"
+               data-title="Wings for Marie"
+               data-video="./Wings For Marie.mp4">
+        <img class="thumb" src="./Wings.png" alt="Poster: Wings for Marie" />
+        <video class="clip" preload="none" playsinline muted></video>
+        <div class="overlay">
+          <div class="title">Wings for Marie</div>
+          <div class="badge">Hover to preview</div>
+        </div>
+      </article>
     </div>
   </div>
 
-<script>
-const area = document.getElementById('area');
-const diag = document.getElementById('diag');
-const mp4Input = document.getElementById('mp4url');
-const embedInput = document.getElementById('embedurl');
-const $ = (id) => document.getElementById(id);
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Video player">
+    <div class="lightbox-card">
+      <div class="lightbox-head">
+        <div class="lightbox-title" id="lbTitle">Title</div>
+        <button class="x" id="lbClose" aria-label="Close">✕</button>
+      </div>
+      <div class="player">
+        <video id="lbVideo" controls playsinline></video>
+      </div>
+    </div>
+  </div>
 
-function clearArea() { area.innerHTML = ''; diag.textContent = 'Diagnostics will appear here.'; }
+  <script>
+    // --- Hover/touch preview (muted) ---
+    const tiles = document.querySelectorAll('.tile');
 
-$('modeVideo').addEventListener('click', () => {
-  clearArea();
-  const url = mp4Input.value.trim();
-  const v = document.createElement('video');
-  v.controls = true; v.playsInline = true; v.preload = 'metadata';
-  // NOTE: do NOT set crossorigin unless the host supports it; some hosts reject CORS.
-  v.src = url;
-  v.addEventListener('error', () => diag.textContent = 'Mode 1: <video> failed to load the MP4 (host likely blocks inline streaming).');
-  area.appendChild(v);
-  diag.textContent = 'Mode 1: Inserted <video src>. Click Play.';
-});
+    function loadAndPlayPreview(tile) {
+      const v = tile.querySelector('video.clip');
+      if (!v.src) v.src = tile.dataset.video;     // lazy set src
+      v.muted = true;                              // muted preview
+      v.loop = false;                              // stop when user leaves
+      v.currentTime = 0;
+      v.play().catch(()=>{ /* autoplay may be blocked on some setups; click still works */ });
+    }
+    function stopPreview(tile) {
+      const v = tile.querySelector('video.clip');
+      if (v) { v.pause(); v.currentTime = 0; }
+    }
 
-$('modeBlob').addEventListener('click', async () => {
-  clearArea();
-  const url = mp4Input.value.trim();
-  const v = document.createElement('video');
-  v.controls = true; v.playsInline = true; v.preload = 'metadata';
-  area.appendChild(v);
-  diag.textContent = 'Mode 2: fetching as Blob (requires CORS)…';
+    tiles.forEach(tile => {
+      tile.addEventListener('mouseenter', () => loadAndPlayPreview(tile));
+      tile.addEventListener('focus', () => loadAndPlayPreview(tile));
+      tile.addEventListener('mouseleave', () => stopPreview(tile));
+      tile.addEventListener('blur', () => stopPreview(tile));
+    });
 
-  try {
-    const res = await fetch(url, { mode: 'cors' }); // if CORS blocked, this throws
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    const blob = await res.blob();
-    const obj = URL.createObjectURL(blob);
-    v.src = obj;
-    diag.textContent = 'Mode 2: Blob created. Click Play.';
-  } catch (e) {
-    diag.textContent = 'Mode 2 failed: CORS or network blocked the fetch. Use Mode 3 (embed) or a CDN with CORS.';
-  }
-});
+    // --- Lightbox with sound ---
+    const lb = document.getElementById('lightbox');
+    const lbVideo = document.getElementById('lbVideo');
+    const lbTitle = document.getElementById('lbTitle');
+    const lbClose = document.getElementById('lbClose');
 
-$('modeIframe').addEventListener('click', () => {
-  clearArea();
-  const url = embedInput.value.trim() || mp4Input.value.trim();
-  const f = document.createElement('iframe');
-  f.src = url;
-  f.allow = 'autoplay; fullscreen; picture-in-picture';
-  area.appendChild(f);
-  diag.textContent = 'Mode 3: Inserted <iframe>. If this navigates to a download, you need a proper player/embed URL from Revid.';
-});
+    function openLightbox(title, src, poster) {
+      lbTitle.textContent = title || 'Untitled';
+      lbVideo.src = src;
+      lbVideo.poster = poster || '';
+      lb.classList.add('open');
+      // Do not force autoplay-with-sound; user clicks Play (iOS policy friendly)
+      lbVideo.muted = false;
+    }
+    function closeLightbox() {
+      lbVideo.pause();
+      lbVideo.src = '';
+      lb.classList.remove('open');
+    }
+    lbClose.addEventListener('click', closeLightbox);
+    lb.addEventListener('click', (e) => { if (e.target === lb) closeLightbox(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && lb.classList.contains('open')) closeLightbox(); });
 
-// Optional: small reachability hint
-(async () => {
-  try {
-    const res = await fetch(mp4Input.value.trim(), { method:'HEAD' });
-    diag.textContent = 'HEAD: '+ (res.ok ? 'OK' : ('HTTP '+res.status)) + ' • content-type: '+(res.headers.get('content-type')||'?');
-  } catch {
-    diag.textContent = 'HEAD failed (CORS). Try Mode 1 or Mode 2 to confirm, or use a proper embed URL in Mode 3.';
-  }
-})();
-</script>
+    tiles.forEach(tile => {
+      tile.addEventListener('click', () =>
+        openLightbox(
+          tile.dataset.title,
+          tile.dataset.video,
+          tile.querySelector('img.thumb')?.getAttribute('src')
+        )
+      );
+      tile.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter' || e.key === ' ')
+          openLightbox(
+            tile.dataset.title,
+            tile.dataset.video,
+            tile.querySelector('img.thumb')?.getAttribute('src')
+          );
+      });
+    });
+  </script>
 </body>
 </html>
