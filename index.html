@@ -3,167 +3,165 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Moving Pictures — Museum Themes</title>
+<title>Moving Pictures — Museum Wall Themes</title>
 <style>
-  /* ---------- Design tokens ---------- */
-  :root {
-    --bg: #0b0c10;            /* fallback wall color */
-    --wall-overlay: rgba(10,12,16,.70);
+  /* ===== Base tokens ===== */
+  :root{
+    --wall: #111317;              /* overridden by theme */
     --text: #e8eaed;
-    --muted: #9aa0a6;
-    --accent: #7cc6ff;
-    --radius: 18px;
-    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --muted:#9aa0a6;
+    --shadow: 0 12px 28px rgba(0,0,0,.35);
 
-    /* Frame colors default (overridden per theme) */
-    --frame-face: #c9b168;    /* gold-ish */
-    --frame-edge: #8a7442;
-    --frame-inner: #f4e8c7;
+    /* Frame + mat defaults (overridden per theme) */
+    --frame-face: #d6bf77;        /* main face color */
+    --frame-edge: #8a7442;        /* outer edge/shadow color */
+    --frame-highlight: #f4e8c7;   /* tiny highlight line */
+    --mat: #f5f3ea;               /* mat board color */
+    --mat-border: #d8d3c2;
     --plinth: rgba(0,0,0,.25);
   }
 
-  /* ---------- Page & “hall” backdrop ---------- */
-  html, body { height: 100%; }
-  body {
-    margin: 0;
-    color: var(--text);
+  /* ===== Page ===== */
+  html,body{height:100%}
+  body{
+    margin:0; background: var(--wall); color: var(--text);
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    background: var(--bg);
-    /* the hall image is applied on .hall via classes */
   }
-  .hall {
-    min-height: 100%;
-    background-attachment: fixed;
-    background-position: center center;
-    background-size: cover;
-    position: relative;
-  }
-  .hall::before {
-    content: "";
-    position: absolute; inset: 0;
-    background: var(--wall-overlay); /* darken for legibility */
-    pointer-events: none;
-  }
-  .wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 28px 18px 80px; }
-  h1 { margin: 0 0 8px; font-size: clamp(22px, 2.6vw, 34px); }
-  .note { color: var(--muted); font-size: 14px; margin: 6px 0 16px; }
+  .wrap{max-width:1200px; margin:0 auto; padding:28px 18px 80px}
+  h1{margin:0 0 8px; font-size:clamp(22px,2.6vw,34px)}
+  .note{color:var(--muted); font-size:14px; margin:6px 0 16px}
 
-  /* ---------- Controls ---------- */
-  .controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 18px; align-items: center; }
-  .btn, .select {
-    appearance: none; border: 1px solid #2a2f3a; background: #171a21; color: var(--text);
-    padding: 10px 14px; border-radius: 10px; cursor: pointer; box-shadow: var(--shadow);
+  /* ===== Controls ===== */
+  .controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:8px 0 18px}
+  .btn, .select{
+    appearance:none; border:1px solid #2a2f3a; background:#171a21; color:#e8eaed;
+    padding:10px 14px; border-radius:10px; cursor:pointer; box-shadow: var(--shadow);
   }
-  .btn[aria-pressed="true"] { border-color: #3a84ff; background: #1b2436; }
-  .select { cursor: default; }
-  .label { font-size: 13px; color: var(--muted); margin-right: 6px; }
+  .btn[aria-pressed="true"]{border-color:#3a84ff; background:#1b2436}
+  .label{font-size:13px; color:var(--muted); margin-left:2px}
 
-  /* ---------- Grid (2×2, responsive) ---------- */
-  .gallery {
-    display: grid;
+  /* ===== Grid (2×2) ===== */
+  .gallery{
+    display:grid; gap:28px;
     grid-template-columns: repeat(2, minmax(280px, 1fr));
-    gap: 26px;
   }
-  @media (max-width: 760px) { .gallery { grid-template-columns: 1fr; } }
+  @media (max-width: 760px){ .gallery{grid-template-columns: 1fr;} }
 
-  /* ---------- Frame + tile ---------- */
-  .frame-wrap {
-    /* plinth/shadow under the frame */
-    filter: drop-shadow(0 18px 24px var(--plinth));
-  }
-  .frame {
-    position: relative;
-    /* Ornate-ish “stepped” frame via layered gradients */
+  /* ===== Frame assembly =====
+     Structure: .frame-wrap > .frame > .mat > .tile (poster & preview)
+  */
+  .frame-wrap{ filter: drop-shadow(0 18px 24px var(--plinth)); }
+  .frame{
+    position:relative; box-shadow: var(--shadow);
+    /* Square, stepped moulding: outer edge + face + inner slip via gradients/borders */
     background:
       linear-gradient(#0000, #0000) padding-box,
       linear-gradient(135deg, var(--frame-edge), var(--frame-face)) border-box;
-    border: 12px solid transparent;              /* outer bevel */
-    border-radius: 12px;
-
-    /* Inner slip (thin line) */
-    box-shadow:
-      inset 0 0 0 2px var(--frame-inner),
-      inset 0 0 0 14px rgba(0,0,0,.35);
-
-    overflow: hidden;
+    border: 14px solid transparent;   /* outer bevel */
+    border-radius: 0;                  /* square corners */
+  }
+  /* fine highlight line near inner edge */
+  .frame::after{
+    content:""; position:absolute; inset:10px;
+    border: 2px solid var(--frame-highlight);
+    pointer-events:none;
   }
 
-  /* The actual poster/preview area */
-  .tile {
-    position: relative;
-    background: #0f1116;
-    aspect-ratio: 16 / 9;               /* consistent “canvas” */
-    border-radius: 6px;
-    overflow: hidden;
+  /* Mat board */
+  .mat{
+    margin: 18px;                      /* mat width */
+    background: var(--mat);
+    border: 1px solid var(--mat-border);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12);
   }
-  .thumb, .clip { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .clip { position: absolute; inset: 0; opacity: 0; transition: opacity .25s ease-out; }
-  .tile:hover .clip, .tile:focus-within .clip { opacity: 1; }
+
+  /* Art area */
+  .tile{
+    position:relative; aspect-ratio:16/9; background:#0a0c10; overflow:hidden;
+    border: 1px solid rgba(0,0,0,.35);
+  }
+  .thumb,.clip{display:block; width:100%; height:100%; object-fit:cover}
+  .clip{position:absolute; inset:0; opacity:0; transition:opacity .25s ease-out}
+  .tile:hover .clip, .tile:focus-within .clip {opacity:1}
 
   /* Caption plaque */
-  .overlay {
-    position: absolute; inset: auto 0 0 0;
-    background: linear-gradient(180deg, transparent, rgba(0,0,0,.75));
-    padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  .overlay{
+    position:absolute; inset:auto 0 0 0;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,.78));
+    padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px;
   }
-  .title { font-weight: 600; font-size: 14px; }
-  .badge { font-size: 12px; color: #c5e4ff; background: rgba(124,198,255,.08);
-           border: 1px solid rgba(124,198,255,.3); padding: 4px 8px; border-radius: 999px; }
+  .title{font-weight:600; font-size:14px}
+  .badge{font-size:12px; color:#c5e4ff; background:rgba(124,198,255,.08); border:1px solid rgba(124,198,255,.3); padding:4px 8px; border-radius:999px}
 
-  /* ---------- Lightbox ---------- */
-  .lightbox { position: fixed; inset: 0; background: rgba(8,10,14,.72); backdrop-filter: blur(6px);
-              display: none; align-items: center; justify-content: center; padding: 24px; z-index: 50; }
-  .lightbox.open { display: flex; }
-  .lightbox-card { width: min(1100px, 92vw); background: #0f1218; border: 1px solid #222936;
-                   border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); }
-  .lightbox-head { display: flex; justify-content: space-between; align-items: center;
-                   padding: 12px 16px; border-bottom: 1px solid #1b222e; }
-  .lightbox-title { font-weight: 600; }
-  .x { border: 0; background: transparent; color: #9aa0a6; font-size: 22px; cursor: pointer; }
-  .player { position: relative; aspect-ratio: 16 / 9; background: #000; }
-  .player video { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* ===== Lightbox ===== */
+  .lightbox{position:fixed; inset:0; background:rgba(8,10,14,.72); backdrop-filter: blur(6px);
+            display:none; align-items:center; justify-content:center; padding:24px; z-index:50}
+  .lightbox.open{display:flex}
+  .lightbox-card{width:min(1100px, 92vw); background:#0f1218; border:1px solid #222936; border-radius:16px; overflow:hidden; box-shadow:var(--shadow)}
+  .lightbox-head{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid #1b222e}
+  .lightbox-title{font-weight:600}
+  .x{border:0; background:transparent; color:#9aa0a6; font-size:22px; cursor:pointer}
+  .player{position:relative; aspect-ratio:16/9; background:#000}
+  .player video{position:absolute; inset:0; width:100%; height:100%}
 
-  /* ---------- Theme presets (background + frame colors) ---------- */
-  /* Louvre: deep blue wall, parquet floor vibe, ornate gold frames */
-  .theme-louvre { --bg: #0d111b; --wall-overlay: rgba(5,7,11,.66);
-                  --frame-face: #d6bf77; --frame-edge: #8a7442; --frame-inner: #f3ebd2; }
-  .theme-louvre .hall { background-image: url("./bg-louvre.jpg"); }
+  /* ===== THEMES (wall + frame palette) ===== */
 
-  /* Met: neutral stone + soft light, black museum frames */
-  .theme-met    { --bg: #121418; --wall-overlay: rgba(8,10,14,.60);
-                  --frame-face: #0d0f13; --frame-edge: #272b35; --frame-inner: #bfc9d6; }
-  .theme-met .hall { background-image: url("./bg-met.jpg"); }
+  /* Louvre: rich royal red wall, gold frame, cream mat */
+  .theme-louvre{
+    --wall: #5a0f12;                   /* deep regal red */
+    --frame-face: #d9c06d;             /* gold leaf */
+    --frame-edge: #7a6230;             /* warm bronze edge */
+    --frame-highlight: #f7f0d8;
+    --mat: #f5f1e6;
+    --mat-border: #e5decc;
+  }
 
-  /* LA modern: bright white cube, minimal white frames */
-  .theme-la     { --bg: #121212; --wall-overlay: rgba(10,10,10,.50);
-                  --frame-face: #f4f6f8; --frame-edge: #cfd6dd; --frame-inner: #fefefe; }
-  .theme-la .hall { background-image: url("./bg-la-modern.jpg"); }
+  /* Met: aqua wall, warm wood frame, off-white mat */
+  .theme-met{
+    --wall: #2b6d73;                   /* museum aqua/teal */
+    --frame-face: #a47a4d;             /* oiled oak */
+    --frame-edge: #6f4f2a;             /* deeper wood edge */
+    --frame-highlight: #ecd9b8;
+    --mat: #f4f2ea;
+    --mat-border: #ddd6c6;
+  }
+
+  /* LA Modern: white wall, black frame, white mat */
+  .theme-la{
+    --wall: #ffffff;
+    --text: #111; --muted:#6b7280;
+    --frame-face: #111111;             /* matte black */
+    --frame-edge: #2b2f36;             /* subtle bevel */
+    --frame-highlight: #d7d7d7;        /* hairline silver */
+    --mat: #ffffff;
+    --mat-border: #e5e7eb;
+  }
 </style>
 </head>
 <body class="theme-louvre">
-  <div class="hall">
-    <div class="wrap">
-      <h1>Moving Pictures — Virtual Museum</h1>
-      <div class="note">Hover to preview. Click to open with sound. Use the buttons to enable sound-on-hover and to switch venues + frames.</div>
+  <div class="wrap">
+    <h1>Moving Pictures — Virtual Museum</h1>
+    <div class="note">Hover to preview (muted). Click to open with sound. Enable sound-on-hover if desired, then switch venue walls & frames.</div>
 
-      <div class="controls">
-        <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
+    <div class="controls">
+      <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
 
-        <span class="label">Venue & Frames:</span>
-        <select id="themeSelect" class="select">
-          <option value="theme-louvre">Louvre (Ornate Gold)</option>
-          <option value="theme-met">Met (Classic Black)</option>
-          <option value="theme-la">LA Modern (Minimal White)</option>
-        </select>
+      <label for="themeSelect" class="label">Venue:</label>
+      <select id="themeSelect" class="select">
+        <option value="theme-louvre" selected>Louvre — Royal Red + Gold</option>
+        <option value="theme-met">Met — Aqua + Wood Frame</option>
+        <option value="theme-la">LA Modern — White Wall + Black Frame</option>
+      </select>
 
-        <button class="btn" onclick="location.reload()">↻ Refresh</button>
-      </div>
+      <button class="btn" onclick="location.reload()">↻ Refresh</button>
+    </div>
 
-      <!-- 2×2 framed gallery -->
-      <div class="gallery">
-        <!-- Tile 1 -->
-        <div class="frame-wrap">
-          <div class="frame">
+    <!-- 2×2 Gallery with square frames + mat -->
+    <div class="gallery">
+
+      <div class="frame-wrap">
+        <div class="frame">
+          <div class="mat">
             <article class="tile" tabindex="0"
                      data-title="Xavier's Perspectives"
                      data-video="./xaviers-perspectives.mp4">
@@ -176,10 +174,11 @@
             </article>
           </div>
         </div>
+      </div>
 
-        <!-- Tile 2 -->
-        <div class="frame-wrap">
-          <div class="frame">
+      <div class="frame-wrap">
+        <div class="frame">
+          <div class="mat">
             <article class="tile" tabindex="0"
                      data-title="Reflections from a Jazz Club"
                      data-video="./Reflections from a Jazz Club.mp4">
@@ -192,10 +191,11 @@
             </article>
           </div>
         </div>
+      </div>
 
-        <!-- Tile 3 -->
-        <div class="frame-wrap">
-          <div class="frame">
+      <div class="frame-wrap">
+        <div class="frame">
+          <div class="mat">
             <article class="tile" tabindex="0"
                      data-title="Vacancy — an AI cover of Dream Theater"
                      data-video="./Vacancy - an AI cover of Dream Theater.mp4">
@@ -208,10 +208,11 @@
             </article>
           </div>
         </div>
+      </div>
 
-        <!-- Tile 4 -->
-        <div class="frame-wrap">
-          <div class="frame">
+      <div class="frame-wrap">
+        <div class="frame">
+          <div class="mat">
             <article class="tile" tabindex="0"
                      data-title="Wings for Marie"
                      data-video="./Wings For Marie.mp4">
@@ -225,6 +226,7 @@
           </div>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -242,7 +244,7 @@
   </div>
 
 <script>
-  /* ===== Sound-on-hover (after opt-in) ===== */
+  /* === Sound-on-hover opt-in === */
   let soundEnabled = false;
   let audioCtx = null;
   const soundToggle = document.getElementById('soundToggle');
@@ -250,67 +252,77 @@
     try {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') await audioCtx.resume();
-    } catch(e) { /* ignore */ }
+    } catch(e) {}
     soundEnabled = !soundEnabled;
     soundToggle.setAttribute('aria-pressed', String(soundEnabled));
     soundToggle.textContent = soundEnabled ? '🔇 Disable Sound Previews' : '🔊 Enable Sound Previews';
   });
 
-  /* ===== Theme switcher ===== */
+  /* === Theme switcher === */
   const themeSelect = document.getElementById('themeSelect');
   themeSelect.addEventListener('change', () => {
-    document.body.classList.remove('theme-louvre', 'theme-met', 'theme-la');
+    document.body.classList.remove('theme-louvre','theme-met','theme-la');
     document.body.classList.add(themeSelect.value);
   });
 
-  /* ===== Hover/touch preview ===== */
+  /* === Hover/touch preview === */
   const tiles = document.querySelectorAll('.tile');
-  function startPreview(tile) {
+  function startPreview(tile){
     const v = tile.querySelector('video.clip');
     if (!v.src) v.src = tile.dataset.video;
-    v.muted = !soundEnabled;  // unmute after user opt-in
-    v.loop = true;
+    v.muted = !soundEnabled; v.loop = true;
     v.play().catch(()=>{});
   }
-  function stopPreview(tile) {
+  function stopPreview(tile){
     const v = tile.querySelector('video.clip');
     if (v) v.pause();
   }
-  tiles.forEach(tile => {
-    tile.addEventListener('mouseenter', () => startPreview(tile));
-    tile.addEventListener('focus', () => startPreview(tile));
-    tile.addEventListener('mouseleave', () => stopPreview(tile));
-    tile.addEventListener('blur', () => stopPreview(tile));
-
-    // iPad "hover"
-    tile.addEventListener('touchstart', () => startPreview(tile), {passive:true});
-    tile.addEventListener('touchend', () => stopPreview(tile), {passive:true});
+  tiles.forEach(tile=>{
+    tile.addEventListener('mouseenter', ()=>startPreview(tile));
+    tile.addEventListener('focus', ()=>startPreview(tile));
+    tile.addEventListener('mouseleave', ()=>stopPreview(tile));
+    tile.addEventListener('blur', ()=>stopPreview(tile));
+    // iPad touch-as-hover
+    tile.addEventListener('touchstart', ()=>startPreview(tile), {passive:true});
+    tile.addEventListener('touchend', ()=>stopPreview(tile), {passive:true});
   });
 
-  /* ===== Lightbox with sound ===== */
+  /* === Lightbox === */
   const lb = document.getElementById('lightbox');
   const lbVideo = document.getElementById('lbVideo');
   const lbTitle = document.getElementById('lbTitle');
   const lbClose = document.getElementById('lbClose');
-  function openLightbox(title, src, poster) {
+
+  function openLightbox(title, src, poster){
     lbTitle.textContent = title || 'Untitled';
     lbVideo.src = src; lbVideo.poster = poster || '';
     lb.classList.add('open');
-    lbVideo.muted = false;
+    lbVideo.muted = false;            // user will press Play (iOS friendly)
   }
-  function closeLightbox() { lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open'); }
+  function closeLightbox(){
+    lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open');
+  }
   lbClose.addEventListener('click', closeLightbox);
   lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
 
-  tiles.forEach(tile => {
-    tile.addEventListener('click', () =>
-      openLightbox(tile.dataset.title, tile.dataset.video, tile.querySelector('img.thumb')?.getAttribute('src')));
-    tile.addEventListener('keyup', (e) => {
-      if (e.key==='Enter' || e.key===' ')
-        openLightbox(tile.dataset.title, tile.dataset.video, tile.querySelector('img.thumb')?.getAttribute('src'));
+  tiles.forEach(tile=>{
+    tile.addEventListener('click', ()=>openLightbox(
+      tile.dataset.title,
+      tile.dataset.video,
+      tile.querySelector('img.thumb')?.getAttribute('src')
+    ));
+    tile.addEventListener('keyup', (e)=>{
+      if (e.key==='Enter' || e.key===' ') openLightbox(
+        tile.dataset.title,
+        tile.dataset.video,
+        tile.querySelector('img.thumb')?.getAttribute('src')
+      );
     });
   });
 </script>
+
+<!-- Start on Louvre theme colors -->
+<script>document.body.classList.add('theme-louvre');</script>
 </body>
 </html>
