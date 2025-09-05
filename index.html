@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Moving Pictures — Museum Wall Themes (Portrait)</title>
+<title>Moving Pictures — Virtual Museum (Portrait, fixed)</title>
 <style>
   /* ===== Base tokens ===== */
   :root{
@@ -11,7 +11,7 @@
     --text: #e8eaed;
     --muted:#9aa0a6;
     --shadow: 0 12px 28px rgba(0,0,0,.35);
-    --art-aspect: 9 / 16;         /* PORTRAIT aspect */
+    --art-aspect: 9 / 16;         /* portrait */
 
     /* Frame + mat defaults (overridden per theme) */
     --frame-face: #d6bf77;        /* main face color */
@@ -43,7 +43,7 @@
 
   /* ===== Grid (2×2) ===== */
   .gallery{
-    display:grid; gap:28px;
+    display:grid; gap:26px;
     grid-template-columns: repeat(2, minmax(260px, 1fr));
   }
   @media (max-width: 760px){ .gallery{grid-template-columns: 1fr;} }
@@ -57,19 +57,19 @@
     background:
       linear-gradient(#0000, #0000) padding-box,
       linear-gradient(135deg, var(--frame-edge), var(--frame-face)) border-box;
-    border: 14px solid transparent;   /* outer bevel */
+    border: 10px solid transparent;   /* trimmed outer bevel (was 14px) */
     border-radius: 0;                  /* square corners */
   }
   /* fine highlight line near inner edge */
   .frame::after{
-    content:""; position:absolute; inset:10px;
+    content:""; position:absolute; inset:8px;   /* trimmed (was 10px) */
     border: 2px solid var(--frame-highlight);
     pointer-events:none;
   }
 
-  /* Mat board (increased to balance portrait height) */
+  /* Mat board (slightly tighter) */
   .mat{
-    margin: 20px;                      /* mat width */
+    margin: 16px;                      /* was 20px */
     background: var(--mat);
     border: 1px solid var(--mat-border);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12);
@@ -79,15 +79,15 @@
   .tile{
     position:relative;
     aspect-ratio: var(--art-aspect);   /* 9/16 portrait */
-    background:#0a0c10;
+    background: var(--mat);            /* key change: match mat, so no black “side spots” */
     overflow:hidden;
-    border: 1px solid rgba(0,0,0,.35);
+    border: 1px solid rgba(0,0,0,.25);
   }
   /* Show full image/video (no crop) */
   .thumb,.clip{
     display:block; width:100%; height:100%;
-    object-fit: contain;               /* critical: show full portrait */
-    background: #000;                  /* subtle letterbox behind content */
+    object-fit: contain;               /* show full artwork */
+    background: var(--mat);            /* behind any letterboxing */
   }
   .clip{position:absolute; inset:0; opacity:0; transition:opacity .25s ease-out}
   .tile:hover .clip, .tile:focus-within .clip {opacity:1}
@@ -109,23 +109,20 @@
   .lightbox-head{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid #1b222e}
   .lightbox-title{font-weight:600}
   .x{border:0; background:transparent; color:#9aa0a6; font-size:22px; cursor:pointer}
-  .player{position:relative; aspect-ratio: 9 / 16; background:#000} /* portrait player to match */
+  .player{position:relative; aspect-ratio: 9 / 16; background:#000}
   .player video{position:absolute; inset:0; width:100%; height:100%; object-fit: contain; background:#000}
 
   /* ===== THEMES ===== */
-  /* Louvre: royal red wall, gold frame, cream mat */
   .theme-louvre{
     --wall: #5a0f12;
     --frame-face: #d9c06d; --frame-edge: #7a6230; --frame-highlight: #f7f0d8;
     --mat: #f5f1e6; --mat-border: #e5decc;
   }
-  /* Met: aqua wall, warm wood frame, off-white mat */
   .theme-met{
     --wall: #2b6d73;
     --frame-face: #a47a4d; --frame-edge: #6f4f2a; --frame-highlight: #ecd9b8;
     --mat: #f4f2ea; --mat-border: #ddd6c6;
   }
-  /* LA Modern: white wall, black frame, white mat */
   .theme-la{
     --wall: #ffffff; --text:#111; --muted:#6b7280;
     --frame-face: #111111; --frame-edge: #2b2f36; --frame-highlight: #d7d7d7;
@@ -136,7 +133,7 @@
 <body class="theme-louvre">
   <div class="wrap">
     <h1>Moving Pictures — Virtual Museum</h1>
-    <div class="note">Hover to preview. Click to open with sound. Enable sound-on-hover if desired, then switch venue walls & frames. Portrait view is restored (9:16, no cropping).</div>
+    <div class="note">Hover to preview (muted). Click to open with sound. Enable sound-on-hover if desired, then switch venue walls & frames. Portrait view, no black side spots.</div>
 
     <div class="controls">
       <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
@@ -192,9 +189,10 @@
         <div class="frame">
           <div class="mat">
             <article class="tile" tabindex="0"
-                     data-title="Vacancy"
+                     data-title="Vacancy — an AI cover of Dream Theater"
                      data-video="./Vacancy - an AI cover of Dream Theater.mp4">
-              <img class="thumb" src="./vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" />
+              <!-- FIXED: poster filename is 'Vacancy.png' (capital V), not 'vacany.png' -->
+              <img class="thumb" src="./Vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" />
               <video class="clip" preload="none" playsinline muted loop></video>
               <div class="overlay">
                 <div class="title">Vacancy — AI cover (Dream Theater)</div>
