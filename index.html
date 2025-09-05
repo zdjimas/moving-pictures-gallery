@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Moving Pictures — Virtual Museum (Portrait, fixed)</title>
+<title>Moving Pictures — Virtual Museum (Adaptive Frames)</title>
 <style>
   /* ===== Base tokens ===== */
   :root{
@@ -11,7 +11,6 @@
     --text: #e8eaed;
     --muted:#9aa0a6;
     --shadow: 0 12px 28px rgba(0,0,0,.35);
-    --art-aspect: 9 / 16;         /* portrait */
 
     /* Frame + mat defaults (overridden per theme) */
     --frame-face: #d6bf77;        /* main face color */
@@ -45,6 +44,7 @@
   .gallery{
     display:grid; gap:26px;
     grid-template-columns: repeat(2, minmax(260px, 1fr));
+    align-items: start;  /* let rows adapt to varying artwork heights */
   }
   @media (max-width: 760px){ .gallery{grid-template-columns: 1fr;} }
 
@@ -57,40 +57,56 @@
     background:
       linear-gradient(#0000, #0000) padding-box,
       linear-gradient(135deg, var(--frame-edge), var(--frame-face)) border-box;
-    border: 10px solid transparent;   /* trimmed outer bevel (was 14px) */
+    border: 10px solid transparent;   /* outer bevel */
     border-radius: 0;                  /* square corners */
   }
   /* fine highlight line near inner edge */
   .frame::after{
-    content:""; position:absolute; inset:8px;   /* trimmed (was 10px) */
+    content:""; position:absolute; inset:8px;
     border: 2px solid var(--frame-highlight);
     pointer-events:none;
   }
 
-  /* Mat board (slightly tighter) */
+  /* Mat board */
   .mat{
-    margin: 16px;                      /* was 20px */
+    margin: 16px;
     background: var(--mat);
     border: 1px solid var(--mat-border);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12);
   }
 
-  /* Art area — PORTRAIT */
+  /* ===== Art area — NATURAL aspect, no forced ratio ===== */
   .tile{
     position:relative;
-    aspect-ratio: var(--art-aspect);   /* 9/16 portrait */
-    background: var(--mat);            /* key change: match mat, so no black “side spots” */
+    background: var(--mat);     /* so any letterboxing matches the mat */
     overflow:hidden;
     border: 1px solid rgba(0,0,0,.25);
+
+    /* Let the poster’s intrinsic width determine height */
+    display:flex; align-items:center; justify-content:center;
   }
-  /* Show full image/video (no crop) */
-  .thumb,.clip{
-    display:block; width:100%; height:100%;
-    object-fit: contain;               /* show full artwork */
-    background: var(--mat);            /* behind any letterboxing */
+
+  /* Poster/preview fill width; height scales naturally */
+  .thumb,
+  .clip{
+    display:block;
+    width:100%;
+    height:auto;                /* critical: use natural aspect */
+    object-fit: contain;        /* keep entire artwork visible */
+    background: var(--mat);
   }
-  .clip{position:absolute; inset:0; opacity:0; transition:opacity .25s ease-out}
-  .tile:hover .clip, .tile:focus-within .clip {opacity:1}
+
+  /* Preview overlay */
+  .clip{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    opacity:0;
+    transition: opacity .25s ease-out;
+  }
+  .tile:hover .clip,
+  .tile:focus-within .clip { opacity:1; }
 
   /* Caption plaque */
   .overlay{
@@ -109,7 +125,7 @@
   .lightbox-head{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid #1b222e}
   .lightbox-title{font-weight:600}
   .x{border:0; background:transparent; color:#9aa0a6; font-size:22px; cursor:pointer}
-  .player{position:relative; aspect-ratio: 9 / 16; background:#000}
+  .player{position:relative; background:#000}
   .player video{position:absolute; inset:0; width:100%; height:100%; object-fit: contain; background:#000}
 
   /* ===== THEMES ===== */
@@ -133,7 +149,7 @@
 <body class="theme-louvre">
   <div class="wrap">
     <h1>Moving Pictures — Virtual Museum</h1>
-    <div class="note">Hover to preview (muted). Click to open with sound. Enable sound-on-hover if desired, then switch venue walls & frames. Portrait view, no black side spots.</div>
+    <div class="note">Hover to preview. Click to open with sound. Enable sound-on-hover if desired, then switch venue walls & frames. Frames auto-fit each artwork—no white space.</div>
 
     <div class="controls">
       <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
@@ -148,7 +164,7 @@
       <button class="btn" onclick="location.reload()">↻ Refresh</button>
     </div>
 
-    <!-- 2×2 Gallery with square frames + mat (PORTRAIT) -->
+    <!-- 2×2 Gallery with square frames + mat (NATURAL aspect) -->
     <div class="gallery">
 
       <div class="frame-wrap">
@@ -191,7 +207,6 @@
             <article class="tile" tabindex="0"
                      data-title="Vacancy — an AI cover of Dream Theater"
                      data-video="./Vacancy - an AI cover of Dream Theater.mp4">
-              <!-- FIXED: poster filename is 'Vacancy.png' (capital V), not 'vacany.png' -->
               <img class="thumb" src="./Vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" />
               <video class="clip" preload="none" playsinline muted loop></video>
               <div class="overlay">
@@ -280,7 +295,7 @@
     tile.addEventListener('touchend', ()=>stopPreview(tile), {passive:true});
   });
 
-  /* === Lightbox (portrait) === */
+  /* === Lightbox === */
   const lb = document.getElementById('lightbox');
   const lbVideo = document.getElementById('lbVideo');
   const lbTitle = document.getElementById('lbTitle');
