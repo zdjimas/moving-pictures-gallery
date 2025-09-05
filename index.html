@@ -44,13 +44,11 @@
   .gallery{
     display:grid; gap:26px;
     grid-template-columns: repeat(2, minmax(260px, 1fr));
-    align-items: start;  /* let rows adapt to varying artwork heights */
+    align-items: start;
   }
   @media (max-width: 760px){ .gallery{grid-template-columns: 1fr;} }
 
-  /* ===== Frame assembly =====
-     Structure: .frame-wrap > .frame > .mat > .tile (poster & preview)
-  */
+  /* ===== Frame assembly ===== */
   .frame-wrap{ filter: drop-shadow(0 18px 24px var(--plinth)); }
   .frame{
     position:relative; box-shadow: var(--shadow);
@@ -60,7 +58,6 @@
     border: 10px solid transparent;   /* outer bevel */
     border-radius: 0;                  /* square corners */
   }
-  /* fine highlight line near inner edge */
   .frame::after{
     content:""; position:absolute; inset:8px;
     border: 2px solid var(--frame-highlight);
@@ -75,33 +72,34 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12);
   }
 
-  /* ===== Art area — NATURAL aspect, no forced ratio ===== */
+  /* ===== Art area — fills without white space ===== */
   .tile{
     position:relative;
-    background: var(--mat);     /* so any letterboxing matches the mat */
+    background: var(--mat);
     overflow:hidden;
     border: 1px solid rgba(0,0,0,.25);
 
-    /* Let the poster’s intrinsic width determine height */
-    display:flex; align-items:center; justify-content:center;
-  }
-
-  /* Poster/preview fill width; height scales naturally */
-  .thumb,
-  .clip{
+    /* Establish a predictable box the artwork can fill */
     display:block;
     width:100%;
-    height:auto;                /* critical: use natural aspect */
-    object-fit: contain;        /* keep entire artwork visible */
-    background: var(--mat);
+    /* aspect-ratio is set via JS to match the poster’s natural dimensions */
   }
 
-  /* Preview overlay */
+  /* Poster and preview must FILL the tile (no letterboxing) */
+  .thumb,
   .clip{
     position:absolute;
     inset:0;
+    display:block;
     width:100%;
     height:100%;
+    object-fit: cover;           /* << key change: fill, allow slight crop */
+    object-position: center;
+    background: var(--mat);
+  }
+
+  /* Preview overlay video fades in on hover/focus */
+  .clip{
     opacity:0;
     transition: opacity .25s ease-out;
   }
@@ -125,8 +123,13 @@
   .lightbox-head{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid #1b222e}
   .lightbox-title{font-weight:600}
   .x{border:0; background:transparent; color:#9aa0a6; font-size:22px; cursor:pointer}
-  .player{position:relative; background:#000}
-  .player video{position:absolute; inset:0; width:100%; height:100%; object-fit: contain; background:#000}
+
+  .player{position:relative; background:#000;}
+  .player video{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit: cover;            /* << fill card; no white space in modal */
+    background:#000;
+  }
 
   /* ===== THEMES ===== */
   .theme-louvre{
@@ -164,7 +167,7 @@
       <button class="btn" onclick="location.reload()">↻ Refresh</button>
     </div>
 
-    <!-- 2×2 Gallery with square frames + mat (NATURAL aspect) -->
+    <!-- 2×2 Gallery -->
     <div class="gallery">
 
       <div class="frame-wrap">
@@ -245,7 +248,7 @@
         <div class="lightbox-title" id="lbTitle">Title</div>
         <button class="x" id="lbClose" aria-label="Close">✕</button>
       </div>
-      <div class="player">
+      <div class="player" id="lbPlayerBox">
         <video id="lbVideo" controls playsinline></video>
       </div>
     </div>
@@ -275,6 +278,7 @@
 
   /* === Hover/touch preview === */
   const tiles = document.querySelectorAll('.tile');
+
   function startPreview(tile){
     const v = tile.querySelector('video.clip');
     if (!v.src) v.src = tile.dataset.video;
@@ -295,17 +299,47 @@
     tile.addEventListener('touchend', ()=>stopPreview(tile), {passive:true});
   });
 
+  /* === Make each frame match its poster's aspect ratio === */
+  function setTileAspectFromPoster(tile){
+    const img = tile.querySelector('img.thumb');
+    if (!img || !img.naturalWidth || !img.naturalHeight) return;
+
+    // Use CSS aspect-ratio so the frame/mat size hugs the artwork exactly.
+    tile.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
+  }
+
+  // When posters are ready (eager in cache or after load), size their tiles.
+  tiles.forEach(tile=>{
+    const img = tile.querySelector('img.thumb');
+    if (!img) return;
+
+    if (img.complete && img.naturalWidth) {
+      setTileAspectFromPoster(tile);
+    } else {
+      img.addEventListener('load', ()=>setTileAspectFromPoster(tile), {once:true});
+    }
+  });
+
   /* === Lightbox === */
   const lb = document.getElementById('lightbox');
   const lbVideo = document.getElementById('lbVideo');
   const lbTitle = document.getElementById('lbTitle');
   const lbClose = document.getElementById('lbClose');
+  const lbPlayerBox = document.getElementById('lbPlayerBox');
 
   function openLightbox(title, src, poster){
     lbTitle.textContent = title || 'Untitled';
     lbVideo.src = src; lbVideo.poster = poster || '';
     lb.classList.add('open');
-    lbVideo.muted = false;            // user will press Play (iOS friendly)
+    lbVideo.muted = false;
+
+    // When metadata is ready, set the card's aspect to the video so it fills without bars
+    const setLBAspect = () => {
+      if (lbVideo.videoWidth && lbVideo.videoHeight) {
+        lbPlayerBox.style.aspectRatio = `${lbVideo.videoWidth} / ${lbVideo.videoHeight}`;
+      }
+    };
+    lbVideo.addEventListener('loadedmetadata', setLBAspect, {once:true});
   }
   function closeLightbox(){
     lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open');
@@ -328,9 +362,9 @@
       );
     });
   });
-</script>
 
-<!-- Start on Louvre theme colors -->
-<script>document.body.classList.add('theme-louvre');</script>
+  /* Start on Louvre theme colors */
+  document.body.classList.add('theme-louvre');
+</script>
 </body>
 </html>
