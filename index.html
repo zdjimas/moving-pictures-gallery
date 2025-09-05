@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Moving Pictures — Virtual Museum (Adaptive Frames)</title>
+<title>Moving Pictures — Virtual Museum</title>
 <style>
   /* ===== Base tokens ===== */
   :root{
@@ -56,7 +56,7 @@
       linear-gradient(#0000, #0000) padding-box,
       linear-gradient(135deg, var(--frame-edge), var(--frame-face)) border-box;
     border: 10px solid transparent;   /* outer bevel */
-    border-radius: 0;                  /* square corners */
+    border-radius: 0;
   }
   .frame::after{
     content:""; position:absolute; inset:8px;
@@ -72,37 +72,28 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12);
   }
 
-  /* ===== Art area — fills without white space ===== */
+  /* ===== Art area — FILL with no white space ===== */
   .tile{
     position:relative;
     background: var(--mat);
     overflow:hidden;
     border: 1px solid rgba(0,0,0,.25);
-
-    /* Establish a predictable box the artwork can fill */
     display:block;
     width:100%;
-    /* aspect-ratio is set via JS to match the poster’s natural dimensions */
+    /* aspect-ratio is set by JS from the VIDEO (preferred) or poster */
   }
 
-  /* Poster and preview must FILL the tile (no letterboxing) */
+  /* Poster and preview => always fill the tile */
   .thumb,
   .clip{
-    position:absolute;
-    inset:0;
+    position:absolute; inset:0;
+    width:100%; height:100%;
     display:block;
-    width:100%;
-    height:100%;
-    object-fit: cover;           /* << key change: fill, allow slight crop */
+    object-fit: cover;      /* key: fill; allow slight crop */
     object-position: center;
     background: var(--mat);
   }
-
-  /* Preview overlay video fades in on hover/focus */
-  .clip{
-    opacity:0;
-    transition: opacity .25s ease-out;
-  }
+  .clip{ opacity:0; transition: opacity .25s ease-out; }
   .tile:hover .clip,
   .tile:focus-within .clip { opacity:1; }
 
@@ -125,9 +116,10 @@
   .x{border:0; background:transparent; color:#9aa0a6; font-size:22px; cursor:pointer}
 
   .player{position:relative; background:#000;}
+  .player-box{position:relative; width:100%; /* aspect-ratio set by JS from video */ }
   .player video{
     position:absolute; inset:0; width:100%; height:100%;
-    object-fit: cover;            /* << fill card; no white space in modal */
+    object-fit: cover;            /* fill modal; no letterboxing */
     background:#000;
   }
 
@@ -152,7 +144,7 @@
 <body class="theme-louvre">
   <div class="wrap">
     <h1>Moving Pictures — Virtual Museum</h1>
-    <div class="note">Hover to preview. Click to open with sound. Enable sound-on-hover if desired, then switch venue walls & frames. Frames auto-fit each artwork—no white space.</div>
+    <div class="note">Hover to preview. Click to open with sound. Switch venues to change walls & frames. Frames conform to each video—no white space.</div>
 
     <div class="controls">
       <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
@@ -177,7 +169,7 @@
                      data-title="Xavier's Perspectives"
                      data-video="./xaviers-perspectives.mp4">
               <img class="thumb" src="./xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" />
-              <video class="clip" preload="none" playsinline muted loop></video>
+              <video class="clip" preload="metadata" playsinline muted loop></video>
               <div class="overlay">
                 <div class="title">Xavier's Perspectives</div>
                 <div class="badge">Hover to preview</div>
@@ -194,7 +186,7 @@
                      data-title="Reflections from a Jazz Club"
                      data-video="./Reflections from a Jazz Club.mp4">
               <img class="thumb" src="./Jazz.png" alt="Poster: Reflections from a Jazz Club" />
-              <video class="clip" preload="none" playsinline muted loop></video>
+              <video class="clip" preload="metadata" playsinline muted loop></video>
               <div class="overlay">
                 <div class="title">Reflections from a Jazz Club</div>
                 <div class="badge">Hover to preview</div>
@@ -211,7 +203,7 @@
                      data-title="Vacancy — an AI cover of Dream Theater"
                      data-video="./Vacancy - an AI cover of Dream Theater.mp4">
               <img class="thumb" src="./Vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" />
-              <video class="clip" preload="none" playsinline muted loop></video>
+              <video class="clip" preload="metadata" playsinline muted loop></video>
               <div class="overlay">
                 <div class="title">Vacancy — AI cover (Dream Theater)</div>
                 <div class="badge">Hover to preview</div>
@@ -228,7 +220,7 @@
                      data-title="Wings for Marie"
                      data-video="./Wings For Marie.mp4">
               <img class="thumb" src="./Wings.png" alt="Poster: Wings for Marie" />
-              <video class="clip" preload="none" playsinline muted loop></video>
+              <video class="clip" preload="metadata" playsinline muted loop></video>
               <div class="overlay">
                 <div class="title">Wings for Marie</div>
                 <div class="badge">Hover to preview</div>
@@ -248,8 +240,10 @@
         <div class="lightbox-title" id="lbTitle">Title</div>
         <button class="x" id="lbClose" aria-label="Close">✕</button>
       </div>
-      <div class="player" id="lbPlayerBox">
-        <video id="lbVideo" controls playsinline></video>
+      <div class="player">
+        <div class="player-box" id="lbPlayerBox">
+          <video id="lbVideo" controls playsinline></video>
+        </div>
       </div>
     </div>
   </div>
@@ -276,9 +270,41 @@
     document.body.classList.add(themeSelect.value);
   });
 
-  /* === Hover/touch preview === */
+  /* === Tile setup: ensure frames match VIDEO aspect === */
   const tiles = document.querySelectorAll('.tile');
 
+  function setTileAspectFromPoster(tile){
+    const img = tile.querySelector('img.thumb');
+    if (img && img.naturalWidth && img.naturalHeight){
+      tile.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
+    }
+  }
+  function setTileAspectFromVideo(tile){
+    const v = tile.querySelector('video.clip');
+    if (v && v.videoWidth && v.videoHeight){
+      tile.style.aspectRatio = `${v.videoWidth} / ${v.videoHeight}`;
+    }
+  }
+
+  tiles.forEach(tile=>{
+    const img = tile.querySelector('img.thumb');
+    const v   = tile.querySelector('video.clip');
+
+    // Fallback: use poster aspect immediately (handles cached posters)
+    if (img){
+      if (img.complete && img.naturalWidth) setTileAspectFromPoster(tile);
+      else img.addEventListener('load', ()=>setTileAspectFromPoster(tile), {once:true});
+    }
+
+    // Ensure the preview video has a source so we can read metadata
+    if (v && !v.src) v.src = tile.dataset.video;
+    if (v && v.readyState >= 1) setTileAspectFromVideo(tile);
+    else if (v){
+      v.addEventListener('loadedmetadata', ()=>setTileAspectFromVideo(tile), {once:true});
+    }
+  });
+
+  /* === Hover/touch preview === */
   function startPreview(tile){
     const v = tile.querySelector('video.clip');
     if (!v.src) v.src = tile.dataset.video;
@@ -286,8 +312,7 @@
     v.play().catch(()=>{});
   }
   function stopPreview(tile){
-    const v = tile.querySelector('video.clip');
-    if (v) v.pause();
+    const v = tile.querySelector('video.clip'); if (v) v.pause();
   }
   tiles.forEach(tile=>{
     tile.addEventListener('mouseenter', ()=>startPreview(tile));
@@ -297,27 +322,6 @@
     // iPad touch-as-hover
     tile.addEventListener('touchstart', ()=>startPreview(tile), {passive:true});
     tile.addEventListener('touchend', ()=>stopPreview(tile), {passive:true});
-  });
-
-  /* === Make each frame match its poster's aspect ratio === */
-  function setTileAspectFromPoster(tile){
-    const img = tile.querySelector('img.thumb');
-    if (!img || !img.naturalWidth || !img.naturalHeight) return;
-
-    // Use CSS aspect-ratio so the frame/mat size hugs the artwork exactly.
-    tile.style.aspectRatio = `${img.naturalWidth} / ${img.naturalHeight}`;
-  }
-
-  // When posters are ready (eager in cache or after load), size their tiles.
-  tiles.forEach(tile=>{
-    const img = tile.querySelector('img.thumb');
-    if (!img) return;
-
-    if (img.complete && img.naturalWidth) {
-      setTileAspectFromPoster(tile);
-    } else {
-      img.addEventListener('load', ()=>setTileAspectFromPoster(tile), {once:true});
-    }
   });
 
   /* === Lightbox === */
@@ -333,13 +337,15 @@
     lb.classList.add('open');
     lbVideo.muted = false;
 
-    // When metadata is ready, set the card's aspect to the video so it fills without bars
+    // Make modal player match the video’s real aspect to avoid bars
     const setLBAspect = () => {
       if (lbVideo.videoWidth && lbVideo.videoHeight) {
         lbPlayerBox.style.aspectRatio = `${lbVideo.videoWidth} / ${lbVideo.videoHeight}`;
       }
     };
-    lbVideo.addEventListener('loadedmetadata', setLBAspect, {once:true});
+    if (lbVideo.readyState >= 1) setLBAspect(); else {
+      lbVideo.addEventListener('loadedmetadata', setLBAspect, {once:true});
+    }
   }
   function closeLightbox(){
     lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open');
@@ -363,7 +369,7 @@
     });
   });
 
-  /* Start on Louvre theme colors */
+  // Default theme
   document.body.classList.add('theme-louvre');
 </script>
 </body>
