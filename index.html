@@ -1,9 +1,9 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Moving Pictures — Museum Wall Themes</title>
+<title>Moving Pictures — Museum Wall Themes (Portrait)</title>
 <style>
   /* ===== Base tokens ===== */
   :root{
@@ -11,6 +11,7 @@
     --text: #e8eaed;
     --muted:#9aa0a6;
     --shadow: 0 12px 28px rgba(0,0,0,.35);
+    --art-aspect: 9 / 16;         /* PORTRAIT aspect */
 
     /* Frame + mat defaults (overridden per theme) */
     --frame-face: #d6bf77;        /* main face color */
@@ -43,7 +44,7 @@
   /* ===== Grid (2×2) ===== */
   .gallery{
     display:grid; gap:28px;
-    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
   }
   @media (max-width: 760px){ .gallery{grid-template-columns: 1fr;} }
 
@@ -53,7 +54,6 @@
   .frame-wrap{ filter: drop-shadow(0 18px 24px var(--plinth)); }
   .frame{
     position:relative; box-shadow: var(--shadow);
-    /* Square, stepped moulding: outer edge + face + inner slip via gradients/borders */
     background:
       linear-gradient(#0000, #0000) padding-box,
       linear-gradient(135deg, var(--frame-edge), var(--frame-face)) border-box;
@@ -67,20 +67,28 @@
     pointer-events:none;
   }
 
-  /* Mat board */
+  /* Mat board (increased to balance portrait height) */
   .mat{
-    margin: 18px;                      /* mat width */
+    margin: 20px;                      /* mat width */
     background: var(--mat);
     border: 1px solid var(--mat-border);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12);
   }
 
-  /* Art area */
+  /* Art area — PORTRAIT */
   .tile{
-    position:relative; aspect-ratio:16/9; background:#0a0c10; overflow:hidden;
+    position:relative;
+    aspect-ratio: var(--art-aspect);   /* 9/16 portrait */
+    background:#0a0c10;
+    overflow:hidden;
     border: 1px solid rgba(0,0,0,.35);
   }
-  .thumb,.clip{display:block; width:100%; height:100%; object-fit:cover}
+  /* Show full image/video (no crop) */
+  .thumb,.clip{
+    display:block; width:100%; height:100%;
+    object-fit: contain;               /* critical: show full portrait */
+    background: #000;                  /* subtle letterbox behind content */
+  }
   .clip{position:absolute; inset:0; opacity:0; transition:opacity .25s ease-out}
   .tile:hover .clip, .tile:focus-within .clip {opacity:1}
 
@@ -97,51 +105,38 @@
   .lightbox{position:fixed; inset:0; background:rgba(8,10,14,.72); backdrop-filter: blur(6px);
             display:none; align-items:center; justify-content:center; padding:24px; z-index:50}
   .lightbox.open{display:flex}
-  .lightbox-card{width:min(1100px, 92vw); background:#0f1218; border:1px solid #222936; border-radius:16px; overflow:hidden; box-shadow:var(--shadow)}
+  .lightbox-card{width:min(900px, 92vw); background:#0f1218; border:1px solid #222936; border-radius:16px; overflow:hidden; box-shadow:var(--shadow)}
   .lightbox-head{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid #1b222e}
   .lightbox-title{font-weight:600}
   .x{border:0; background:transparent; color:#9aa0a6; font-size:22px; cursor:pointer}
-  .player{position:relative; aspect-ratio:16/9; background:#000}
-  .player video{position:absolute; inset:0; width:100%; height:100%}
+  .player{position:relative; aspect-ratio: 9 / 16; background:#000} /* portrait player to match */
+  .player video{position:absolute; inset:0; width:100%; height:100%; object-fit: contain; background:#000}
 
-  /* ===== THEMES (wall + frame palette) ===== */
-
-  /* Louvre: rich royal red wall, gold frame, cream mat */
+  /* ===== THEMES ===== */
+  /* Louvre: royal red wall, gold frame, cream mat */
   .theme-louvre{
-    --wall: #5a0f12;                   /* deep regal red */
-    --frame-face: #d9c06d;             /* gold leaf */
-    --frame-edge: #7a6230;             /* warm bronze edge */
-    --frame-highlight: #f7f0d8;
-    --mat: #f5f1e6;
-    --mat-border: #e5decc;
+    --wall: #5a0f12;
+    --frame-face: #d9c06d; --frame-edge: #7a6230; --frame-highlight: #f7f0d8;
+    --mat: #f5f1e6; --mat-border: #e5decc;
   }
-
   /* Met: aqua wall, warm wood frame, off-white mat */
   .theme-met{
-    --wall: #2b6d73;                   /* museum aqua/teal */
-    --frame-face: #a47a4d;             /* oiled oak */
-    --frame-edge: #6f4f2a;             /* deeper wood edge */
-    --frame-highlight: #ecd9b8;
-    --mat: #f4f2ea;
-    --mat-border: #ddd6c6;
+    --wall: #2b6d73;
+    --frame-face: #a47a4d; --frame-edge: #6f4f2a; --frame-highlight: #ecd9b8;
+    --mat: #f4f2ea; --mat-border: #ddd6c6;
   }
-
   /* LA Modern: white wall, black frame, white mat */
   .theme-la{
-    --wall: #ffffff;
-    --text: #111; --muted:#6b7280;
-    --frame-face: #111111;             /* matte black */
-    --frame-edge: #2b2f36;             /* subtle bevel */
-    --frame-highlight: #d7d7d7;        /* hairline silver */
-    --mat: #ffffff;
-    --mat-border: #e5e7eb;
+    --wall: #ffffff; --text:#111; --muted:#6b7280;
+    --frame-face: #111111; --frame-edge: #2b2f36; --frame-highlight: #d7d7d7;
+    --mat: #ffffff; --mat-border: #e5e7eb;
   }
 </style>
 </head>
 <body class="theme-louvre">
   <div class="wrap">
     <h1>Moving Pictures — Virtual Museum</h1>
-    <div class="note">Hover to preview (muted). Click to open with sound. Enable sound-on-hover if desired, then switch venue walls & frames.</div>
+    <div class="note">Hover to preview. Click to open with sound. Enable sound-on-hover if desired, then switch venue walls & frames. Portrait view is restored (9:16, no cropping).</div>
 
     <div class="controls">
       <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
@@ -156,7 +151,7 @@
       <button class="btn" onclick="location.reload()">↻ Refresh</button>
     </div>
 
-    <!-- 2×2 Gallery with square frames + mat -->
+    <!-- 2×2 Gallery with square frames + mat (PORTRAIT) -->
     <div class="gallery">
 
       <div class="frame-wrap">
@@ -287,7 +282,7 @@
     tile.addEventListener('touchend', ()=>stopPreview(tile), {passive:true});
   });
 
-  /* === Lightbox === */
+  /* === Lightbox (portrait) === */
   const lb = document.getElementById('lightbox');
   const lbVideo = document.getElementById('lbVideo');
   const lbTitle = document.getElementById('lbTitle');
