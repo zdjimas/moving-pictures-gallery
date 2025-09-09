@@ -3,212 +3,267 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Moving Pictures Gallery</title>
-<meta name="description" content="2x2 video gallery. Hover to preview, click to play with sound. Theme selectable via dropdown." />
-
-<!-- (Optional) TikTok embed loader — unused because we open in a new tab for reliability -->
-<script async src="https://www.tiktok.com/embed.js"></script>
-
+<title>Moving Pictures — Virtual Museum (Poster Once + Persistent Video + TikTok)</title>
 <style>
   :root{
-    --wall:#ffffff; --ink:#222; --muted:#666;
-    --frame-front:#111; --frame-edge:#333;
-    --mat:#ffffff; --mat-edge:#e5e5e5;
-    --tile-shadow:0 14px 34px rgba(0,0,0,.18);
-    --gap:22px;
+    --wall:#111317; --text:#e8eaed; --muted:#9aa0a6; --shadow:0 12px 28px rgba(0,0,0,.35);
+    --frame-face:#d6bf77; --frame-edge:#8a7442; --frame-highlight:#f4e8c7;
+    --mat:#f5f3ea; --mat-border:#d8d3c2; --plinth:rgba(0,0,0,.25);
+    --tile-aspect: 3 / 4;  /* change if you want landscape: 16/9 */
   }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--wall);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-  header{text-align:center;padding:26px 12px 6px}
-  header h1{margin:0 0 6px;font-size:clamp(22px,3.6vw,36px)}
-  header p{margin:0;color:var(--muted)}
-  .controls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;padding:14px 12px 8px}
-  label{font-size:.95rem}
-  select,.toggle{appearance:none;padding:8px 12px;border:1px solid #cfcfcf;border-radius:10px;background:#fff;cursor:pointer;font-size:.95rem}
-  .toggle{display:inline-flex;align-items:center;gap:8px}
-  .wrap{max-width:1100px;margin:10px auto 60px;padding:0 16px}
-  .grid{display:grid;gap:var(--gap);grid-template-columns:repeat(2,minmax(260px,1fr))}
-  @media(max-width:720px){.grid{grid-template-columns:1fr}}
 
-  .card{position:relative;display:flex;flex-direction:column;gap:10px}
-  .frame{position:relative;border:8px solid var(--frame-front);border-radius:12px;background:linear-gradient(180deg,var(--frame-front),var(--frame-edge));box-shadow:var(--tile-shadow);text-decoration:none;color:inherit}
-  .frame::before{content:"";position:absolute;inset:8px;border-radius:8px;background:radial-gradient(120% 120% at 50% 50%,var(--mat)0%,#f7f7f7 70%);box-shadow:inset 0 0 0 1px var(--mat-edge),inset 0 12px 22px rgba(0,0,0,.06)}
+  html,body{height:100%}
+  body{margin:0;background:var(--wall);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 80px}
+  h1{margin:0 0 8px;font-size:clamp(22px,2.6vw,34px)}
+  .note{color:var(--muted);font-size:14px;margin:6px 0 16px}
 
-  /* Artwork area fills frame (no black bars in tiles) */
-  .art{position:relative;margin:10px;border-radius:8px;overflow:hidden;z-index:1;aspect-ratio:16/9;background:#000}
-  .art video,.art img{width:100%;height:100%;display:block;object-fit:cover}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 18px}
+  .btn,.select{appearance:none;border:1px solid #2a2f3a;background:#171a21;color:#e8eaed;
+    padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow)}
+  .btn[aria-pressed="true"]{border-color:#3a84ff;background:#1b2436}
+  .label{font-size:13px;color:var(--muted);margin-left:2px}
 
-  /* poster fallback layer (shows instantly, hides when video starts) */
-  .art .poster-fallback{position:absolute;inset:0;object-fit:cover;z-index:0}
-  .art.playing .poster-fallback{display:none}
+  .gallery{display:grid;gap:26px;grid-template-columns:repeat(2,minmax(260px,1fr));align-items:start}
+  @media (max-width:760px){.gallery{grid-template-columns:1fr}}
 
-  .title{text-align:center;font-weight:600;font-size:.95rem}
-  .byline{text-align:center;color:#777;font-size:.85rem;margin-top:-4px}
-  .hint{position:absolute;bottom:8px;right:8px;z-index:2;background:rgba(0,0,0,.65);color:#fff;font-size:.85rem;padding:4px 8px;border-radius:8px;opacity:0;transition:opacity .15s ease;pointer-events:none}
-  .frame:hover .hint{opacity:1}
+  .frame-wrap{filter:drop-shadow(0 18px 24px var(--plinth))}
+  .frame{
+    position:relative;box-shadow:var(--shadow);
+    background:linear-gradient(#0000,#0000) padding-box,
+               linear-gradient(135deg,var(--frame-edge),var(--frame-face)) border-box;
+    border:10px solid transparent
+  }
+  .frame::after{content:"";position:absolute;inset:8px;border:2px solid var(--frame-highlight);pointer-events:none}
+  .mat{margin:16px;background:var(--mat);border:1px solid var(--mat-border);
+       box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12)}
 
-  /* Lightbox for MP4s */
-  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.86);display:none;place-items:center;z-index:1000}
-  .lightbox.open{display:grid}
-  .lightbox-inner{width:min(95vw,1100px);max-height:90vh;display:flex;flex-direction:column;gap:10px}
-  .viewer{background:#000;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:240px}
-  .viewer video,.viewer img{width:100%;height:100%;object-fit:contain;max-height:80vh}
-  .lb-meta{color:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px}
-  .lb-title{font-weight:600}
-  .lb-close{background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px 12px;cursor:pointer}
+  /* Artwork tile: uniform size, flush fill */
+  .tile{position:relative;aspect-ratio:var(--tile-aspect);overflow:hidden;border:1px solid rgba(0,0,0,.25);
+        background:var(--mat);display:block;touch-action:manipulation}
+  .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
 
-  /* Themes */
-  .theme-louvre{--wall:#3c0b0b;--ink:#f8f2e9;--muted:#e4d4c2;--frame-front:#b38b2a;--frame-edge:#8a6c20;--mat:#fffaf0;--mat-edge:#e6d8be}
-  .theme-met{--wall:#e3f2f6;--ink:#10222b;--muted:#3d6673;--frame-front:#9b6b3e;--frame-edge:#7d5432;--mat:#fffdf8;--mat-edge:#e9e0cf}
-  .theme-la{--wall:#ffffff;--ink:#1a1a1a;--muted:#666;--frame-front:#111;--frame-edge:#333;--mat:#ffffff;--mat-edge:#e5e5e5}
+  /* Visibility rules:
+     - Default: show poster (thumb)
+     - While previewing OR once revealed: show video surface
+  */
+  .clip{opacity:0;transition:opacity .15s ease-out}
+  .tile.is-previewing .clip,
+  .tile.revealed .clip{opacity:1}
+  .tile.revealed .thumb{opacity:0;pointer-events:none} /* hide poster permanently after first interaction */
+
+  .overlay{position:absolute;inset:auto 0 0 0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
+           padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .title{font-weight:600;font-size:14px}
+  .badge{font-size:12px;color:#c5e4ff;background:rgba(124,198,255,.08);border:1px solid rgba(124,198,255,.3);
+         padding:4px 8px;border-radius:999px}
+
+  .lightbox{position:fixed;inset:0;background:rgba(8,10,14,.72);backdrop-filter:blur(6px);
+            display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
+  .lightbox.open{display:flex}
+  .lightbox-card{width:min(900px,92vw);background:#0f1218;border:1px solid #222936;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .lightbox-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #1b222e}
+  .lightbox-title{font-weight:600}
+  .x{border:0;background:transparent;color:#9aa0a6;font-size:22px;cursor:pointer}
+  .player{position:relative;background:#000}
+  .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+
+  .theme-louvre{--wall:#5a0f12;--frame-face:#d9c06d;--frame-edge:#7a6230;--frame-highlight:#f7f0d8;--mat:#f5f1e6;--mat-border:#e5decc}
+  .theme-met{--wall:#2b6d73;--frame-face:#a47a4d;--frame-edge:#6f4f2a;--frame-highlight:#ecd9b8;--mat:#f4f2ea;--mat-border:#ddd6c6}
+  .theme-la{--wall:#ffffff;--text:#111;--muted:#6b7280;--frame-face:#111111;--frame-edge:#2b2f36;--frame-highlight:#d7d7d7;--mat:#ffffff;--mat-border:#e5e7eb}
 </style>
 </head>
-<body class="theme-la">
-  <header>
-    <h1>Moving Pictures Gallery</h1>
-    <p>Hover to preview (muted). Click to play with sound. Use the dropdown to change the room.</p>
-  </header>
-
-  <div class="controls" role="toolbar" aria-label="Gallery controls">
-    <label for="themeSelect">Room:</label>
-    <select id="themeSelect" aria-label="Select room">
-      <option value="la" selected>LA Modern (White & Black)</option>
-      <option value="louvre">Louvre (Red & Gold)</option>
-      <option value="met">Met (Aqua & Wood)</option>
-    </select>
-    <button id="soundToggle" class="toggle" type="button" aria-pressed="false">🔈 Enable Sound on Hover</button>
-  </div>
-
+<body class="theme-louvre">
   <div class="wrap">
-    <section id="gallery" class="grid" aria-label="gallery"></section>
+    <h1>Moving Pictures — Virtual Museum</h1>
+    <div class="note">Poster appears once. Hover or press-hold to play; release or move off to pause and leave the last frame showing. Click to open the full player at the same timestamp.</div>
+
+    <div class="controls">
+      <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
+      <label for="themeSelect" class="label">Venue:</label>
+      <select id="themeSelect" class="select">
+        <option value="theme-louvre" selected>Louvre — Royal Red + Gold</option>
+        <option value="theme-met">Met — Aqua + Wood Frame</option>
+        <option value="theme-la">LA Modern — White Wall + Black Frame</option>
+      </select>
+      <button class="btn" onclick="location.reload()">↻ Refresh</button>
+    </div>
+
+    <div class="gallery">
+      <!-- 1 -->
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="Xavier's Perspectives" data-video="./xaviers-perspectives.mp4">
+          <img class="thumb" src="./xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" loading="lazy" />
+          <video class="clip" preload="metadata" playsinline muted></video>
+          <div class="overlay"><div class="title">Xavier's Perspectives</div><div class="badge">Hover to preview</div></div>
+        </article>
+      </div></div></div>
+
+      <!-- 2 -->
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="Reflections from a Jazz Club" data-video="./Reflections from a Jazz Club.mp4">
+          <img class="thumb" src="./Jazz.png" alt="Poster: Reflections from a Jazz Club" loading="lazy" />
+          <video class="clip" preload="metadata" playsinline muted></video>
+          <div class="overlay"><div class="title">Reflections from a Jazz Club</div><div class="badge">Hover to preview</div></div>
+        </article>
+      </div></div></div>
+
+      <!-- 3 -->
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="Vacancy — an AI cover of Dream Theater" data-video="./Vacancy - an AI cover of Dream Theater.mp4">
+          <img class="thumb" src="./Vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" loading="lazy" />
+          <video class="clip" preload="metadata" playsinline muted></video>
+          <div class="overlay"><div class="title">Vacancy — AI cover (Dream Theater)</div><div class="badge">Hover to preview</div></div>
+        </article>
+      </div></div></div>
+
+      <!-- 4 -->
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="Wings for Marie" data-video="./Wings For Marie.mp4">
+          <img class="thumb" src="./Wings.png" alt="Poster: Wings for Marie" loading="lazy" />
+          <video class="clip" preload="metadata" playsinline muted></video>
+          <div class="overlay"><div class="title">Wings for Marie</div><div class="badge">Hover to preview</div></div>
+        </article>
+      </div></div></div>
+
+      <!-- 5 — TikTok tile (poster only; opens in new tab) -->
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="The Grudge on Dune" data-tiktok="https://www.tiktok.com/t/ZT63YRxNR/">
+          <img class="thumb" src="./Vacancy.png" alt="Poster: The Grudge on Dune" loading="lazy" />
+          <!-- No <video> for TikTok tile -->
+          <div class="overlay"><div class="title">The Grudge on Dune</div><div class="badge">Click to watch on TikTok</div></div>
+        </article>
+      </div></div></div>
+    </div>
   </div>
 
-  <!-- Lightbox (MP4 only; TikTok opens in new tab) -->
-  <div id="lightbox" class="lightbox" aria-modal="true" role="dialog">
-    <div class="lightbox-inner">
-      <div id="viewer" class="viewer"></div>
-      <div class="lb-meta">
-        <div id="lbTitle" class="lb-title"></div>
-        <button id="lbClose" class="lb-close" type="button">Close ✕</button>
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Video player">
+    <div class="lightbox-card">
+      <div class="lightbox-head">
+        <div class="lightbox-title" id="lbTitle">Title</div>
+        <button class="x" id="lbClose" aria-label="Close">✕</button>
+      </div>
+      <div class="player">
+        <video id="lbVideo" controls playsinline></video>
       </div>
     </div>
   </div>
 
 <script>
-/* ============================
-   CONFIG — update filenames to yours
-   The four MP4s should sit next to index.html.
-============================ */
-const WORKS = [
-  { title:"Clip One",   mp4:"video-1.mp4", poster:"video-1.jpg" },
-  { title:"Clip Two",   mp4:"video-2.mp4", poster:"video-2.jpg" },
-  { title:"Clip Three", mp4:"video-3.mp4", poster:"video-3.jpg" },
-  { title:"Clip Four",  mp4:"video-4.mp4", poster:"video-4.jpg" },
+  /* === Sound-on-hover opt-in === */
+  let soundEnabled = false;
+  let audioCtx = null;
+  const soundToggle = document.getElementById('soundToggle');
+  soundToggle.addEventListener('click', async () => {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') await audioCtx.resume();
+    } catch(e) {}
+    soundEnabled = !soundEnabled;
+    soundToggle.setAttribute('aria-pressed', String(soundEnabled));
+    soundToggle.textContent = soundEnabled ? '🔇 Disable Sound Previews' : '🔊 Enable Sound Previews';
+  });
 
-  // TikTok (new row). Uses poster image and opens in a new tab for reliability.
-  { title:"The Grudge on Dune", tiktok:"https://www.tiktok.com/t/ZT63YRxNR/", poster:"Vacancy.png" }
-];
+  /* === Theme switcher === */
+  const themeSelect = document.getElementById('themeSelect');
+  themeSelect.addEventListener('change', () => {
+    document.body.classList.remove('theme-louvre','theme-met','theme-la');
+    document.body.classList.add(themeSelect.value);
+  });
 
-const gallery = document.getElementById('gallery');
-const themeSelect = document.getElementById('themeSelect');
-const soundToggle = document.getElementById('soundToggle');
-let soundOnHover = false;
+  /* === Hover / press-hold preview with resume & “poster once” === */
+  const tiles = document.querySelectorAll('.tile');
+  const safeSrc = (p) => encodeURI(p);   // handle spaces
 
-/* Build a tile */
-function createCard(item){
-  const card = document.createElement('article'); card.className = 'card';
-  const frame = document.createElement('a'); frame.href = "#"; frame.className = 'frame';
-  frame.setAttribute('aria-label', item.title || 'Artwork');
-
-  const art = document.createElement('div'); art.className = 'art';
-  const hint = document.createElement('div'); hint.className = 'hint';
-  const title = document.createElement('div'); title.className = 'title'; title.textContent = item.title || '';
-
-  if (item.tiktok){
-    // Static poster; click opens TikTok in new tab
-    const im = document.createElement('img'); im.alt = item.title || 'TikTok poster'; im.src = item.poster || '';
-    art.appendChild(im);
-    hint.textContent = 'Open on TikTok';
-    frame.addEventListener('click', (e)=>{ e.preventDefault(); window.open(item.tiktok, '_blank', 'noopener'); });
-
-  } else {
-    // MP4 with hover preview + poster fallback
-    if (item.poster){
-      const pf = document.createElement('img');
-      pf.className = 'poster-fallback';
-      pf.alt = item.title || 'Poster';
-      pf.src = item.poster;
-      art.appendChild(pf);
+  function ensureVideo(tile){
+    const v = tile.querySelector('video.clip');
+    if (!v) return null;                 // <-- TikTok tiles have no video
+    if (!v.dataset.bound){
+      v.dataset.bound = '1';
+      v.src = safeSrc(tile.dataset.video);     // set once; never reset (preserves currentTime)
+      v.preload = 'metadata';
+      v.playsInline = true;
+      v.setAttribute('playsinline','');
+      v.setAttribute('webkit-playsinline','');
     }
-
-    const v = document.createElement('video');
-    v.playsInline = true;                 // iOS inline playback
-    v.setAttribute('playsinline','');
-    v.setAttribute('webkit-playsinline','');
-    v.muted = true;                       // required for autoplay on hover
-    v.setAttribute('muted','');
-    v.loop = true;
-    v.preload = "metadata";
-    if (item.poster) v.poster = item.poster;
-
-    const s = document.createElement('source'); s.src = item.mp4; s.type = "video/mp4";
-    v.appendChild(s); art.appendChild(v);
-
-    hint.textContent = 'Hover to preview • Click for sound';
-
-    // When the video starts playing, hide poster fallback
-    v.addEventListener('playing', ()=> art.classList.add('playing'));
-
-    // Hover preview (desktop)
-    frame.addEventListener('mouseenter', ()=>{ v.muted = !soundOnHover; v.play().catch(()=>{}); });
-    frame.addEventListener('mouseleave', ()=>{ v.pause(); v.currentTime = 0; art.classList.remove('playing'); });
-
-    // Click to open with sound
-    frame.addEventListener('click', (e)=>{ e.preventDefault(); openVideoLightbox(item); });
+    return v;
   }
 
-  frame.appendChild(art); frame.appendChild(hint);
-  card.appendChild(frame); if (item.title) card.appendChild(title);
-  return card;
-}
+  function reveal(tile){
+    if (!tile.classList.contains('revealed')) tile.classList.add('revealed');
+  }
 
-/* Render (2 columns; auto new row for TikTok) */
-WORKS.forEach(w => gallery.appendChild(createCard(w)));
+  function startPreview(tile, userGesture=false){
+    // Skip preview on TikTok tiles
+    if (tile.dataset.tiktok) return;
+    const v = ensureVideo(tile);
+    if (!v) return;
+    reveal(tile);
+    v.muted = !soundEnabled;
+    const p = v.play(); if (userGesture && p) p.catch(()=>{});
+    tile.classList.add('is-previewing');
+  }
 
-/* Theme switching */
-function setTheme(key){
-  document.body.classList.remove('theme-louvre','theme-met','theme-la');
-  document.body.classList.add(`theme-${key}`);
-}
-themeSelect.addEventListener('change', e => setTheme(e.target.value));
-setTheme(themeSelect.value);
+  function stopPreview(tile){
+    const v = tile.querySelector('video.clip');
+    if (v){ v.pause(); }
+    tile.classList.remove('is-previewing');
+  }
 
-/* Sound-on-hover toggle */
-soundToggle.addEventListener('click', () => {
-  soundOnHover = !soundOnHover;
-  soundToggle.setAttribute('aria-pressed', String(soundOnHover));
-  soundToggle.textContent = soundOnHover ? '🔊 Sound on Hover Enabled' : '🔈 Enable Sound on Hover';
-});
+  tiles.forEach(tile=>{
+    // Hover (desktop)
+    tile.addEventListener('pointerenter', ()=>startPreview(tile,false));
+    tile.addEventListener('pointerleave', ()=>stopPreview(tile));
 
-/* Lightbox for MP4s (uses contain so full video is visible with letterbox if needed) */
-const lb = document.getElementById('lightbox');
-const viewer = document.getElementById('viewer');
-const lbTitle = document.getElementById('lbTitle');
-document.getElementById('lbClose').addEventListener('click', closeLightbox);
-lb.addEventListener('click', (e)=>{ if (e.target === lb) closeLightbox(); });
-document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeLightbox(); });
+    // Press/hold (touch & iPad)
+    tile.addEventListener('pointerdown', ()=>startPreview(tile,true));
+    tile.addEventListener('pointerup',   ()=>stopPreview(tile));
+    tile.addEventListener('pointercancel',()=>stopPreview(tile));
 
-function openVideoLightbox(item){
-  viewer.innerHTML = '';
-  const v = document.createElement('video');
-  v.controls = true; v.autoplay = true; v.playsInline = true; v.muted = false;
-  if (item.poster) v.poster = item.poster;
-  const s = document.createElement('source'); s.src = item.mp4; s.type = "video/mp4";
-  v.appendChild(s); viewer.appendChild(v);
-  lbTitle.textContent = item.title || '';
-  lb.classList.add('open'); document.body.style.overflow = 'hidden';
-}
-function closeLightbox(){ lb.classList.remove('open'); viewer.innerHTML = ''; document.body.style.overflow = ''; }
+    // Legacy touch fallback
+    tile.addEventListener('touchstart', ()=>startPreview(tile,true), {passive:true});
+    tile.addEventListener('touchend',   ()=>stopPreview(tile), {passive:true});
+    tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
+  });
+
+  /* === Lightbox continues from the same timestamp (video tiles only) === */
+  const lb = document.getElementById('lightbox');
+  const lbVideo = document.getElementById('lbVideo');
+  const lbTitle = document.getElementById('lbTitle');
+  const lbClose = document.getElementById('lbClose');
+
+  function openLightboxFromTile(tile){
+    if (tile.dataset.tiktok){
+      // Open TikTok reliably in a new tab; no lightbox for TikTok
+      window.open(tile.dataset.tiktok, '_blank', 'noopener');
+      return;
+    }
+    const vPrev = tile.querySelector('video.clip');
+    lbTitle.textContent = tile.dataset.title || 'Untitled';
+    lbVideo.src = safeSrc(tile.dataset.video);
+    lb.classList.add('open');
+
+    const resumeAt = vPrev && !isNaN(vPrev.currentTime) ? vPrev.currentTime : 0;
+    lbVideo.addEventListener('loadedmetadata', function onMeta(){
+      lbVideo.removeEventListener('loadedmetadata', onMeta);
+      try { lbVideo.currentTime = resumeAt; } catch(e){}
+    });
+  }
+  function closeLightbox(){ lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open'); }
+
+  lbClose.addEventListener('click', closeLightbox);
+  lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
+
+  // Click/keyboard open
+  tiles.forEach(tile=>{
+    tile.addEventListener('click', ()=>openLightboxFromTile(tile));
+    tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
+  });
+
+  // Default theme
+  document.body.classList.add('theme-louvre');
 </script>
 </body>
 </html>
