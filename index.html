@@ -3,231 +3,102 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Moving Pictures — Virtual Museum (Uniform Frames)</title>
+<title>Moving Pictures — Virtual Museum (Resume-on-Hover)</title>
 <style>
-  /* ===== Base tokens ===== */
   :root{
-    --wall: #111317;
-    --text: #e8eaed;
-    --muted:#9aa0a6;
-    --shadow: 0 12px 28px rgba(0,0,0,.35);
-
-    /* Frame + mat defaults (overridden per theme) */
-    --frame-face: #d6bf77;        /* main face color */
-    --frame-edge: #8a7442;        /* outer edge/shadow color */
-    --frame-highlight: #f4e8c7;   /* tiny highlight line */
-    --mat: #f5f3ea;               /* mat board color */
-    --mat-border: #d8d3c2;
-    --plinth: rgba(0,0,0,.25);
-
-    /* Uniform artwork aspect ratio for all tiles (width/height) */
-    --tile-aspect: 3 / 4;         /* portrait; change to 16/9 for landscape sets */
+    --wall:#111317; --text:#e8eaed; --muted:#9aa0a6; --shadow:0 12px 28px rgba(0,0,0,.35);
+    --frame-face:#d6bf77; --frame-edge:#8a7442; --frame-highlight:#f4e8c7;
+    --mat:#f5f3ea; --mat-border:#d8d3c2; --plinth:rgba(0,0,0,.25);
+    --tile-aspect: 3 / 4;
   }
-
-  /* ===== Page ===== */
   html,body{height:100%}
-  body{
-    margin:0; background: var(--wall); color: var(--text);
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-  }
-  .wrap{max-width:1200px; margin:0 auto; padding:28px 18px 80px}
-  h1{margin:0 0 8px; font-size:clamp(22px,2.6vw,34px)}
-  .note{color:var(--muted); font-size:14px; margin:6px 0 16px}
-
-  /* ===== Controls ===== */
-  .controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:8px 0 18px}
-  .btn, .select{
-    appearance:none; border:1px solid #2a2f3a; background:#171a21; color:#e8eaed;
-    padding:10px 14px; border-radius:10px; cursor:pointer; box-shadow: var(--shadow);
-  }
-  .btn[aria-pressed="true"]{border-color:#3a84ff; background:#1b2436}
-  .label{font-size:13px; color:var(--muted); margin-left:2px}
-
-  /* ===== Grid (2×2) ===== */
-  .gallery{
-    display:grid; gap:26px;
-    grid-template-columns: repeat(2, minmax(260px, 1fr));
-    align-items: start;
-  }
-  @media (max-width: 760px){ .gallery{grid-template-columns: 1fr;} }
-
-  /* ===== Frame assembly ===== */
-  .frame-wrap{ filter: drop-shadow(0 18px 24px var(--plinth)); }
-  .frame{
-    position:relative; box-shadow: var(--shadow);
-    background:
-      linear-gradient(#0000, #0000) padding-box,
-      linear-gradient(135deg, var(--frame-edge), var(--frame-face)) border-box;
-    border: 10px solid transparent;   /* outer bevel */
-    border-radius: 0;                  /* square corners */
-  }
-  .frame::after{
-    content:""; position:absolute; inset:8px;
-    border: 2px solid var(--frame-highlight);
-    pointer-events:none;
-  }
-
-  /* Mat board */
-  .mat{
-    margin: 16px;
-    background: var(--mat);
-    border: 1px solid var(--mat-border);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12);
-  }
-
-  /* ===== Art area — UNIFORM aspect + flush fill ===== */
-  .tile{
-    position:relative;
-    aspect-ratio: var(--tile-aspect);   /* every tile same size */
-    overflow:hidden;
-    border: 1px solid rgba(0,0,0,.25);
-    background: var(--mat);
-    display:block;
-  }
-
-  /* Both poster and preview video occupy the exact same box, flush */
-  .thumb,
-  .clip{
-    position:absolute; inset:0;
-    width:100%; height:100%;
-    object-fit: cover;                 /* fill with no letterboxing */
-    display:block;
-    background:#000;
-  }
-
-  /* Preview overlay behavior (fade in/out) */
-  .clip{
-    opacity:0; transition: opacity .18s ease-out;
-  }
-  .tile.is-previewing .clip{ opacity:1; }
-
-  /* Caption plaque */
-  .overlay{
-    position:absolute; inset:auto 0 0 0;
-    background: linear-gradient(180deg, transparent, rgba(0,0,0,.78));
-    padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px;
-  }
-  .title{font-weight:600; font-size:14px}
-  .badge{font-size:12px; color:#c5e4ff; background:rgba(124,198,255,.08); border:1px solid rgba(124,198,255,.3); padding:4px 8px; border-radius:999px}
-
-  /* ===== Lightbox ===== */
-  .lightbox{position:fixed; inset:0; background:rgba(8,10,14,.72); backdrop-filter: blur(6px);
-            display:none; align-items:center; justify-content:center; padding:24px; z-index:50}
+  body{margin:0;background:var(--wall);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 80px}
+  h1{margin:0 0 8px;font-size:clamp(22px,2.6vw,34px)}
+  .note{color:var(--muted);font-size:14px;margin:6px 0 16px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 18px}
+  .btn,.select{appearance:none;border:1px solid #2a2f3a;background:#171a21;color:#e8eaed;padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow)}
+  .btn[aria-pressed="true"]{border-color:#3a84ff;background:#1b2436}
+  .label{font-size:13px;color:var(--muted);margin-left:2px}
+  .gallery{display:grid;gap:26px;grid-template-columns:repeat(2,minmax(260px,1fr));align-items:start}
+  @media (max-width:760px){.gallery{grid-template-columns:1fr}}
+  .frame-wrap{filter:drop-shadow(0 18px 24px var(--plinth))}
+  .frame{position:relative;box-shadow:var(--shadow);
+    background:linear-gradient(#0000,#0000) padding-box,
+               linear-gradient(135deg,var(--frame-edge),var(--frame-face)) border-box;
+    border:10px solid transparent}
+  .frame::after{content:"";position:absolute;inset:8px;border:2px solid var(--frame-highlight);pointer-events:none}
+  .mat{margin:16px;background:var(--mat);border:1px solid var(--mat-border);
+       box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12)}
+  .tile{position:relative;aspect-ratio:var(--tile-aspect);overflow:hidden;border:1px solid rgba(0,0,0,.25);background:var(--mat);display:block;touch-action:manipulation}
+  .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
+  .clip{opacity:0;transition:opacity .18s ease-out}
+  .tile.is-previewing .clip{opacity:1}
+  .overlay{position:absolute;inset:auto 0 0 0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
+           padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .title{font-weight:600;font-size:14px}
+  .badge{font-size:12px;color:#c5e4ff;background:rgba(124,198,255,.08);border:1px solid rgba(124,198,255,.3);padding:4px 8px;border-radius:999px}
+  .lightbox{position:fixed;inset:0;background:rgba(8,10,14,.72);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
   .lightbox.open{display:flex}
-  .lightbox-card{width:min(900px, 92vw); background:#0f1218; border:1px solid #222936; border-radius:16px; overflow:hidden; box-shadow:var(--shadow)}
-  .lightbox-head{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid #1b222e}
+  .lightbox-card{width:min(900px,92vw);background:#0f1218;border:1px solid #222936;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .lightbox-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #1b222e}
   .lightbox-title{font-weight:600}
-  .x{border:0; background:transparent; color:#9aa0a6; font-size:22px; cursor:pointer}
-  .player{position:relative; background:#000}
-  .player video{position:absolute; inset:0; width:100%; height:100%; object-fit: contain; background:#000}
-
-  /* ===== THEMES ===== */
-  .theme-louvre{
-    --wall: #5a0f12;
-    --frame-face: #d9c06d; --frame-edge: #7a6230; --frame-highlight: #f7f0d8;
-    --mat: #f5f1e6; --mat-border: #e5decc;
-  }
-  .theme-met{
-    --wall: #2b6d73;
-    --frame-face: #a47a4d; --frame-edge: #6f4f2a; --frame-highlight: #ecd9b8;
-    --mat: #f4f2ea; --mat-border: #ddd6c6;
-  }
-  .theme-la{
-    --wall: #ffffff; --text:#111; --muted:#6b7280;
-    --frame-face: #111111; --frame-edge: #2b2f36; --frame-highlight: #d7d7d7;
-    --mat: #ffffff; --mat-border: #e5e7eb;
-  }
+  .x{border:0;background:transparent;color:#9aa0a6;font-size:22px;cursor:pointer}
+  .player{position:relative;background:#000}
+  .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+  .theme-louvre{--wall:#5a0f12;--frame-face:#d9c06d;--frame-edge:#7a6230;--frame-highlight:#f7f0d8;--mat:#f5f1e6;--mat-border:#e5decc}
+  .theme-met{--wall:#2b6d73;--frame-face:#a47a4d;--frame-edge:#6f4f2a;--frame-highlight:#ecd9b8;--mat:#f4f2ea;--mat-border:#ddd6c6}
+  .theme-la{--wall:#ffffff;--text:#111;--muted:#6b7280;--frame-face:#111111;--frame-edge:#2b2f36;--frame-highlight:#d7d7d7;--mat:#ffffff;--mat-border:#e5e7eb}
 </style>
 </head>
 <body class="theme-louvre">
   <div class="wrap">
     <h1>Moving Pictures — Virtual Museum</h1>
-    <div class="note">Hover (or press-hold on iPad) to preview. Videos fill frames flush; all frames are the same size. Release to pause at the current frame. Click to open with sound.</div>
+    <div class="note">Press-hold (iPad) or hover to preview with motion and sound (when enabled). Release to pause and resume later from the same spot. Click to open the full player at the same timestamp.</div>
 
     <div class="controls">
       <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
-
       <label for="themeSelect" class="label">Venue:</label>
       <select id="themeSelect" class="select">
         <option value="theme-louvre" selected>Louvre — Royal Red + Gold</option>
         <option value="theme-met">Met — Aqua + Wood Frame</option>
         <option value="theme-la">LA Modern — White Wall + Black Frame</option>
       </select>
-
       <button class="btn" onclick="location.reload()">↻ Refresh</button>
     </div>
 
-    <!-- 2×2 Gallery (uniform frames) -->
     <div class="gallery">
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="Xavier's Perspectives" data-video="./xaviers-perspectives.mp4">
+          <img class="thumb" src="./xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" loading="lazy" />
+          <video class="clip" preload="metadata" playsinline muted></video>
+          <div class="overlay"><div class="title">Xavier's Perspectives</div><div class="badge">Hover to preview</div></div>
+        </article>
+      </div></div></div>
 
-      <div class="frame-wrap">
-        <div class="frame">
-          <div class="mat">
-            <article class="tile" tabindex="0"
-              data-title="Xavier's Perspectives"
-              data-video="./xaviers-perspectives.mp4">
-              <img class="thumb" src="./xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" loading="lazy" />
-              <video class="clip" preload="none" playsinline muted></video>
-              <div class="overlay">
-                <div class="title">Xavier's Perspectives</div>
-                <div class="badge">Hover to preview</div>
-              </div>
-            </article>
-          </div>
-        </div>
-      </div>
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="Reflections from a Jazz Club" data-video="./Reflections from a Jazz Club.mp4">
+          <img class="thumb" src="./Jazz.png" alt="Poster: Reflections from a Jazz Club" loading="lazy" />
+          <video class="clip" preload="metadata" playsinline muted></video>
+          <div class="overlay"><div class="title">Reflections from a Jazz Club</div><div class="badge">Hover to preview</div></div>
+        </article>
+      </div></div></div>
 
-      <div class="frame-wrap">
-        <div class="frame">
-          <div class="mat">
-            <article class="tile" tabindex="0"
-              data-title="Reflections from a Jazz Club"
-              data-video="./Reflections from a Jazz Club.mp4">
-              <img class="thumb" src="./Jazz.png" alt="Poster: Reflections from a Jazz Club" loading="lazy" />
-              <video class="clip" preload="none" playsinline muted></video>
-              <div class="overlay">
-                <div class="title">Reflections from a Jazz Club</div>
-                <div class="badge">Hover to preview</div>
-              </div>
-            </article>
-          </div>
-        </div>
-      </div>
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="Vacancy — an AI cover of Dream Theater" data-video="./Vacancy - an AI cover of Dream Theater.mp4">
+          <img class="thumb" src="./Vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" loading="lazy" />
+          <video class="clip" preload="metadata" playsinline muted></video>
+          <div class="overlay"><div class="title">Vacancy — AI cover (Dream Theater)</div><div class="badge">Hover to preview</div></div>
+        </article>
+      </div></div></div>
 
-      <div class="frame-wrap">
-        <div class="frame">
-          <div class="mat">
-            <article class="tile" tabindex="0"
-              data-title="Vacancy — an AI cover of Dream Theater"
-              data-video="./Vacancy - an AI cover of Dream Theater.mp4">
-              <img class="thumb" src="./Vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" loading="lazy" />
-              <video class="clip" preload="none" playsinline muted></video>
-              <div class="overlay">
-                <div class="title">Vacancy — AI cover (Dream Theater)</div>
-                <div class="badge">Hover to preview</div>
-              </div>
-            </article>
-          </div>
-        </div>
-      </div>
-
-      <div class="frame-wrap">
-        <div class="frame">
-          <div class="mat">
-            <article class="tile" tabindex="0"
-              data-title="Wings for Marie"
-              data-video="./Wings For Marie.mp4">
-              <img class="thumb" src="./Wings.png" alt="Poster: Wings for Marie" loading="lazy" />
-              <video class="clip" preload="none" playsinline muted></video>
-              <div class="overlay">
-                <div class="title">Wings for Marie</div>
-                <div class="badge">Hover to preview</div>
-              </div>
-            </article>
-          </div>
-        </div>
-      </div>
-
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="Wings for Marie" data-video="./Wings For Marie.mp4">
+          <img class="thumb" src="./Wings.png" alt="Poster: Wings for Marie" loading="lazy" />
+          <video class="clip" preload="metadata" playsinline muted></video>
+          <div class="overlay"><div class="title">Wings for Marie</div><div class="badge">Hover to preview</div></div>
+        </article>
+      </div></div></div>
     </div>
   </div>
 
@@ -266,80 +137,94 @@
     document.body.classList.add(themeSelect.value);
   });
 
-  /* === Hover/touch preview (flush fill; pause on release) === */
+  /* === Hover / press-hold preview with RESUME behavior === */
   const tiles = document.querySelectorAll('.tile');
 
-  function safeSrc(path){
-    // Encode only the filename portion if needed; encodeURI handles spaces safely.
-    return encodeURI(path);
+  // Helper: encode filenames w/ spaces
+  const safeSrc = (p) => encodeURI(p);
+
+  function ensureVideo(tile){
+    const v = tile.querySelector('video.clip');
+    if (!v.dataset.bound){
+      v.dataset.bound = '1';
+      v.src = safeSrc(tile.dataset.video);  // set once; do NOT reset later
+      v.preload = 'metadata';               // allows seeking without starting over
+      v.playsInline = true;
+    }
+    return v;
   }
 
-  function startPreview(tile){
-    const v = tile.querySelector('video.clip');
-    if (!v.src) v.src = safeSrc(tile.dataset.video);
+  function startPreview(tile, byUserGesture=false){
+    const v = ensureVideo(tile);
+    // keep currentTime as-is; just play
     v.muted = !soundEnabled;
-    v.play().catch(()=>{});
+    // iOS requires a user gesture for unmuted play; pointerdown satisfies it
+    const playPromise = v.play();
+    if (byUserGesture && playPromise) playPromise.catch(()=>{});
     tile.classList.add('is-previewing');
   }
 
   function stopPreview(tile){
     const v = tile.querySelector('video.clip');
     if (v){
-      v.pause();               // pauses at current frame (desired)
+      v.pause();                     // pause and KEEP currentTime
     }
     tile.classList.remove('is-previewing');
   }
 
-  // Pointer events cover mouse + stylus; add touch for iOS hold semantics
   tiles.forEach(tile=>{
-    // Mouse / pointer hover
-    tile.addEventListener('pointerenter', ()=>startPreview(tile));
+    // Hover (desktop)
+    tile.addEventListener('pointerenter', ()=>startPreview(tile, false));
     tile.addEventListener('pointerleave', ()=>stopPreview(tile));
-    // Press/hold to play; release to pause (useful on touch)
-    tile.addEventListener('pointerdown', ()=>startPreview(tile));
+
+    // Press-hold (touch/iPad) – guarantees user gesture so audio can play if enabled
+    tile.addEventListener('pointerdown', ()=>startPreview(tile, true));
     tile.addEventListener('pointerup',   ()=>stopPreview(tile));
     tile.addEventListener('pointercancel',()=>stopPreview(tile));
 
-    // Fallback touch events (older Safari)
-    tile.addEventListener('touchstart', ()=>startPreview(tile), {passive:true});
+    // Fallback for older Safari touch
+    tile.addEventListener('touchstart', ()=>startPreview(tile, true), {passive:true});
     tile.addEventListener('touchend',   ()=>stopPreview(tile), {passive:true});
     tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
   });
 
-  /* === Lightbox === */
+  /* === Lightbox continues from the same timestamp === */
   const lb = document.getElementById('lightbox');
   const lbVideo = document.getElementById('lbVideo');
   const lbTitle = document.getElementById('lbTitle');
   const lbClose = document.getElementById('lbClose');
 
-  function openLightbox(title, src, poster){
-    lbTitle.textContent = title || 'Untitled';
+  function openLightboxFromTile(tile){
+    const vPrev = tile.querySelector('video.clip');
+    const title = tile.dataset.title || 'Untitled';
+    const src   = tile.dataset.video;
+
+    lbTitle.textContent = title;
     lbVideo.src = safeSrc(src);
-    lbVideo.poster = poster || '';
     lb.classList.add('open');
-    lbVideo.muted = false;      // user will press Play (iOS friendly)
+
+    // Continue where the preview left off
+    const resumeAt = vPrev && !isNaN(vPrev.currentTime) ? vPrev.currentTime : 0;
+    lbVideo.addEventListener('loadedmetadata', function onMeta(){
+      lbVideo.removeEventListener('loadedmetadata', onMeta);
+      try { lbVideo.currentTime = resumeAt; } catch(e){}
+    });
+    // user will press Play (iOS-friendly)
   }
+
   function closeLightbox(){
     lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open');
   }
+
   lbClose.addEventListener('click', closeLightbox);
   lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
 
+  // Click/keyboard open
   tiles.forEach(tile=>{
-    tile.addEventListener('click', ()=>{
-      openLightbox(
-        tile.dataset.title,
-        tile.dataset.video,
-        tile.querySelector('img.thumb')?.getAttribute('src')
-      );
-    });
+    tile.addEventListener('click', ()=>openLightboxFromTile(tile));
     tile.addEventListener('keyup', (e)=>{
-      if (e.key==='Enter' || e.key===' ') openLightbox(
-        tile.dataset.title,
-        tile.dataset.video,
-        tile.querySelector('img.thumb')?.getAttribute('src')
-      );
+      if (e.key==='Enter' || e.key===' ') openLightboxFromTile(tile);
     });
   });
 
