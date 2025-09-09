@@ -4,117 +4,53 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Moving Pictures Gallery</title>
-<meta name="description" content="2x2+ video gallery. Hover to preview, click to play with sound. Theme selectable via dropdown." />
+<meta name="description" content="2x2 video gallery. Hover to preview, click to play with sound. Theme selectable via dropdown." />
 
-<!-- TikTok embed loader (for the TikTok lightbox) -->
+<!-- OPTIONAL: TikTok embed loader (only used if you set USE_TIKTOK_EMBED=true) -->
 <script async src="https://www.tiktok.com/embed.js"></script>
 
 <style>
   :root{
-    --wall: #ffffff;            /* updated by theme */
-    --ink: #222;
-    --muted: #666;
-    --frame-front: #111;        /* updated by theme */
-    --frame-edge: #333;         /* updated by theme */
-    --mat: #ffffff;
-    --mat-edge: #e5e5e5;
-    --tile-shadow: 0 14px 34px rgba(0,0,0,.18);
-    --gap: 22px;
+    --wall:#ffffff; --ink:#222; --muted:#666;
+    --frame-front:#111; --frame-edge:#333;
+    --mat:#ffffff; --mat-edge:#e5e5e5;
+    --tile-shadow:0 14px 34px rgba(0,0,0,.18);
+    --gap:22px;
   }
-  *{ box-sizing: border-box }
-  body{
-    margin:0; background: var(--wall); color: var(--ink);
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  }
-  header{ text-align:center; padding:26px 12px 6px }
-  header h1{ margin:0 0 6px; font-size:clamp(22px,3.6vw,36px) }
-  header p{ margin:0; color:var(--muted) }
-
-  .controls{
-    display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center;
-    padding:14px 12px 8px;
-  }
-  label{ font-size:.95rem; color:var(--ink) }
-  select, .toggle{
-    appearance:none; padding:8px 12px; border:1px solid #cfcfcf; border-radius:10px; background:#fff; cursor:pointer;
-    font-size:.95rem;
-  }
-  .toggle{ display:inline-flex; align-items:center; gap:8px }
-
-  .wrap{ max-width:1100px; margin:10px auto 60px; padding:0 16px }
-  .grid{
-    display:grid; gap:var(--gap);
-    grid-template-columns: repeat(2, minmax(260px, 1fr));   /* 2 columns; new items make new rows */
-  }
-  @media (max-width: 720px){
-    .grid{ grid-template-columns: 1fr; }                    /* stack on small screens */
-  }
-
-  .card{ position:relative; display:flex; flex-direction:column; gap:10px }
-  .frame{
-    position:relative; border:8px solid var(--frame-front); border-radius:12px;
-    background: linear-gradient(180deg, var(--frame-front), var(--frame-edge));
-    box-shadow: var(--tile-shadow);
-    text-decoration:none; color:inherit;
-  }
-  .frame::before{
-    content:""; position:absolute; inset:8px; border-radius:8px;
-    background: radial-gradient(120% 120% at 50% 50%, var(--mat) 0%, #f7f7f7 70%);
-    box-shadow: inset 0 0 0 1px var(--mat-edge), inset 0 12px 22px rgba(0,0,0,.06);
-  }
-
-  .art{
-    position:relative; margin:10px; border-radius:8px; overflow:hidden; z-index:1;
-    aspect-ratio: 16 / 9;   /* uniform tile shape for tidy grid */
-    background:#000;
-  }
-  .art video, .art img{
-    width:100%; height:100%; display:block; object-fit:contain; background:#000;
-  }
-
-  .title{ text-align:center; font-weight:600; font-size:.95rem }
-  .byline{ text-align:center; color:#777; font-size:.85rem; margin-top:-4px }
-
-  .hint{
-    position:absolute; bottom:8px; right:8px; z-index:2;
-    background: rgba(0,0,0,.65); color:#fff; font-size:.85rem; padding:4px 8px; border-radius:8px;
-    opacity:0; transition:opacity .15s ease; pointer-events:none;
-  }
-  .frame:hover .hint{ opacity:1 }
-
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--wall);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  header{text-align:center;padding:26px 12px 6px}
+  header h1{margin:0 0 6px;font-size:clamp(22px,3.6vw,36px)}
+  header p{margin:0;color:var(--muted)}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;padding:14px 12px 8px}
+  label{font-size:.95rem}
+  select,.toggle{appearance:none;padding:8px 12px;border:1px solid #cfcfcf;border-radius:10px;background:#fff;cursor:pointer;font-size:.95rem}
+  .toggle{display:inline-flex;align-items:center;gap:8px}
+  .wrap{max-width:1100px;margin:10px auto 60px;padding:0 16px}
+  .grid{display:grid;gap:var(--gap);grid-template-columns:repeat(2,minmax(260px,1fr))}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .card{position:relative;display:flex;flex-direction:column;gap:10px}
+  .frame{position:relative;border:8px solid var(--frame-front);border-radius:12px;background:linear-gradient(180deg,var(--frame-front),var(--frame-edge));box-shadow:var(--tile-shadow);text-decoration:none;color:inherit}
+  .frame::before{content:"";position:absolute;inset:8px;border-radius:8px;background:radial-gradient(120% 120% at 50% 50%,var(--mat)0%,#f7f7f7 70%);box-shadow:inset 0 0 0 1px var(--mat-edge),inset 0 12px 22px rgba(0,0,0,.06)}
+  .art{position:relative;margin:10px;border-radius:8px;overflow:hidden;z-index:1;aspect-ratio:16/9;background:#000}
+  .art video,.art img{width:100%;height:100%;display:block;object-fit:contain;background:#000}
+  .title{text-align:center;font-weight:600;font-size:.95rem}
+  .byline{text-align:center;color:#777;font-size:.85rem;margin-top:-4px}
+  .hint{position:absolute;bottom:8px;right:8px;z-index:2;background:rgba(0,0,0,.65);color:#fff;font-size:.85rem;padding:4px 8px;border-radius:8px;opacity:0;transition:opacity .15s ease;pointer-events:none}
+  .frame:hover .hint{opacity:1}
   /* Lightbox */
-  .lightbox{
-    position:fixed; inset:0; background: rgba(0,0,0,.86);
-    display:none; place-items:center; z-index:1000;
-  }
-  .lightbox.open{ display:grid }
-  .lightbox-inner{
-    width:min(95vw, 1100px); max-height:90vh; display:flex; flex-direction:column; gap:10px;
-  }
-  .viewer{ background:#000; border-radius:10px; overflow:hidden; display:flex; align-items:center; justify-content:center; min-height:240px }
-  .viewer video, .viewer img{ width:100%; height:100%; object-fit:contain; max-height:80vh }
-
-  .lb-meta{ color:#fff; display:flex; justify-content:space-between; align-items:center; gap:12px }
-  .lb-title{ font-weight:600 }
-  .lb-close{ background:#fff; border:1px solid #ddd; border-radius:10px; padding:8px 12px; cursor:pointer }
-
-  /* THEMES via dropdown */
-  /* Louvre — red walls, gold frames */
-  .theme-louvre{
-    --wall:#3c0b0b; --ink:#f8f2e9; --muted:#e4d4c2;
-    --frame-front:#b38b2a; --frame-edge:#8a6c20; --mat:#fffaf0; --mat-edge:#e6d8be;
-  }
-  /* Met — aqua walls, wood frames */
-  .theme-met{
-    --wall:#e3f2f6; --ink:#10222b; --muted:#3d6673;
-    --frame-front:#9b6b3e; --frame-edge:#7d5432; --mat:#fffdf8; --mat-edge:#e9e0cf;
-  }
-  /* LA Modern — white walls, black frames (default) */
-  .theme-la{
-    --wall:#ffffff; --ink:#1a1a1a; --muted:#666;
-    --frame-front:#111; --frame-edge:#333; --mat:#ffffff; --mat-edge:#e5e5e5;
-  }
-  body.theme-la{}
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.86);display:none;place-items:center;z-index:1000}
+  .lightbox.open{display:grid}
+  .lightbox-inner{width:min(95vw,1100px);max-height:90vh;display:flex;flex-direction:column;gap:10px}
+  .viewer{background:#000;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:240px}
+  .viewer video,.viewer img{width:100%;height:100%;object-fit:contain;max-height:80vh}
+  .lb-meta{color:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .lb-title{font-weight:600}
+  .lb-close{background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px 12px;cursor:pointer}
+  /* Themes */
+  .theme-louvre{--wall:#3c0b0b;--ink:#f8f2e9;--muted:#e4d4c2;--frame-front:#b38b2a;--frame-edge:#8a6c20;--mat:#fffaf0;--mat-edge:#e6d8be}
+  .theme-met{--wall:#e3f2f6;--ink:#10222b;--muted:#3d6673;--frame-front:#9b6b3e;--frame-edge:#7d5432;--mat:#fffdf8;--mat-edge:#e9e0cf}
+  .theme-la{--wall:#ffffff;--ink:#1a1a1a;--muted:#666;--frame-front:#111;--frame-edge:#333;--mat:#ffffff;--mat-edge:#e5e5e5}
 </style>
 </head>
 <body class="theme-la">
@@ -130,17 +66,14 @@
       <option value="louvre">Louvre (Red & Gold)</option>
       <option value="met">Met (Aqua & Wood)</option>
     </select>
-
-    <button id="soundToggle" class="toggle" type="button" aria-pressed="false">
-      🔈 Enable Sound on Hover
-    </button>
+    <button id="soundToggle" class="toggle" type="button" aria-pressed="false">🔈 Enable Sound on Hover</button>
   </div>
 
   <div class="wrap">
     <section id="gallery" class="grid" aria-label="gallery"></section>
   </div>
 
-  <!-- Lightbox -->
+  <!-- Lightbox (used for MP4s; TikTok opens in new tab by default) -->
   <div id="lightbox" class="lightbox" aria-modal="true" role="dialog">
     <div class="lightbox-inner">
       <div id="viewer" class="viewer"></div>
@@ -153,24 +86,23 @@
 
 <script>
 /* ============================
-   Your works
-   - Keep your existing four MP4 tiles unchanged.
-   - NEW: TikTok tile using Vacancy.png poster.
-   Put all referenced files next to index.html.
+   CONFIG
 ============================ */
+const USE_TIKTOK_EMBED = false; // leave false for maximum reliability on iOS/Safari
+
 const WORKS = [
-  /* Your original four MP4s (examples shown—leave your real filenames here) */
+  /* Your original four MP4 tiles — replace with your exact filenames */
   { title:"Clip One",   mp4:"video-1.mp4", poster:"video-1.jpg" },
   { title:"Clip Two",   mp4:"video-2.mp4", poster:"video-2.jpg" },
   { title:"Clip Three", mp4:"video-3.mp4", poster:"video-3.jpg" },
   { title:"Clip Four",  mp4:"video-4.mp4", poster:"video-4.jpg" },
 
-  /* NEW TikTok item */
+  /* NEW TikTok tile (adds a new row) */
   {
     title: "The Grudge on Dune",
     tiktok: "https://www.tiktok.com/t/ZT63YRxNR/",
     poster: "Vacancy.png",
-    caption: "Click to play on TikTok"
+    caption: "Opens on TikTok"
   }
 ];
 
@@ -179,6 +111,7 @@ const themeSelect = document.getElementById('themeSelect');
 const soundToggle = document.getElementById('soundToggle');
 let soundOnHover = false;
 
+/* Build one tile */
 function createCard(item){
   const card = document.createElement('article');
   card.className = 'card';
@@ -187,77 +120,47 @@ function createCard(item){
   frame.href = "#"; frame.className = 'frame';
   frame.setAttribute('aria-label', item.title || 'Artwork');
 
-  const art = document.createElement('div');
-  art.className = 'art';
-
-  const hint = document.createElement('div');
-  hint.className = 'hint';
-  hint.textContent = item.tiktok
-    ? 'Click to watch TikTok'
-    : 'Hover to preview • Click for sound';
-
-  frame.appendChild(art);
-  frame.appendChild(hint);
-
-  const title = document.createElement('div');
-  title.className = 'title';
-  title.textContent = item.title || '';
-
-  card.appendChild(frame);
-  if (item.title) card.appendChild(title);
+  const art = document.createElement('div'); art.className = 'art';
+  const hint = document.createElement('div'); hint.className = 'hint';
 
   if (item.tiktok){
-    // Poster only (no hover playback from TikTok)
+    // Static poster; click opens TikTok (new tab by default)
     const im = document.createElement('img');
     im.alt = item.title || 'TikTok poster';
     im.src = item.poster || '';
     art.appendChild(im);
-
+    hint.textContent = 'Open on TikTok';
     frame.addEventListener('click', (e) => {
       e.preventDefault();
-      openTikTokLightbox(item);
+      if (USE_TIKTOK_EMBED) openTikTokEmbed(item); else window.open(item.tiktok, '_blank', 'noopener');
     });
-
-  } else if (item.mp4){
-    // Video with hover preview
+  } else {
+    // Video tile with hover preview
     const v = document.createElement('video');
-    v.playsInline = true;
-    v.muted = true;     // hover previews muted unless toggle is on
-    v.loop = true;
-    v.preload = "metadata";
+    v.playsInline = true; v.muted = true; v.loop = true; v.preload = "metadata";
     if (item.poster) v.poster = item.poster;
-
-    const src = document.createElement('source');
-    src.src = item.mp4;
-    src.type = "video/mp4";
-    v.appendChild(src);
-    art.appendChild(v);
-
-    frame.addEventListener('mouseenter', () => {
-      v.muted = !soundOnHover;
-      v.play().catch(()=>{});
-    });
-    frame.addEventListener('mouseleave', () => {
-      v.pause(); v.currentTime = 0;
-    });
-    frame.addEventListener('click', (e) => {
-      e.preventDefault(); openVideoLightbox(item);
-    });
+    const s = document.createElement('source'); s.src = item.mp4; s.type = "video/mp4";
+    v.appendChild(s); art.appendChild(v);
+    hint.textContent = 'Hover to preview • Click for sound';
+    frame.addEventListener('mouseenter', () => { v.muted = !soundOnHover; v.play().catch(()=>{}); });
+    frame.addEventListener('mouseleave', () => { v.pause(); v.currentTime = 0; });
+    frame.addEventListener('click', (e) => { e.preventDefault(); openVideoLightbox(item); });
   }
 
+  frame.appendChild(art); frame.appendChild(hint);
+  const title = document.createElement('div'); title.className = 'title'; title.textContent = item.title || '';
+  card.appendChild(frame); if (item.title) card.appendChild(title);
   return card;
 }
 
-/* Build all items (no slice: allows extra rows) */
+/* Build all tiles (2 columns, as many rows as needed) */
 WORKS.forEach(w => gallery.appendChild(createCard(w)));
 
-/* Theme dropdown */
+/* Theme switching */
 function setTheme(key){
-  document.body.classList.remove('theme-louvre','theme-met','theme-la');
-  document.body.classList.add(`theme-${key}`);
+  document.body.className = ''; document.body.classList.add(`theme-${key}`);
 }
-themeSelect.addEventListener('change', e => setTheme(e.target.value));
-setTheme(themeSelect.value);
+themeSelect.addEventListener('change', e => setTheme(e.target.value)); setTheme(themeSelect.value);
 
 /* Sound-on-hover toggle */
 soundToggle.addEventListener('click', () => {
@@ -266,7 +169,7 @@ soundToggle.addEventListener('click', () => {
   soundToggle.textContent = soundOnHover ? '🔊 Sound on Hover Enabled' : '🔈 Enable Sound on Hover';
 });
 
-/* Lightbox */
+/* Lightbox for MP4s */
 const lb = document.getElementById('lightbox');
 const viewer = document.getElementById('viewer');
 const lbTitle = document.getElementById('lbTitle');
@@ -279,49 +182,33 @@ function openVideoLightbox(item){
   const v = document.createElement('video');
   v.controls = true; v.autoplay = true; v.playsInline = true; v.muted = false;
   if (item.poster) v.poster = item.poster;
-  const s = document.createElement('source');
-  s.src = item.mp4; s.type = "video/mp4";
-  v.appendChild(s);
-  viewer.appendChild(v);
+  const s = document.createElement('source'); s.src = item.mp4; s.type = "video/mp4";
+  v.appendChild(s); viewer.appendChild(v);
   lbTitle.textContent = item.title || '';
   lb.classList.add('open'); document.body.style.overflow = 'hidden';
 }
+function closeLightbox(){ lb.classList.remove('open'); viewer.innerHTML = ''; document.body.style.overflow = ''; }
 
-function openTikTokLightbox(item){
+/* OPTIONAL: embed TikTok in lightbox (less reliable on iOS; disabled by default) */
+function openTikTokEmbed(item){
   viewer.innerHTML = '';
-  // TikTok blockquote embed
-  const url = item.tiktok;
-  const idRaw = (url.split('/').filter(Boolean).pop() || "");
-  const videoId = idRaw.replace(/\D/g,''); // TikTok's embed.js prefers numeric id if present
+  const poster = document.createElement('img');
+  if (item.poster){ poster.src = item.poster; poster.alt = item.title || 'Poster'; poster.style.maxWidth='100%'; poster.style.maxHeight='80vh'; viewer.appendChild(poster); }
   const block = document.createElement('blockquote');
   block.className = 'tiktok-embed';
-  block.setAttribute('cite', url);
-  if (videoId) block.setAttribute('data-video-id', videoId);
-  block.innerHTML = `<section>Loading TikTok…</section>`;
-
-  // Poster as immediate visual until embed loads (optional)
-  if (item.poster){
-    const poster = document.createElement('img');
-    poster.src = item.poster;
-    poster.alt = item.title || 'Poster';
-    poster.style.maxWidth = '100%';
-    poster.style.maxHeight = '80vh';
-    viewer.appendChild(poster);
-  }
-
+  block.setAttribute('cite', item.tiktok);
+  block.innerHTML = '<section>Loading TikTok…</section>';
   viewer.appendChild(block);
-
-  // trigger embed rendering
-  if (window.tiktokEmbedLoad) { try { window.tiktokEmbedLoad(); } catch(e){} }
+  if (window.tiktokEmbedLoad) { try { window.tiktokEmbedLoad(); } catch(_){} }
 
   lbTitle.textContent = item.title || 'TikTok';
   lb.classList.add('open'); document.body.style.overflow = 'hidden';
-}
 
-function closeLightbox(){
-  lb.classList.remove('open');
-  viewer.innerHTML = '';
-  document.body.style.overflow = '';
+  /* Fallback: if embed didn’t render an iframe in ~3s, open new tab */
+  setTimeout(() => {
+    const hasIframe = viewer.querySelector('iframe'); 
+    if (!hasIframe) { closeLightbox(); window.open(item.tiktok, '_blank', 'noopener'); }
+  }, 3000);
 }
 </script>
 </body>
