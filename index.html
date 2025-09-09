@@ -8,11 +8,11 @@
 
 <style>
   :root{
-    --wall: #ffffff;          /* updated by theme */
+    --wall: #ffffff;
     --mat: #ffffff;
     --mat-edge: #d9d9d9;
-    --frame-front: #222;      /* updated by theme */
-    --frame-edge: #444;       /* updated by theme */
+    --frame-front: #222;
+    --frame-edge: #444;
     --ink: #222;
     --muted: #666;
     --tile-shadow: 0 14px 34px rgba(0,0,0,.18);
@@ -22,7 +22,7 @@
   body{
     margin:0; background: var(--wall);
     color: var(--ink);
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   }
   header{
     text-align:center; padding: 26px 12px 10px;
@@ -37,7 +37,6 @@
   .toggle{
     display:inline-flex; align-items:center; gap:8px;
     padding:8px 12px; border:1px solid #cfcfcf; border-radius:10px; background:#fff; cursor:pointer;
-    user-select:none;
   }
   .themes{ display:inline-flex; gap:8px; flex-wrap:wrap }
   .theme-btn{
@@ -52,50 +51,35 @@
     gap: var(--gap);
   }
 
-  /* frame + mat */
-  .card{
-    position:relative; display:flex; flex-direction:column; gap:10px;
-  }
+  .card{ position:relative; display:flex; flex-direction:column; gap:10px; }
   .frame{
     position:relative; border: 8px solid var(--frame-front); border-radius: 12px;
     background: linear-gradient(180deg, var(--frame-front), var(--frame-edge));
     box-shadow: var(--tile-shadow);
   }
-  .frame::before{ /* mat */
+  .frame::before{
     content:""; position:absolute; inset:8px; border-radius:8px;
     background: radial-gradient(120% 120% at 50% 50%, var(--mat) 0%, #f7f7f7 70%);
     box-shadow: inset 0 0 0 1px var(--mat-edge), inset 0 12px 22px rgba(0,0,0,.06);
   }
 
-  /* artwork area preserves natural aspect ratio */
   .art{
     position:relative; margin:10px; border-radius:8px; overflow:hidden; z-index:1;
-    aspect-ratio: auto; /* video/img natural ratio takes over; fallback below */
   }
-  .art:has(img){ aspect-ratio: auto }
-  .art:has(video){ aspect-ratio: auto }
-
   .art img, .art video{
     width:100%; height:100%; display:block; object-fit:contain; background:#000;
   }
 
-  .title{
-    text-align:center; font-weight:600; font-size:.95rem;
-  }
-  .byline{
-    text-align:center; color:#777; font-size:.85rem; margin-top:-4px;
-  }
+  .title{ text-align:center; font-weight:600; font-size:.95rem; }
+  .byline{ text-align:center; color:#777; font-size:.85rem; margin-top:-4px; }
 
-  /* hover hint */
   .hint{
     position:absolute; bottom:8px; right:8px; z-index:2;
     background: rgba(0,0,0,.65); color:#fff; font-size:.85rem; padding:4px 8px; border-radius:8px;
-    opacity:0; transition:opacity .15s ease;
-    pointer-events:none;
+    opacity:0; transition:opacity .15s ease; pointer-events:none;
   }
   .frame:hover .hint{ opacity:1 }
 
-  /* lightbox */
   .lightbox{
     position:fixed; inset:0; background: rgba(0,0,0,.86);
     display:none; place-items:center; z-index:1000;
@@ -120,29 +104,24 @@
   }
 
   /* THEMES */
-  /* Louvre: red walls, gold frames */
   .theme-louvre{
     --wall: #3c0b0b;
     --ink: #f8f2e9; --muted:#e4d4c2;
     --frame-front: #b38b2a; --frame-edge: #8a6c20;
     --mat: #fffaf0; --mat-edge: #e6d8be;
   }
-  /* Met: aqua walls, wood frames */
   .theme-met{
     --wall: #e3f2f6;
     --ink: #10222b; --muted:#3d6673;
     --frame-front: #9b6b3e; --frame-edge: #7d5432;
     --mat: #fffdf8; --mat-edge:#e9e0cf;
   }
-  /* LA Modern: white walls, black frames */
   .theme-la{
     --wall: #ffffff;
     --ink: #1a1a1a; --muted:#666;
     --frame-front: #111; --frame-edge:#333;
     --mat: #ffffff; --mat-edge:#e5e5e5;
   }
-
-  /* default theme when the page loads */
   body.theme-la{}
 </style>
 </head>
@@ -152,55 +131,37 @@
     <p>Hover to preview. Click to open with sound. Toggle sound-on-hover or switch museum themes.</p>
   </header>
 
-  <div class="controls" role="toolbar" aria-label="Gallery controls">
+  <div class="controls">
     <button id="soundToggle" class="toggle" type="button" aria-pressed="false">
       <span>🔈 Enable Sound Previews</span>
     </button>
-    <div class="themes" role="group" aria-label="Themes">
+    <div class="themes">
       <button class="theme-btn" data-theme="louvre" type="button" aria-pressed="false">Louvre — Red & Gold</button>
-      <button class="theme-btn" data-theme="met"    type="button" aria-pressed="false">Met — Aqua & Wood</button>
-      <button class="theme-btn" data-theme="la"     type="button" aria-pressed="true">LA — White & Black</button>
+      <button class="theme-btn" data-theme="met" type="button" aria-pressed="false">Met — Aqua & Wood</button>
+      <button class="theme-btn" data-theme="la" type="button" aria-pressed="true">LA — White & Black</button>
     </div>
   </div>
 
   <div class="wrap">
-    <section id="gallery" class="grid" aria-label="Gallery"></section>
+    <section id="gallery" class="grid"></section>
   </div>
 
-  <!-- Lightbox -->
   <div id="lightbox" class="lightbox" aria-modal="true" role="dialog">
     <div class="lightbox-inner">
       <div id="viewer" class="viewer"></div>
       <div class="lb-meta">
         <div class="lb-title" id="lbTitle"></div>
-        <button id="lbClose" class="lb-close" type="button" aria-label="Close">Close ✕</button>
+        <button id="lbClose" class="lb-close" type="button">Close ✕</button>
       </div>
     </div>
   </div>
 
 <script>
-/* ========================
-   Configure your artworks
-   ========================
-
-   Put these files next to index.html (or update src paths).
-   For videos, provide:
-     - "mp4": "YourVideo.mp4"
-     - optional "poster": "YourPoster.jpg" (shown before play and on hover)
-*/
 const WORKS = [
-  // Example video item
   { title: "Xavier's Perspectives", mp4: "xaviers-perspectives.mp4", poster: "xaviers-perspectives.jpg", caption: "Hover to preview" },
-
-  // Example static poster item (no video; opens as image)
   { title: "Poster Study", img: "poster-study.jpg" }
-
-  // Add more entries...
 ];
 
-/* ========================
-   Build gallery
-   ======================== */
 const gallery = document.getElementById('gallery');
 const soundToggle = document.getElementById('soundToggle');
 let soundOnHover = false;
@@ -239,7 +200,7 @@ function createCard(item){
   if (item.mp4){
     const v = document.createElement('video');
     v.playsInline = true;
-    v.muted = true;              // hover previews are muted by default; toggle can change
+    v.muted = true;
     v.loop = true;
     v.preload = "metadata";
     if (item.poster) v.poster = item.poster;
@@ -249,39 +210,21 @@ function createCard(item){
     v.appendChild(src);
     art.appendChild(v);
 
-    // hover preview
-    frame.addEventListener('mouseenter', () => {
-      v.muted = !soundOnHover;   // if toggle is ON, unmute hover
-      v.play().catch(()=>{});
-    });
+    frame.addEventListener('mouseenter', () => { v.muted = !soundOnHover; v.play().catch(()=>{}); });
     frame.addEventListener('mouseleave', () => { v.pause(); v.currentTime = 0; });
-
-    // click: open lightbox with sound
-    frame.addEventListener('click', (e) => {
-      e.preventDefault();
-      openVideoLightbox(item);
-    });
+    frame.addEventListener('click', (e) => { e.preventDefault(); openVideoLightbox(item); });
 
   } else if (item.img){
     const im = document.createElement('img');
     im.alt = item.title || 'Artwork';
     im.src = item.img;
     art.appendChild(im);
-
-    frame.addEventListener('click', (e) => {
-      e.preventDefault();
-      openImageLightbox(item);
-    });
+    frame.addEventListener('click', (e) => { e.preventDefault(); openImageLightbox(item); });
   }
-
   return card;
 }
-
 WORKS.forEach(w => gallery.appendChild(createCard(w)));
 
-/* ========================
-   Theme switching
-   ======================== */
 const themeBtns = [...document.querySelectorAll('.theme-btn')];
 function setTheme(key){
   document.body.classList.remove('theme-louvre','theme-met','theme-la');
@@ -290,18 +233,12 @@ function setTheme(key){
 }
 themeBtns.forEach(btn => btn.addEventListener('click', () => setTheme(btn.dataset.theme)));
 
-/* ========================
-   Sound-on-hover toggle
-   ======================== */
 soundToggle.addEventListener('click', () => {
   soundOnHover = !soundOnHover;
   soundToggle.setAttribute('aria-pressed', String(soundOnHover));
   soundToggle.firstElementChild.textContent = soundOnHover ? '🔊 Sound Previews Enabled' : '🔈 Enable Sound Previews';
 });
 
-/* ========================
-   Lightbox
-   ======================== */
 const lb = document.getElementById('lightbox');
 const viewer = document.getElementById('viewer');
 const lbTitle = document.getElementById('lbTitle');
@@ -333,8 +270,6 @@ function openImageLightbox(item){
 function closeLightbox(){
   lb.classList.remove('open'); viewer.innerHTML = ''; document.body.style.overflow = '';
 }
-
-/* Default theme on load */
 setTheme('la');
 </script>
 </body>
