@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Moving Pictures — Virtual Museum (Poster Once + Persistent Video + TikTok)</title>
+<title>Moving Pictures — Virtual Museum (Landing + Room Intro)</title>
 <style>
   :root{
     --wall:#111317; --text:#e8eaed; --muted:#9aa0a6; --shadow:0 12px 28px rgba(0,0,0,.35);
@@ -71,12 +71,43 @@
   .theme-louvre{--wall:#5a0f12;--frame-face:#d9c06d;--frame-edge:#7a6230;--frame-highlight:#f7f0d8;--mat:#f5f1e6;--mat-border:#e5decc}
   .theme-met{--wall:#2b6d73;--frame-face:#a47a4d;--frame-edge:#6f4f2a;--frame-highlight:#ecd9b8;--mat:#f4f2ea;--mat-border:#ddd6c6}
   .theme-la{--wall:#ffffff;--text:#111;--muted:#6b7280;--frame-face:#111111;--frame-edge:#2b2f36;--frame-highlight:#d7d7d7;--mat:#ffffff;--mat-border:#e5e7eb}
+
+  /* ========== New: CTA + Intro overlay ========== */
+  .room-cta{
+    margin: 8px 0 26px;
+    display: flex;
+    justify-content: center;
+  }
+  .enter-room-btn{
+    appearance:none;border:1px solid #2a3340;background:#101620;color:#e9ecf2;
+    padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow);font-size:.95rem
+  }
+  .enter-room-btn:hover{ background:#151c26 }
+
+  .intro-overlay{
+    position:fixed; inset:0; z-index:9999;
+    display:none; place-items:center;
+    background:rgba(10,12,16,.85);
+    backdrop-filter:blur(6px);
+  }
+  .intro-overlay.open{ display:grid }
+  .intro-shell{ width:min(900px,92vw); max-height:90vh; display:grid; gap:10px }
+  .intro-video{
+    width:100%; height:auto; max-height:80vh; background:#000; display:block;
+    border-radius:12px; box-shadow:0 18px 40px rgba(0,0,0,.5)
+  }
+  .intro-actions{ display:flex; justify-content:flex-end }
+  .intro-skip{
+    border:1px solid #394355; background:#121a25; color:#e9ecf2;
+    padding:8px 12px; border-radius:10px; cursor:pointer
+  }
+  .intro-skip:hover{ background:#17202c }
 </style>
 </head>
 <body class="theme-louvre">
   <div class="wrap">
     <h1>Moving Pictures — Virtual Museum</h1>
-    <div class="note">Poster appears once. Hover or press-hold to play; release or move off to pause and leave the last frame showing. Click to open the full player at the same timestamp.</div>
+    <div class="note">Poster appears once. Hover or press-hold to play; release or move off to pause and leave the last frame showing. Click to open the full player at the same timestamp. The showcase tile also has an “Enter this room” intro.</div>
 
     <div class="controls">
       <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
@@ -134,6 +165,34 @@
           <div class="overlay"><div class="title">The Grudge on Dune</div><div class="badge">Click to watch on TikTok</div></div>
         </article>
       </div></div></div>
+    </div>
+
+    <!-- CTA button for the showcase tile (separate, so it doesn't affect tile handlers) -->
+    <div class="room-cta">
+      <button
+        id="enterAbstracts"
+        class="enter-room-btn"
+        data-intro="media/abstracts-intro.mp4"  <!-- your short hallway video -->
+        data-target="room-abstract/"            <!-- destination room -->
+        aria-haspopup="dialog"
+      >
+        ▶︎ Click to Enter this Room
+      </button>
+    </div>
+  </div>
+
+  <!-- Intro overlay (plays the short video before navigating) -->
+  <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
+    <div class="intro-shell">
+      <video id="introVideo"
+             class="intro-video"
+             playsinline webkit-playsinline
+             preload="metadata"
+             controlslist="nodownload noplaybackrate"
+             disablepictureinpicture></video>
+      <div class="intro-actions">
+        <button id="skipIntro" class="intro-skip">Skip →</button>
+      </div>
     </div>
   </div>
 
@@ -256,7 +315,7 @@
   lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
 
-  // Click/keyboard open
+  // Click/keyboard open for tiles
   tiles.forEach(tile=>{
     tile.addEventListener('click', ()=>openLightboxFromTile(tile));
     tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
@@ -264,6 +323,54 @@
 
   // Default theme
   document.body.classList.add('theme-louvre');
+
+  /* ========== New: Intro overlay logic (Enter this room button) ========== */
+  (function(){
+    const btn = document.getElementById('enterAbstracts');
+    if(!btn) return;
+
+    const overlay = document.getElementById('introOverlay');
+    const video   = document.getElementById('introVideo');
+    const skipBtn = document.getElementById('skipIntro');
+
+    function cleanup(){
+      try { video.pause(); } catch(e){}
+      video.removeAttribute('src'); video.load();
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function go(target){ cleanup(); if(target) location.href = target; }
+
+    btn.addEventListener('click', async (e)=>{
+      e.preventDefault();
+      const introSrc = btn.dataset.intro;
+      const target   = btn.dataset.target || './';
+      if(!introSrc){ location.href = target; return; }
+
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      video.src = introSrc;
+      video.currentTime = 0;
+      video.muted = false; // user gesture present → audio should be allowed
+
+      // Start playback; if it fails or stalls, navigate to room quickly
+      let started = false;
+      const bail = setTimeout(()=>{ if(!started) go(target); }, 1800);
+      try {
+        await video.play();
+        started = true;
+        clearTimeout(bail);
+      } catch {
+        go(target);
+        return;
+      }
+
+      // Auto-navigate on end; allow skipping
+      const onEnd = ()=> go(target);
+      video.addEventListener('ended', onEnd, {once:true});
+      skipBtn.onclick = ()=> go(target);
+    }, {passive:false});
+  })();
 </script>
 </body>
 </html>
