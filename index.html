@@ -6,498 +6,212 @@
 <title>Moving Pictures — Museum Lobby</title>
 <meta name="color-scheme" content="dark light" />
 <style>
-  /* =========================================================
-     Design tokens (overridden per theme)
-     ========================================================= */
   :root{
-    --wall: #101215;                   /* background wall */
-    --wall-grad-top: #0c0e11;
-    --wall-grad-bot: #14171c;
+    --wall: #111317;
     --text: #e8eaed;
-    --muted: #a0a5ad;
-    --card: rgba(10,12,14,.78);
+    --muted:#9aa0a6;
+    --card: rgba(20,22,25,.75);
     --card-border: rgba(255,255,255,.12);
-    --accent: #7fb0ff;
-    --button-bg: #1b2735;
-    --button-bg-hover: #203246;
-    --button-ring: 0 0 0 3px rgba(127,176,255,.35);
-    --frame-gold: #caa64a;
-    --frame-ebony: #1a1a1a;
-    --frame-brass: #9f9a72;
-    --frame-walnut: #6b4b2e;
-    --shadow: 0 18px 36px rgba(0,0,0,.45);
+    --accent:#7fb0ff;
+    --frame-gold:#caa64a;
+    --frame-ebony:#1a1a1a;
+    --frame-brass:#9f9a72;
+    --frame-walnut:#6b4b2e;
+    --shadow:0 18px 36px rgba(0,0,0,.45);
   }
-
-  /* ---------------- LA Modern (White Cube) -----------------
-     High-contrast white on black, clean and modern           */
-  [data-theme="la"]{
-    --wall:#000000;
-    --wall-grad-top:#000000;
-    --wall-grad-bot:#000000;
-    --text:#ffffff;                     /* pure white text */
-    --muted:#d7dbe0;                    /* light gray for body copy */
-    --card: rgba(255,255,255,.06);      /* translucent white on black */
-    --card-border: rgba(255,255,255,.18);
-    --accent:#ffffff;                   /* white accents */
-    --button-bg:#111111;
-    --button-bg-hover:#1a1a1a;
-    --button-ring: 0 0 0 3px rgba(255,255,255,.35);
-    --frame-gold:#d5b76a;               /* keep tasteful, slightly lighter */
-    --frame-ebony:#0f0f0f;
-    --frame-brass:#b9b38a;
-    --frame-walnut:#7a5332;
-  }
-
-  /* ---------------- Louvre ---------------- */
   [data-theme="louvre"]{
-    --wall:#0e0f12;
-    --wall-grad-top:#0b0c0f;
-    --wall-grad-bot:#14161b;
-    --text:#f3f4f6;
-    --muted:#cfd5dd;
-    --card:rgba(15,17,20,.72);
-    --card-border:rgba(255,255,255,.14);
-    --accent:#a6b9ff;
+    --wall:#0e0f12; --text:#f3f4f6; --muted:#cfd5dd;
   }
-
-  /* ---------------- Met ---------------- */
   [data-theme="met"]{
-    --wall:#121012;
-    --wall-grad-top:#121012;
-    --wall-grad-bot:#1b171b;
-    --text:#f2f2f2;
-    --muted:#d7d1d7;
-    --card:rgba(20,16,20,.76);
-    --card-border:rgba(255,255,255,.12);
-    --accent:#e6a9a9;
+    --wall:#121012; --text:#f2f2f2; --muted:#d7d1d7;
+  }
+  [data-theme="la"]{
+    --wall:#f9f9f9; --text:#111; --muted:#333;
   }
 
-  /* =========================================================
-     Base layout
-     ========================================================= */
   html,body{
     height:100%;
     margin:0;
+    background:var(--wall);
     color:var(--text);
-    background:
-      radial-gradient(1200px 900px at 50% -10%, var(--wall-grad-top), transparent 55%),
-      radial-gradient(1200px 900px at 50% 110%, var(--wall-grad-bot), transparent 55%),
-      var(--wall);
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
   }
-  .wrap{ max-width:1300px; margin:0 auto; padding:40px 20px 80px; }
-
-  h1{
-    margin:0 0 6px;
-    font-size: clamp(26px, 4.2vw, 44px);
-    letter-spacing:.2px;
-  }
-  .sub{
-    color:var(--muted);
-    margin:0 0 28px;
-    font-size: clamp(14px, 2vw, 16px);
-  }
-
-  /* Theme selector */
-  .toolbar{
-    display:flex; align-items:center; gap:12px; margin:6px 0 28px;
-  }
-  .toolbar label{ color:var(--muted); font-size:14px;}
-  .select{
-    appearance:none; border:1px solid var(--card-border);
-    background:var(--card);
-    color:var(--text);
-    padding:10px 36px 10px 12px; border-radius:12px;
-    backdrop-filter: blur(6px);
-    position:relative;
-  }
-
-  /* Grid of exhibits: plaque + frame tile */
-  .grid{
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-    gap:28px 34px;
-    align-items:stretch;
-  }
-
-  .exhibit{
-    display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:center;
-  }
-  .exhibit.plaque-right{ grid-template-columns:1fr 1fr; }
-  .exhibit.plaque-left { grid-template-columns:1fr 1fr; direction:rtl; } /* flip order but keep inner LTR */
-  .exhibit.plaque-left > *{ direction:ltr; }
-
+  .wrap{max-width:1300px;margin:0 auto;padding:40px 20px 80px;}
+  h1{margin:0 0 6px;font-size:clamp(26px,4.2vw,44px);}
+  .sub{color:var(--muted);margin:0 0 28px;}
+  .toolbar{display:flex;align-items:center;gap:12px;margin:6px 0 28px;}
+  .select{appearance:none;background:var(--card);color:var(--text);
+    border:1px solid var(--card-border);padding:8px 36px 8px 12px;
+    border-radius:12px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
+        gap:28px 34px;}
+  .exhibit{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center;}
+  .exhibit.plaque-left{direction:rtl;}
+  .exhibit.plaque-left>*{direction:ltr;}
   .plaque{
-    background: var(--card);
+    background:var(--card);
     border:1px solid var(--card-border);
-    box-shadow: var(--shadow);
     border-radius:16px;
     padding:20px 18px;
+    box-shadow:var(--shadow);
   }
-  .plaque h3{
-    margin:0 0 6px; font-weight:700; letter-spacing:.2px;
-    color: var(--text);
-  }
-  .plaque p{ margin:8px 0 14px; color:var(--muted); line-height:1.45; }
-  .actions{ display:flex; gap:10px; flex-wrap:wrap; }
-
+  .plaque h3{margin:0 0 6px;}
+  .plaque p{margin:8px 0 14px;color:var(--muted);}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;}
   .btn{
-    display:inline-flex; align-items:center; gap:8px;
-    background:var(--button-bg); color:var(--text);
-    padding:10px 12px; border-radius:12px; border:1px solid var(--card-border);
-    text-decoration:none; font-size:14px; line-height:1; cursor:pointer;
+    background:var(--accent);color:#000;
+    padding:10px 12px;border-radius:12px;border:none;
+    text-decoration:none;font-size:14px;cursor:pointer;
   }
-  .btn:hover{ background:var(--button-bg-hover); }
-  .btn:focus-visible{ outline:none; box-shadow: var(--button-ring); }
-  .btn.secondary{ background:transparent; }
-  .btn svg{ width:16px; height:16px; }
-
-  /* Frame tile */
   .frame{
-    position:relative;
-    border-radius:18px;
-    padding:18px;
-    box-shadow: var(--shadow);
-    transform: rotate(var(--tilt, 0deg));
+    position:relative;border-radius:18px;padding:18px;
+    box-shadow:var(--shadow);
+    transform:rotate(var(--tilt,0deg));
     --frame-color: var(--frame-gold);
-    background:
-      linear-gradient(#0000 0 0) padding-box,
-      linear-gradient(160deg, rgba(255,255,255,.35), rgba(255,255,255,.08)) border-box;
-    border: 10px solid var(--frame-color);
+    background:linear-gradient(#0000 0 0) padding-box,
+              linear-gradient(160deg, rgba(255,255,255,.35),
+              rgba(255,255,255,.08)) border-box;
+    border:10px solid var(--frame-color);
   }
   .frame.finish-ebony { --frame-color: var(--frame-ebony); }
   .frame.finish-brass { --frame-color: var(--frame-brass); }
   .frame.finish-walnut{ --frame-color: var(--frame-walnut); }
-
-  .art{
-    position:relative; overflow:hidden; border-radius:10px;
-    background:#000;
-    aspect-ratio: 3/4;
-  }
-  .art img, .art video{
-    width:100%; height:100%; object-fit:cover; display:block;
-  }
+  .art{position:relative;overflow:hidden;border-radius:10px;background:#000;aspect-ratio:3/4;}
+  .art img,.art video{width:100%;height:100%;object-fit:cover;display:block;}
   .art .tiktok-tag{
-    position:absolute; right:12px; bottom:10px;
-    background:rgba(0,0,0,.6); color:#fff; font-size:12px; padding:6px 8px; border-radius:8px;
+    position:absolute;right:12px;bottom:10px;
+    background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;
   }
-
-  /* Lightbox */
   .lightbox{
-    position:fixed; inset:0; background:rgba(0,0,0,.9);
-    display:none; align-items:center; justify-content:center; z-index:60;
+    position:fixed;inset:0;background:rgba(0,0,0,.9);
+    display:none;align-items:center;justify-content:center;z-index:60;
   }
-  .lightbox.open{ display:flex; }
-  .lightbox video{ width:min(92vw, 1100px); height:auto; border-radius:12px; }
-
-  /* Fullscreen intro overlay (contain fix) */
+  .lightbox.open{display:flex;}
+  .lightbox video{width:min(92vw,1100px);border-radius:12px;}
   .intro{
-    position:fixed; inset:0; z-index:80; display:none;
-    align-items:center; justify-content:center; background:#000;
+    position:fixed;inset:0;z-index:80;display:none;
+    align-items:center;justify-content:center;background:#000;
   }
-  .intro.open{ display:flex; }
-  .intro .shell{
-    width:100svw; height:100svh; display:grid; place-items:center; position:relative;
-    background: #000;
-  }
-  .intro video{ width:100%; height:100%; object-fit:contain; }
+  .intro.open{display:flex;}
+  .intro video{width:100%;height:100%;object-fit:cover;}
   .intro .controls{
-    position:absolute; right:16px; top:16px; display:flex; gap:10px;
+    position:absolute;right:16px;top:16px;display:flex;gap:10px;
   }
-  .intro .controls .btn{ background:#111; }
-
-  /* Hover sound toggle – per exhibit (UI only; persisted in localStorage) */
-  .hover-sound{
-    display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted);
-  }
-  .hover-sound input{ transform: translateY(1px); }
-
-  /* Small screens: stack */
-  @media (max-width: 820px){
-    .exhibit{ grid-template-columns:1fr; }
-    .exhibit.plaque-left{ direction:ltr; }
+  .intro .controls .btn{background:#111;color:#fff;}
+  @media(max-width:820px){
+    .exhibit{grid-template-columns:1fr;}
+    .exhibit.plaque-left{direction:ltr;}
   }
 </style>
 </head>
 <body>
-  <main class="wrap">
-    <h1>Moving Pictures — Museum Lobby</h1>
-    <p class="sub">Each visit rehangs the lobby slightly. Plaques sit left or right, frames tilt and finish vary—just like a living museum.</p>
-
-    <!-- Theme selector -->
-    <div class="toolbar">
-      <label for="venue">Venue:</label>
-      <select id="venue" class="select" aria-label="Choose venue theme">
-        <option value="default">Default</option>
-        <option value="louvre">Louvre</option>
-        <option value="met">Met</option>
-        <option value="la">LA Museum – White Cube</option>
-      </select>
-    </div>
-
-    <!-- Grid -->
-    <section id="grid" class="grid" aria-live="polite"></section>
-  </main>
-
-  <!-- Lightbox for local MP4s -->
-  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Video viewer">
-    <video id="lbVideo" controls playsinline></video>
+<main class="wrap">
+  <h1>Moving Pictures — Museum Lobby</h1>
+  <p class="sub">Each visit rehangs the lobby slightly. Plaques sit left or right, frames tilt and finish vary—just like a living museum.</p>
+  <div class="toolbar">
+    <label for="venue">Venue:</label>
+    <select id="venue" class="select">
+      <option value="default">Default</option>
+      <option value="louvre">Louvre</option>
+      <option value="met">Met</option>
+      <option value="la">LA Museum – White Cube</option>
+    </select>
   </div>
+  <section id="grid" class="grid"></section>
+</main>
 
-  <!-- Fullscreen intro overlay -->
-  <div id="intro" class="intro" aria-hidden="true">
-    <div class="shell">
-      <video id="introVideo" src="room-abstract/media/GhoulsDoor.mp4" preload="metadata" playsinline></video>
-      <div class="controls">
-        <button class="btn" id="introMuteBtn" type="button" title="Toggle sound">Sound</button>
-        <button class="btn" id="introSkipBtn" type="button" title="Skip intro">Skip</button>
-      </div>
-    </div>
+<div id="lightbox" class="lightbox"><video id="lbVideo" controls playsinline></video></div>
+
+<div id="intro" class="intro">
+  <video id="introVideo" src="room-abstract/media/GhoulsDoor.mp4" playsinline></video>
+  <div class="controls">
+    <button class="btn" id="introMuteBtn">Sound</button>
+    <button class="btn" id="introSkipBtn">Skip</button>
   </div>
+</div>
 
 <script>
-/* =========================================================
-   Data model – Lobby exhibits
-   - kind: "tiktok" opens new tab
-   - kind: "local" uses hover preview + lightbox resume
-   ========================================================= */
-const exhibits = [
-  {
-    id: "grudge-dune",
-    title: "The Grudge on Dune",
-    roomTitle: "Room: Abstracts, Tools & Ghouls",
-    desc: "Dark, rebellious remixes—surreal mechanics, ritual light, and riffs re-forged. Enter for the full series.",
-    plaqueActions: [
-      { type: "tiktok", href: "https://www.tiktok.com/", label: "Watch on TikTok" }
-    ],
-    hoverSoundKey: "hoverSound_grudge",   // persisted per-exhibit
-    kind: "tiktok",
-    poster: "room-abstract/img/poster-grudge.jpg",
-    tiktokHref: "https://www.tiktok.com/",
-    // Special: Enter-this-room CTA
-    enterRoom: {
-      label: "Enter this Room",
-      introVideo: "room-abstract/media/GhoulsDoor.mp4",
-      target: "room-abstract/index.html"
-    }
-  },
-  /* Example local MP4 tile (kept minimal for brevity) */
-  {
-    id: "local-saturn",
-    title: "Saturn Rite",
-    roomTitle: "Lobby Feature",
-    desc: "A silent gravity—ritual light beneath the rings.",
-    plaqueActions: [],
-    hoverSoundKey: "hoverSound_saturn",
-    kind: "local",
-    poster: "room-abstract/img/poster-saturn.jpg",
-    src: "room-abstract/media/sample.mp4"
-  }
-];
+const exhibits=[{
+  id:"grudge-dune",
+  title:"The Grudge on Dune",
+  roomTitle:"Room: Abstracts, Tools & Ghouls",
+  desc:"Dark, rebellious remixes—surreal mechanics, ritual light, and riffs re-forged. Enter for the full series.",
+  plaqueActions:[{type:"tiktok",href:"https://www.tiktok.com/",label:"Watch on TikTok"}],
+  hoverSoundKey:"hoverSound_grudge",
+  kind:"tiktok",
+  poster:"room-abstract/img/poster-grudge.jpg",
+  tiktokHref:"https://www.tiktok.com/",
+  enterRoom:{label:"Enter this Room",introVideo:"room-abstract/media/GhoulsDoor.mp4",target:"room-abstract/index.html"}
+}];
 
-/* =========================================================
-   Utilities
-   ========================================================= */
-const $ = (q, root=document)=>root.querySelector(q);
-const $$ = (q, root=document)=>Array.from(root.querySelectorAll(q));
+const $=(q,r=document)=>r.querySelector(q);
+const $$=(q,r=document)=>Array.from(r.querySelectorAll(q));
+function choose(a){return a[Math.floor(Math.random()*a.length)];}
+function randomTilt(){return (Math.random()*2-1).toFixed(2)+"deg";}
 
-function choose(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function randomTilt(){ return (Math.random() * 2 - 1.0).toFixed(2) + "deg"; } // ±1°
+const THEME_KEY="mp_theme_v1";
+const root=document.documentElement;
+const venue=$("#venue");
+function applyTheme(n){root.setAttribute("data-theme",n);localStorage.setItem(THEME_KEY,n);}
+venue.addEventListener("change",e=>applyTheme(e.target.value));
+(function(){const s=localStorage.getItem(THEME_KEY)||"default";applyTheme(s);venue.value=s;})();
 
-/* =========================================================
-   Theme persistence
-   ========================================================= */
-const THEME_KEY = "mp_theme_v2";
-const root = document.documentElement;
-const venue = $("#venue");
-
-function applyTheme(name){
-  root.setAttribute("data-theme", name);
-  localStorage.setItem(THEME_KEY, name);
-}
-venue.addEventListener("change", e => applyTheme(e.target.value));
-(function initTheme(){
-  const saved = localStorage.getItem(THEME_KEY) || "default";
-  applyTheme(saved);
-  venue.value = saved;
-})();
-
-/* =========================================================
-   Render lobby grid
-   ========================================================= */
-const grid = $("#grid");
-
+const grid=$("#grid");
 function render(){
-  grid.innerHTML = "";
-  exhibits.forEach(ex => {
-    const plaqueSide = Math.random() > .5 ? "plaque-left" : "plaque-right";
-    const finish = choose(["finish-ebony","finish-brass","finish-walnut",""]);
-    const tilt = randomTilt();
-
-    const exDiv = document.createElement("article");
-    exDiv.className = `exhibit ${plaqueSide}`;
-    exDiv.innerHTML = `
+  grid.innerHTML="";
+  exhibits.forEach(ex=>{
+    const side=Math.random()>.5?"plaque-left":"plaque-right";
+    const finish=choose(["finish-ebony","finish-brass","finish-walnut",""]);
+    const tilt=randomTilt();
+    const el=document.createElement("article");
+    el.className=`exhibit ${side}`;
+    el.innerHTML=`
       <div class="plaque">
         <h3>${ex.title}</h3>
         <p><strong>${ex.roomTitle}</strong><br/>${ex.desc}</p>
         <div class="actions">
-          ${ex.plaqueActions.map(a => `
-            <a class="btn" href="${a.href}" target="_blank" rel="noopener">
-              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6 13l5-5-5-5v10z"/></svg>
-              ${a.label}
-            </a>
-          `).join("")}
-          ${ex.enterRoom ? `
-            <button class="btn" type="button" data-enter="${ex.id}">
-              <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2 8h8l-3-3 1.4-1.4L14.8 10l-6.4 6.4L7 15l3-3H2z"/></svg>
-              ${ex.enterRoom.label}
-            </button>
-          ` : ""}
+          ${ex.plaqueActions.map(a=>`<a class="btn" href="${a.href}" target="_blank" rel="noopener">${a.label}</a>`).join("")}
+          ${ex.enterRoom?`<button class="btn" data-enter="${ex.id}">${ex.enterRoom.label}</button>`:""}
         </div>
-        <label class="hover-sound">
-          <input type="checkbox" data-sound="${ex.hoverSoundKey}">
-          Hover sound
-        </label>
       </div>
-
       <div class="frame ${finish}" style="--tilt:${tilt}">
-        <div class="art" data-kind="${ex.kind}" ${ex.kind==="local" ? `data-src="${ex.src}"` : `data-href="${ex.tiktokHref}"`} aria-label="${ex.title}">
-          <img alt="" loading="lazy" src="${ex.poster}">
-          ${ex.kind==="tiktok" ? `<span class="tiktok-tag">Click to watch on TikTok</span>` : ""}
+        <div class="art" data-kind="${ex.kind}" data-href="${ex.tiktokHref}">
+          <img alt="" src="${ex.poster}">
+          <span class="tiktok-tag">Click to watch on TikTok</span>
         </div>
-      </div>
-    `;
-    grid.appendChild(exDiv);
+      </div>`;
+    grid.appendChild(el);
   });
-
-  // Initialize per-exhibit hover sound toggles
-  $$('input[type="checkbox"][data-sound]').forEach(cb=>{
-    const key = cb.getAttribute('data-sound');
-    cb.checked = localStorage.getItem(key) === "1";
-    cb.addEventListener('change', ()=> {
-      localStorage.setItem(key, cb.checked ? "1" : "0");
-    });
-  });
-
-  wireInteractions();
+  wire();
 }
 render();
 
-/* =========================================================
-   Interactions:
-   - TikTok tiles open new tab
-   - Local MP4 hover preview + lightbox resume
-   - Enter-this-room → intro overlay (contain fix) → navigate
-   ========================================================= */
-const lightbox = $("#lightbox");
-const lbVideo  = $("#lbVideo");
-
-function wireInteractions(){
-  // TikTok tiles
-  $$('.art[data-kind="tiktok"]').forEach(tile=>{
-    tile.addEventListener('click', ()=>{
-      const href = tile.getAttribute('data-href');
-      if(href) window.open(href, '_blank', 'noopener');
-    }, {passive:true});
+const lightbox=$("#lightbox"),lbVideo=$("#lbVideo");
+function wire(){
+  $$('.art[data-kind="tiktok"]').forEach(t=>{
+    t.addEventListener("click",()=>window.open(t.getAttribute("data-href"),"_blank","noopener"));
   });
-
-  // Local previews
-  $$('.art[data-kind="local"]').forEach(tile=>{
-    const src = tile.getAttribute('data-src');
-    const img = $('img', tile);
-    const vid = document.createElement('video');
-    vid.src = src;
-    vid.muted = true;
-    vid.playsInline = true;
-    vid.preload = "metadata";
-    vid.style.display = "none";
-    tile.appendChild(vid);
-
-    let hoverTime = 0;
-    const play = ()=>{ img.style.display="none"; vid.style.display="block"; vid.currentTime = hoverTime; vid.play().catch(()=>{}); };
-    const pause = ()=>{ hoverTime = vid.currentTime || 0; vid.pause(); vid.style.display="none"; img.style.display="block"; };
-
-    tile.addEventListener('mouseenter', play);
-    tile.addEventListener('mouseleave', pause);
-    // Touch (iOS)
-    tile.addEventListener('touchstart', (e)=>{ play(); }, {passive:true});
-    tile.addEventListener('touchend', (e)=>{ pause(); }, {passive:true});
-
-    // Click → lightbox resume
-    tile.addEventListener('click', ()=>{
-      lightbox.classList.add('open');
-      lbVideo.src = src;
-      lbVideo.currentTime = hoverTime || 0;
-      lbVideo.play().catch(()=>{});
-    });
-  });
-
-  // Close lightbox on backdrop click or ESC
-  lightbox.addEventListener('click', (e)=>{
-    if(e.target === lightbox){ closeLightbox(); }
-  });
-  document.addEventListener('keydown', (e)=>{
-    if(e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
-  });
-
-  function closeLightbox(){
-    lbVideo.pause(); lbVideo.removeAttribute('src'); lbVideo.load();
-    lightbox.classList.remove('open');
-  }
-
-  // Enter-this-room (intro → navigate)
   $$('button[data-enter]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      openIntro("room-abstract/media/GhoulsDoor.mp4", "room-abstract/index.html");
-    });
+    btn.addEventListener("click",()=>openIntro("room-abstract/media/GhoulsDoor.mp4","room-abstract/index.html"));
   });
 }
 
-/* =========================================================
-   Fullscreen Intro (attempt unmuted; fall back muted)
-   ========================================================= */
-const introEl = $("#intro");
-const introVideo = $("#introVideo");
-const introMuteBtn = $("#introMuteBtn");
-const introSkipBtn = $("#introSkipBtn");
-let introTargetHref = null;
-
-function openIntro(src, targetHref){
-  introTargetHref = targetHref;
-  introVideo.src = src;
-  introEl.classList.add('open');
-  introEl.setAttribute('aria-hidden','false');
-
-  // Try autoplay with sound
-  introVideo.muted = false;
-  introVideo.play()
-    .catch(()=>{
-      // Fallback: muted autoplay if blocked
-      introVideo.muted = true;
-      introVideo.play().catch(()=>{ /* if still blocked, user will press Skip */ });
-    });
+const intro=$("#intro"),introVideo=$("#introVideo"),
+      introMuteBtn=$("#introMuteBtn"),introSkipBtn=$("#introSkipBtn");
+let introTarget=null;
+function openIntro(src,target){
+  introTarget=target;
+  introVideo.src=src;
+  intro.classList.add("open");
+  introVideo.muted=false;
+  introVideo.play().catch(()=>{introVideo.muted=true;introVideo.play();});
 }
-
-introMuteBtn.addEventListener('click', ()=>{
-  introVideo.muted = !introVideo.muted;
-  introMuteBtn.textContent = introVideo.muted ? "Sound Off" : "Sound On";
-});
-
-introSkipBtn.addEventListener('click', ()=>{
-  finishIntro();
-});
-
-// Auto-finish when video ends
-introVideo.addEventListener('ended', finishIntro);
-
+introMuteBtn.addEventListener("click",()=>{introVideo.muted=!introVideo.muted;});
+introSkipBtn.addEventListener("click",finishIntro);
+introVideo.addEventListener("ended",finishIntro);
 function finishIntro(){
-  introVideo.pause();
-  introVideo.removeAttribute('src'); introVideo.load();
-  introEl.classList.remove('open');
-  introEl.setAttribute('aria-hidden','true');
-  if(introTargetHref) window.location.href = introTargetHref;
+  introVideo.pause();intro.classList.remove("open");
+  if(introTarget)window.location.href=introTarget;
 }
 </script>
 </body>
