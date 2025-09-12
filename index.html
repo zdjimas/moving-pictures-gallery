@@ -7,65 +7,55 @@
 <style>
   /* ---------- Base tokens (overridden by theme classes) ---------- */
   :root{
-    --wall-deep:#221014; --wall-top:#2e0f13; --gold:#d8b765;
-    --ink:#eceff4; --muted:#b7becd; --shadow:0 16px 40px rgba(0,0,0,.40);
+    /* core */
+    --ink:#eceff4; --muted:#b7becd; --gold:#d8b765;
+    --shadow:0 16px 40px rgba(0,0,0,.40);
+    --tile-aspect: 3 / 4;
+
+    /* legacy beam/marble/floor (now disabled globally) */
     --beam-a: rgba(255,255,210,.20); --beam-b: rgba(255,240,190,.16);
     --marble-top:#e7dcc3; --marble-mid:#b9a67b; --marble-edge:#8f7846;
     --floor-1:#e9e7de; --floor-2:#cfc7b6; --floor-3:#b8ae99;
-    --tile-aspect: 3 / 4;
+
+    /* NEW: single solid wall color per theme */
+    --wall-solid:#221014;
   }
 
-  /* ---------- Themes ---------- */
+  /* ---------- Themes (now define --wall-solid per theme) ---------- */
   body.theme-default{
-    --wall-deep:#221014; --wall-top:#2e0f13; --gold:#d8b765;
-    --beam-a: rgba(255,255,210,.20); --beam-b: rgba(255,240,190,.16);
-    --marble-top:#e7dcc3; --marble-mid:#b9a67b; --marble-edge:#8f7846;
-    --floor-1:#e9e7de; --floor-2:#cfc7b6; --floor-3:#b8ae99;
+    --wall-solid:#221014;
+    --ink:#eceff4; --muted:#b7becd;
   }
   body.theme-louvre{
-    --wall-deep:#5a0f12; --wall-top:#3f0c0e; --gold:#e2c266;
-    --beam-a: rgba(255,220,170,.22); --beam-b: rgba(255,210,150,.18);
-    --marble-top:#f0e6cf; --marble-mid:#d8c39a; --marble-edge:#b89656;
-    --floor-1:#f1e9da; --floor-2:#d9ccb1; --floor-3:#c2b089;
+    --wall-solid:#3f0c0e; /* deep royal red */
+    --ink:#f7f7f9; --muted:#e0d5c7;
   }
   body.theme-met{
-    --wall-deep:#1f4750; --wall-top:#2b6d73; --gold:#a47a4d;
-    --beam-a: rgba(170,240,220,.20); --beam-b: rgba(140,220,210,.16);
-    --marble-top:#e3dccf; --marble-mid:#bfa98b; --marble-edge:#8b6b41;
-    --floor-1:#e9efe9; --floor-2:#cfe0de; --floor-3:#b5c8c6;
+    --wall-solid:#1f4750; /* teal stone */
+    --ink:#f2f7f8; --muted:#d6e4e6;
   }
+  /* LA Modern — warm white with dark fonts (high contrast, modern) */
   body.theme-la{
-    --wall-deep:#111111; --wall-top:#1a1a1a; --gold:#bdbdbd;
-    --beam-a: rgba(255,255,255,.12); --beam-b: rgba(255,255,255,.10);
-    --marble-top:#ececec; --marble-mid:#d9d9d9; --marble-edge:#bdbdbd;
-    --floor-1:#ffffff; --floor-2:#ececec; --floor-3:#dcdcdc;
-    --ink:#111; --muted:#6b7280;
+    --wall-solid:#f7f3ee; /* warm white */
+    --ink:#111111;        /* dark body text */
+    --muted:#4b5563;      /* modern neutral */
+    --gold:#bdbdbd;       /* keep neutral metallics for frames */
+    --beam-a: rgba(255,255,255,.00); /* irrelevant now, backgrounds are flat */
+    --beam-b: rgba(255,255,255,.00);
   }
 
   html,body{height:100%}
   body{
-    margin:0; color:var(--ink);
+    margin:0;
+    color:var(--ink);
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-    background:
-      radial-gradient(1200px 600px at 85% -10%, var(--beam-a), transparent 60%),
-      radial-gradient(900px 560px at 10% 10%,  var(--beam-b), transparent 58%),
-      linear-gradient(180deg, var(--wall-top) 0%, var(--wall-deep) 40%, #0d0d0d 100%),
-      repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, transparent 2px 120px) fixed;
+    /* NEW: flat, solid background across ALL themes */
+    background: var(--wall-solid);
   }
-  .beams{position:fixed; inset:0; pointer-events:none; z-index:0;
-    background:
-      radial-gradient(500px 260px at 18% 0%, var(--beam-a), transparent 60%),
-      radial-gradient(540px 260px at 78% 0%, var(--beam-b), transparent 60%);
-    mix-blend-mode:screen;
-  }
-  body::before, body::after{content:""; position:fixed; left:0; right:0; z-index:0; pointer-events:none;}
-  body::before{ top:0; height:18px; background:linear-gradient(180deg, var(--marble-top), var(--marble-mid) 60%, var(--marble-edge)); box-shadow:0 4px 14px rgba(0,0,0,.35) inset }
-  body::after{ bottom:0; height:120px; background:
-      linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.45)),
-      repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 6px, rgba(0,0,0,.08) 6px 12px),
-      linear-gradient(180deg, var(--floor-1), var(--floor-2) 60%, var(--floor-3));
-    box-shadow:0 -10px 30px rgba(0,0,0,.35) inset;
-  }
+
+  /* Disable decorative overlays for a flat background across all themes */
+  .beams{ display:none !important; }
+  body::before, body::after{ display:none !important; content:""; }
 
   .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 120px; position:relative; z-index:1}
   h1{margin:0 0 10px;font-size:clamp(24px,3.2vw,40px);letter-spacing:.02em}
@@ -74,8 +64,15 @@
   /* Controls row */
   .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 24px}
   .select,.btn{
-    appearance:none;border:1px solid #3a2a20;background:#1a1412;color:var(--ink);
+    appearance:none;border:1px solid #3a2a20;background:#1a1412;color:#f2f5f9;
     padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);cursor:pointer
+  }
+  /* Make selector legible on LA’s light background */
+  body.theme-la .select, body.theme-la .btn{
+    background:#ffffff;
+    color:#111;
+    border:1px solid #c9c9c9;
+    box-shadow:0 4px 16px rgba(0,0,0,.08);
   }
   .label{font-size:13px;color:var(--muted)}
 
@@ -94,17 +91,30 @@
     border-left:6px solid var(--gold);
     border-radius:14px; padding:16px 16px 12px; margin-top:var(--plaqueTop,0px);
     backdrop-filter: blur(3px); box-shadow: var(--shadow);
+    color:#f4efe6;
+  }
+  /* On LA’s light canvas, keep plaque readable but soften */
+  body.theme-la .plaque{
+    background:linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.34));
+    border-color:#d7d7d7; border-left-color:#bdbdbd; color:#f7f7f7;
   }
   .plaque h2{margin:0 0 6px;font-size:clamp(18px,2.2vw,24px)}
   .plaque .room{margin:0 0 6px;color:color-mix(in oklab, var(--gold) 85%, white 20%);font-weight:600}
   .plaque p{margin:0 12px 12px 0;color:#eae4d6;line-height:1.45}
+  body.theme-la .plaque p{ color:#f0ede7; }
+
   .cta{display:inline-flex;align-items:center;gap:8px;background:#121a20;color:#f2f5f9;border:1px solid #38424f;
        padding:10px 12px;border-radius:10px;text-decoration:none;cursor:pointer}
   .cta + .cta{margin-left:8px}
   .cta[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
   .cta:hover{background:#161f26}
+  /* LA buttons on light background */
+  body.theme-la .cta{ background:#111; color:#fff; border-color:#222; }
+  body.theme-la .cta:hover{ background:#161616; }
+
   .mini-toggle{font-size:.9rem;padding:8px 10px;border-radius:10px;border:1px solid #3a4656;background:#0f151c;color:#eaf2ff;cursor:pointer}
   .mini-toggle[aria-pressed="true"]{background:#14202c;border-color:#46607a}
+  body.theme-la .mini-toggle{ background:#fff; color:#111; border:1px solid #c9c9c9; }
 
   .frame-wrap{filter:drop-shadow(0 18px 24px rgba(0,0,0,.35)); transform: rotate(var(--frame-tilt, 0deg));}
   .frame{position:relative; box-shadow:var(--shadow); border-radius:14px; border:10px solid transparent;}
@@ -129,6 +139,8 @@
   .frame::after{content:"";position:absolute;inset:8px;border-radius:8px;border:2px solid #f4e8c7;pointer-events:none}
   .mat{margin:16px;background:#f4efe6;border:1px solid #ddd2be;border-radius:8px;
        box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12)}
+  body.theme-la .mat{ background:#fff7ee; border-color:#eadfcd; }
+
   .tile{position:relative;aspect-ratio:var(--tile-aspect);overflow:hidden;border:1px solid rgba(0,0,0,.25);
         background:#000;display:block;touch-action:manipulation;border-radius:6px}
   .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
@@ -152,26 +164,18 @@
   .player{position:relative;background:#000}
   .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 
-  /* ===== FULLSCREEN INTRO OVERLAY — CROPPING FIX ===== */
+  /* ===== FULLSCREEN INTRO OVERLAY (unchanged) ===== */
   .intro-overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center; background:#000; }
   .intro-overlay.open{ display:grid }
   .intro-shell{
-    width:100svw;           /* small-viewport units avoid iOS toolbar issues */
-    height:100svh;
+    width:100svw; height:100svh;
     display:flex; align-items:center; justify-content:center;
     padding: max(8px, env(safe-area-inset-top))
              max(8px, env(safe-area-inset-right))
              max(8px, env(safe-area-inset-bottom))
              max(8px, env(safe-area-inset-left));
   }
-  .intro-video{
-    width:100%;
-    height:100%;
-    object-fit:contain;      /* always show the whole video (letterbox if needed) */
-    background:#000;
-    border-radius:0;
-    box-shadow:none;
-  }
+  .intro-video{ width:100%; height:100%; object-fit:contain; background:#000; }
   .intro-actions{ position:fixed; right:16px; bottom:16px; z-index:2; }
   .intro-skip{ border:1px solid #394355; background:#121a25; color:#e9ecf2; padding:10px 14px; border-radius:10px; cursor:pointer }
   .intro-skip:hover{ background:#17202c }
@@ -191,7 +195,7 @@
         <option value="theme-default" selected>Default Lobby</option>
         <option value="theme-louvre">Louvre — Royal Red + Gold</option>
         <option value="theme-met">Met — Teal Stone + Wood</option>
-        <option value="theme-la">LA Modern — White Cube</option>
+        <option value="theme-la">LA Modern — Warm White</option>
       </select>
     </div>
 
@@ -378,7 +382,6 @@ function buildExhibit(data){
 
 /* ============ Render ============ */
 const exhibitsEl = document.getElementById('exhibits');
-// Make Abstracts banner first; randomize the rest
 [ABSTRACTS, ...shuffle([...OTHERS])].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
 
 /* ============ Hover previews & Lightbox ============ */
@@ -403,103 +406,4 @@ function startPreview(tile, userGesture=false){
   if (tile.dataset.tiktok) return;
   const v = ensureVideo(tile); if (!v) return;
   reveal(tile);
-  const ex = tile.closest('.exhibit');
-  v.muted = !(ex && ex.dataset.sound === 'on');
-  const p = v.play(); if (userGesture && p) p.catch(()=>{});
-  tile.classList.add('is-previewing');
-}
-function stopPreview(tile){ const v = tile.querySelector('video.clip'); if (v) v.pause(); tile.classList.remove('is-previewing'); }
-
-tiles.forEach(tile=>{
-  tile.addEventListener('pointerenter', ()=>startPreview(tile,false));
-  tile.addEventListener('pointerleave', ()=>stopPreview(tile));
-  tile.addEventListener('pointerdown', ()=>startPreview(tile,true));
-  tile.addEventListener('pointerup',   ()=>stopPreview(tile));
-  tile.addEventListener('pointercancel',()=>stopPreview(tile));
-  tile.addEventListener('touchstart', ()=>startPreview(tile,true), {passive:true});
-  tile.addEventListener('touchend',   ()=>stopPreview(tile), {passive:true});
-  tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
-});
-
-/* Lightbox for local MP4 tiles only */
-const lb = document.getElementById('lightbox');
-const lbVideo = document.getElementById('lbVideo');
-const lbTitle = document.getElementById('lbTitle');
-const lbClose = document.getElementById('lbClose');
-
-function openLightboxFromTile(tile){
-  if (tile.dataset.tiktok){
-    window.open(tile.dataset.tiktok, '_blank', 'noopener');
-    return;
-  }
-  const vPrev = tile.querySelector('video.clip');
-  lbTitle.textContent = tile.dataset.title || 'Untitled';
-  lbVideo.src = safeSrc(tile.dataset.video);
-  lb.classList.add('open');
-  const resumeAt = vPrev && !isNaN(vPrev.currentTime) ? vPrev.currentTime : 0;
-  lbVideo.addEventListener('loadedmetadata', function onMeta(){
-    lbVideo.removeEventListener('loadedmetadata', onMeta);
-    try { lbVideo.currentTime = resumeAt; } catch(e){}
-  });
-}
-function closeLightbox(){ lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open'); }
-lbClose.addEventListener('click', closeLightbox);
-lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
-document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
-tiles.forEach(tile=>{
-  tile.addEventListener('click', ()=>openLightboxFromTile(tile));
-  tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
-});
-
-/* ===== Fullscreen Intro overlay (Abstracts room) ===== */
-(function(){
-  const btn = document.getElementById('enterAbstracts');
-  if(!btn) return;
-
-  const overlay = document.getElementById('introOverlay');
-  const video   = document.getElementById('introVideo');
-  const skipBtn = document.getElementById('skipIntro');
-
-  function resolveTarget(){
-    const raw = btn.dataset.target || 'room-abstract/index.html';
-    try { return new URL(raw, window.location.href).href; }
-    catch { return raw; }
-  }
-  function cleanup(){
-    try { video.pause(); } catch(e){}
-    video.removeAttribute('src'); video.load();
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  function goNow(){
-    const href = resolveTarget();
-    cleanup();
-    window.location.assign(href);
-  }
-
-  btn.addEventListener('click', async (e)=>{
-    e.preventDefault(); e.stopPropagation();
-    const introSrc = btn.dataset.intro;
-    if(!introSrc){ goNow(); return; }
-
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    video.src = introSrc;
-    video.setAttribute('playsinline',''); 
-    video.setAttribute('webkit-playsinline','');
-
-    try {
-      video.muted = false; video.volume = 1.0;
-      await video.play();
-    } catch {
-      video.muted = true;
-      try { await video.play(); } catch { goNow(); return; }
-    }
-
-    video.addEventListener('ended', ()=>goNow(), {once:true});
-    skipBtn.onclick = ()=>goNow();
-  }, {passive:false});
-})();
-</script>
-</body>
-</html>
+  const
