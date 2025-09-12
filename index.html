@@ -406,4 +406,103 @@ function startPreview(tile, userGesture=false){
   if (tile.dataset.tiktok) return;
   const v = ensureVideo(tile); if (!v) return;
   reveal(tile);
-  const
+  const ex = tile.closest('.exhibit');
+  v.muted = !(ex && ex.dataset.sound === 'on');
+  const p = v.play(); if (userGesture && p) p.catch(()=>{});
+  tile.classList.add('is-previewing');
+}
+function stopPreview(tile){ const v = tile.querySelector('video.clip'); if (v) v.pause(); tile.classList.remove('is-previewing'); }
+
+tiles.forEach(tile=>{
+  tile.addEventListener('pointerenter', ()=>startPreview(tile,false));
+  tile.addEventListener('pointerleave', ()=>stopPreview(tile));
+  tile.addEventListener('pointerdown', ()=>startPreview(tile,true));
+  tile.addEventListener('pointerup',   ()=>stopPreview(tile));
+  tile.addEventListener('pointercancel',()=>stopPreview(tile));
+  tile.addEventListener('touchstart', ()=>startPreview(tile,true), {passive:true});
+  tile.addEventListener('touchend',   ()=>stopPreview(tile), {passive:true});
+  tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
+});
+
+/* Lightbox for local MP4 tiles only */
+const lb = document.getElementById('lightbox');
+const lbVideo = document.getElementById('lbVideo');
+const lbTitle = document.getElementById('lbTitle');
+const lbClose = document.getElementById('lbClose');
+
+function openLightboxFromTile(tile){
+  if (tile.dataset.tiktok){
+    window.open(tile.dataset.tiktok, '_blank', 'noopener');
+    return;
+  }
+  const vPrev = tile.querySelector('video.clip');
+  lbTitle.textContent = tile.dataset.title || 'Untitled';
+  lbVideo.src = safeSrc(tile.dataset.video);
+  lb.classList.add('open');
+  const resumeAt = vPrev && !isNaN(vPrev.currentTime) ? vPrev.currentTime : 0;
+  lbVideo.addEventListener('loadedmetadata', function onMeta(){
+    lbVideo.removeEventListener('loadedmetadata', onMeta);
+    try { lbVideo.currentTime = resumeAt; } catch(e){}
+  });
+}
+function closeLightbox(){ lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open'); }
+lbClose.addEventListener('click', closeLightbox);
+lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
+tiles.forEach(tile=>{
+  tile.addEventListener('click', ()=>openLightboxFromTile(tile));
+  tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
+});
+
+/* ===== Fullscreen Intro overlay (Abstracts room) ===== */
+(function(){
+  const btn = document.getElementById('enterAbstracts');
+  if(!btn) return;
+
+  const overlay = document.getElementById('introOverlay');
+  const video   = document.getElementById('introVideo');
+  const skipBtn = document.getElementById('skipIntro');
+
+  function resolveTarget(){
+    const raw = btn.dataset.target || 'room-abstract/index.html';
+    try { return new URL(raw, window.location.href).href; }
+    catch { return raw; }
+  }
+  function cleanup(){
+    try { video.pause(); } catch(e){}
+    video.removeAttribute('src'); video.load();
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function goNow(){
+    const href = resolveTarget();
+    cleanup();
+    window.location.assign(href);
+  }
+
+  btn.addEventListener('click', async (e)=>{
+    e.preventDefault(); e.stopPropagation();
+    const introSrc = btn.dataset.intro;
+    if(!introSrc){ goNow(); return; }
+
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    video.src = introSrc;
+    video.setAttribute('playsinline',''); 
+    video.setAttribute('webkit-playsinline','');
+
+    try {
+      video.muted = false; video.volume = 1.0;
+      await video.play();
+    } catch {
+      video.muted = true;
+      try { await video.play(); } catch { goNow(); return; }
+    }
+
+    video.addEventListener('ended', ()=>goNow(), {once:true});
+    skipBtn.onclick = ()=>goNow();
+  }, {passive:false});
+})();
+</script>
+</body>
+</html>
