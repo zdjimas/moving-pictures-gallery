@@ -70,7 +70,7 @@
   .theme-la{--wall:#ffffff;--text:#111;--muted:#6b7280;--frame-face:#111111;--frame-edge:#2b2f36;--frame-highlight:#d7d7d7;--mat:#ffffff;--mat-border:#e5e7eb}
 
   /* CTA + Intro overlay */
-  .room-cta{ margin: 8px 0 26px; display:flex; justify-content:center }
+  .room-cta{ margin: 12px 0 26px; display:flex; justify-content:center }
   .enter-room-btn{
     appearance:none;border:1px solid #2a2f3a;background:#101620;color:#e9ecf2;
     padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow);font-size:.95rem
@@ -142,28 +142,30 @@
         </article>
       </div></div></div>
 
-      <!-- 5 — TikTok tile (poster only; opens in new tab) -->
-      <div class="frame-wrap"><div class="frame"><div class="mat">
-        <article class="tile" tabindex="0" data-title="The Grudge on Dune" data-tiktok="https://www.tiktok.com/t/ZT63YRxNR/">
-          <img class="thumb" src="./IMG_0494.jpg" alt="Poster: The Grudge on Dune" loading="lazy" />
-          <div class="overlay"><div class="title">The Grudge on Dune</div><div class="badge">Click to watch on TikTok</div></div>
-        </article>
-      </div></div></div>
+      <!-- 5 — TikTok tile (poster only; opens in new tab) + CTA inside same frame-wrap -->
+      <div class="frame-wrap">
+        <div class="frame"><div class="mat">
+          <article class="tile" tabindex="0" data-title="The Grudge on Dune" data-tiktok="https://www.tiktok.com/t/ZT63YRxNR/">
+            <img class="thumb" src="./IMG_0494.jpg" alt="Poster: The Grudge on Dune" loading="lazy" />
+            <div class="overlay"><div class="title">The Grudge on Dune</div><div class="badge">Click to watch on TikTok</div></div>
+          </article>
+        </div></div>
+
+        <!-- Centered CTA, aligned under the poster -->
+        <div class="room-cta">
+          <button
+            id="enterAbstracts"
+            class="enter-room-btn"
+            type="button"
+            data-intro="room-abstract/media/GhoulsDoor.mp4"
+            data-target="room-abstract/index.html"
+            aria-haspopup="dialog">
+            ▶︎ Click to Enter this Room
+          </button>
+        </div>
+      </div>
     </div>
-
-   <!-- CTA button for the showcase tile -->
-<div class="room-cta">
-  <button
-    id="enterAbstracts"
-    class="enter-room-btn"
-    type="button"
-    data-intro="room-abstract/media/GhoulsDoor.mp4"
-    data-target="room-abstract/index.html"
-    aria-haspopup="dialog">
-    ▶︎ Click to Enter this Room
-  </button>
-</div>
-
+  </div>
 
   <!-- Intro overlay -->
   <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
@@ -221,7 +223,7 @@
 
   function ensureVideo(tile){
     const v = tile.querySelector('video.clip');
-    if (!v) return null;
+    if (!v) return null;                 // TikTok tile has no <video>
     if (!v.dataset.bound){
       v.dataset.bound = '1';
       v.src = safeSrc(tile.dataset.video);
@@ -264,7 +266,7 @@
     tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
   });
 
-  /* === Lightbox continues from the same timestamp (video tiles only) === */
+  /* === Lightbox (video tiles only) === */
   const lb = document.getElementById('lightbox');
   const lbVideo = document.getElementById('lbVideo');
   const lbTitle = document.getElementById('lbTitle');
@@ -297,7 +299,7 @@
     tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
   });
 
-  /* Default theme */
+  /* Default theme on load */
   document.body.classList.add('theme-louvre');
 
   /* ========== Intro overlay logic (robust) ========== */
@@ -341,7 +343,7 @@
       video.src = introSrc;
       video.setAttribute('playsinline','');
       video.setAttribute('webkit-playsinline','');
-      video.muted = true; // most reliable autoplay policy
+      video.muted = true; // most reliable autoplay
 
       let started = false;
       const bail = setTimeout(()=>{ if(!started) goNow(); }, 3500);
@@ -355,9 +357,8 @@
         return;
       }
 
-      const onEnd = ()=>{ goNow(); };
-      video.addEventListener('ended', onEnd, {once:true});
-      skipBtn.onclick = ()=>{ goNow(); };
+      video.addEventListener('ended', ()=>goNow(), {once:true});
+      skipBtn.onclick = ()=>goNow();
     }, {passive:false});
   })();
 </script>
