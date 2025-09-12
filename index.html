@@ -40,10 +40,10 @@
   h1{margin:0 0 10px;font-size:clamp(24px,3.2vw,40px);letter-spacing:.02em}
   .note{color:var(--muted);font-size:14px;margin:6px 0 24px}
 
-  /* Dynamic exhibits list (single column, randomized spacing) */
+  /* Dynamic exhibits list */
   .exhibits{display:grid; gap:36px}
 
-  /* Exhibit row with randomized plaque side */
+  /* Exhibit row w/ randomized plaque side */
   .exhibit{
     display:grid;
     grid-template-columns: 1fr 1fr;
@@ -57,7 +57,7 @@
     .plaque-col, .frame-col{ order:initial }
   }
 
-  /* Plaque (left banner) with random width/tilt via CSS vars */
+  /* Plaque (left banner) w/ random width/tilt via CSS vars */
   .plaque-col{ transform: rotate(var(--pl-tilt, 0deg)); }
   .plaque{
     width: min(var(--plaqueW, 320px), 100%);
@@ -65,7 +65,7 @@
     border:1px solid rgba(255,220,140,.25);
     border-left:6px solid var(--gold);
     border-radius:14px;
-    padding:16px 16px 14px;
+    padding:16px 16px 12px;
     margin-top: var(--plaqueTop, 0px);
     backdrop-filter: blur(3px);
     box-shadow: var(--shadow);
@@ -78,14 +78,23 @@
     background:#121a20; color:#f2f5f9; border:1px solid #38424f;
     padding:10px 12px; border-radius:10px; text-decoration:none; cursor:pointer;
   }
+  .cta + .cta{ margin-left:8px }
   .cta[aria-disabled="true"]{ opacity:.55; cursor:not-allowed }
   .cta:hover{ background:#161f26 }
 
+  /* Small toggle button style */
+  .mini-toggle{
+    font-size:.9rem;
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid #3a4656;
+    background:#0f151c; color:#eaf2ff; cursor:pointer;
+  }
+  .mini-toggle[aria-pressed="true"]{ background:#14202c; border-color:#46607a }
+
   /* Frame finishes (random) */
   .frame-wrap{filter:drop-shadow(0 18px 24px rgba(0,0,0,.35)); transform: rotate(var(--frame-tilt, 0deg));}
-  .frame{
-    position:relative; box-shadow:var(--shadow); border-radius:14px; border:10px solid transparent;
-  }
+  .frame{position:relative; box-shadow:var(--shadow); border-radius:14px; border:10px solid transparent;}
   .finish-gilded .frame{
     background:
       linear-gradient(#0000,#0000) padding-box,
@@ -134,16 +143,28 @@
   .player{position:relative;background:#000}
   .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 
-  /* Intro overlay */
-  .intro-overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center;
-                  background:rgba(10,12,16,.85); backdrop-filter:blur(6px) }
+  /* ===== FULL-SCREEN INTRO OVERLAY ===== */
+  .intro-overlay{
+    position:fixed; inset:0; z-index:9999;
+    display:none; place-items:center;
+    background:#000;
+  }
   .intro-overlay.open{ display:grid }
-  .intro-shell{ width:min(900px,92vw); max-height:90vh; display:grid; gap:10px }
-  .intro-video{ width:100%; height:auto; max-height:80vh; background:#000; display:block;
-                border-radius:12px; box-shadow:0 18px 40px rgba(0,0,0,.5) }
-  .intro-actions{ display:flex; justify-content:flex-end }
-  .intro-skip{ border:1px solid #394355; background:#121a25; color:#e9ecf2;
-               padding:8px 12px; border-radius:10px; cursor:pointer }
+  .intro-shell{
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .intro-video{
+    width:100%; height:100%;
+    object-fit:cover; background:#000; border-radius:0; box-shadow:none;
+  }
+  .intro-actions{
+    position:fixed; right:16px; bottom:16px; z-index:2;
+  }
+  .intro-skip{
+    border:1px solid #394355; background:#121a25; color:#e9ecf2;
+    padding:10px 14px; border-radius:10px; cursor:pointer
+  }
   .intro-skip:hover{ background:#17202c }
 </style>
 </head>
@@ -157,7 +178,7 @@
     <section id="exhibits" class="exhibits"></section>
   </div>
 
-  <!-- Intro overlay -->
+  <!-- Fullscreen Intro overlay -->
   <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
     <div class="intro-shell">
       <video id="introVideo"
@@ -166,9 +187,9 @@
              preload="metadata"
              controlslist="nodownload noplaybackrate"
              disablepictureinpicture></video>
-      <div class="intro-actions">
-        <button id="skipIntro" class="intro-skip">Skip →</button>
-      </div>
+    </div>
+    <div class="intro-actions">
+      <button id="skipIntro" class="intro-skip">Skip →</button>
     </div>
   </div>
 
@@ -187,7 +208,6 @@
 
 <script>
 /* ============ Data ============ */
-/* Abstracts first; the rest can shuffle each load */
 const ABSTRACTS = {
   key: 'abstracts',
   title: 'The Grudge on Dune',
@@ -243,13 +263,13 @@ const FINISHES = ['finish-gilded','finish-ebony','finish-brass','finish-walnut']
 /* ============ Build one exhibit row ============ */
 function buildExhibit(data){
   const ex = document.createElement('article');
-  const plaqueLeft = Math.random() < 0.5;   // random side
+  const plaqueLeft = Math.random() < 0.5;
   const finish = choose(FINISHES);
   const frameTilt = (rand(-0.35,0.35)).toFixed(3)+'deg';
   const plaqueTilt = (rand(-0.4,0.4)).toFixed(3)+'deg';
   const plaqueW = Math.round(rand(240, 340))+'px';
   const plaqueTop = Math.round(rand(0, 24))+'px';
-  const spacing = Math.round(rand(16, 52)); // random vertical gap after this exhibit
+  const spacing = Math.round(rand(16, 52));
 
   ex.className = `exhibit ${plaqueLeft ? 'pl-left':'pl-right'} ${finish}`;
   ex.style.marginBottom = spacing+'px';
@@ -257,6 +277,9 @@ function buildExhibit(data){
   ex.style.setProperty('--pl-tilt', plaqueTilt);
   ex.style.setProperty('--plaqueW', plaqueW);
   ex.style.setProperty('--plaqueTop', plaqueTop);
+
+  // default: hover sound OFF for this exhibit
+  ex.dataset.sound = 'off';
 
   const plaque = document.createElement('div');
   plaque.className = 'plaque-col';
@@ -298,22 +321,34 @@ function buildExhibit(data){
     `;
   }
 
-  // CTA(s)
+  // CTA(s) + per-exhibit hover-sound toggle (only for MP4 exhibits)
   const ctaRow = plaque.querySelector('.cta-row');
+  let parts = [];
   if (data.isActiveRoom){
-    ctaRow.innerHTML = `
-      <a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>
-      <button class="cta" id="enterAbstracts" type="button"
-              data-intro="${data.introSrc}"
-              data-target="${data.target}"
-              aria-haspopup="dialog">🏛 Enter this Room</button>
-    `;
+    parts.push(`<a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>`);
+    // Abstracts is TikTok-only; no hover-sound toggle needed
   } else {
-    ctaRow.innerHTML = `<button class="cta" aria-disabled="true" title="Room under construction">▶︎ Enter Room (Coming Soon)</button>`;
+    parts.push(`<button class="cta" aria-disabled="true" title="Room under construction">▶︎ Enter Room (Coming Soon)</button>`);
   }
+  if (!data.tile?.tiktok){
+    parts.push(`<button class="mini-toggle hover-sound-toggle" type="button" aria-pressed="false" title="Toggle sound while hovering this artwork">🔊 Hover Sound: Off</button>`);
+  }
+  ctaRow.innerHTML = parts.join(' ');
 
   ex.appendChild(plaque);
   ex.appendChild(frameCol);
+
+  // Wire the hover-sound toggle (if present)
+  const toggle = ctaRow.querySelector('.hover-sound-toggle');
+  if (toggle){
+    toggle.addEventListener('click', ()=>{
+      const on = ex.dataset.sound === 'on';
+      ex.dataset.sound = on ? 'off' : 'on';
+      toggle.setAttribute('aria-pressed', String(!on));
+      toggle.textContent = !on ? '🔊 Hover Sound: On' : '🔊 Hover Sound: Off';
+    });
+  }
+
   return ex;
 }
 
@@ -324,7 +359,7 @@ const order = [ABSTRACTS, ...shuffle([...OTHERS])];
 order.forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
 
 /* ============ Interactions ============ */
-/* Hover previews for MP4 tiles + poster-once */
+/* Hover previews for MP4 tiles + poster-once (per-exhibit sound toggle respected) */
 const tiles = document.querySelectorAll('.tile');
 const safeSrc = (p)=> encodeURI(p);
 
@@ -346,7 +381,12 @@ function startPreview(tile, userGesture=false){
   if (tile.dataset.tiktok) return;
   const v = ensureVideo(tile); if (!v) return;
   reveal(tile);
-  v.muted = true; // lobby previews muted by default
+
+  // per-exhibit sound: read dataset.sound on the nearest .exhibit
+  const ex = tile.closest('.exhibit');
+  const soundOn = ex && ex.dataset.sound === 'on';
+  v.muted = !soundOn;
+
   const p = v.play(); if (userGesture && p) p.catch(()=>{});
   tile.classList.add('is-previewing');
 }
@@ -390,13 +430,12 @@ function closeLightbox(){ lbVideo.pause(); lbVideo.src=''; lb.classList.remove('
 lbClose.addEventListener('click', closeLightbox);
 lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
-
 tiles.forEach(tile=>{
   tile.addEventListener('click', ()=>openLightboxFromTile(tile));
   tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
 });
 
-/* Intro overlay (Abstracts room) */
+/* ===== Fullscreen Intro overlay (Abstracts room) ===== */
 (function(){
   const btn = document.getElementById('enterAbstracts');
   if(!btn) return;
@@ -430,13 +469,19 @@ tiles.forEach(tile=>{
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
     video.src = introSrc;
-    video.setAttribute('playsinline',''); video.setAttribute('webkit-playsinline','');
-    video.muted = false;
-    video.volume = 1.0;
+    video.setAttribute('playsinline',''); 
+    video.setAttribute('webkit-playsinline','');
 
-    let started = false;
-    const bail = setTimeout(()=>{ if(!started) goNow(); }, 3500);
-    try { await video.play(); started = true; clearTimeout(bail); } catch { goNow(); return; }
+    // Try to play WITH sound (allowed due to user gesture). Fallback to muted if blocked.
+    try {
+      video.muted = false;
+      video.volume = 1.0;
+      await video.play();
+    } catch {
+      video.muted = true;
+      try { await video.play(); } catch { goNow(); return; }
+    }
+
     video.addEventListener('ended', ()=>goNow(), {once:true});
     skipBtn.onclick = ()=>goNow();
   }, {passive:false});
