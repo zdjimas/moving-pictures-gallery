@@ -1,349 +1,376 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Abstracts, Tools and Ghouls — Virtual Museum Room</title>
+<title>Moving Pictures — Virtual Museum (Landing + Room Intro)</title>
 <style>
   :root{
-    --bg1:#0e1014; --bg2:#151821; --accentGlow: rgba(160,160,180,.12);
-    --ink:#e9ecf2; --muted:#b7bfcc;
-    --frame:#11161c; --mat:#0f141b; --mat-edge:#27303a;
-    --pl-shadow: 0 10px 30px rgba(0,0,0,.38);
-    --tile-shadow: 0 20px 40px rgba(0,0,0,.38);
+    --wall:#111317; --text:#e8eaed; --muted:#9aa0a6; --shadow:0 12px 28px rgba(0,0,0,.35);
+    --frame-face:#d6bf77; --frame-edge:#8a7442; --frame-highlight:#f4e8c7;
+    --mat:#f5f3ea; --mat-border:#d8d3c2; --plinth:rgba(0,0,0,.25);
+    --tile-aspect: 3 / 4;  /* change if you want landscape: 16/9 */
   }
 
-  /* Room themes */
-  .theme-gold{
-    --bg1:#111319; --bg2:#171a22; --accentGlow: rgba(210,180,120,.10);
-  }
-  .theme-ebony{
-    --bg1:#0c0e12; --bg2:#12151b; --accentGlow: rgba(120,140,180,.10);
-    --frame:#0a0d12; --mat:#0d1218; --mat-edge:#1f2630;
-  }
+  html,body{height:100%}
+  body{margin:0;background:var(--wall);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 80px}
+  h1{margin:0 0 8px;font-size:clamp(22px,2.6vw,34px)}
+  .note{color:var(--muted);font-size:14px;margin:6px 0 16px}
 
-  *{ box-sizing: border-box }
-  html,body{ height:100% }
-  body{
-    margin:0; color:var(--ink);
-    font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    background:
-      radial-gradient(900px 600px at 78% 14%, var(--accentGlow), transparent 62%),
-      radial-gradient(900px 650px at 18% 82%, var(--accentGlow), transparent 66%),
-      linear-gradient(180deg, var(--bg1), var(--bg2));
-    min-height: 100svh;
-  }
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 18px}
+  .btn,.select{appearance:none;border:1px solid #2a2f3a;background:#171a21;color:#e8eaed;
+    padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow)}
+  .btn[aria-pressed="true"]{border-color:#3a84ff;background:#1b2436}
+  .label{font-size:13px;color:var(--muted);margin-left:2px}
 
-  header{ text-align:center; padding:28px 16px 12px }
-  h1{ margin:0; font-size: clamp(22px,3.4vw,36px) }
-  .sub{ margin:6px 0 0; color:var(--muted) }
+  .gallery{display:grid;gap:26px;grid-template-columns:repeat(2,minmax(260px,1fr));align-items:start}
+  @media (max-width:760px){.gallery{grid-template-columns:1fr}}
 
-  .actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:16px 0 28px }
-  .btn, .linkbtn, .select{
-    background:#0f141b; color:#e9ecf2; border:1px solid #2a3340;
-    padding:10px 14px; border-radius:10px; font-size:.95rem; cursor:pointer; text-decoration:none;
-  }
-  .btn:hover, .linkbtn:hover{ background:#151b24 }
-  .select{ appearance:none }
-
-  .shell{ max-width: 1200px; margin: 0 auto; padding: 0 18px 80px }
-
-  .cards{
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(620px, 1fr));
-    gap: 42px;
-  }
-  .card{
-    --mediaW: 420px; --plaqueW: 220px; --plaqueTop: 14px;
-    --pl-pad-left: 0px; --pl-pad-right: 0px;
-    position: relative;
-    padding-left:  var(--pl-pad-left);
-    padding-right: var(--pl-pad-right);
-  }
-  .artwrap{ max-width: var(--mediaW); margin: 0 auto; }
-
+  .frame-wrap{filter:drop-shadow(0 18px 24px var(--plinth))}
   .frame{
-    --tilt: 0deg;
-    display:block; position:relative; cursor:pointer;
-    border:12px solid var(--frame); border-radius: 20px;
-    background: linear-gradient(180deg, #0c1218, #141c24);
-    box-shadow: var(--tile-shadow), 0 0 0 1px rgba(255,255,255,.05) inset;
-    transition: transform .20s ease, box-shadow .20s ease;
-    overflow:hidden; transform: rotate(var(--tilt)); text-decoration:none;
+    position:relative;box-shadow:var(--shadow);
+    background:linear-gradient(#0000,#0000) padding-box,
+               linear-gradient(135deg,var(--frame-edge),var(--frame-face)) border-box;
+    border:10px solid transparent
   }
-  .frame::before{
-    content:""; position:absolute; inset:8px; border-radius:14px;
-    background: radial-gradient(120% 130% at 50% 50%, var(--mat) 0%, #0e151c 58%);
-    box-shadow: inset 0 0 0 1px var(--mat-edge), inset 0 10px 20px rgba(0,0,0,.45);
-  }
-  .frame:hover{ transform: rotate(var(--tilt)) translateY(-2px) scale(1.01); box-shadow: 0 24px 58px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06) inset }
+  .frame::after{content:"";position:absolute;inset:8px;border:2px solid var(--frame-highlight);pointer-events:none}
+  .mat{margin:16px;background:var(--mat);border:1px solid var(--mat-border);
+       box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12)}
 
-  .tile{ position:relative; aspect-ratio: var(--ar, 4/3); border-radius:12px; overflow:hidden; margin:12px; z-index:1 }
-  .tile img{ width:100%; height:100%; display:block; object-fit:contain; object-position:center; background:#0d1319; transition: transform .25s ease; }
+  /* Artwork tile: uniform size, flush fill */
+  .tile{position:relative;aspect-ratio:var(--tile-aspect);overflow:hidden;border:1px solid rgba(0,0,0,.25);
+        background:var(--mat);display:block;touch-action:manipulation}
+  .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
 
-  /* Shapes */
-  .shape-a .frame{ border-radius:28px }
-  .shape-a .frame::before, .shape-a .tile{ border-radius:22px }
-  .shape-b .frame{ border-radius:14px 28px 18px 32px }
-  .shape-b .frame::before, .shape-b .tile{ border-radius:10px 22px 14px 26px }
-  .shape-c .frame{ border-radius:40px }
-  .shape-c .frame::before, .shape-c .tile{ border-radius:30px }
-  .shape-d .frame{ border-radius:18px; }
-  .shape-d .frame::before{ box-shadow: inset 0 0 0 2px rgba(255,255,255,.06), inset 0 20px 24px rgba(0,0,0,.5) }
-  .shape-e .frame{ border-radius:18px 18px 48px 18px }
-  .shape-e .frame::before, .shape-e .tile{ border-radius:12px 12px 36px 12px }
-  .shape-f .frame{ border-radius:22px; }
+  /* Visibility rules:
+     - Default: show poster (thumb)
+     - While previewing OR once revealed: show video surface
+  */
+  .clip{opacity:0;transition:opacity .15s ease-out}
+  .tile.is-previewing .clip,
+  .tile.revealed .clip{opacity:1}
+  .tile.revealed .thumb{opacity:0;pointer-events:none} /* hide poster permanently after first interaction */
 
-  /* Finishes */
-  .finish-gilded .frame{
-    border:12px solid transparent;
-    background:
-      linear-gradient(180deg,#0e141a,#151d24) padding-box,
-      conic-gradient(from 22deg,
-        #6b4e0f, #caa54b 12%, #ffeb9c 24%, #d3ab4a 36%,
-        #6b4e0f 48%, #e2c266 60%, #fff1b5 72%, #c3972e 84%, #6b4e0f) border-box;
-    box-shadow: var(--tile-shadow), 0 10px 26px rgba(250,210,120,.16);
-  }
-  .finish-brass .frame{
-    border:10px solid transparent;
-    background:
-      linear-gradient(180deg,#0e141a,#151d24) padding-box,
-      conic-gradient(from -30deg,#3c2e14,#b49352,#6f582b,#d7b778,#4a3a18,#b49352) border-box;
-    filter: saturate(1.06);
-  }
-  .finish-ebony .frame{
-    border-color:#0a0d12;
-    background:
-      linear-gradient(180deg,#0a0f14,#131a22) padding-box,
-      linear-gradient(145deg, #1c232c, #090d12 60%, #1a212a) border-box;
-    box-shadow: var(--tile-shadow), 0 12px 28px rgba(0,0,0,.62);
-  }
-  .finish-walnut .frame{
-    border:10px solid transparent;
-    background:
-      linear-gradient(180deg,#0e141a,#151d24) padding-box,
-      linear-gradient(25deg, #3b2414 0%, #5a3820 30%, #7a4b2b 55%, #4b2d19 80%, #3b2414 100%) border-box;
-    box-shadow: var(--tile-shadow), 0 10px 26px rgba(80,40,20,.35);
-  }
+  .overlay{position:absolute;inset:auto 0 0 0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
+           padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .title{font-weight:600;font-size:14px}
+  .badge{font-size:12px;color:#c5e4ff;background:rgba(124,198,255,.08);border:1px solid rgba(124,198,255,.3);
+         padding:4px 8px;border-radius:999px}
 
-  /* Plaques */
-  .plaque{
-    position:absolute; top: var(--plaqueTop); width: var(--plaqueW);
-    z-index:2; padding:12px 14px; border-radius:12px; line-height:1.35;
-    box-shadow: var(--pl-shadow); backdrop-filter: blur(2px);
-    transform: rotate(var(--pl-tilt, 0deg));
-  }
-  .plaque::before{
-    content:""; position:absolute; top:8px; width:8px; height:8px; border-radius:50%;
-    background:#d0d0d0; box-shadow:0 1px 0 rgba(0,0,0,.5);
-  }
-  .pl-left  .plaque{ left:18px }  .pl-left  .plaque::before{ left:10px }
-  .pl-right .plaque{ right:18px }  .pl-right .plaque::before{ right:10px }
+  .lightbox{position:fixed;inset:0;background:rgba(8,10,14,.72);backdrop-filter:blur(6px);
+            display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
+  .lightbox.open{display:flex}
+  .lightbox-card{width:min(900px,92vw);background:#0f1218;border:1px solid #222936;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .lightbox-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #1b222e}
+  .lightbox-title{font-weight:600}
+  .x{border:0;background:transparent;color:#9aa0a6;font-size:22px;cursor:pointer}
+  .player{position:relative;background:#000}
+  .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 
-  .pl-brass{ background: linear-gradient(180deg, #3b2f19, #7c6334); color:#f8f0d0; border:1px solid #c9b073 }
-  .pl-ivory{ background: linear-gradient(180deg, #f6f1e3, #e6dcc6); color:#2a2a2a; border:1px solid #e1d4b6 }
-  .pl-slate{ background: linear-gradient(180deg, #1d242c, #12171d); color:#dbe7ff; border:1px solid #2d3946 }
-  .pl-verdigris{ background: linear-gradient(180deg, #0f2f2f, #0b2223); color:#d8fff6; border:1px solid #1e5a59 }
-  .pl-wood{ background: linear-gradient(180deg, #4b2f1c, #352113); color:#ffe8c9; border:1px solid #6a4126 }
+  .theme-louvre{--wall:#5a0f12;--frame-face:#d9c06d;--frame-edge:#7a6230;--frame-highlight:#f7f0d8;--mat:#f5f1e6;--mat-border:#e5decc}
+  .theme-met{--wall:#2b6d73;--frame-face:#a47a4d;--frame-edge:#6f4f2a;--frame-highlight:#ecd9b8;--mat:#f4f2ea;--mat-border:#ddd6c6}
+  .theme-la{--wall:#ffffff;--text:#111;--muted:#6b7280;--frame-face:#111111;--frame-edge:#2b2f36;--frame-highlight:#d7d7d7;--mat:#ffffff;--mat-border:#e5e7eb}
 
-  .plaque h3{ margin:0 0 6px; font-size:1.02rem }
-  .plaque .sub{ margin:0 0 10px; font-size:.9rem; opacity:.85 }
-  .plaque p{ margin:0; font-size:.95rem }
-
-  /* Narrow screens */
-  @media (max-width: 860px){
-    .cards{ grid-template-columns: 1fr }
-    .card{ padding-left:0; padding-right:0 }
-    .plaque{ position:static; width:auto; transform:none; margin:12px auto 0 }
-    .plaque::before{ display:none }
-    .artwrap{ max-width: min(92vw, 520px) }
+  /* ========== New: CTA + Intro overlay ========== */
+  .room-cta{
+    margin: 8px 0 26px;
+    display: flex;
+    justify-content: center;
   }
-
-  .missing{
-    position:absolute; inset:8px; display:grid; place-items:center;
-    border:2px dashed #ff9a9a; color:#ffd0d0; background:#2a2f3a;
-    border-radius:12px; font-size:.9rem; text-align:center; padding:8px;
+  .enter-room-btn{
+    appearance:none;border:1px solid #2a3340;background:#101620;color:#e9ecf2;
+    padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow);font-size:.95rem
   }
+  .enter-room-btn:hover{ background:#151c26 }
+
+  .intro-overlay{
+    position:fixed; inset:0; z-index:9999;
+    display:none; place-items:center;
+    background:rgba(10,12,16,.85);
+    backdrop-filter:blur(6px);
+  }
+  .intro-overlay.open{ display:grid }
+  .intro-shell{ width:min(900px,92vw); max-height:90vh; display:grid; gap:10px }
+  .intro-video{
+    width:100%; height:auto; max-height:80vh; background:#000; display:block;
+    border-radius:12px; box-shadow:0 18px 40px rgba(0,0,0,.5)
+  }
+  .intro-actions{ display:flex; justify-content:flex-end }
+  .intro-skip{
+    border:1px solid #394355; background:#121a25; color:#e9ecf2;
+    padding:8px 12px; border-radius:10px; cursor:pointer
+  }
+  .intro-skip:hover{ background:#17202c }
 </style>
 </head>
-<body class="theme-gold">
-  <header>
-    <h1>Abstracts, Tools and Ghouls</h1>
-    <p class="sub">Darker, rebellious works. Click any frame to open on TikTok in a new tab.</p>
-    <div class="actions">
-      <a class="linkbtn" href="../index.html">← Return to Lobby Map</a>
-      <label for="themeSelect" class="visually-hidden" style="position:absolute;left:-9999px;">Room Theme</label>
-      <select id="themeSelect" class="select" title="Room Theme">
-        <option value="theme-gold" selected>Gold Frames on Charcoal</option>
-        <option value="theme-ebony">Ebony Frames on Graphite</option>
-      </select>
-      <button id="shuffleBtn" class="btn" title="Randomize frame styles">Shuffle Frames</button>
-    </div>
-  </header>
+<body class="theme-louvre">
+  <div class="wrap">
+    <h1>Moving Pictures — Virtual Museum</h1>
+    <div class="note">Poster appears once. Hover or press-hold to play; release or move off to pause and leave the last frame showing. Click to open the full player at the same timestamp. The showcase tile also has an “Enter this room” intro.</div>
 
-  <div class="shell">
-    <div id="cards" class="cards" aria-live="polite"></div>
+    <div class="controls">
+      <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
+      <label for="themeSelect" class="label">Venue:</label>
+      <select id="themeSelect" class="select">
+        <option value="theme-louvre" selected>Louvre — Royal Red + Gold</option>
+        <option value="theme-met">Met — Aqua + Wood Frame</option>
+        <option value="theme-la">LA Modern — White Wall + Black Frame</option>
+      </select>
+      <button class="btn" onclick="location.reload()">↻ Refresh</button>
+    </div>
+
+    <div class="gallery">
+      <!-- 1 -->
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="Xavier's Perspectives" data-video="./xaviers-perspectives.mp4">
+          <img class="thumb" src="./xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" loading="lazy" />
+          <video class="clip" preload="metadata" playsinline muted></video>
+          <div class="overlay"><div class="title">Xavier's Perspectives</div><div class="badge">Hover to preview</div></div>
+        </article>
+      </div></div></div>
+
+      <!-- 2 -->
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="Reflections from a Jazz Club" data-video="./Reflections from a Jazz Club.mp4">
+          <img class="thumb" src="./Jazz.png" alt="Poster: Reflections from a Jazz Club" loading="lazy" />
+          <video class="clip" preload="metadata" playsinline muted></video>
+          <div class="overlay"><div class="title">Reflections from a Jazz Club</div><div class="badge">Hover to preview</div></div>
+        </article>
+      </div></div></div>
+
+      <!-- 3 -->
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="Vacancy — an AI cover of Dream Theater" data-video="./Vacancy - an AI cover of Dream Theater.mp4">
+          <img class="thumb" src="./Vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" loading="lazy" />
+          <video class="clip" preload="metadata" playsinline muted></video>
+          <div class="overlay"><div class="title">Vacancy — AI cover (Dream Theater)</div><div class="badge">Hover to preview</div></div>
+        </article>
+      </div></div></div>
+
+      <!-- 4 -->
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="Wings for Marie" data-video="./Wings For Marie.mp4">
+          <img class="thumb" src="./Wings.png" alt="Poster: Wings for Marie" loading="lazy" />
+          <video class="clip" preload="metadata" playsinline muted></video>
+          <div class="overlay"><div class="title">Wings for Marie</div><div class="badge">Hover to preview</div></div>
+        </article>
+      </div></div></div>
+
+      <!-- 5 — TikTok tile (poster only; opens in new tab) -->
+      <div class="frame-wrap"><div class="frame"><div class="mat">
+        <article class="tile" tabindex="0" data-title="The Grudge on Dune" data-tiktok="https://www.tiktok.com/t/ZT63YRxNR/">
+          <img class="thumb" src="./IMG_0494.jpg" alt="Poster: The Grudge on Dune" loading="lazy" />
+          <!-- No <video> for TikTok tile -->
+          <div class="overlay"><div class="title">The Grudge on Dune</div><div class="badge">Click to watch on TikTok</div></div>
+        </article>
+      </div></div></div>
+    </div>
+
+    <!-- CTA button for the showcase tile (separate, so it doesn't affect tile handlers) -->
+    <div class="room-cta">
+      <button
+        id="enterAbstracts"
+        class="enter-room-btn"
+        data-intro="media/GhoulsDoor.mp4"  <!-- your short hallway video -->
+        data-target="room-abstract/"            <!-- destination room -->
+        aria-haspopup="dialog"
+      >
+        ▶︎ Click to Enter this Room
+      </button>
+    </div>
+  </div>
+
+  <!-- Intro overlay (plays the short video before navigating) -->
+  <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
+    <div class="intro-shell">
+      <video id="introVideo"
+             class="intro-video"
+             playsinline webkit-playsinline
+             preload="metadata"
+             controlslist="nodownload noplaybackrate"
+             disablepictureinpicture></video>
+      <div class="intro-actions">
+        <button id="skipIntro" class="intro-skip">Skip →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Video player">
+    <div class="lightbox-card">
+      <div class="lightbox-head">
+        <div class="lightbox-title" id="lbTitle">Title</div>
+        <button class="x" id="lbClose" aria-label="Close">✕</button>
+      </div>
+      <div class="player">
+        <video id="lbVideo" controls playsinline></video>
+      </div>
+    </div>
   </div>
 
 <script>
-/* ============================
-   ROOM CONTENT (order-mapped)
-   ============================ */
-/* Posters folder for THIS room */
-const IMG_DIR = 'img/';
-
-/* Your URLs (1→15) matched to titles/posters (1→15) */
-const TIKTOKS = [
-  "https://www.tiktok.com/t/ZT6TpD6Po/",
-  "https://www.tiktok.com/t/ZT6TpSQUq/",
-  "https://www.tiktok.com/t/ZT6TpDtSW/",
-  "https://www.tiktok.com/t/ZT6TpYSjD/",
-  "https://www.tiktok.com/t/ZT6TpSTgs/",
-  "https://www.tiktok.com/t/ZT6Tp5T8L/",
-  "https://www.tiktok.com/t/ZT6Tp2Jo5/",
-  "https://www.tiktok.com/t/ZT6Tpa7ao/",
-  "https://www.tiktok.com/t/ZT6TpAgJq/",
-  "https://www.tiktok.com/t/ZT6TpMLgL/",
-  "https://www.tiktok.com/t/ZT6TpMGT3/",
-  "https://www.tiktok.com/t/ZT6TpH64F/",
-  "https://www.tiktok.com/t/ZT6TpD8Vx/",
-  "https://www.tiktok.com/t/ZT6Tp6sRb/",
-  "https://www.tiktok.com/t/ZT6TpR367/"
-];
-
-/* Titles + posters (1→15), exactly aligned with the URLs above */
-const MAPPINGS = [
-  { title: "Vicarious and living",           poster: "Vicarious .png" },
-  { title: "Flood",                           poster: "Flood.png" },
-  { title: "Strangest of Days",               poster: "Strange.jpg" },
-  { title: "Schism",                          poster: "Schism.png" },
-  { title: "Running from Waiting Worms",      poster: "Running.png" },
-  { title: "The Resurrection of Fear",        poster: "Fear.png" },
-  { title: "46 & 3",                          poster: "463.png" },
-  { title: "Resurrecting a Madman",           poster: "Madman.png" },
-  { title: "Another Brick, just one more….",  poster: "Bricks.png" },
-  { title: "Symmetry of Collapse",            poster: "Collapse.png" },
-  { title: "Bending the Clock",               poster: "Clock.png" },
-  { title: "Aenema Reborn",                   poster: "Resurrected.png" },
-  { title: "Part of Me",                      poster: "Part.png" },
-  { title: "Pigs, 3 Different Illustrated",   poster: "Pigs.png" },
-  { title: "A Trippy Nightmare Remembered",   poster: "Nightmare.png" }
-];
-
-/* Build ITEMS by zipping the two lists in order */
-const ITEMS = MAPPINGS.map((m,i)=>({
-  title: m.title,
-  poster: m.poster,
-  tiktok: TIKTOKS[i]
-}));
-
-/* ============================
-   RENDERING & BEHAVIOR
-   ============================ */
-const cardsEl = document.getElementById('cards');
-const themeSelect = document.getElementById('themeSelect');
-const shuffleBtn  = document.getElementById('shuffleBtn');
-
-const rand   = (min,max)=> Math.random()*(max-min)+min;
-const choose = arr => arr[Math.floor(Math.random()*arr.length)];
-
-function installSmartFallback(img, rawPath){
-  const [base, ext] = rawPath.split(/\.(?=[^.]+$)/);
-  const toggled = ext === 'png' ? 'PNG' : ext === 'PNG' ? 'png' : null;
-  const encoded = rawPath.replace(/ /g,'%20');
-  const tries = [rawPath];
-  if (toggled) tries.push(`${base}.${toggled}`);
-  if (encoded !== rawPath) tries.push(encoded);
-  let i=0;
-  img.addEventListener('error', ()=>{ i+=1; if(i<tries.length) img.src = tries[i]; });
-}
-
-/* Per-tile varieties */
-const SHAPES   = ['shape-a','shape-b','shape-c','shape-d','shape-e','shape-f'];
-const FINISHES = ['finish-gilded','finish-ebony','finish-brass','finish-walnut'];
-const PLAQUE_FINISHES = ['pl-brass','pl-ivory','pl-slate','pl-verdigris','pl-wood'];
-const PLAQUE_SIDE     = ['pl-left','pl-right'];
-
-/* Escape HTML for safe insertion */
-function esc(s){ return String(s)
-  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-  .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-/* Build one TikTok card */
-function buildCard(item){
-  const article = document.createElement('article');
-  const side = choose(PLAQUE_SIDE);
-
-  // Random layout within safe bounds
-  const mediaW    = Math.round(rand(360, 460));
-  const plaqueW   = Math.round(rand(180, 260));
-  const plaqueTop = Math.round(rand(8, 46));
-  const tilt      = rand(-0.30, 0.30).toFixed(3) + 'deg';
-  const plTilt    = rand(-0.4, 0.4).toFixed(3) + 'deg';
-
-  article.className = `card ${side} ${choose(SHAPES)} ${choose(FINISHES)}`;
-  article.style.setProperty('--mediaW',  mediaW+'px');
-  article.style.setProperty('--plaqueW', plaqueW+'px');
-  article.style.setProperty('--plaqueTop', plaqueTop+'px');
-  if (side === 'pl-left')  article.style.setProperty('--pl-pad-left',  `calc(var(--plaqueW) + 24px)`);
-  if (side === 'pl-right') article.style.setProperty('--pl-pad-right', `calc(var(--plaqueW) + 24px)`);
-
-  const title = item.title || '';
-  const url   = item.tiktok;
-  const file  = item.poster;
-  const src   = IMG_DIR + file;
-
-  article.innerHTML = `
-    <div class="artwrap">
-      <a class="frame" href="${url}" target="_blank" rel="noopener" data-title="${esc(title)}" style="--tilt:${tilt}">
-        <div class="tile"><img alt="${esc(title)}" decoding="async" loading="lazy"></div>
-      </a>
-    </div>
-    <aside class="plaque ${choose(PLAQUE_FINISHES)}" style="--pl-tilt:${plTilt}">
-      <h3>${esc(title)}</h3>
-      <p class="sub"><strong>Abstracts, Tools and Ghouls</strong> · <code>${esc(file)}</code></p>
-      <p>Click to view on TikTok.</p>
-    </aside>
-  `;
-
-  const img  = article.querySelector('img');
-  const tile = article.querySelector('.tile');
-
-  installSmartFallback(img, src);
-
-  img.addEventListener('load', ()=>{
-    const w = img.naturalWidth  || 4;
-    const h = img.naturalHeight || 3;
-    tile.style.setProperty('--ar', `${w} / ${h}`);
+  /* === Sound-on-hover opt-in === */
+  let soundEnabled = false;
+  let audioCtx = null;
+  const soundToggle = document.getElementById('soundToggle');
+  soundToggle.addEventListener('click', async () => {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') await audioCtx.resume();
+    } catch(e) {}
+    soundEnabled = !soundEnabled;
+    soundToggle.setAttribute('aria-pressed', String(soundEnabled));
+    soundToggle.textContent = soundEnabled ? '🔇 Disable Sound Previews' : '🔊 Enable Sound Previews';
   });
 
-  img.addEventListener('error', ()=>{
-    if (img._failed) return;
-    img._failed = true;
-    const box = document.createElement('div');
-    box.className = 'missing';
-    box.innerHTML = 'Missing poster:<br><small><code>'+ (img.currentSrc || src) +'</code></small>';
-    tile.appendChild(box); img.style.display='none';
+  /* === Theme switcher === */
+  const themeSelect = document.getElementById('themeSelect');
+  themeSelect.addEventListener('change', () => {
+    document.body.classList.remove('theme-louvre','theme-met','theme-la');
+    document.body.classList.add(themeSelect.value);
   });
 
-  img.src = src;
-  return article;
-}
+  /* === Hover / press-hold preview with resume & “poster once” === */
+  const tiles = document.querySelectorAll('.tile');
+  const safeSrc = (p) => encodeURI(p);   // handle spaces
 
-function renderCards(){
-  cardsEl.innerHTML = '';
-  ITEMS.forEach(it => cardsEl.appendChild(buildCard(it)));
-}
+  function ensureVideo(tile){
+    const v = tile.querySelector('video.clip');
+    if (!v) return null;                 // <-- TikTok tiles have no video
+    if (!v.dataset.bound){
+      v.dataset.bound = '1';
+      v.src = safeSrc(tile.dataset.video);     // set once; never reset (preserves currentTime)
+      v.preload = 'metadata';
+      v.playsInline = true;
+      v.setAttribute('playsinline','');
+      v.setAttribute('webkit-playsinline','');
+    }
+    return v;
+  }
 
-themeSelect.addEventListener('change', ()=>{
-  document.body.classList.remove('theme-gold','theme-ebony');
-  document.body.classList.add(themeSelect.value);
-});
+  function reveal(tile){
+    if (!tile.classList.contains('revealed')) tile.classList.add('revealed');
+  }
 
-document.body.classList.add('theme-gold');  // default theme
-document.getElementById('shuffleBtn').addEventListener('click', renderCards);
+  function startPreview(tile, userGesture=false){
+    // Skip preview on TikTok tiles
+    if (tile.dataset.tiktok) return;
+    const v = ensureVideo(tile);
+    if (!v) return;
+    reveal(tile);
+    v.muted = !soundEnabled;
+    const p = v.play(); if (userGesture && p) p.catch(()=>{});
+    tile.classList.add('is-previewing');
+  }
 
-renderCards();
+  function stopPreview(tile){
+    const v = tile.querySelector('video.clip');
+    if (v){ v.pause(); }
+    tile.classList.remove('is-previewing');
+  }
+
+  tiles.forEach(tile=>{
+    // Hover (desktop)
+    tile.addEventListener('pointerenter', ()=>startPreview(tile,false));
+    tile.addEventListener('pointerleave', ()=>stopPreview(tile));
+
+    // Press/hold (touch & iPad)
+    tile.addEventListener('pointerdown', ()=>startPreview(tile,true));
+    tile.addEventListener('pointerup',   ()=>stopPreview(tile));
+    tile.addEventListener('pointercancel',()=>stopPreview(tile));
+
+    // Legacy touch fallback
+    tile.addEventListener('touchstart', ()=>startPreview(tile,true), {passive:true});
+    tile.addEventListener('touchend',   ()=>stopPreview(tile), {passive:true});
+    tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
+  });
+
+  /* === Lightbox continues from the same timestamp (video tiles only) === */
+  const lb = document.getElementById('lightbox');
+  const lbVideo = document.getElementById('lbVideo');
+  const lbTitle = document.getElementById('lbTitle');
+  const lbClose = document.getElementById('lbClose');
+
+  function openLightboxFromTile(tile){
+    if (tile.dataset.tiktok){
+      // Open TikTok reliably in a new tab; no lightbox for TikTok
+      window.open(tile.dataset.tiktok, '_blank', 'noopener');
+      return;
+    }
+    const vPrev = tile.querySelector('video.clip');
+    lbTitle.textContent = tile.dataset.title || 'Untitled';
+    lbVideo.src = safeSrc(tile.dataset.video);
+    lb.classList.add('open');
+
+    const resumeAt = vPrev && !isNaN(vPrev.currentTime) ? vPrev.currentTime : 0;
+    lbVideo.addEventListener('loadedmetadata', function onMeta(){
+      lbVideo.removeEventListener('loadedmetadata', onMeta);
+      try { lbVideo.currentTime = resumeAt; } catch(e){}
+    });
+  }
+  function closeLightbox(){ lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open'); }
+
+  lbClose.addEventListener('click', closeLightbox);
+  lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
+
+  // Click/keyboard open for tiles
+  tiles.forEach(tile=>{
+    tile.addEventListener('click', ()=>openLightboxFromTile(tile));
+    tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
+  });
+
+  // Default theme
+  document.body.classList.add('theme-louvre');
+
+  /* ========== New: Intro overlay logic (Enter this room button) ========== */
+  (function(){
+    const btn = document.getElementById('enterAbstracts');
+    if(!btn) return;
+
+    const overlay = document.getElementById('introOverlay');
+    const video   = document.getElementById('introVideo');
+    const skipBtn = document.getElementById('skipIntro');
+
+    function cleanup(){
+      try { video.pause(); } catch(e){}
+      video.removeAttribute('src'); video.load();
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function go(target){ cleanup(); if(target) location.href = target; }
+
+    btn.addEventListener('click', async (e)=>{
+      e.preventDefault();
+      const introSrc = btn.dataset.intro;
+      const target   = btn.dataset.target || './';
+      if(!introSrc){ location.href = target; return; }
+
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      video.src = introSrc;
+      video.currentTime = 0;
+      video.muted = false; // user gesture present → audio should be allowed
+
+      // Start playback; if it fails or stalls, navigate to room quickly
+      let started = false;
+      const bail = setTimeout(()=>{ if(!started) go(target); }, 1800);
+      try {
+        await video.play();
+        started = true;
+        clearTimeout(bail);
+      } catch {
+        go(target);
+        return;
+      }
+
+      // Auto-navigate on end; allow skipping
+      const onEnd = ()=> go(target);
+      video.addEventListener('ended', onEnd, {once:true});
+      skipBtn.onclick = ()=> go(target);
+    }, {passive:false});
+  })();
 </script>
 </body>
 </html>
