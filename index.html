@@ -1,218 +1,505 @@
  <!doctype html>
-<html lang="en" data-theme="default">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Moving Pictures — Museum Lobby</title>
-<meta name="color-scheme" content="dark light" />
 <style>
+  /* ---------- Base tokens (overridden by theme classes) ---------- */
   :root{
-    --wall: #111317;
-    --text: #e8eaed;
-    --muted:#9aa0a6;
-    --card: rgba(20,22,25,.75);
-    --card-border: rgba(255,255,255,.12);
-    --accent:#7fb0ff;
-    --frame-gold:#caa64a;
-    --frame-ebony:#1a1a1a;
-    --frame-brass:#9f9a72;
-    --frame-walnut:#6b4b2e;
-    --shadow:0 18px 36px rgba(0,0,0,.45);
-  }
-  [data-theme="louvre"]{
-    --wall:#0e0f12; --text:#f3f4f6; --muted:#cfd5dd;
-  }
-  [data-theme="met"]{
-    --wall:#121012; --text:#f2f2f2; --muted:#d7d1d7;
-  }
-  [data-theme="la"]{
-    --wall:#f9f9f9; --text:#111; --muted:#333;
+    --wall-deep:#221014; --wall-top:#2e0f13; --gold:#d8b765;
+    --ink:#eceff4; --muted:#b7becd; --shadow:0 16px 40px rgba(0,0,0,.40);
+    --beam-a: rgba(255,255,210,.20); --beam-b: rgba(255,240,190,.16);
+    --marble-top:#e7dcc3; --marble-mid:#b9a67b; --marble-edge:#8f7846;
+    --floor-1:#e9e7de; --floor-2:#cfc7b6; --floor-3:#b8ae99;
+    --tile-aspect: 3 / 4;
   }
 
-  html,body{
-    height:100%;
-    margin:0;
-    background:var(--wall);
-    color:var(--text);
-    font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  /* ---------- Themes ---------- */
+  body.theme-default{
+    --wall-deep:#221014; --wall-top:#2e0f13; --gold:#d8b765;
+    --beam-a: rgba(255,255,210,.20); --beam-b: rgba(255,240,190,.16);
+    --marble-top:#e7dcc3; --marble-mid:#b9a67b; --marble-edge:#8f7846;
+    --floor-1:#e9e7de; --floor-2:#cfc7b6; --floor-3:#b8ae99;
   }
-  .wrap{max-width:1300px;margin:0 auto;padding:40px 20px 80px;}
-  h1{margin:0 0 6px;font-size:clamp(26px,4.2vw,44px);}
-  .sub{color:var(--muted);margin:0 0 28px;}
-  .toolbar{display:flex;align-items:center;gap:12px;margin:6px 0 28px;}
-  .select{appearance:none;background:var(--card);color:var(--text);
-    border:1px solid var(--card-border);padding:8px 36px 8px 12px;
-    border-radius:12px;}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
-        gap:28px 34px;}
-  .exhibit{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center;}
-  .exhibit.plaque-left{direction:rtl;}
-  .exhibit.plaque-left>*{direction:ltr;}
+  body.theme-louvre{
+    --wall-deep:#5a0f12; --wall-top:#3f0c0e; --gold:#e2c266;
+    --beam-a: rgba(255,220,170,.22); --beam-b: rgba(255,210,150,.18);
+    --marble-top:#f0e6cf; --marble-mid:#d8c39a; --marble-edge:#b89656;
+    --floor-1:#f1e9da; --floor-2:#d9ccb1; --floor-3:#c2b089;
+  }
+  body.theme-met{
+    --wall-deep:#1f4750; --wall-top:#2b6d73; --gold:#a47a4d;
+    --beam-a: rgba(170,240,220,.20); --beam-b: rgba(140,220,210,.16);
+    --marble-top:#e3dccf; --marble-mid:#bfa98b; --marble-edge:#8b6b41;
+    --floor-1:#e9efe9; --floor-2:#cfe0de; --floor-3:#b5c8c6;
+  }
+  body.theme-la{
+    --wall-deep:#111111; --wall-top:#1a1a1a; --gold:#bdbdbd;
+    --beam-a: rgba(255,255,255,.12); --beam-b: rgba(255,255,255,.10);
+    --marble-top:#ececec; --marble-mid:#d9d9d9; --marble-edge:#bdbdbd;
+    --floor-1:#ffffff; --floor-2:#ececec; --floor-3:#dcdcdc;
+    --ink:#111; --muted:#6b7280;
+  }
+
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--ink);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    background:
+      radial-gradient(1200px 600px at 85% -10%, var(--beam-a), transparent 60%),
+      radial-gradient(900px 560px at 10% 10%,  var(--beam-b), transparent 58%),
+      linear-gradient(180deg, var(--wall-top) 0%, var(--wall-deep) 40%, #0d0d0d 100%),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, transparent 2px 120px) fixed;
+  }
+  .beams{position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(500px 260px at 18% 0%, var(--beam-a), transparent 60%),
+      radial-gradient(540px 260px at 78% 0%, var(--beam-b), transparent 60%);
+    mix-blend-mode:screen;
+  }
+  body::before, body::after{content:""; position:fixed; left:0; right:0; z-index:0; pointer-events:none;}
+  body::before{ top:0; height:18px; background:linear-gradient(180deg, var(--marble-top), var(--marble-mid) 60%, var(--marble-edge)); box-shadow:0 4px 14px rgba(0,0,0,.35) inset }
+  body::after{ bottom:0; height:120px; background:
+      linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.45)),
+      repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 6px, rgba(0,0,0,.08) 6px 12px),
+      linear-gradient(180deg, var(--floor-1), var(--floor-2) 60%, var(--floor-3));
+    box-shadow:0 -10px 30px rgba(0,0,0,.35) inset;
+  }
+
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 120px; position:relative; z-index:1}
+  h1{margin:0 0 10px;font-size:clamp(24px,3.2vw,40px);letter-spacing:.02em}
+  .note{color:var(--muted);font-size:14px;margin:6px 0 12px}
+
+  /* Controls row */
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 24px}
+  .select,.btn{
+    appearance:none;border:1px solid #3a2a20;background:#1a1412;color:var(--ink);
+    padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);cursor:pointer
+  }
+  .label{font-size:13px;color:var(--muted)}
+
+  /* Exhibits grid */
+  .exhibits{display:grid; gap:36px}
+  .exhibit{ display:grid; grid-template-columns: 1fr 1fr; gap:26px; align-items:start; }
+  .exhibit.pl-left  .plaque-col{ order:1 } .exhibit.pl-left  .frame-col{ order:2 }
+  .exhibit.pl-right .plaque-col{ order:2 } .exhibit.pl-right .frame-col{ order:1 }
+  @media (max-width: 900px){ .exhibit{ grid-template-columns: 1fr; } .plaque-col,.frame-col{ order:initial } }
+
+  .plaque-col{ transform: rotate(var(--pl-tilt, 0deg)); }
   .plaque{
-    background:var(--card);
-    border:1px solid var(--card-border);
-    border-radius:16px;
-    padding:20px 18px;
-    box-shadow:var(--shadow);
+    width:min(var(--plaqueW, 320px), 100%);
+    background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.55));
+    border:1px solid color-mix(in oklab, var(--gold) 60%, black);
+    border-left:6px solid var(--gold);
+    border-radius:14px; padding:16px 16px 12px; margin-top:var(--plaqueTop,0px);
+    backdrop-filter: blur(3px); box-shadow: var(--shadow);
   }
-  .plaque h3{margin:0 0 6px;}
-  .plaque p{margin:8px 0 14px;color:var(--muted);}
-  .actions{display:flex;gap:10px;flex-wrap:wrap;}
-  .btn{
-    background:var(--accent);color:#000;
-    padding:10px 12px;border-radius:12px;border:none;
-    text-decoration:none;font-size:14px;cursor:pointer;
+  .plaque h2{margin:0 0 6px;font-size:clamp(18px,2.2vw,24px)}
+  .plaque .room{margin:0 0 6px;color:color-mix(in oklab, var(--gold) 85%, white 20%);font-weight:600}
+  .plaque p{margin:0 12px 12px 0;color:#eae4d6;line-height:1.45}
+  .cta{display:inline-flex;align-items:center;gap:8px;background:#121a20;color:#f2f5f9;border:1px solid #38424f;
+       padding:10px 12px;border-radius:10px;text-decoration:none;cursor:pointer}
+  .cta + .cta{margin-left:8px}
+  .cta[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+  .cta:hover{background:#161f26}
+  .mini-toggle{font-size:.9rem;padding:8px 10px;border-radius:10px;border:1px solid #3a4656;background:#0f151c;color:#eaf2ff;cursor:pointer}
+  .mini-toggle[aria-pressed="true"]{background:#14202c;border-color:#46607a}
+
+  .frame-wrap{filter:drop-shadow(0 18px 24px rgba(0,0,0,.35)); transform: rotate(var(--frame-tilt, 0deg));}
+  .frame{position:relative; box-shadow:var(--shadow); border-radius:14px; border:10px solid transparent;}
+  .finish-gilded .frame{
+    background:linear-gradient(#0000,#0000) padding-box,
+      conic-gradient(from 20deg,#6b4e0f,#caa54b 12%,#ffeb9c 24%,#d3ab4a 36%,#6b4e0f 48%,#e2c266 60%,#fff1b5 72%,#c3972e 84%,#6b4e0f) border-box;
   }
-  .frame{
-    position:relative;border-radius:18px;padding:18px;
-    box-shadow:var(--shadow);
-    transform:rotate(var(--tilt,0deg));
-    --frame-color: var(--frame-gold);
-    background:linear-gradient(#0000 0 0) padding-box,
-              linear-gradient(160deg, rgba(255,255,255,.35),
-              rgba(255,255,255,.08)) border-box;
-    border:10px solid var(--frame-color);
+  .finish-ebony .frame{
+    border-color:#0a0d12;
+    background:linear-gradient(180deg,#0a0f14,#131a22) padding-box,
+      linear-gradient(145deg, #1c232c, #090d12 60%, #1a212a) border-box;
   }
-  .frame.finish-ebony { --frame-color: var(--frame-ebony); }
-  .frame.finish-brass { --frame-color: var(--frame-brass); }
-  .frame.finish-walnut{ --frame-color: var(--frame-walnut); }
-  .art{position:relative;overflow:hidden;border-radius:10px;background:#000;aspect-ratio:3/4;}
-  .art img,.art video{width:100%;height:100%;object-fit:cover;display:block;}
-  .art .tiktok-tag{
-    position:absolute;right:12px;bottom:10px;
-    background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;
+  .finish-brass .frame{
+    background:linear-gradient(#0000,#0000) padding-box,
+      conic-gradient(from -30deg,#3c2e14,#b49352,#6f582b,#d7b778,#4a3a18,#b49352) border-box;
+    filter:saturate(1.06);
   }
-  .lightbox{
-    position:fixed;inset:0;background:rgba(0,0,0,.9);
-    display:none;align-items:center;justify-content:center;z-index:60;
+  .finish-walnut .frame{
+    background:linear-gradient(#0000,#0000) padding-box,
+      linear-gradient(25deg, #3b2414 0%, #5a3820 30%, #7a4b2b 55%, #4b2d19 80%, #3b2414 100%) border-box;
   }
-  .lightbox.open{display:flex;}
-  .lightbox video{width:min(92vw,1100px);border-radius:12px;}
-  .intro{
-    position:fixed;inset:0;z-index:80;display:none;
-    align-items:center;justify-content:center;background:#000;
+  .frame::after{content:"";position:absolute;inset:8px;border-radius:8px;border:2px solid #f4e8c7;pointer-events:none}
+  .mat{margin:16px;background:#f4efe6;border:1px solid #ddd2be;border-radius:8px;
+       box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12)}
+  .tile{position:relative;aspect-ratio:var(--tile-aspect);overflow:hidden;border:1px solid rgba(0,0,0,.25);
+        background:#000;display:block;touch-action:manipulation;border-radius:6px}
+  .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
+  .clip{opacity:0;transition:opacity .15s ease-out}
+  .tile.is-previewing .clip,.tile.revealed .clip{opacity:1}
+  .tile.revealed .thumb{opacity:0;pointer-events:none}
+  .overlay{position:absolute;inset:auto 0 0 0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
+           padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .title{font-weight:600;font-size:14px}
+  .badge{font-size:12px;color:#c5e4ff;background:rgba(124,198,255,.08);border:1px solid rgba(124,198,255,.3);
+         padding:4px 8px;border-radius:999px}
+
+  /* Lightbox */
+  .lightbox{position:fixed;inset:0;background:rgba(8,10,14,.72);backdrop-filter:blur(6px);
+            display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
+  .lightbox.open{display:flex}
+  .lightbox-card{width:min(900px,92vw);background:#0f1218;border:1px solid #222936;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .lightbox-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #1b222e}
+  .lightbox-title{font-weight:600}
+  .x{border:0;background:transparent;color:#9aa0a6;font-size:22px;cursor:pointer}
+  .player{position:relative;background:#000}
+  .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+
+  /* ===== FULLSCREEN INTRO OVERLAY — CROPPING FIX ===== */
+  .intro-overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center; background:#000; }
+  .intro-overlay.open{ display:grid }
+  .intro-shell{
+    width:100svw;           /* small-viewport units avoid iOS toolbar issues */
+    height:100svh;
+    display:flex; align-items:center; justify-content:center;
+    padding: max(8px, env(safe-area-inset-top))
+             max(8px, env(safe-area-inset-right))
+             max(8px, env(safe-area-inset-bottom))
+             max(8px, env(safe-area-inset-left));
   }
-  .intro.open{display:flex;}
-  .intro video{width:100%;height:100%;object-fit:cover;}
-  .intro .controls{
-    position:absolute;right:16px;top:16px;display:flex;gap:10px;
+  .intro-video{
+    width:100%;
+    height:100%;
+    object-fit:contain;      /* always show the whole video (letterbox if needed) */
+    background:#000;
+    border-radius:0;
+    box-shadow:none;
   }
-  .intro .controls .btn{background:#111;color:#fff;}
-  @media(max-width:820px){
-    .exhibit{grid-template-columns:1fr;}
-    .exhibit.plaque-left{direction:ltr;}
-  }
+  .intro-actions{ position:fixed; right:16px; bottom:16px; z-index:2; }
+  .intro-skip{ border:1px solid #394355; background:#121a25; color:#e9ecf2; padding:10px 14px; border-radius:10px; cursor:pointer }
+  .intro-skip:hover{ background:#17202c }
 </style>
 </head>
-<body>
-<main class="wrap">
-  <h1>Moving Pictures — Museum Lobby</h1>
-  <p class="sub">Each visit rehangs the lobby slightly. Plaques sit left or right, frames tilt and finish vary—just like a living museum.</p>
-  <div class="toolbar">
-    <label for="venue">Venue:</label>
-    <select id="venue" class="select">
-      <option value="default">Default</option>
-      <option value="louvre">Louvre</option>
-      <option value="met">Met</option>
-      <option value="la">LA Museum – White Cube</option>
-    </select>
-  </div>
-  <section id="grid" class="grid"></section>
-</main>
+<body class="theme-default">
+  <div class="beams" aria-hidden="true"></div>
 
-<div id="lightbox" class="lightbox"><video id="lbVideo" controls playsinline></video></div>
+  <div class="wrap">
+    <h1>Moving Pictures — Museum Lobby</h1>
+    <div class="note">Each visit rehangs the lobby slightly. Plaques sit left or right, frames tilt and finish vary—just like a living museum.</div>
 
-<div id="intro" class="intro">
-  <video id="introVideo" src="room-abstract/media/GhoulsDoor.mp4" playsinline></video>
-  <div class="controls">
-    <button class="btn" id="introMuteBtn">Sound</button>
-    <button class="btn" id="introSkipBtn">Skip</button>
+    <!-- Theme control -->
+    <div class="controls">
+      <label for="venueSelect" class="label">Venue:</label>
+      <select id="venueSelect" class="select">
+        <option value="theme-default" selected>Default Lobby</option>
+        <option value="theme-louvre">Louvre — Royal Red + Gold</option>
+        <option value="theme-met">Met — Teal Stone + Wood</option>
+        <option value="theme-la">LA Modern — White Cube</option>
+      </select>
+    </div>
+
+    <section id="exhibits" class="exhibits"></section>
   </div>
-</div>
+
+  <!-- Fullscreen Intro overlay -->
+  <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
+    <div class="intro-shell">
+      <video id="introVideo"
+             class="intro-video"
+             playsinline webkit-playsinline
+             preload="metadata"
+             controlslist="nodownload noplaybackrate"
+             disablepictureinpicture></video>
+    </div>
+    <div class="intro-actions">
+      <button id="skipIntro" class="intro-skip">Skip →</button>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Video player">
+    <div class="lightbox-card">
+      <div class="lightbox-head">
+        <div class="lightbox-title" id="lbTitle">Title</div>
+        <button class="x" id="lbClose" aria-label="Close">✕</button>
+      </div>
+      <div class="player">
+        <video id="lbVideo" controls playsinline></video>
+      </div>
+    </div>
+  </div>
 
 <script>
-const exhibits=[{
-  id:"grudge-dune",
-  title:"The Grudge on Dune",
-  roomTitle:"Room: Abstracts, Tools & Ghouls",
-  desc:"Dark, rebellious remixes—surreal mechanics, ritual light, and riffs re-forged. Enter for the full series.",
-  plaqueActions:[{type:"tiktok",href:"https://www.tiktok.com/",label:"Watch on TikTok"}],
-  hoverSoundKey:"hoverSound_grudge",
-  kind:"tiktok",
-  poster:"room-abstract/img/poster-grudge.jpg",
-  tiktokHref:"https://www.tiktok.com/",
-  enterRoom:{label:"Enter this Room",introVideo:"room-abstract/media/GhoulsDoor.mp4",target:"room-abstract/index.html"}
-}];
-
-const $=(q,r=document)=>r.querySelector(q);
-const $$=(q,r=document)=>Array.from(r.querySelectorAll(q));
-function choose(a){return a[Math.floor(Math.random()*a.length)];}
-function randomTilt(){return (Math.random()*2-1).toFixed(2)+"deg";}
-
-const THEME_KEY="mp_theme_v1";
-const root=document.documentElement;
-const venue=$("#venue");
-function applyTheme(n){root.setAttribute("data-theme",n);localStorage.setItem(THEME_KEY,n);}
-venue.addEventListener("change",e=>applyTheme(e.target.value));
-(function(){const s=localStorage.getItem(THEME_KEY)||"default";applyTheme(s);venue.value=s;})();
-
-const grid=$("#grid");
-function render(){
-  grid.innerHTML="";
-  exhibits.forEach(ex=>{
-    const side=Math.random()>.5?"plaque-left":"plaque-right";
-    const finish=choose(["finish-ebony","finish-brass","finish-walnut",""]);
-    const tilt=randomTilt();
-    const el=document.createElement("article");
-    el.className=`exhibit ${side}`;
-    el.innerHTML=`
-      <div class="plaque">
-        <h3>${ex.title}</h3>
-        <p><strong>${ex.roomTitle}</strong><br/>${ex.desc}</p>
-        <div class="actions">
-          ${ex.plaqueActions.map(a=>`<a class="btn" href="${a.href}" target="_blank" rel="noopener">${a.label}</a>`).join("")}
-          ${ex.enterRoom?`<button class="btn" data-enter="${ex.id}">${ex.enterRoom.label}</button>`:""}
-        </div>
-      </div>
-      <div class="frame ${finish}" style="--tilt:${tilt}">
-        <div class="art" data-kind="${ex.kind}" data-href="${ex.tiktokHref}">
-          <img alt="" src="${ex.poster}">
-          <span class="tiktok-tag">Click to watch on TikTok</span>
-        </div>
-      </div>`;
-    grid.appendChild(el);
+/* ===== Theme switcher (with persistence) ===== */
+(function(){
+  const sel = document.getElementById('venueSelect');
+  const saved = localStorage.getItem('mpg-theme');
+  if(saved){
+    document.body.classList.remove('theme-default','theme-louvre','theme-met','theme-la');
+    document.body.classList.add(saved);
+    sel.value = saved;
+  }
+  sel.addEventListener('change', ()=>{
+    const t = sel.value;
+    document.body.classList.remove('theme-default','theme-louvre','theme-met','theme-la');
+    document.body.classList.add(t);
+    localStorage.setItem('mpg-theme', t);
   });
-  wire();
-}
-render();
+})();
 
-const lightbox=$("#lightbox"),lbVideo=$("#lbVideo");
-function wire(){
-  $$('.art[data-kind="tiktok"]').forEach(t=>{
-    t.addEventListener("click",()=>window.open(t.getAttribute("data-href"),"_blank","noopener"));
-  });
-  $$('button[data-enter]').forEach(btn=>{
-    btn.addEventListener("click",()=>openIntro("room-abstract/media/GhoulsDoor.mp4","room-abstract/index.html"));
-  });
+/* ============ Data ============ */
+const ABSTRACTS = {
+  key: 'abstracts',
+  title: 'The Grudge on Dune',
+  room: 'Abstracts, Tools & Ghouls',
+  desc: 'Dark, rebellious remixes—surreal mechanics, ritual light, and riffs re-forged. Enter for the full series.',
+  isActiveRoom: true,
+  introSrc: 'room-abstract/media/GhoulsDoor.mp4',
+  target:   'room-abstract/index.html',
+  tile: { tiktok: 'https://www.tiktok.com/t/ZT63YRxNR/', poster: './IMG_0494.jpg' }
+};
+
+const OTHERS = [
+  { key:'xavier', title:"Xavier's Perspectives", room:'Portraits in Motion',
+    desc:'Intimate character studies that flicker between realism and dream. Faces, gestures, and mood as moving compositions.',
+    mp4:'./xaviers-perspectives.mp4', poster:'./xaviers-perspectives-poster.png' },
+  { key:'jazz', title:'Reflections from a Jazz Club', room:'Noir & Jazz Abstractions',
+    desc:'Smoke, brass, and neon. Improvised camera rhythms meet graphic motifs in a low-lit synesthetic lounge.',
+    mp4:'./Reflections from a Jazz Club.mp4', poster:'./Jazz.png' },
+  { key:'vacancy', title:'Vacancy — an AI cover of Dream Theater', room:'Cinematic Covers',
+    desc:'Classic tracks reimagined as moving paintings—lyric moods translated into light and motion.',
+    mp4:'./Vacancy - an AI cover of Dream Theater.mp4', poster:'./Vacancy.png' },
+  { key:'wings', title:'Wings for Marie', room:'Devotional Motion',
+    desc:'Elegiac studies about memory and lift—where textures arc upward and time seems to glow.',
+    mp4:'./Wings For Marie.mp4', poster:'./Wings.png' }
+];
+
+/* ============ Utilities ============ */
+const rand = (min,max)=> Math.random()*(max-min)+min;
+const choose = arr => arr[Math.floor(Math.random()*arr.length)];
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+const FINISHES = ['finish-gilded','finish-ebony','finish-brass','finish-walnut'];
+
+/* ============ Build one exhibit row ============ */
+function buildExhibit(data){
+  const ex = document.createElement('article');
+  const plaqueLeft = Math.random() < 0.5;
+  const finish = choose(FINISHES);
+  const frameTilt = (rand(-0.35,0.35)).toFixed(3)+'deg';
+  const plaqueTilt = (rand(-0.4,0.4)).toFixed(3)+'deg';
+  const plaqueW = Math.round(rand(240, 340))+'px';
+  const plaqueTop = Math.round(rand(0, 24))+'px';
+  const spacing = Math.round(rand(16, 52));
+
+  ex.className = `exhibit ${plaqueLeft ? 'pl-left':'pl-right'} ${finish}`;
+  ex.style.marginBottom = spacing+'px';
+  ex.style.setProperty('--frame-tilt', frameTilt);
+  ex.style.setProperty('--pl-tilt', plaqueTilt);
+  ex.style.setProperty('--plaqueW', plaqueW);
+  ex.style.setProperty('--plaqueTop', plaqueTop);
+
+  // default: hover sound OFF per exhibit
+  ex.dataset.sound = 'off';
+
+  const plaque = document.createElement('div');
+  plaque.className = 'plaque-col';
+  plaque.innerHTML = `
+    <div class="plaque">
+      <h2>${data.title}</h2>
+      <div class="room">Room: ${data.room}${data.isActiveRoom ? '' : ' (coming soon)'}</div>
+      <p>${data.desc}</p>
+      <div class="cta-row"></div>
+    </div>
+  `;
+
+  const frameCol = document.createElement('div');
+  frameCol.className = 'frame-col';
+  frameCol.innerHTML = `
+    <div class="frame-wrap">
+      <div class="frame"><div class="mat">
+        <article class="tile" tabindex="0"></article>
+      </div></div>
+    </div>
+  `;
+
+  // Tile content (MP4 hover vs TikTok)
+  const tile = frameCol.querySelector('.tile');
+  if (data.tile?.tiktok){
+    tile.dataset.title = data.title;
+    tile.dataset.tiktok = data.tile.tiktok;
+    tile.innerHTML = `
+      <img class="thumb" src="${data.tile.poster}" alt="Poster: ${data.title}" loading="lazy" />
+      <div class="overlay"><div class="title">${data.title}</div><div class="badge">Click to watch on TikTok</div></div>
+    `;
+  } else {
+    tile.dataset.title = data.title;
+    tile.dataset.video = data.mp4;
+    tile.innerHTML = `
+      <img class="thumb" src="${data.poster}" alt="Poster: ${data.title}" loading="lazy" />
+      <video class="clip" preload="metadata" playsinline muted></video>
+      <div class="overlay"><div class="title">${data.title}</div><div class="badge">Hover to preview</div></div>
+    `;
+  }
+
+  // CTA(s)
+  const ctaRow = plaque.querySelector('.cta-row');
+  const parts = [];
+
+  if (data.key === 'abstracts' && data.isActiveRoom){
+    parts.push(
+      `<a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>`,
+      `<button class="cta" id="enterAbstracts" type="button"
+               data-intro="${data.introSrc}" data-target="${data.target}"
+               aria-haspopup="dialog">🏛 Enter this Room</button>`
+    );
+  } else if (!data.isActiveRoom){
+    parts.push(`<button class="cta" aria-disabled="true" title="Room under construction">▶︎ Enter Room (Coming Soon)</button>`);
+  }
+
+  // Per-exhibit hover-sound toggle (only when local MP4)
+  if (!data.tile?.tiktok){
+    parts.push(`<button class="mini-toggle hover-sound-toggle" type="button" aria-pressed="false" title="Toggle sound while hovering this artwork">🔊 Hover Sound: Off</button>`);
+  }
+
+  ctaRow.innerHTML = parts.join(' ');
+
+  ex.appendChild(plaque);
+  ex.appendChild(frameCol);
+
+  // Wire the hover-sound toggle (if present)
+  const toggle = ctaRow.querySelector('.hover-sound-toggle');
+  if (toggle){
+    toggle.addEventListener('click', ()=>{
+      const on = ex.dataset.sound === 'on';
+      ex.dataset.sound = on ? 'off' : 'on';
+      toggle.setAttribute('aria-pressed', String(!on));
+      toggle.textContent = !on ? '🔊 Hover Sound: On' : '🔊 Hover Sound: Off';
+    });
+  }
+  return ex;
 }
 
-const intro=$("#intro"),introVideo=$("#introVideo"),
-      introMuteBtn=$("#introMuteBtn"),introSkipBtn=$("#introSkipBtn");
-let introTarget=null;
-function openIntro(src,target){
-  introTarget=target;
-  introVideo.src=src;
-  intro.classList.add("open");
-  introVideo.muted=false;
-  introVideo.play().catch(()=>{introVideo.muted=true;introVideo.play();});
+/* ============ Render ============ */
+const exhibitsEl = document.getElementById('exhibits');
+// Make Abstracts banner first; randomize the rest
+[ABSTRACTS, ...shuffle([...OTHERS])].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
+
+/* ============ Hover previews & Lightbox ============ */
+const tiles = document.querySelectorAll('.tile');
+const safeSrc = (p)=> encodeURI(p);
+
+function ensureVideo(tile){
+  const v = tile.querySelector('video.clip');
+  if (!v) return null;
+  if (!v.dataset.bound){
+    v.dataset.bound = '1';
+    v.src = safeSrc(tile.dataset.video);
+    v.preload = 'metadata';
+    v.playsInline = true;
+    v.setAttribute('playsinline','');
+    v.setAttribute('webkit-playsinline','');
+  }
+  return v;
 }
-introMuteBtn.addEventListener("click",()=>{introVideo.muted=!introVideo.muted;});
-introSkipBtn.addEventListener("click",finishIntro);
-introVideo.addEventListener("ended",finishIntro);
-function finishIntro(){
-  introVideo.pause();intro.classList.remove("open");
-  if(introTarget)window.location.href=introTarget;
+function reveal(tile){ if (!tile.classList.contains('revealed')) tile.classList.add('revealed'); }
+function startPreview(tile, userGesture=false){
+  if (tile.dataset.tiktok) return;
+  const v = ensureVideo(tile); if (!v) return;
+  reveal(tile);
+  const ex = tile.closest('.exhibit');
+  v.muted = !(ex && ex.dataset.sound === 'on');
+  const p = v.play(); if (userGesture && p) p.catch(()=>{});
+  tile.classList.add('is-previewing');
 }
+function stopPreview(tile){ const v = tile.querySelector('video.clip'); if (v) v.pause(); tile.classList.remove('is-previewing'); }
+
+tiles.forEach(tile=>{
+  tile.addEventListener('pointerenter', ()=>startPreview(tile,false));
+  tile.addEventListener('pointerleave', ()=>stopPreview(tile));
+  tile.addEventListener('pointerdown', ()=>startPreview(tile,true));
+  tile.addEventListener('pointerup',   ()=>stopPreview(tile));
+  tile.addEventListener('pointercancel',()=>stopPreview(tile));
+  tile.addEventListener('touchstart', ()=>startPreview(tile,true), {passive:true});
+  tile.addEventListener('touchend',   ()=>stopPreview(tile), {passive:true});
+  tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
+});
+
+/* Lightbox for local MP4 tiles only */
+const lb = document.getElementById('lightbox');
+const lbVideo = document.getElementById('lbVideo');
+const lbTitle = document.getElementById('lbTitle');
+const lbClose = document.getElementById('lbClose');
+
+function openLightboxFromTile(tile){
+  if (tile.dataset.tiktok){
+    window.open(tile.dataset.tiktok, '_blank', 'noopener');
+    return;
+  }
+  const vPrev = tile.querySelector('video.clip');
+  lbTitle.textContent = tile.dataset.title || 'Untitled';
+  lbVideo.src = safeSrc(tile.dataset.video);
+  lb.classList.add('open');
+  const resumeAt = vPrev && !isNaN(vPrev.currentTime) ? vPrev.currentTime : 0;
+  lbVideo.addEventListener('loadedmetadata', function onMeta(){
+    lbVideo.removeEventListener('loadedmetadata', onMeta);
+    try { lbVideo.currentTime = resumeAt; } catch(e){}
+  });
+}
+function closeLightbox(){ lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open'); }
+lbClose.addEventListener('click', closeLightbox);
+lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
+tiles.forEach(tile=>{
+  tile.addEventListener('click', ()=>openLightboxFromTile(tile));
+  tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
+});
+
+/* ===== Fullscreen Intro overlay (Abstracts room) ===== */
+(function(){
+  const btn = document.getElementById('enterAbstracts');
+  if(!btn) return;
+
+  const overlay = document.getElementById('introOverlay');
+  const video   = document.getElementById('introVideo');
+  const skipBtn = document.getElementById('skipIntro');
+
+  function resolveTarget(){
+    const raw = btn.dataset.target || 'room-abstract/index.html';
+    try { return new URL(raw, window.location.href).href; }
+    catch { return raw; }
+  }
+  function cleanup(){
+    try { video.pause(); } catch(e){}
+    video.removeAttribute('src'); video.load();
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function goNow(){
+    const href = resolveTarget();
+    cleanup();
+    window.location.assign(href);
+  }
+
+  btn.addEventListener('click', async (e)=>{
+    e.preventDefault(); e.stopPropagation();
+    const introSrc = btn.dataset.intro;
+    if(!introSrc){ goNow(); return; }
+
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    video.src = introSrc;
+    video.setAttribute('playsinline',''); 
+    video.setAttribute('webkit-playsinline','');
+
+    try {
+      video.muted = false; video.volume = 1.0;
+      await video.play();
+    } catch {
+      video.muted = true;
+      try { await video.play(); } catch { goNow(); return; }
+    }
+
+    video.addEventListener('ended', ()=>goNow(), {once:true});
+    skipBtn.onclick = ()=>goNow();
+  }, {passive:false});
+})();
 </script>
 </body>
 </html>
