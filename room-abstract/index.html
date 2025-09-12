@@ -3,363 +3,97 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Moving Pictures — Virtual Museum (Landing + Room Intro)</title>
+<title>Abstracts, Tools and Ghouls — Virtual Art Gallery</title>
 <style>
   :root{
-    --wall:#111317; --text:#e8eaed; --muted:#9aa0a6; --shadow:0 12px 28px rgba(0,0,0,.35);
-    --frame-face:#d6bf77; --frame-edge:#8a7442; --frame-highlight:#f4e8c7;
-    --mat:#f5f3ea; --mat-border:#d8d3c2; --plinth:rgba(0,0,0,.25);
-    --tile-aspect: 3 / 4;  /* change if you want landscape: 16/9 */
+    --bg1:#1a1a1a; --bg2:#0f0f0f;
+    --accentGlow: rgba(180,160,90,.15);
+    --ink:#f0f0f0; --muted:#c0c0c0;
+    --tile-shadow: 0 18px 40px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; color:var(--ink);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:
+      radial-gradient(800px 600px at 70% 20%, var(--accentGlow), transparent 60%),
+      linear-gradient(180deg, var(--bg1), var(--bg2));
+    min-height:100vh;
   }
 
-  html,body{height:100%}
-  body{margin:0;background:var(--wall);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-  .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 80px}
-  h1{margin:0 0 8px;font-size:clamp(22px,2.6vw,34px)}
-  .note{color:var(--muted);font-size:14px;margin:6px 0 16px}
+  header{ text-align:center; padding:28px 16px 10px }
+  header h1{ margin:0; font-size:clamp(22px,3.5vw,34px) }
+  header p{ margin:6px 0 0; color:var(--muted) }
 
-  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 18px}
-  .btn,.select{appearance:none;border:1px solid #2a2f3a;background:#171a21;color:#e8eaed;
-    padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow)}
-  .btn[aria-pressed="true"]{border-color:#3a84ff;background:#1b2436}
-  .label{font-size:13px;color:var(--muted);margin-left:2px}
+  .shell{ max-width:1200px; margin:0 auto; padding:0 18px 72px }
+  .cards{ display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:40px; }
 
-  .gallery{display:grid;gap:26px;grid-template-columns:repeat(2,minmax(260px,1fr));align-items:start}
-  @media (max-width:760px){.gallery{grid-template-columns:1fr}}
-
-  .frame-wrap{filter:drop-shadow(0 18px 24px var(--plinth))}
+  /* --- Frames --- */
   .frame{
-    position:relative;box-shadow:var(--shadow);
-    background:linear-gradient(#0000,#0000) padding-box,
-               linear-gradient(135deg,var(--frame-edge),var(--frame-face)) border-box;
-    border:10px solid transparent
+    position:relative;
+    border:12px solid transparent;
+    border-radius:20px;
+    background:
+      linear-gradient(180deg,#111,#222) padding-box,
+      conic-gradient(from 20deg, #6b4e0f, #caa54b 20%, #222 40%, #caa54b 60%, #6b4e0f 80%, #222 100%) border-box;
+    box-shadow: var(--tile-shadow);
+    cursor:pointer;
+    overflow:hidden;
   }
-  .frame::after{content:"";position:absolute;inset:8px;border:2px solid var(--frame-highlight);pointer-events:none}
-  .mat{margin:16px;background:var(--mat);border:1px solid var(--mat-border);
-       box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12)}
+  .tile{ position:relative; aspect-ratio:4/3; }
+  .tile img{ width:100%; height:100%; object-fit:cover; display:block; }
 
-  /* Artwork tile: uniform size, flush fill */
-  .tile{position:relative;aspect-ratio:var(--tile-aspect);overflow:hidden;border:1px solid rgba(0,0,0,.25);
-        background:var(--mat);display:block;touch-action:manipulation}
-  .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
-
-  /* Visibility rules */
-  .clip{opacity:0;transition:opacity .15s ease-out}
-  .tile.is-previewing .clip,
-  .tile.revealed .clip{opacity:1}
-  .tile.revealed .thumb{opacity:0;pointer-events:none}
-
-  .overlay{position:absolute;inset:auto 0 0 0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
-           padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .title{font-weight:600;font-size:14px}
-  .badge{font-size:12px;color:#c5e4ff;background:rgba(124,198,255,.08);border:1px solid rgba(124,198,255,.3);
-         padding:4px 8px;border-radius:999px}
-
-  .lightbox{position:fixed;inset:0;background:rgba(8,10,14,.72);backdrop-filter:blur(6px);
-            display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
-  .lightbox.open{display:flex}
-  .lightbox-card{width:min(900px,92vw);background:#0f1218;border:1px solid #222936;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
-  .lightbox-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #1b222e}
-  .lightbox-title{font-weight:600}
-  .x{border:0;background:transparent;color:#9aa0a6;font-size:22px;cursor:pointer}
-  .player{position:relative;background:#000}
-  .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
-
-  .theme-louvre{--wall:#5a0f12;--frame-face:#d9c06d;--frame-edge:#7a6230;--frame-highlight:#f7f0d8;--mat:#f5f1e6;--mat-border:#e5decc}
-  .theme-met{--wall:#2b6d73;--frame-face:#a47a4d;--frame-edge:#6f4f2a;--frame-highlight:#ecd9b8;--mat:#f4f2ea;--mat-border:#ddd6c6}
-  .theme-la{--wall:#ffffff;--text:#111;--muted:#6b7280;--frame-face:#111111;--frame-edge:#2b2f36;--frame-highlight:#d7d7d7;--mat:#ffffff;--mat-border:#e5e7eb}
-
-  /* CTA + Intro overlay */
-  .room-cta{ margin: 8px 0 26px; display:flex; justify-content:center }
-  .enter-room-btn{
-    appearance:none;border:1px solid #2a2f3a;background:#101620;color:#e9ecf2;
-    padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow);font-size:.95rem
+  .titlebar{
+    position:absolute; bottom:0; left:0; right:0;
+    background:linear-gradient(180deg, transparent, rgba(0,0,0,.7));
+    color:#f8f8f8; padding:10px 14px;
+    font-weight:600; font-size:1rem;
   }
-  .enter-room-btn:hover{ background:#151c26 }
-
-  .intro-overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center;
-                  background:rgba(10,12,16,.85); backdrop-filter:blur(6px) }
-  .intro-overlay.open{ display:grid }
-  .intro-shell{ width:min(900px,92vw); max-height:90vh; display:grid; gap:10px }
-  .intro-video{ width:100%; height:auto; max-height:80vh; background:#000; display:block;
-                border-radius:12px; box-shadow:0 18px 40px rgba(0,0,0,.5) }
-  .intro-actions{ display:flex; justify-content:flex-end }
-  .intro-skip{ border:1px solid #394355; background:#121a25; color:#e9ecf2;
-               padding:8px 12px; border-radius:10px; cursor:pointer }
-  .intro-skip:hover{ background:#17202c }
 </style>
 </head>
-<body class="theme-louvre">
-  <div class="wrap">
-    <h1>Moving Pictures — Virtual Museum</h1>
-    <div class="note">Poster appears once. Hover or press-hold to play; release or move off to pause and leave the last frame showing. Click to open the full player at the same timestamp. The showcase tile also has an “Enter this room” intro.</div>
+<body>
+<header>
+  <h1>Abstracts, Tools and Ghouls</h1>
+  <p>All works link directly to their TikTok videos</p>
+  <p><a href="../index.html" style="color:#cfc080;text-decoration:none;">← Back to Lobby</a></p>
+</header>
 
-    <div class="controls">
-      <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
-      <label for="themeSelect" class="label">Venue:</label>
-      <select id="themeSelect" class="select">
-        <option value="theme-louvre" selected>Louvre — Royal Red + Gold</option>
-        <option value="theme-met">Met — Aqua + Wood Frame</option>
-        <option value="theme-la">LA Modern — White Wall + Black Frame</option>
-      </select>
-      <button class="btn" onclick="location.reload()">↻ Refresh</button>
-    </div>
-
-    <div class="gallery">
-      <!-- 1 -->
-      <div class="frame-wrap"><div class="frame"><div class="mat">
-        <article class="tile" tabindex="0" data-title="Xavier's Perspectives" data-video="./xaviers-perspectives.mp4">
-          <img class="thumb" src="./xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" loading="lazy" />
-          <video class="clip" preload="metadata" playsinline muted></video>
-          <div class="overlay"><div class="title">Xavier's Perspectives</div><div class="badge">Hover to preview</div></div>
-        </article>
-      </div></div></div>
-
-      <!-- 2 -->
-      <div class="frame-wrap"><div class="frame"><div class="mat">
-        <article class="tile" tabindex="0" data-title="Reflections from a Jazz Club" data-video="./Reflections from a Jazz Club.mp4">
-          <img class="thumb" src="./Jazz.png" alt="Poster: Reflections from a Jazz Club" loading="lazy" />
-          <video class="clip" preload="metadata" playsinline muted></video>
-          <div class="overlay"><div class="title">Reflections from a Jazz Club</div><div class="badge">Hover to preview</div></div>
-        </article>
-      </div></div></div>
-
-      <!-- 3 -->
-      <div class="frame-wrap"><div class="frame"><div class="mat">
-        <article class="tile" tabindex="0" data-title="Vacancy — an AI cover of Dream Theater" data-video="./Vacancy - an AI cover of Dream Theater.mp4">
-          <img class="thumb" src="./Vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" loading="lazy" />
-          <video class="clip" preload="metadata" playsinline muted></video>
-          <div class="overlay"><div class="title">Vacancy — AI cover (Dream Theater)</div><div class="badge">Hover to preview</div></div>
-        </article>
-      </div></div></div>
-
-      <!-- 4 -->
-      <div class="frame-wrap"><div class="frame"><div class="mat">
-        <article class="tile" tabindex="0" data-title="Wings for Marie" data-video="./Wings For Marie.mp4">
-          <img class="thumb" src="./Wings.png" alt="Poster: Wings for Marie" loading="lazy" />
-          <video class="clip" preload="metadata" playsinline muted></video>
-          <div class="overlay"><div class="title">Wings for Marie</div><div class="badge">Hover to preview</div></div>
-        </article>
-      </div></div></div>
-
-      <!-- 5 — TikTok tile (poster only; opens in new tab) -->
-      <div class="frame-wrap"><div class="frame"><div class="mat">
-        <article class="tile" tabindex="0" data-title="The Grudge on Dune" data-tiktok="https://www.tiktok.com/t/ZT63YRxNR/">
-          <img class="thumb" src="./IMG_0494.jpg" alt="Poster: The Grudge on Dune" loading="lazy" />
-          <div class="overlay"><div class="title">The Grudge on Dune</div><div class="badge">Click to watch on TikTok</div></div>
-        </article>
-      </div></div></div>
-    </div>
-
-    <!-- CTA button for the showcase tile -->
-    <div class="room-cta">
-      <button>
-        id="enterAbstracts"
-        class="enter-room-btn"
-        type="button"
-        data-intro="room-abstract/media/GhoulsDoor.mp4"
-        data-target="/moving-pictures-gallery/room-abstract/index.html"
-        aria-haspopup="dialog"
-        ▶︎ Click to Enter this Room
-      </button>
-    </div>
-  </div>
-
-  <!-- Intro overlay -->
-  <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
-    <div class="intro-shell">
-      <video id="introVideo"
-             class="intro-video"
-             playsinline webkit-playsinline
-             preload="metadata"
-             controlslist="nodownload noplaybackrate"
-             disablepictureinpicture></video>
-      <div class="intro-actions">
-        <button id="skipIntro" class="intro-skip">Skip →</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Lightbox -->
-  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Video player">
-    <div class="lightbox-card">
-      <div class="lightbox-head">
-        <div class="lightbox-title" id="lbTitle">Title</div>
-        <button class="x" id="lbClose" aria-label="Close">✕</button>
-      </div>
-      <div class="player">
-        <video id="lbVideo" controls playsinline></video>
-      </div>
-    </div>
-  </div>
+<div class="shell">
+  <div id="cards" class="cards"></div>
+</div>
 
 <script>
-  /* === Sound-on-hover opt-in === */
-  let soundEnabled = false;
-  let audioCtx = null;
-  const soundToggle = document.getElementById('soundToggle');
-  soundToggle.addEventListener('click', async () => {
-    try {
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') await audioCtx.resume();
-    } catch(e) {}
-    soundEnabled = !soundEnabled;
-    soundToggle.setAttribute('aria-pressed', String(soundEnabled));
-    soundToggle.textContent = soundEnabled ? '🔇 Disable Sound Previews' : '🔊 Enable Sound Previews';
-  });
+const pieces = [
+  ["Vicarious and living","vicarious.png","https://www.tiktok.com/t/ZT6TpD6Po/"],
+  ["Flood","flood.png","https://www.tiktok.com/t/ZT6TpSQUq/"],
+  ["Strangest of Days","strange.png","https://www.tiktok.com/t/ZT6TpDtSW/"],
+  ["Schism","schism.png","https://www.tiktok.com/t/ZT6TpYSjD/"],
+  ["Running from Waiting Worms","running.png","https://www.tiktok.com/t/ZT6TpSTgs/"],
+  ["The Resurrection of Fear","fear.png","https://www.tiktok.com/t/ZT6Tp5T8L/"],
+  ["46 & 3","463.png","https://www.tiktok.com/t/ZT6Tp2Jo5/"],
+  ["Resurrecting a Madman","madman.png","https://www.tiktok.com/t/ZT6Tpa7ao/"],
+  ["Another Brick, just one more…","brick.png","https://www.tiktok.com/t/ZT6TpAgJq/"],
+  ["Symmetry of Collapse","Collapse.png","https://www.tiktok.com/t/ZT6TpMLgL/"],
+  ["Bending the Clock","clock.png","https://www.tiktok.com/t/ZT6TpMGT3/"],
+  ["Aenema Reborn","reborn.png","https://www.tiktok.com/t/ZT6TpH64F/"],
+  ["Part of Me","part.png","https://www.tiktok.com/t/ZT6TpD8Vx/"],
+  ["Pigs, 3 Different Illustrated","pigs.png","https://www.tiktok.com/t/ZT6Tp6sRb/"],
+  ["A Trippy Nightmare Remembered","nightmare.png","https://www.tiktok.com/t/ZT6TpR367/"]
+];
 
-  /* === Theme switcher === */
-  const themeSelect = document.getElementById('themeSelect');
-  themeSelect.addEventListener('change', () => {
-    document.body.classList.remove('theme-louvre','theme-met','theme-la');
-    document.body.classList.add(themeSelect.value);
-  });
+const cards = document.getElementById('cards');
 
-  /* === Hover / press-hold preview with resume & “poster once” === */
-  const tiles = document.querySelectorAll('.tile');
-  const safeSrc = (p) => encodeURI(p);
-
-  function ensureVideo(tile){
-    const v = tile.querySelector('video.clip');
-    if (!v) return null;
-    if (!v.dataset.bound){
-      v.dataset.bound = '1';
-      v.src = safeSrc(tile.dataset.video);
-      v.preload = 'metadata';
-      v.playsInline = true;
-      v.setAttribute('playsinline','');
-      v.setAttribute('webkit-playsinline','');
-    }
-    return v;
-  }
-
-  function reveal(tile){
-    if (!tile.classList.contains('revealed')) tile.classList.add('revealed');
-  }
-
-  function startPreview(tile, userGesture=false){
-    if (tile.dataset.tiktok) return;
-    const v = ensureVideo(tile);
-    if (!v) return;
-    reveal(tile);
-    v.muted = !soundEnabled;
-    const p = v.play(); if (userGesture && p) p.catch(()=>{});
-    tile.classList.add('is-previewing');
-  }
-
-  function stopPreview(tile){
-    const v = tile.querySelector('video.clip');
-    if (v){ v.pause(); }
-    tile.classList.remove('is-previewing');
-  }
-
-  tiles.forEach(tile=>{
-    tile.addEventListener('pointerenter', ()=>startPreview(tile,false));
-    tile.addEventListener('pointerleave', ()=>stopPreview(tile));
-    tile.addEventListener('pointerdown', ()=>startPreview(tile,true));
-    tile.addEventListener('pointerup',   ()=>stopPreview(tile));
-    tile.addEventListener('pointercancel',()=>stopPreview(tile));
-    tile.addEventListener('touchstart', ()=>startPreview(tile,true), {passive:true});
-    tile.addEventListener('touchend',   ()=>stopPreview(tile), {passive:true});
-    tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
-  });
-
-  /* === Lightbox continues from the same timestamp (video tiles only) === */
-  const lb = document.getElementById('lightbox');
-  const lbVideo = document.getElementById('lbVideo');
-  const lbTitle = document.getElementById('lbTitle');
-  const lbClose = document.getElementById('lbClose');
-
-  function openLightboxFromTile(tile){
-    if (tile.dataset.tiktok){
-      window.open(tile.dataset.tiktok, '_blank', 'noopener');
-      return;
-    }
-    const vPrev = tile.querySelector('video.clip');
-    lbTitle.textContent = tile.dataset.title || 'Untitled';
-    lbVideo.src = safeSrc(tile.dataset.video);
-    lb.classList.add('open');
-
-    const resumeAt = vPrev && !isNaN(vPrev.currentTime) ? vPrev.currentTime : 0;
-    lbVideo.addEventListener('loadedmetadata', function onMeta(){
-      lbVideo.removeEventListener('loadedmetadata', onMeta);
-      try { lbVideo.currentTime = resumeAt; } catch(e){}
-    });
-  }
-  function closeLightbox(){ lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open'); }
-
-  lbClose.addEventListener('click', closeLightbox);
-  lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
-  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
-
-  tiles.forEach(tile=>{
-    tile.addEventListener('click', ()=>openLightboxFromTile(tile));
-    tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
-  });
-
-  /* Default theme */
-  document.body.classList.add('theme-louvre');
-
-  /* ========== Intro overlay logic (robust) ========== */
-  (function(){
-    const btn = document.getElementById('enterAbstracts');
-    if(!btn) return;
-
-    const overlay = document.getElementById('introOverlay');
-    const video   = document.getElementById('introVideo');
-    const skipBtn = document.getElementById('skipIntro');
-
-    function resolveTarget(){
-      const raw = btn.dataset.target || 'room-abstract/index.html';
-      try { return new URL(raw, window.location.href).href; }
-      catch { return raw; }
-    }
-
-    function cleanup(){
-      try { video.pause(); } catch(e){}
-      video.removeAttribute('src'); video.load();
-      overlay.classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
-    function goNow(){
-      const targetAbs = resolveTarget();
-      cleanup();
-      window.location.assign(targetAbs);
-    }
-
-    btn.addEventListener('click', async (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-
-      const introSrc = btn.dataset.intro;
-      if(!introSrc){ goNow(); return; }
-
-      overlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
-
-      video.src = introSrc;
-      video.setAttribute('playsinline','');
-      video.setAttribute('webkit-playsinline','');
-      video.muted = true; // most reliable autoplay policy
-
-      let started = false;
-      const bail = setTimeout(()=>{ if(!started) goNow(); }, 3500);
-
-      try {
-        await video.play();
-        started = true;
-        clearTimeout(bail);
-      } catch {
-        goNow();
-        return;
-      }
-
-      const onEnd = ()=>{ goNow(); };
-      video.addEventListener('ended', onEnd, {once:true});
-      skipBtn.onclick = ()=>{ goNow(); };
-    }, {passive:false});
-  })();
+pieces.forEach(([title,file,url])=>{
+  const wrap = document.createElement('div');
+  wrap.className = 'frame';
+  wrap.innerHTML = `
+    <div class="tile">
+      <img src="img/${file}" alt="${title}" loading="lazy">
+      <div class="titlebar">${title}</div>
+    </div>`;
+  wrap.addEventListener('click', ()=> window.open(url,'_blank','noopener'));
+  cards.appendChild(wrap);
+});
 </script>
 </body>
 </html>
