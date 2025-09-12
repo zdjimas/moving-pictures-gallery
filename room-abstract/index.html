@@ -168,18 +168,21 @@
     </div>
 
     <!-- CTA button for the showcase tile (separate, so it doesn't affect tile handlers) -->
-    <div class="room-cta">
-      <button
-        id="enterAbstracts"
-        class="enter-room-btn"
-        data-intro="media/GhoulsDoor.mp4"  <!-- your short hallway video -->
-        data-target="room-abstract/"            <!-- destination room -->
-        aria-haspopup="dialog"
-      >
-        ▶︎ Click to Enter this Room
-      </button>
-    </div>
-  </div>
+   <div class="room-cta">
+  <button
+    id="enterAbstracts"
+    class="enter-room-btn"
+    type="button"
+    data-intro="media/GhoulsDoor.mp4"
+    data-target="./room-abstract/"
+    aria-haspopup="dialog"
+  >
+    ▶︎ Click to Enter this Room
+  </button>
+</div>
+<!-- your short hallway video: media/GhoulsDoor.mp4 -->
+<!-- destination room: ./room-abstract/ -->
+
 
   <!-- Intro overlay (plays the short video before navigating) -->
   <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
