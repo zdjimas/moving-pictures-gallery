@@ -431,7 +431,8 @@ tiles.forEach(tile=>{
     document.body.style.overflow = 'hidden';
     video.src = introSrc;
     video.setAttribute('playsinline',''); video.setAttribute('webkit-playsinline','');
-    video.muted = true;
+    video.muted = false;
+    video.volume = 1.0;
 
     let started = false;
     const bail = setTimeout(()=>{ if(!started) goNow(); }, 3500);
