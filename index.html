@@ -5,10 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Moving Pictures — Museum Lobby</title>
 <style>
+  /* ---------- Base tokens (overridden by theme classes) ---------- */
   :root{
     --wall-deep:#221014; --wall-top:#2e0f13; --gold:#d8b765;
     --ink:#eceff4; --muted:#b7becd; --shadow:0 16px 40px rgba(0,0,0,.40);
+    --beam-a: rgba(255,255,210,.20); --beam-b: rgba(255,240,190,.16);
+    --marble-top:#e7dcc3; --marble-mid:#b9a67b; --marble-edge:#8f7846;
+    --floor-1:#e9e7de; --floor-2:#cfc7b6; --floor-3:#b8ae99;
     --tile-aspect: 3 / 4;
+  }
+
+  /* ---------- Themes ---------- */
+  body.theme-default{
+    --wall-deep:#221014; --wall-top:#2e0f13; --gold:#d8b765;
+    --beam-a: rgba(255,255,210,.20); --beam-b: rgba(255,240,190,.16);
+    --marble-top:#e7dcc3; --marble-mid:#b9a67b; --marble-edge:#8f7846;
+    --floor-1:#e9e7de; --floor-2:#cfc7b6; --floor-3:#b8ae99;
+  }
+  body.theme-louvre{
+    --wall-deep:#5a0f12; --wall-top:#3f0c0e; --gold:#e2c266;
+    --beam-a: rgba(255,220,170,.22); --beam-b: rgba(255,210,150,.18);
+    --marble-top:#f0e6cf; --marble-mid:#d8c39a; --marble-edge:#b89656;
+    --floor-1:#f1e9da; --floor-2:#d9ccb1; --floor-3:#c2b089;
+  }
+  body.theme-met{
+    --wall-deep:#1f4750; --wall-top:#2b6d73; --gold:#a47a4d;
+    --beam-a: rgba(170,240,220,.20); --beam-b: rgba(140,220,210,.16);
+    --marble-top:#e3dccf; --marble-mid:#bfa98b; --marble-edge:#8b6b41;
+    --floor-1:#e9efe9; --floor-2:#cfe0de; --floor-3:#b5c8c6;
+  }
+  body.theme-la{
+    --wall-deep:#111111; --wall-top:#1a1a1a; --gold:#bdbdbd;
+    --beam-a: rgba(255,255,255,.12); --beam-b: rgba(255,255,255,.10);
+    --marble-top:#ececec; --marble-mid:#d9d9d9; --marble-edge:#bdbdbd;
+    --floor-1:#ffffff; --floor-2:#ececec; --floor-3:#dcdcdc;
+    --ink:#111; --muted:#6b7280;
   }
 
   html,body{height:100%}
@@ -16,105 +47,84 @@
     margin:0; color:var(--ink);
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
     background:
-      radial-gradient(1200px 600px at 85% -10%, rgba(255,220,150,.16), transparent 60%),
-      radial-gradient(900px 560px at 10% 10%,  rgba(255,200,120,.12), transparent 58%),
-      linear-gradient(180deg, var(--wall-top) 0%, var(--wall-deep) 40%, #1b0e12 100%),
+      radial-gradient(1200px 600px at 85% -10%, var(--beam-a), transparent 60%),
+      radial-gradient(900px 560px at 10% 10%,  var(--beam-b), transparent 58%),
+      linear-gradient(180deg, var(--wall-top) 0%, var(--wall-deep) 40%, #0d0d0d 100%),
       repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, transparent 2px 120px) fixed;
   }
   .beams{position:fixed; inset:0; pointer-events:none; z-index:0;
     background:
-      radial-gradient(500px 260px at 18% 0%, rgba(255,255,210,.20), transparent 60%),
-      radial-gradient(540px 260px at 78% 0%, rgba(255,240,190,.16), transparent 60%);
+      radial-gradient(500px 260px at 18% 0%, var(--beam-a), transparent 60%),
+      radial-gradient(540px 260px at 78% 0%, var(--beam-b), transparent 60%);
     mix-blend-mode:screen;
   }
   body::before, body::after{content:""; position:fixed; left:0; right:0; z-index:0; pointer-events:none;}
-  body::before{ top:0; height:18px; background:linear-gradient(180deg, #e7dcc3, #b9a67b 60%, #8f7846); box-shadow:0 4px 14px rgba(0,0,0,.35) inset }
+  body::before{ top:0; height:18px; background:linear-gradient(180deg, var(--marble-top), var(--marble-mid) 60%, var(--marble-edge)); box-shadow:0 4px 14px rgba(0,0,0,.35) inset }
   body::after{ bottom:0; height:120px; background:
       linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.45)),
       repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 6px, rgba(0,0,0,.08) 6px 12px),
-      linear-gradient(180deg, #e9e7de, #cfc7b6 60%, #b8ae99);
+      linear-gradient(180deg, var(--floor-1), var(--floor-2) 60%, var(--floor-3));
     box-shadow:0 -10px 30px rgba(0,0,0,.35) inset;
   }
 
   .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 120px; position:relative; z-index:1}
   h1{margin:0 0 10px;font-size:clamp(24px,3.2vw,40px);letter-spacing:.02em}
-  .note{color:var(--muted);font-size:14px;margin:6px 0 24px}
+  .note{color:var(--muted);font-size:14px;margin:6px 0 12px}
 
-  /* Dynamic exhibits list */
+  /* Controls row */
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 24px}
+  .select,.btn{
+    appearance:none;border:1px solid #3a2a20;background:#1a1412;color:var(--ink);
+    padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);cursor:pointer
+  }
+  .label{font-size:13px;color:var(--muted)}
+
+  /* Exhibits grid */
   .exhibits{display:grid; gap:36px}
 
-  /* Exhibit row w/ randomized plaque side */
-  .exhibit{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:26px; align-items:start;
-  }
+  .exhibit{ display:grid; grid-template-columns: 1fr 1fr; gap:26px; align-items:start; }
   .exhibit.pl-left  .plaque-col{ order:1 } .exhibit.pl-left  .frame-col{ order:2 }
   .exhibit.pl-right .plaque-col{ order:2 } .exhibit.pl-right .frame-col{ order:1 }
+  @media (max-width: 900px){ .exhibit{ grid-template-columns: 1fr; } .plaque-col,.frame-col{ order:initial } }
 
-  @media (max-width: 900px){
-    .exhibit{ grid-template-columns: 1fr; }
-    .plaque-col, .frame-col{ order:initial }
-  }
-
-  /* Plaque (left banner) w/ random width/tilt via CSS vars */
   .plaque-col{ transform: rotate(var(--pl-tilt, 0deg)); }
   .plaque{
-    width: min(var(--plaqueW, 320px), 100%);
+    width:min(var(--plaqueW, 320px), 100%);
     background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.55));
-    border:1px solid rgba(255,220,140,.25);
+    border:1px solid color-mix(in oklab, var(--gold) 60%, black);
     border-left:6px solid var(--gold);
-    border-radius:14px;
-    padding:16px 16px 12px;
-    margin-top: var(--plaqueTop, 0px);
-    backdrop-filter: blur(3px);
-    box-shadow: var(--shadow);
+    border-radius:14px; padding:16px 16px 12px; margin-top:var(--plaqueTop,0px);
+    backdrop-filter: blur(3px); box-shadow: var(--shadow);
   }
   .plaque h2{margin:0 0 6px;font-size:clamp(18px,2.2vw,24px)}
-  .plaque .room{margin:0 0 6px;color:#f3dfad;font-weight:600}
-  .plaque p{margin:0 0 12px;color:#eae4d6;line-height:1.45}
-  .cta{
-    display:inline-flex; align-items:center; gap:8px;
-    background:#121a20; color:#f2f5f9; border:1px solid #38424f;
-    padding:10px 12px; border-radius:10px; text-decoration:none; cursor:pointer;
-  }
-  .cta + .cta{ margin-left:8px }
-  .cta[aria-disabled="true"]{ opacity:.55; cursor:not-allowed }
-  .cta:hover{ background:#161f26 }
+  .plaque .room{margin:0 0 6px;color:color-mix(in oklab, var(--gold) 85%, white 20%);font-weight:600}
+  .plaque p{margin:0 12px 12px 0;color:#eae4d6;line-height:1.45}
+  .cta{display:inline-flex;align-items:center;gap:8px;background:#121a20;color:#f2f5f9;border:1px solid #38424f;
+       padding:10px 12px;border-radius:10px;text-decoration:none;cursor:pointer}
+  .cta + .cta{margin-left:8px}
+  .cta[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+  .cta:hover{background:#161f26}
+  .mini-toggle{font-size:.9rem;padding:8px 10px;border-radius:10px;border:1px solid #3a4656;background:#0f151c;color:#eaf2ff;cursor:pointer}
+  .mini-toggle[aria-pressed="true"]{background:#14202c;border-color:#46607a}
 
-  /* Small toggle button style */
-  .mini-toggle{
-    font-size:.9rem;
-    padding:8px 10px;
-    border-radius:10px;
-    border:1px solid #3a4656;
-    background:#0f151c; color:#eaf2ff; cursor:pointer;
-  }
-  .mini-toggle[aria-pressed="true"]{ background:#14202c; border-color:#46607a }
-
-  /* Frame finishes (random) */
   .frame-wrap{filter:drop-shadow(0 18px 24px rgba(0,0,0,.35)); transform: rotate(var(--frame-tilt, 0deg));}
   .frame{position:relative; box-shadow:var(--shadow); border-radius:14px; border:10px solid transparent;}
   .finish-gilded .frame{
-    background:
-      linear-gradient(#0000,#0000) padding-box,
+    background:linear-gradient(#0000,#0000) padding-box,
       conic-gradient(from 20deg,#6b4e0f,#caa54b 12%,#ffeb9c 24%,#d3ab4a 36%,#6b4e0f 48%,#e2c266 60%,#fff1b5 72%,#c3972e 84%,#6b4e0f) border-box;
   }
   .finish-ebony .frame{
     border-color:#0a0d12;
-    background:
-      linear-gradient(180deg,#0a0f14,#131a22) padding-box,
+    background:linear-gradient(180deg,#0a0f14,#131a22) padding-box,
       linear-gradient(145deg, #1c232c, #090d12 60%, #1a212a) border-box;
   }
   .finish-brass .frame{
-    background:
-      linear-gradient(#0000,#0000) padding-box,
+    background:linear-gradient(#0000,#0000) padding-box,
       conic-gradient(from -30deg,#3c2e14,#b49352,#6f582b,#d7b778,#4a3a18,#b49352) border-box;
     filter:saturate(1.06);
   }
   .finish-walnut .frame{
-    background:
-      linear-gradient(#0000,#0000) padding-box,
+    background:linear-gradient(#0000,#0000) padding-box,
       linear-gradient(25deg, #3b2414 0%, #5a3820 30%, #7a4b2b 55%, #4b2d19 80%, #3b2414 100%) border-box;
   }
   .frame::after{content:"";position:absolute;inset:8px;border-radius:8px;border:2px solid #f4e8c7;pointer-events:none}
@@ -143,37 +153,33 @@
   .player{position:relative;background:#000}
   .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 
-  /* ===== FULL-SCREEN INTRO OVERLAY ===== */
-  .intro-overlay{
-    position:fixed; inset:0; z-index:9999;
-    display:none; place-items:center;
-    background:#000;
-  }
+  /* Fullscreen Intro */
+  .intro-overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center; background:#000; }
   .intro-overlay.open{ display:grid }
-  .intro-shell{
-    width:100%; height:100%;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .intro-video{
-    width:100%; height:100%;
-    object-fit:cover; background:#000; border-radius:0; box-shadow:none;
-  }
-  .intro-actions{
-    position:fixed; right:16px; bottom:16px; z-index:2;
-  }
-  .intro-skip{
-    border:1px solid #394355; background:#121a25; color:#e9ecf2;
-    padding:10px 14px; border-radius:10px; cursor:pointer
-  }
+  .intro-shell{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+  .intro-video{ width:100%; height:100%; object-fit:cover; background:#000; border-radius:0; box-shadow:none; }
+  .intro-actions{ position:fixed; right:16px; bottom:16px; z-index:2; }
+  .intro-skip{ border:1px solid #394355; background:#121a25; color:#e9ecf2; padding:10px 14px; border-radius:10px; cursor:pointer }
   .intro-skip:hover{ background:#17202c }
 </style>
 </head>
-<body>
+<body class="theme-default">
   <div class="beams" aria-hidden="true"></div>
 
   <div class="wrap">
     <h1>Moving Pictures — Museum Lobby</h1>
     <div class="note">Each visit rehangs the lobby slightly. Plaques sit left or right, frames tilt and finish vary—just like a living museum.</div>
+
+    <!-- Theme control -->
+    <div class="controls">
+      <label for="venueSelect" class="label">Venue:</label>
+      <select id="venueSelect" class="select">
+        <option value="theme-default" selected>Default Lobby</option>
+        <option value="theme-louvre">Louvre — Royal Red + Gold</option>
+        <option value="theme-met">Met — Teal Stone + Wood</option>
+        <option value="theme-la">LA Modern — White Cube</option>
+      </select>
+    </div>
 
     <section id="exhibits" class="exhibits"></section>
   </div>
@@ -207,6 +213,23 @@
   </div>
 
 <script>
+/* ===== Theme switcher (with persistence) ===== */
+(function(){
+  const sel = document.getElementById('venueSelect');
+  const saved = localStorage.getItem('mpg-theme');
+  if(saved){
+    document.body.classList.remove('theme-default','theme-louvre','theme-met','theme-la');
+    document.body.classList.add(saved);
+    sel.value = saved;
+  }
+  sel.addEventListener('change', ()=>{
+    const t = sel.value;
+    document.body.classList.remove('theme-default','theme-louvre','theme-met','theme-la');
+    document.body.classList.add(t);
+    localStorage.setItem('mpg-theme', t);
+  });
+})();
+
 /* ============ Data ============ */
 const ABSTRACTS = {
   key: 'abstracts',
@@ -220,38 +243,18 @@ const ABSTRACTS = {
 };
 
 const OTHERS = [
-  {
-    key:'xavier',
-    title:"Xavier's Perspectives",
-    room:'Portraits in Motion',
+  { key:'xavier', title:"Xavier's Perspectives", room:'Portraits in Motion',
     desc:'Intimate character studies that flicker between realism and dream. Faces, gestures, and mood as moving compositions.',
-    mp4:'./xaviers-perspectives.mp4',
-    poster:'./xaviers-perspectives-poster.png'
-  },
-  {
-    key:'jazz',
-    title:'Reflections from a Jazz Club',
-    room:'Noir & Jazz Abstractions',
+    mp4:'./xaviers-perspectives.mp4', poster:'./xaviers-perspectives-poster.png' },
+  { key:'jazz', title:'Reflections from a Jazz Club', room:'Noir & Jazz Abstractions',
     desc:'Smoke, brass, and neon. Improvised camera rhythms meet graphic motifs in a low-lit synesthetic lounge.',
-    mp4:'./Reflections from a Jazz Club.mp4',
-    poster:'./Jazz.png'
-  },
-  {
-    key:'vacancy',
-    title:'Vacancy — AI cover (Dream Theater)',
-    room:'Cinematic Covers',
+    mp4:'./Reflections from a Jazz Club.mp4', poster:'./Jazz.png' },
+  { key:'vacancy', title:'Vacancy — AI cover (Dream Theater)', room:'Cinematic Covers',
     desc:'Classic tracks reimagined as moving paintings—lyric moods translated into light and motion.',
-    mp4:'./Vacancy - an AI cover of Dream Theater.mp4',
-    poster:'./Vacancy.png'
-  },
-  {
-    key:'wings',
-    title:'Wings for Marie',
-    room:'Devotional Motion',
+    mp4:'./Vacancy - an AI cover of Dream Theater.mp4', poster:'./Vacancy.png' },
+  { key:'wings', title:'Wings for Marie', room:'Devotional Motion',
     desc:'Elegiac studies about memory and lift—where textures arc upward and time seems to glow.',
-    mp4:'./Wings For Marie.mp4',
-    poster:'./Wings.png'
-  }
+    mp4:'./Wings For Marie.mp4', poster:'./Wings.png' }
 ];
 
 /* ============ Utilities ============ */
@@ -278,7 +281,7 @@ function buildExhibit(data){
   ex.style.setProperty('--plaqueW', plaqueW);
   ex.style.setProperty('--plaqueTop', plaqueTop);
 
-  // default: hover sound OFF for this exhibit
+  // default: hover sound OFF per exhibit
   ex.dataset.sound = 'off';
 
   const plaque = document.createElement('div');
@@ -321,18 +324,27 @@ function buildExhibit(data){
     `;
   }
 
-  // CTA(s) + per-exhibit hover-sound toggle (only for MP4 exhibits)
+  // CTA(s)
   const ctaRow = plaque.querySelector('.cta-row');
-  let parts = [];
-  if (data.isActiveRoom){
-    parts.push(`<a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>`);
-    // Abstracts is TikTok-only; no hover-sound toggle needed
-  } else {
+  const parts = [];
+
+  if (data.key === 'abstracts' && data.isActiveRoom){
+    /* RESTORED: Watch on TikTok + Enter this Room (with intro) */
+    parts.push(
+      `<a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>`,
+      `<button class="cta" id="enterAbstracts" type="button"
+               data-intro="${data.introSrc}" data-target="${data.target}"
+               aria-haspopup="dialog">🏛 Enter this Room</button>`
+    );
+  } else if (!data.isActiveRoom){
     parts.push(`<button class="cta" aria-disabled="true" title="Room under construction">▶︎ Enter Room (Coming Soon)</button>`);
   }
+
+  // Per-exhibit hover-sound toggle (only when local MP4)
   if (!data.tile?.tiktok){
     parts.push(`<button class="mini-toggle hover-sound-toggle" type="button" aria-pressed="false" title="Toggle sound while hovering this artwork">🔊 Hover Sound: Off</button>`);
   }
+
   ctaRow.innerHTML = parts.join(' ');
 
   ex.appendChild(plaque);
@@ -348,18 +360,15 @@ function buildExhibit(data){
       toggle.textContent = !on ? '🔊 Hover Sound: On' : '🔊 Hover Sound: Off';
     });
   }
-
   return ex;
 }
 
 /* ============ Render ============ */
 const exhibitsEl = document.getElementById('exhibits');
-// Abstracts first; others randomized
-const order = [ABSTRACTS, ...shuffle([...OTHERS])];
-order.forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
+// Make Abstracts banner first; randomize the rest
+[ABSTRACTS, ...shuffle([...OTHERS])].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
 
-/* ============ Interactions ============ */
-/* Hover previews for MP4 tiles + poster-once (per-exhibit sound toggle respected) */
+/* ============ Hover previews & Lightbox ============ */
 const tiles = document.querySelectorAll('.tile');
 const safeSrc = (p)=> encodeURI(p);
 
@@ -381,12 +390,8 @@ function startPreview(tile, userGesture=false){
   if (tile.dataset.tiktok) return;
   const v = ensureVideo(tile); if (!v) return;
   reveal(tile);
-
-  // per-exhibit sound: read dataset.sound on the nearest .exhibit
   const ex = tile.closest('.exhibit');
-  const soundOn = ex && ex.dataset.sound === 'on';
-  v.muted = !soundOn;
-
+  v.muted = !(ex && ex.dataset.sound === 'on');
   const p = v.play(); if (userGesture && p) p.catch(()=>{});
   tile.classList.add('is-previewing');
 }
@@ -418,7 +423,6 @@ function openLightboxFromTile(tile){
   lbTitle.textContent = tile.dataset.title || 'Untitled';
   lbVideo.src = safeSrc(tile.dataset.video);
   lb.classList.add('open');
-
   const resumeAt = vPrev && !isNaN(vPrev.currentTime) ? vPrev.currentTime : 0;
   lbVideo.addEventListener('loadedmetadata', function onMeta(){
     lbVideo.removeEventListener('loadedmetadata', onMeta);
@@ -426,7 +430,6 @@ function openLightboxFromTile(tile){
   });
 }
 function closeLightbox(){ lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open'); }
-
 lbClose.addEventListener('click', closeLightbox);
 lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
@@ -472,10 +475,8 @@ tiles.forEach(tile=>{
     video.setAttribute('playsinline',''); 
     video.setAttribute('webkit-playsinline','');
 
-    // Try to play WITH sound (allowed due to user gesture). Fallback to muted if blocked.
     try {
-      video.muted = false;
-      video.volume = 1.0;
+      video.muted = false; video.volume = 1.0;
       await video.play();
     } catch {
       video.muted = true;
