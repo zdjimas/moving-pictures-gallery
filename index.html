@@ -43,14 +43,11 @@
         background:var(--mat);display:block;touch-action:manipulation}
   .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
 
-  /* Visibility rules:
-     - Default: show poster (thumb)
-     - While previewing OR once revealed: show video surface
-  */
+  /* Visibility rules */
   .clip{opacity:0;transition:opacity .15s ease-out}
   .tile.is-previewing .clip,
   .tile.revealed .clip{opacity:1}
-  .tile.revealed .thumb{opacity:0;pointer-events:none} /* hide poster permanently after first interaction */
+  .tile.revealed .thumb{opacity:0;pointer-events:none}
 
   .overlay{position:absolute;inset:auto 0 0 0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
            padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -72,35 +69,23 @@
   .theme-met{--wall:#2b6d73;--frame-face:#a47a4d;--frame-edge:#6f4f2a;--frame-highlight:#ecd9b8;--mat:#f4f2ea;--mat-border:#ddd6c6}
   .theme-la{--wall:#ffffff;--text:#111;--muted:#6b7280;--frame-face:#111111;--frame-edge:#2b2f36;--frame-highlight:#d7d7d7;--mat:#ffffff;--mat-border:#e5e7eb}
 
-  /* ========== New: CTA + Intro overlay ========== */
-  .room-cta{
-    margin: 8px 0 26px;
-    display: flex;
-    justify-content: center;
-  }
+  /* CTA + Intro overlay */
+  .room-cta{ margin: 8px 0 26px; display:flex; justify-content:center }
   .enter-room-btn{
-    appearance:none;border:1px solid #2a3340;background:#101620;color:#e9ecf2;
+    appearance:none;border:1px solid #2a2f3a;background:#101620;color:#e9ecf2;
     padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow);font-size:.95rem
   }
   .enter-room-btn:hover{ background:#151c26 }
 
-  .intro-overlay{
-    position:fixed; inset:0; z-index:9999;
-    display:none; place-items:center;
-    background:rgba(10,12,16,.85);
-    backdrop-filter:blur(6px);
-  }
+  .intro-overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center;
+                  background:rgba(10,12,16,.85); backdrop-filter:blur(6px) }
   .intro-overlay.open{ display:grid }
   .intro-shell{ width:min(900px,92vw); max-height:90vh; display:grid; gap:10px }
-  .intro-video{
-    width:100%; height:auto; max-height:80vh; background:#000; display:block;
-    border-radius:12px; box-shadow:0 18px 40px rgba(0,0,0,.5)
-  }
+  .intro-video{ width:100%; height:auto; max-height:80vh; background:#000; display:block;
+                border-radius:12px; box-shadow:0 18px 40px rgba(0,0,0,.5) }
   .intro-actions{ display:flex; justify-content:flex-end }
-  .intro-skip{
-    border:1px solid #394355; background:#121a25; color:#e9ecf2;
-    padding:8px 12px; border-radius:10px; cursor:pointer
-  }
+  .intro-skip{ border:1px solid #394355; background:#121a25; color:#e9ecf2;
+               padding:8px 12px; border-radius:10px; cursor:pointer }
   .intro-skip:hover{ background:#17202c }
 </style>
 </head>
@@ -161,19 +146,19 @@
       <div class="frame-wrap"><div class="frame"><div class="mat">
         <article class="tile" tabindex="0" data-title="The Grudge on Dune" data-tiktok="https://www.tiktok.com/t/ZT63YRxNR/">
           <img class="thumb" src="./IMG_0494.jpg" alt="Poster: The Grudge on Dune" loading="lazy" />
-          <!-- No <video> for TikTok tile -->
           <div class="overlay"><div class="title">The Grudge on Dune</div><div class="badge">Click to watch on TikTok</div></div>
         </article>
       </div></div></div>
     </div>
 
-    <!-- CTA button for the showcase tile (separate, so it doesn't affect tile handlers) -->
+    <!-- CTA button for the showcase tile -->
     <div class="room-cta">
       <button
         id="enterAbstracts"
         class="enter-room-btn"
-        data-intro="media/abstracts-intro.mp4"  <!-- your short hallway video -->
-        data-target="room-abstract/"            <!-- destination room -->
+        type="button"
+        data-intro="room-abstract/media/GhoulsDoor.mp4"
+        data-target="room-abstract/index.html"
         aria-haspopup="dialog"
       >
         ▶︎ Click to Enter this Room
@@ -181,7 +166,7 @@
     </div>
   </div>
 
-  <!-- Intro overlay (plays the short video before navigating) -->
+  <!-- Intro overlay -->
   <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
     <div class="intro-shell">
       <video id="introVideo"
@@ -233,14 +218,14 @@
 
   /* === Hover / press-hold preview with resume & “poster once” === */
   const tiles = document.querySelectorAll('.tile');
-  const safeSrc = (p) => encodeURI(p);   // handle spaces
+  const safeSrc = (p) => encodeURI(p);
 
   function ensureVideo(tile){
     const v = tile.querySelector('video.clip');
-    if (!v) return null;                 // <-- TikTok tiles have no video
+    if (!v) return null;
     if (!v.dataset.bound){
       v.dataset.bound = '1';
-      v.src = safeSrc(tile.dataset.video);     // set once; never reset (preserves currentTime)
+      v.src = safeSrc(tile.dataset.video);
       v.preload = 'metadata';
       v.playsInline = true;
       v.setAttribute('playsinline','');
@@ -254,7 +239,6 @@
   }
 
   function startPreview(tile, userGesture=false){
-    // Skip preview on TikTok tiles
     if (tile.dataset.tiktok) return;
     const v = ensureVideo(tile);
     if (!v) return;
@@ -271,16 +255,11 @@
   }
 
   tiles.forEach(tile=>{
-    // Hover (desktop)
     tile.addEventListener('pointerenter', ()=>startPreview(tile,false));
     tile.addEventListener('pointerleave', ()=>stopPreview(tile));
-
-    // Press/hold (touch & iPad)
     tile.addEventListener('pointerdown', ()=>startPreview(tile,true));
     tile.addEventListener('pointerup',   ()=>stopPreview(tile));
     tile.addEventListener('pointercancel',()=>stopPreview(tile));
-
-    // Legacy touch fallback
     tile.addEventListener('touchstart', ()=>startPreview(tile,true), {passive:true});
     tile.addEventListener('touchend',   ()=>stopPreview(tile), {passive:true});
     tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
@@ -294,7 +273,6 @@
 
   function openLightboxFromTile(tile){
     if (tile.dataset.tiktok){
-      // Open TikTok reliably in a new tab; no lightbox for TikTok
       window.open(tile.dataset.tiktok, '_blank', 'noopener');
       return;
     }
@@ -315,16 +293,15 @@
   lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
 
-  // Click/keyboard open for tiles
   tiles.forEach(tile=>{
     tile.addEventListener('click', ()=>openLightboxFromTile(tile));
     tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
   });
 
-  // Default theme
+  /* Default theme */
   document.body.classList.add('theme-louvre');
 
-  /* ========== New: Intro overlay logic (Enter this room button) ========== */
+  /* ========== Intro overlay logic (robust) ========== */
   (function(){
     const btn = document.getElementById('enterAbstracts');
     if(!btn) return;
@@ -333,42 +310,55 @@
     const video   = document.getElementById('introVideo');
     const skipBtn = document.getElementById('skipIntro');
 
+    function resolveTarget(){
+      const raw = btn.dataset.target || 'room-abstract/index.html';
+      try { return new URL(raw, window.location.href).href; }
+      catch { return raw; }
+    }
+
     function cleanup(){
       try { video.pause(); } catch(e){}
       video.removeAttribute('src'); video.load();
       overlay.classList.remove('open');
       document.body.style.overflow = '';
     }
-    function go(target){ cleanup(); if(target) location.href = target; }
+
+    function goNow(){
+      const targetAbs = resolveTarget();
+      cleanup();
+      window.location.assign(targetAbs);
+    }
 
     btn.addEventListener('click', async (e)=>{
       e.preventDefault();
+      e.stopPropagation();
+
       const introSrc = btn.dataset.intro;
-      const target   = btn.dataset.target || './';
-      if(!introSrc){ location.href = target; return; }
+      if(!introSrc){ goNow(); return; }
 
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
-      video.src = introSrc;
-      video.currentTime = 0;
-      video.muted = false; // user gesture present → audio should be allowed
 
-      // Start playback; if it fails or stalls, navigate to room quickly
+      video.src = introSrc;
+      video.setAttribute('playsinline','');
+      video.setAttribute('webkit-playsinline','');
+      video.muted = true; // most reliable autoplay policy
+
       let started = false;
-      const bail = setTimeout(()=>{ if(!started) go(target); }, 1800);
+      const bail = setTimeout(()=>{ if(!started) goNow(); }, 3500);
+
       try {
         await video.play();
         started = true;
         clearTimeout(bail);
       } catch {
-        go(target);
+        goNow();
         return;
       }
 
-      // Auto-navigate on end; allow skipping
-      const onEnd = ()=> go(target);
+      const onEnd = ()=>{ goNow(); };
       video.addEventListener('ended', onEnd, {once:true});
-      skipBtn.onclick = ()=> go(target);
+      skipBtn.onclick = ()=>{ goNow(); };
     }, {passive:false});
   })();
 </script>
