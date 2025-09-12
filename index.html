@@ -81,7 +81,6 @@
 
   /* Exhibits grid */
   .exhibits{display:grid; gap:36px}
-
   .exhibit{ display:grid; grid-template-columns: 1fr 1fr; gap:26px; align-items:start; }
   .exhibit.pl-left  .plaque-col{ order:1 } .exhibit.pl-left  .frame-col{ order:2 }
   .exhibit.pl-right .plaque-col{ order:2 } .exhibit.pl-right .frame-col{ order:1 }
@@ -153,11 +152,15 @@
   .player{position:relative;background:#000}
   .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 
-  /* Fullscreen Intro */
+  /* ===== FULLSCREEN INTRO OVERLAY ===== */
   .intro-overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center; background:#000; }
   .intro-overlay.open{ display:grid }
   .intro-shell{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
   .intro-video{ width:100%; height:100%; object-fit:contain; background:#000; border-radius:0; box-shadow:none; }
+  /* Mobile: keep immersive cover */
+  @media (max-width: 900px){
+    .intro-video{ object-fit:cover; }
+  }
   .intro-actions{ position:fixed; right:16px; bottom:16px; z-index:2; }
   .intro-skip{ border:1px solid #394355; background:#121a25; color:#e9ecf2; padding:10px 14px; border-radius:10px; cursor:pointer }
   .intro-skip:hover{ background:#17202c }
@@ -329,7 +332,6 @@ function buildExhibit(data){
   const parts = [];
 
   if (data.key === 'abstracts' && data.isActiveRoom){
-    /* RESTORED: Watch on TikTok + Enter this Room (with intro) */
     parts.push(
       `<a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>`,
       `<button class="cta" id="enterAbstracts" type="button"
