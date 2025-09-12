@@ -3,50 +3,118 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Moving Pictures — Virtual Museum (Landing + Room Intro)</title>
+<title>Moving Pictures — Museum Lobby</title>
 <style>
   :root{
-    --wall:#111317; --text:#e8eaed; --muted:#9aa0a6; --shadow:0 12px 28px rgba(0,0,0,.35);
-    --frame-face:#d6bf77; --frame-edge:#8a7442; --frame-highlight:#f4e8c7;
-    --mat:#f5f3ea; --mat-border:#d8d3c2; --plinth:rgba(0,0,0,.25);
-    --tile-aspect: 3 / 4;  /* change if you want landscape: 16/9 */
+    /* Lobby color system */
+    --wall-deep:#221014;      /* rich red-burgundy walls */
+    --wall-top:#2e0f13;       /* top gradient */
+    --marble:#f0efe9;         /* marble trims */
+    --gold:#d8b765;           /* brass/gold accents */
+    --ink:#eceff4;
+    --muted:#b7becd;
+    --shadow:0 16px 40px rgba(0,0,0,.40);
+    --tile-aspect: 3 / 4;
   }
 
+  /* ================== LOBBY BACKDROP ================== */
   html,body{height:100%}
-  body{margin:0;background:var(--wall);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-  .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 80px}
-  h1{margin:0 0 8px;font-size:clamp(22px,2.6vw,34px)}
-  .note{color:var(--muted);font-size:14px;margin:6px 0 16px}
+  body{
+    margin:0; color:var(--ink);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    /* layered lobby: deep wall, light shafts, marble base, subtle columns */
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(255,220,150,.18), transparent 60%),
+      radial-gradient(900px 560px at 10% 10%, rgba(255,200,120,.14), transparent 58%),
+      linear-gradient(180deg, var(--wall-top) 0%, var(--wall-deep) 40%, #1b0e12 100%),
+      repeating-linear-gradient(90deg,
+        rgba(255,255,255,.06) 0 2px, transparent 2px 120px) fixed;
+  }
+  /* chair rail + baseboard illusion */
+  body::before, body::after{
+    content:""; position:fixed; left:0; right:0; z-index:0; pointer-events:none;
+  }
+  body::before{ top:0; height:18px; background:linear-gradient(180deg, #e7dcc3, #b9a67b 60%, #8f7846); box-shadow:0 4px 14px rgba(0,0,0,.35) inset }
+  body::after{
+    bottom:0; height:120px;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.45)),
+      repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 6px, rgba(0,0,0,.08) 6px 12px),
+      linear-gradient(180deg, #e9e7de, #cfc7b6 60%, #b8ae99);
+    box-shadow:0 -10px 30px rgba(0,0,0,.35) inset;
+  }
 
-  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 18px}
-  .btn,.select{appearance:none;border:1px solid #2a2f3a;background:#171a21;color:#e8eaed;
-    padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow)}
-  .btn[aria-pressed="true"]{border-color:#3a84ff;background:#1b2436}
+  /* Slim ceiling lamps / light shafts */
+  .beams{
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(500px 260px at 18% 0%, rgba(255,255,210,.22), transparent 60%),
+      radial-gradient(540px 260px at 78% 0%, rgba(255,240,190,.18), transparent 60%);
+    mix-blend-mode:screen;
+  }
+
+  /* ================== PAGE CHROME ================== */
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 120px; position:relative; z-index:1}
+  h1{margin:0 0 10px;font-size:clamp(24px,3.2vw,40px);letter-spacing:.02em}
+  .note{color:var(--muted);font-size:14px;margin:6px 0 24px}
+
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:4px 0 24px}
+  .btn,.select{
+    appearance:none;border:1px solid #3a2a20;background:#1a1412;color:var(--ink);
+    padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow)
+  }
   .label{font-size:13px;color:var(--muted);margin-left:2px}
 
-  .gallery{display:grid;gap:26px;grid-template-columns:repeat(2,minmax(260px,1fr));align-items:start}
-  @media (max-width:760px){.gallery{grid-template-columns:1fr}}
+  /* ================== EXHIBIT LAYOUT ================== */
+  .exhibits{display:grid; gap:36px}
+  .exhibit{
+    display:grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr);
+    gap:26px; align-items:start;
+  }
+  /* on phones stack plaque then frame */
+  @media (max-width: 860px){
+    .exhibit{ grid-template-columns: 1fr; }
+  }
 
-  .frame-wrap{filter:drop-shadow(0 18px 24px var(--plinth))}
+  /* ----- Plaque (left banner) ----- */
+  .plaque{
+    background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.55));
+    border:1px solid rgba(255,220,140,.25);
+    border-left:6px solid var(--gold);
+    border-radius:14px;
+    padding:16px 16px 14px;
+    backdrop-filter: blur(3px);
+    box-shadow: var(--shadow);
+  }
+  .plaque h2{margin:0 0 6px;font-size:clamp(18px,2.2vw,24px)}
+  .plaque .room{margin:0 0 6px;color:#f3dfad;font-weight:600}
+  .plaque p{margin:0 0 12px;color:#eae4d6;line-height:1.45}
+  .cta{
+    display:inline-flex; align-items:center; gap:8px;
+    background:#121a20; color:#f2f5f9; border:1px solid #38424f;
+    padding:10px 12px; border-radius:10px; text-decoration:none; cursor:pointer;
+  }
+  .cta[aria-disabled="true"]{ opacity:.55; cursor:not-allowed }
+  .cta:hover{ background:#161f26 }
+
+  /* ----- Frame / mat / tile ----- */
+  .frame-wrap{filter:drop-shadow(0 18px 24px rgba(0,0,0,.35))}
   .frame{
     position:relative;box-shadow:var(--shadow);
     background:linear-gradient(#0000,#0000) padding-box,
-               linear-gradient(135deg,var(--frame-edge),var(--frame-face)) border-box;
-    border:10px solid transparent
+               linear-gradient(135deg,#8a7442,#d6bf77) border-box;
+    border:10px solid transparent;border-radius:14px
   }
-  .frame::after{content:"";position:absolute;inset:8px;border:2px solid var(--frame-highlight);pointer-events:none}
-  .mat{margin:16px;background:var(--mat);border:1px solid var(--mat-border);
+  .frame::after{content:"";position:absolute;inset:8px;border-radius:8px;border:2px solid #f4e8c7;pointer-events:none}
+  .mat{margin:16px;background:#f4efe6;border:1px solid #ddd2be;border-radius:8px;
        box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12)}
 
-  /* Artwork tile: uniform size, flush fill */
   .tile{position:relative;aspect-ratio:var(--tile-aspect);overflow:hidden;border:1px solid rgba(0,0,0,.25);
-        background:var(--mat);display:block;touch-action:manipulation}
+        background:#000;display:block;touch-action:manipulation;border-radius:6px}
   .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
-
-  /* Visibility rules */
   .clip{opacity:0;transition:opacity .15s ease-out}
-  .tile.is-previewing .clip,
-  .tile.revealed .clip{opacity:1}
+  .tile.is-previewing .clip,.tile.revealed .clip{opacity:1}
   .tile.revealed .thumb{opacity:0;pointer-events:none}
 
   .overlay{position:absolute;inset:auto 0 0 0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
@@ -55,6 +123,7 @@
   .badge{font-size:12px;color:#c5e4ff;background:rgba(124,198,255,.08);border:1px solid rgba(124,198,255,.3);
          padding:4px 8px;border-radius:999px}
 
+  /* Lightbox */
   .lightbox{position:fixed;inset:0;background:rgba(8,10,14,.72);backdrop-filter:blur(6px);
             display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
   .lightbox.open{display:flex}
@@ -65,18 +134,7 @@
   .player{position:relative;background:#000}
   .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 
-  .theme-louvre{--wall:#5a0f12;--frame-face:#d9c06d;--frame-edge:#7a6230;--frame-highlight:#f7f0d8;--mat:#f5f1e6;--mat-border:#e5decc}
-  .theme-met{--wall:#2b6d73;--frame-face:#a47a4d;--frame-edge:#6f4f2a;--frame-highlight:#ecd9b8;--mat:#f4f2ea;--mat-border:#ddd6c6}
-  .theme-la{--wall:#ffffff;--text:#111;--muted:#6b7280;--frame-face:#111111;--frame-edge:#2b2f36;--frame-highlight:#d7d7d7;--mat:#ffffff;--mat-border:#e5e7eb}
-
-  /* CTA + Intro overlay */
-  .room-cta{ margin: 12px 0 26px; display:flex; justify-content:center }
-  .enter-room-btn{
-    appearance:none;border:1px solid #2a2f3a;background:#101620;color:#e9ecf2;
-    padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:var(--shadow);font-size:.95rem
-  }
-  .enter-room-btn:hover{ background:#151c26 }
-
+  /* Intro overlay (room entry video) */
   .intro-overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center;
                   background:rgba(10,12,16,.85); backdrop-filter:blur(6px) }
   .intro-overlay.open{ display:grid }
@@ -89,82 +147,110 @@
   .intro-skip:hover{ background:#17202c }
 </style>
 </head>
-<body class="theme-louvre">
+<body>
+  <div class="beams" aria-hidden="true"></div>
+
   <div class="wrap">
-    <h1>Moving Pictures — Virtual Museum</h1>
-    <div class="note">Poster appears once. Hover or press-hold to play; release or move off to pause and leave the last frame showing. Click to open the full player at the same timestamp. The showcase tile also has an “Enter this room” intro.</div>
+    <h1>Moving Pictures — Museum Lobby</h1>
+    <div class="note">Explore the centerpieces. Each plaque explains the work and links to a dedicated room for more in that style.</div>
 
-    <div class="controls">
-      <button id="soundToggle" class="btn" aria-pressed="false">🔊 Enable Sound Previews</button>
-      <label for="themeSelect" class="label">Venue:</label>
-      <select id="themeSelect" class="select">
-        <option value="theme-louvre" selected>Louvre — Royal Red + Gold</option>
-        <option value="theme-met">Met — Aqua + Wood Frame</option>
-        <option value="theme-la">LA Modern — White Wall + Black Frame</option>
-      </select>
-      <button class="btn" onclick="location.reload()">↻ Refresh</button>
-    </div>
+    <!-- ====== EXHIBITS ====== -->
+    <section class="exhibits">
 
-    <div class="gallery">
-      <!-- 1 -->
-      <div class="frame-wrap"><div class="frame"><div class="mat">
-        <article class="tile" tabindex="0" data-title="Xavier's Perspectives" data-video="./xaviers-perspectives.mp4">
-          <img class="thumb" src="./xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" loading="lazy" />
-          <video class="clip" preload="metadata" playsinline muted></video>
-          <div class="overlay"><div class="title">Xavier's Perspectives</div><div class="badge">Hover to preview</div></div>
-        </article>
-      </div></div></div>
+      <!-- Exhibit 1 -->
+      <article class="exhibit">
+        <aside class="plaque">
+          <h2>Xavier's Perspectives</h2>
+          <div class="room">Room: Portraits in Motion (coming soon)</div>
+          <p>Intimate character studies that flicker between realism and dream. This wing explores faces, gestures, and mood as moving compositions.</p>
+          <button class="cta" aria-disabled="true" title="Room under construction">▶︎ Enter Room (Coming Soon)</button>
+        </aside>
+        <div class="frame-wrap"><div class="frame"><div class="mat">
+          <article class="tile" tabindex="0" data-title="Xavier's Perspectives" data-video="./xaviers-perspectives.mp4">
+            <img class="thumb" src="./xaviers-perspectives-poster.png" alt="Poster: Xavier's Perspectives" loading="lazy" />
+            <video class="clip" preload="metadata" playsinline muted></video>
+            <div class="overlay"><div class="title">Xavier's Perspectives</div><div class="badge">Hover to preview</div></div>
+          </article>
+        </div></div></div>
+      </article>
 
-      <!-- 2 -->
-      <div class="frame-wrap"><div class="frame"><div class="mat">
-        <article class="tile" tabindex="0" data-title="Reflections from a Jazz Club" data-video="./Reflections from a Jazz Club.mp4">
-          <img class="thumb" src="./Jazz.png" alt="Poster: Reflections from a Jazz Club" loading="lazy" />
-          <video class="clip" preload="metadata" playsinline muted></video>
-          <div class="overlay"><div class="title">Reflections from a Jazz Club</div><div class="badge">Hover to preview</div></div>
-        </article>
-      </div></div></div>
+      <!-- Exhibit 2 -->
+      <article class="exhibit">
+        <aside class="plaque">
+          <h2>Reflections from a Jazz Club</h2>
+          <div class="room">Room: Noir & Jazz Abstractions (coming soon)</div>
+          <p>Smoke, brass, and neon. Improvised camera rhythms meet graphic motifs in a low-lit synesthetic lounge.</p>
+          <button class="cta" aria-disabled="true" title="Room under construction">▶︎ Enter Room (Coming Soon)</button>
+        </aside>
+        <div class="frame-wrap"><div class="frame"><div class="mat">
+          <article class="tile" tabindex="0" data-title="Reflections from a Jazz Club" data-video="./Reflections from a Jazz Club.mp4">
+            <img class="thumb" src="./Jazz.png" alt="Poster: Reflections from a Jazz Club" loading="lazy" />
+            <video class="clip" preload="metadata" playsinline muted></video>
+            <div class="overlay"><div class="title">Reflections from a Jazz Club</div><div class="badge">Hover to preview</div></div>
+          </article>
+        </div></div></div>
+      </article>
 
-      <!-- 3 -->
-      <div class="frame-wrap"><div class="frame"><div class="mat">
-        <article class="tile" tabindex="0" data-title="Vacancy — an AI cover of Dream Theater" data-video="./Vacancy - an AI cover of Dream Theater.mp4">
-          <img class="thumb" src="./Vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" loading="lazy" />
-          <video class="clip" preload="metadata" playsinline muted></video>
-          <div class="overlay"><div class="title">Vacancy — AI cover (Dream Theater)</div><div class="badge">Hover to preview</div></div>
-        </article>
-      </div></div></div>
+      <!-- Exhibit 3 -->
+      <article class="exhibit">
+        <aside class="plaque">
+          <h2>Vacancy — AI cover (Dream Theater)</h2>
+          <div class="room">Room: Cinematic Covers (coming soon)</div>
+          <p>Classic tracks reimagined as moving paintings—lyric moods translated into light and motion.</p>
+          <button class="cta" aria-disabled="true" title="Room under construction">▶︎ Enter Room (Coming Soon)</button>
+        </aside>
+        <div class="frame-wrap"><div class="frame"><div class="mat">
+          <article class="tile" tabindex="0" data-title="Vacancy — an AI cover of Dream Theater" data-video="./Vacancy - an AI cover of Dream Theater.mp4">
+            <img class="thumb" src="./Vacancy.png" alt="Poster: Vacancy — an AI cover of Dream Theater" loading="lazy" />
+            <video class="clip" preload="metadata" playsinline muted></video>
+            <div class="overlay"><div class="title">Vacancy — AI cover (Dream Theater)</div><div class="badge">Hover to preview</div></div>
+          </article>
+        </div></div></div>
+      </article>
 
-      <!-- 4 -->
-      <div class="frame-wrap"><div class="frame"><div class="mat">
-        <article class="tile" tabindex="0" data-title="Wings for Marie" data-video="./Wings For Marie.mp4">
-          <img class="thumb" src="./Wings.png" alt="Poster: Wings for Marie" loading="lazy" />
-          <video class="clip" preload="metadata" playsinline muted></video>
-          <div class="overlay"><div class="title">Wings for Marie</div><div class="badge">Hover to preview</div></div>
-        </article>
-      </div></div></div>
+      <!-- Exhibit 4 -->
+      <article class="exhibit">
+        <aside class="plaque">
+          <h2>Wings for Marie</h2>
+          <div class="room">Room: Devotional Motion (coming soon)</div>
+          <p>Elegiac studies about memory and lift—where textures arc upward and time seems to glow.</p>
+          <button class="cta" aria-disabled="true" title="Room under construction">▶︎ Enter Room (Coming Soon)</button>
+        </aside>
+        <div class="frame-wrap"><div class="frame"><div class="mat">
+          <article class="tile" tabindex="0" data-title="Wings for Marie" data-video="./Wings For Marie.mp4">
+            <img class="thumb" src="./Wings.png" alt="Poster: Wings for Marie" loading="lazy" />
+            <video class="clip" preload="metadata" playsinline muted></video>
+            <div class="overlay"><div class="title">Wings for Marie</div><div class="badge">Hover to preview</div></div>
+          </article>
+        </div></div></div>
+      </article>
 
-      <!-- 5 — TikTok tile (poster only; opens in new tab) + CTA inside same frame-wrap -->
-      <div class="frame-wrap">
-        <div class="frame"><div class="mat">
+      <!-- Exhibit 5 (TikTok + Working Room) -->
+      <article class="exhibit">
+        <aside class="plaque">
+          <h2>The Grudge on Dune</h2>
+          <div class="room">Room: Abstracts, Tools & Ghouls</div>
+          <p>Dark, rebellious remixes—surreal mechanics, ritual light, and riffs re-forged. Enter for the full series.</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap">
+            <a class="cta" href="https://www.tiktok.com/t/ZT63YRxNR/" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>
+            <button
+              id="enterAbstracts"
+              class="cta"
+              type="button"
+              data-intro="room-abstract/media/GhoulsDoor.mp4"
+              data-target="room-abstract/index.html"
+              aria-haspopup="dialog">🏛 Enter this Room</button>
+          </div>
+        </aside>
+        <div class="frame-wrap"><div class="frame"><div class="mat">
           <article class="tile" tabindex="0" data-title="The Grudge on Dune" data-tiktok="https://www.tiktok.com/t/ZT63YRxNR/">
             <img class="thumb" src="./IMG_0494.jpg" alt="Poster: The Grudge on Dune" loading="lazy" />
             <div class="overlay"><div class="title">The Grudge on Dune</div><div class="badge">Click to watch on TikTok</div></div>
           </article>
-        </div></div>
+        </div></div></div>
+      </article>
 
-        <!-- Centered CTA, aligned under the poster -->
-        <div class="room-cta">
-          <button
-            id="enterAbstracts"
-            class="enter-room-btn"
-            type="button"
-            data-intro="room-abstract/media/GhoulsDoor.mp4"
-            data-target="room-abstract/index.html"
-            aria-haspopup="dialog">
-            ▶︎ Click to Enter the Abstract,Tools and Ghouls Room
-          </button>
-        </div>
-      </div>
-    </div>
+    </section>
   </div>
 
   <!-- Intro overlay -->
@@ -196,34 +282,17 @@
   </div>
 
 <script>
-  /* === Sound-on-hover opt-in === */
+  /* === Hover + sound toggle kept simple for lobby === */
   let soundEnabled = false;
   let audioCtx = null;
-  const soundToggle = document.getElementById('soundToggle');
-  soundToggle.addEventListener('click', async () => {
-    try {
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') await audioCtx.resume();
-    } catch(e) {}
-    soundEnabled = !soundEnabled;
-    soundToggle.setAttribute('aria-pressed', String(soundEnabled));
-    soundToggle.textContent = soundEnabled ? '🔇 Disable Sound Previews' : '🔊 Enable Sound Previews';
-  });
 
-  /* === Theme switcher === */
-  const themeSelect = document.getElementById('themeSelect');
-  themeSelect.addEventListener('change', () => {
-    document.body.classList.remove('theme-louvre','theme-met','theme-la');
-    document.body.classList.add(themeSelect.value);
-  });
-
-  /* === Hover / press-hold preview with resume & “poster once” === */
+  /* Hover / press-hold preview with resume & poster-once (for local MP4 tiles) */
   const tiles = document.querySelectorAll('.tile');
   const safeSrc = (p) => encodeURI(p);
 
   function ensureVideo(tile){
     const v = tile.querySelector('video.clip');
-    if (!v) return null;                 // TikTok tile has no <video>
+    if (!v) return null;                 // TikTok tiles have no <video>
     if (!v.dataset.bound){
       v.dataset.bound = '1';
       v.src = safeSrc(tile.dataset.video);
@@ -234,26 +303,15 @@
     }
     return v;
   }
-
-  function reveal(tile){
-    if (!tile.classList.contains('revealed')) tile.classList.add('revealed');
-  }
-
+  function reveal(tile){ if (!tile.classList.contains('revealed')) tile.classList.add('revealed'); }
   function startPreview(tile, userGesture=false){
     if (tile.dataset.tiktok) return;
-    const v = ensureVideo(tile);
-    if (!v) return;
-    reveal(tile);
-    v.muted = !soundEnabled;
+    const v = ensureVideo(tile); if (!v) return;
+    reveal(tile); v.muted = !soundEnabled;
     const p = v.play(); if (userGesture && p) p.catch(()=>{});
     tile.classList.add('is-previewing');
   }
-
-  function stopPreview(tile){
-    const v = tile.querySelector('video.clip');
-    if (v){ v.pause(); }
-    tile.classList.remove('is-previewing');
-  }
+  function stopPreview(tile){ const v = tile.querySelector('video.clip'); if (v) v.pause(); tile.classList.remove('is-previewing'); }
 
   tiles.forEach(tile=>{
     tile.addEventListener('pointerenter', ()=>startPreview(tile,false));
@@ -266,7 +324,7 @@
     tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
   });
 
-  /* === Lightbox (video tiles only) === */
+  /* Lightbox for video tiles only */
   const lb = document.getElementById('lightbox');
   const lbVideo = document.getElementById('lbVideo');
   const lbTitle = document.getElementById('lbTitle');
@@ -289,20 +347,15 @@
     });
   }
   function closeLightbox(){ lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open'); }
-
   lbClose.addEventListener('click', closeLightbox);
   lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
-
   tiles.forEach(tile=>{
     tile.addEventListener('click', ()=>openLightboxFromTile(tile));
     tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
   });
 
-  /* Default theme on load */
-  document.body.classList.add('theme-louvre');
-
-  /* ========== Intro overlay logic (robust) ========== */
+  /* ====== Intro overlay for Abstracts room ====== */
   (function(){
     const btn = document.getElementById('enterAbstracts');
     if(!btn) return;
@@ -316,47 +369,31 @@
       try { return new URL(raw, window.location.href).href; }
       catch { return raw; }
     }
-
     function cleanup(){
       try { video.pause(); } catch(e){}
       video.removeAttribute('src'); video.load();
       overlay.classList.remove('open');
       document.body.style.overflow = '';
     }
-
     function goNow(){
-      const targetAbs = resolveTarget();
-      cleanup();
-      window.location.assign(targetAbs);
+      const href = resolveTarget();
+      cleanup(); window.location.assign(href);
     }
 
     btn.addEventListener('click', async (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-
+      e.preventDefault(); e.stopPropagation();
       const introSrc = btn.dataset.intro;
       if(!introSrc){ goNow(); return; }
 
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
-
       video.src = introSrc;
-      video.setAttribute('playsinline','');
-      video.setAttribute('webkit-playsinline','');
-      video.muted = true; // most reliable autoplay
+      video.setAttribute('playsinline',''); video.setAttribute('webkit-playsinline','');
+      video.muted = true;
 
       let started = false;
       const bail = setTimeout(()=>{ if(!started) goNow(); }, 3500);
-
-      try {
-        await video.play();
-        started = true;
-        clearTimeout(bail);
-      } catch {
-        goNow();
-        return;
-      }
-
+      try { await video.play(); started = true; clearTimeout(bail); } catch { goNow(); return; }
       video.addEventListener('ended', ()=>goNow(), {once:true});
       skipBtn.onclick = ()=>goNow();
     }, {passive:false});
