@@ -71,16 +71,11 @@
   </div>
 
 <script>
-/* ---------- Configure this section per room ---------- */
-const Celestial & Abyssal Realms = "Celestial & Abyssal Realms"; // keep <title> in sync if you like
+const ROOM_TITLE = "Celestial & Abyssal Realms";
 const INTRO_TEXT = "Poster-only room. Click any artwork to watch on TikTok.";
+const TILES = [{"id":"more-guitars-at-luna-park","title":"More Guitars at Luna Park","href":"https://www.tiktok.com/@chrisjmurphy6...133?is_from_webapp=1&sender_device=pc&web_id=7549220495280195086","poster":"img/more-guitars-at-luna-park.jpg"},{"id":"a-speck-of-a-blue-dot","title":"A Speck of a Blue Dot","href":"https://www.tiktok.com/@chrisjmurphy65/vi...783?is_from_webapp=1&sender_device=pc&web_id=7549220495280195086","poster":"img/a-speck-of-a-blue-dot.jpg"},{"id":"our-waiting-for-sleep","title":"Our Waiting For Sleep","href":"https://www.tiktok.com/@chrisjmurphy65/vi...237?is_from_webapp=1&sender_device=pc&web_id=7549220495280195086","poster":"img/our-waiting-for-sleep.jpg"},{"id":"the-greatest-gig-in-the-sky","title":"The Greatest Gig in the Sky","href":"https://www.tiktok.com/@chrisjmurph...534?is_from_webapp=1&sender_device=pc&web_id=7549220495280195086","poster":"img/the-greatest-gig-in-the-sky.jpg"},{"id":"labyrinths-of-coral-caves","title":"Labyrinths of Coral Caves","href":"https://www.tiktok.com/@chrisjmurphy6...725?is_from_webapp=1&sender_device=pc&web_id=7549220495280195086","poster":"img/labyrinths-of-coral-caves.jpg"},{"id":"sketching-the-dark-side-of-the-moon","title":"Sketching the Dark Side of the Moon","href":"https://www.tiktok.com/@chr...309?is_from_webapp=1&sender_device=pc&web_id=7549220495280195086","poster":"img/sketching-the-dark-side-of-the-moon.jpg"},{"id":"covering-my-eyes","title":"Covering My Eyes","href":"https://www.tiktok.com/@chrisjmurphy65/video/7...799?is_from_webapp=1&sender_device=pc&web_id=7549220495280195086","poster":"img/covering-my-eyes.jpg"},{"id":"help-set-our-sun","title":"Help Set Our Sun","href":"https://www.tiktok.com/@chrisjmurphy65/v...","poster":"img/help-set-our-sun.jpg"},{"id":"our-spirits-will-carry-on","title":"Our Spirits will Carry On","href":"https://www.tiktok.com/@chrisjmurphy6...430?is_from_webapp=1&sender_device=pc&web_id=7549220495280195086","poster":"img/our-spirits-will-carry-on.jpg"}];
 
-// Fill this with { id, title, poster, href } objects.
-// Example: { id:"dark-side-moon", title:"Dark Side of the Moon", poster:"img/dark-side-moon.jpg", href:"https://www.tiktok.com/@.../video/..." }
-const TILES = [
-];
-
-/* ---------- Rendering (no edits needed below) ---------- */
+/* rendering */
 const rand = (min,max)=> Math.random()*(max-min)+min;
 const choose = a => a[Math.floor(Math.random()*a.length)];
 const FINISHES = ['finish-gilded','finish-ebony','finish-brass','finish-walnut'];
@@ -131,13 +126,8 @@ function buildExhibit(tile){
 
 const root = document.getElementById('exhibits');
 TILES.forEach(t => root.appendChild(buildExhibit(t)));
-
-document.addEventListener('click', e=>{
-  const t = e.target.closest('.tile'); if(!t) return;
-  const href = t.dataset.href || '';
-  if(href) window.open(href,'_blank','noopener');
-});
-document.title = Celestial & Abyssal Realms + " — Moving Pictures";
+document.addEventListener('click', e=>{ const t=e.target.closest('.tile'); if(!t) return; const href=t.dataset.href||''; if(href) window.open(href,'_blank','noopener'); });
+document.title = ROOM_TITLE + " — Moving Pictures";
 </script>
 </body>
 </html>
