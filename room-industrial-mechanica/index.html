@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Industrial & Mechanica — Moving Pictures</title>
 <style>
-  :root{
-    --ink:#eceff4; --muted:#b7becd; --gold:#d8b765; --shadow:0 16px 40px rgba(0,0,0,.40);
-    --tile-aspect: 3 / 4; --wall-solid:#221014;
-  }
+  :root{ --ink:#eceff4; --muted:#b7becd; --gold:#d8b765; --shadow:0 16px 40px rgba(0,0,0,.40);
+         --tile-aspect: 3 / 4; --wall-solid:#221014; }
   html,body{height:100%}
   body{margin:0;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--wall-solid)}
   .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 80px}
@@ -21,35 +19,22 @@
   .exhibit.pl-right .plaque-col{order:2} .exhibit.pl-right .frame-col{order:1}
   @media(max-width:900px){.exhibit{grid-template-columns:1fr}.exhibit .plaque-col,.exhibit .frame-col{order:initial}}
   .plaque-col{transform:rotate(var(--pl-tilt,0deg))}
-  .plaque{
-    width:min(var(--plaqueW,320px),100%);
-    background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.55));
-    border:1px solid color-mix(in oklab,var(--gold) 60%, black);
-    border-left:6px solid var(--gold);
-    border-radius:14px;padding:16px 16px 12px;margin-top:var(--plaqueTop,0px);
-    backdrop-filter:blur(3px);box-shadow:var(--shadow)
-  }
+  .plaque{ width:min(var(--plaqueW,320px),100%); background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.55));
+           border:1px solid color-mix(in oklab,var(--gold) 60%, black); border-left:6px solid var(--gold);
+           border-radius:14px;padding:16px 16px 12px;margin-top:var(--plaqueTop,0px);
+           backdrop-filter:blur(3px);box-shadow:var(--shadow) }
   .plaque h2{margin:0 0 6px;font-size:clamp(18px,2.2vw,24px)}
   .plaque p{margin:0 12px 12px 0;color:#eae4d6;line-height:1.45}
   .frame-wrap{filter:drop-shadow(0 18px 24px rgba(0,0,0,.35));transform:rotate(var(--frame-tilt,0deg))}
   .frame{position:relative;box-shadow:var(--shadow);border-radius:14px;border:10px solid transparent}
-  .finish-gilded .frame{
-    background:linear-gradient(#0000,#0000) padding-box,
-      conic-gradient(from 20deg,#6b4e0f,#caa54b 12%,#ffeb9c 24%,#d3ab4a 36%,#6b4e0f 48%,#e2c266 60%,#fff1b5 72%,#c3972e 84%,#6b4e0f) border-box;
-  }
-  .finish-ebony .frame{
-    border-color:#0a0d12;
-    background:linear-gradient(180deg,#0a0f14,#131a22) padding-box,
-      linear-gradient(145deg,#1c232c,#090d12 60%,#1a212a) border-box;
-  }
-  .finish-brass .frame{
-    background:linear-gradient(#0000,#0000) padding-box,
-      conic-gradient(from -30deg,#3c2e14,#b49352,#6f582b,#d7b778,#4a3a18,#b49352) border-box;filter:saturate(1.06);
-  }
-  .finish-walnut .frame{
-    background:linear-gradient(#0000,#0000) padding-box,
-      linear-gradient(25deg,#3b2414 0%,#5a3820 30%,#7a4b2b 55%,#4b2d19 80%,#3b2414 100%) border-box;
-  }
+  .finish-gilded .frame{ background:linear-gradient(#0000,#0000) padding-box,
+      conic-gradient(from 20deg,#6b4e0f,#caa54b 12%,#ffeb9c 24%,#d3ab4a 36%,#6b4e0f 48%,#e2c266 60%,#fff1b5 72%,#c3972e 84%,#6b4e0f) border-box; }
+  .finish-ebony .frame{ border-color:#0a0d12; background:linear-gradient(180deg,#0a0f14,#131a22) padding-box,
+      linear-gradient(145deg,#1c232c,#090d12 60%,#1a212a) border-box; }
+  .finish-brass .frame{ background:linear-gradient(#0000,#0000) padding-box,
+      conic-gradient(from -30deg,#3c2e14,#b49352,#6f582b,#d7b778,#4a3a18,#b49352) border-box; filter:saturate(1.06); }
+  .finish-walnut .frame{ background:linear-gradient(#0000,#0000) padding-box,
+      linear-gradient(25deg, #3b2414 0%, #5a3820 30%, #7a4b2b 55%, #4b2d19 80%, #3b2414 100%) border-box; }
   .frame::after{content:"";position:absolute;inset:8px;border-radius:8px;border:2px solid #f4e8c7;pointer-events:none}
   .mat{margin:16px;background:#f4efe6;border:1px solid #ddd2be;border-radius:8px;
        box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12)}
@@ -69,75 +54,70 @@
     <div class="note">Posters link to TikTok. Frames/plaque styles vary per tile.</div>
     <section id="exhibits" class="exhibits"></section>
   </div>
-
 <script>
-/* ---------- Configure this section per room ---------- */
-const Industrial & Mechanica = "Industrial & Mechanica"; // keep <title> in sync if you like
-const INTRO_TEXT = "Poster-only room. Click any artwork to watch on TikTok.";
-
-// Fill this with { id, title, poster, href } objects.
-// Example: { id:"dark-side-moon", title:"Dark Side of the Moon", poster:"img/dark-side-moon.jpg", href:"https://www.tiktok.com/@.../video/..." }
-const TILES = [
+var INTRO_TEXT = "Poster-only room. Click any artwork to watch on TikTok.";
+var TILES = [
+  {
+    "title": "Midnight in Manhattan",
+    "href": "https://www.tiktok.com/@chrisjmurphy65/video/7546341732477046030",
+    "poster": "img/midnight-in-manhattan.jpg"
+  },
+  {
+    "title": "Surfacing Tensions",
+    "href": "https://www.tiktok.com/@chrisjmurphy65/video/7544973308586335773",
+    "poster": "img/surfacing-tensions.jpg"
+  },
+  {
+    "title": "Techno 7empest",
+    "href": "https://www.tiktok.com/@chrisjmurphy65/video/7526819657686176389",
+    "poster": "img/techno-7empest.jpg"
+  },
+  {
+    "title": "TechnoInvincible",
+    "href": "https://www.tiktok.com/@chrisjmurphy65/video/7528094489722834189",
+    "poster": "img/technoinvincible.jpg"
+  }
 ];
-
-/* ---------- Rendering (no edits needed below) ---------- */
-const rand = (min,max)=> Math.random()*(max-min)+min;
-const choose = a => a[Math.floor(Math.random()*a.length)];
-const FINISHES = ['finish-gilded','finish-ebony','finish-brass','finish-walnut'];
-
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function choose(a){ return a[Math.floor(Math.random()*a.length)]; }
+var FINISHES = ["finish-gilded","finish-ebony","finish-brass","finish-walnut"];
 function buildExhibit(tile){
-  const ex = document.createElement('article');
-  const plaqueLeft = Math.random() < 0.5;
-  const finish = choose(FINISHES);
-  const frameTilt = (rand(-0.35,0.35)).toFixed(3)+'deg';
-  const plaqueTilt = (rand(-0.4,0.4)).toFixed(3)+'deg';
-  const plaqueW = Math.round(rand(240,340))+'px';
-  const plaqueTop = Math.round(rand(0,24))+'px';
-  const spacing = Math.round(rand(16,52));
+  var ex = document.createElement('article');
+  var plaqueLeft = Math.random() < 0.5;
+  var finish = choose(FINISHES);
+  var frameTilt = (rand(-0.35,0.35)).toFixed(3) + "deg";
+  var plaqueTilt = (rand(-0.4,0.4)).toFixed(3) + "deg";
+  var plaqueW = Math.round(rand(240,340)) + "px";
+  var plaqueTop = Math.round(rand(0,24)) + "px";
+  var spacing = Math.round(rand(16,52));
+  ex.className = "exhibit " + (plaqueLeft ? "pl-left" : "pl-right") + " " + finish;
+  ex.style.marginBottom = spacing + "px";
+  ex.style.setProperty("--frame-tilt", frameTilt);
+  ex.style.setProperty("--pl-tilt", plaqueTilt);
+  ex.style.setProperty("--plaqueW", plaqueW);
+  ex.style.setProperty("--plaqueTop", plaqueTop);
 
-  ex.className = `exhibit ${plaqueLeft ? 'pl-left':'pl-right'} ${finish}`;
-  ex.style.marginBottom = spacing+'px';
-  ex.style.setProperty('--frame-tilt', frameTilt);
-  ex.style.setProperty('--pl-tilt', plaqueTilt);
-  ex.style.setProperty('--plaqueW', plaqueW);
-  ex.style.setProperty('--plaqueTop', plaqueTop);
+  var plaque = document.createElement('div');
+  plaque.className = "plaque-col";
+  plaque.innerHTML = '<div class="plaque"><h2>' + tile.title + '</h2><p>' + INTRO_TEXT + '</p></div>';
 
-  const plaque = document.createElement('div');
-  plaque.className = 'plaque-col';
-  plaque.innerHTML = `
-    <div class="plaque">
-      <h2>${tile.title}</h2>
-      <p>${INTRO_TEXT}</p>
-    </div>
-  `;
-
-  const frameCol = document.createElement('div');
-  frameCol.className = 'frame-col';
-  frameCol.innerHTML = `
-    <div class="frame-wrap">
-      <div class="frame"><div class="mat">
-        <article class="tile" data-href="${tile.href || ''}" tabindex="0">
-          <img class="thumb" src="${tile.poster}" alt="Poster: ${tile.title}" loading="lazy" />
-          <div class="overlay"><div class="title">${tile.title}</div><div class="badge">Click to watch on TikTok</div></div>
-        </article>
-      </div></div>
-    </div>
-  `;
+  var frameCol = document.createElement('div');
+  frameCol.className = "frame-col";
+  frameCol.innerHTML = '<div class="frame-wrap"><div class="frame"><div class="mat">'
+    + '<article class="tile" data-href="' + (tile.href || '') + '" tabindex="0">'
+    +   '<img class="thumb" src="' + tile.poster + '" alt="Poster: ' + tile.title.replace(/"/g,'&quot;') + '" loading="lazy" />'
+    +   '<div class="overlay"><div class="title">' + tile.title + '</div><div class="badge">Click to watch on TikTok</div></div>'
+    + '</article>'
+    + '</div></div></div>';
 
   ex.appendChild(plaque);
   ex.appendChild(frameCol);
   return ex;
 }
-
-const root = document.getElementById('exhibits');
-TILES.forEach(t => root.appendChild(buildExhibit(t)));
-
-document.addEventListener('click', e=>{
-  const t = e.target.closest('.tile'); if(!t) return;
-  const href = t.dataset.href || '';
-  if(href) window.open(href,'_blank','noopener');
-});
-document.title = Industrial & Mechanica + " — Moving Pictures";
+var root = document.getElementById('exhibits');
+TILES.forEach(function(t){ root.appendChild(buildExhibit(t)); });
+function isLikelyTikTokUrl(u){ try { return /^https?:\/\/(www\.)?tiktok\.com\/@[^/]+\/video\/\d{6,25}(?:[?#].*)?$/i.test(u.trim()); } catch(e){ return false; } }
+document.addEventListener('click', function(e){ var t=e.target.closest('.tile'); if(!t) return; var href=(t.dataset.href||'').trim(); if(!href||!isLikelyTikTokUrl(href)){ var b=t.querySelector('.badge'); if(b) b.textContent='Link pending'; e.preventDefault(); return; } window.open(href,'_blank','noopener'); });
 </script>
 </body>
 </html>
