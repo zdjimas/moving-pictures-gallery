@@ -134,7 +134,7 @@
   }
   .finish-walnut .frame{
     background:linear-gradient(#0000,#0000) padding-box,
-      linear-gradient(25deg, #3b2414 0%, #5a3820 30%, #7a4b2b 55%, #4b2d19 80%, #3b2414 100%) border-box;
+      linear-gradient(25deg, #3b2414 0%,#5a3820 30%,#7a4b2b 55%,#4b2d19 80%,#3b2414 100%) border-box;
   }
   .frame::after{content:"";position:absolute;inset:8px;border-radius:8px;border:2px solid #f4e8c7;pointer-events:none}
   .mat{margin:16px;background:#f4efe6;border:1px solid #ddd2be;border-radius:8px;
@@ -202,7 +202,7 @@
     <section id="exhibits" class="exhibits"></section>
   </div>
 
-  <!-- Fullscreen Intro overlay -->
+  <!-- Fullscreen Intro overlay (used for Abstracts only) -->
   <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
     <div class="intro-shell">
       <video id="introVideo"
@@ -249,6 +249,17 @@
 })();
 
 /* ============ Data ============ */
+/* FEATURED: Wings for Marie → opens Narrative & Memory room */
+const FEATURED = {
+  key: 'featured-wings',
+  title: 'Wings for Marie',
+  room: 'Narrative & Memory',
+  desc: 'Enter the Narrative & Memory room — curated works on recollection, meaning, and time.',
+  targetRoom: 'room-narrative-memory/index.html',
+  poster: './Wings.png'
+};
+
+/* Abstracts (unchanged) — has intro overlay then enters the room */
 const ABSTRACTS = {
   key: 'abstracts',
   title: 'The Grudge on Dune',
@@ -260,6 +271,7 @@ const ABSTRACTS = {
   tile: { tiktok: 'https://www.tiktok.com/t/ZT63YRxNR/', poster: './IMG_0494.jpg' }
 };
 
+/* Other local MP4 showcases (hover preview + lightbox) */
 const OTHERS = [
   { key:'xavier', title:"Xavier's Perspectives", room:'Portraits in Motion',
     desc:'Intimate character studies that flicker between realism and dream. Faces, gestures, and mood as moving compositions.',
@@ -269,10 +281,7 @@ const OTHERS = [
     mp4:'./Reflections from a Jazz Club.mp4', poster:'./Jazz.png' },
   { key:'vacancy', title:'Vacancy — an AI cover of Dream Theater', room:'Cinematic Covers',
     desc:'Classic tracks reimagined as moving paintings—lyric moods translated into light and motion.',
-    mp4:'./Vacancy - an AI cover of Dream Theater.mp4', poster:'./Vacancy.png' },
-  { key:'wings', title:'Wings for Marie', room:'Devotional Motion',
-    desc:'Elegiac studies about memory and lift—where textures arc upward and time seems to glow.',
-    mp4:'./Wings For Marie.mp4', poster:'./Wings.png' }
+    mp4:'./Vacancy - an AI cover of Dream Theater.mp4', poster:'./Vacancy.png' }
 ];
 
 /* ============ Utilities ============ */
@@ -307,7 +316,7 @@ function buildExhibit(data){
   plaque.innerHTML = `
     <div class="plaque">
       <h2>${data.title}</h2>
-      <div class="room">Room: ${data.room}${data.isActiveRoom ? '' : ' (coming soon)'}</div>
+      <div class="room">Room: ${data.room}${data.isActiveRoom ? '' : ''}</div>
       <p>${data.desc}</p>
       <div class="cta-row"></div>
     </div>
@@ -323,17 +332,26 @@ function buildExhibit(data){
     </div>
   `;
 
-  // Tile content (MP4 hover vs TikTok)
+  // Tile content types:
+  // 1) targetRoom → clicking poster enters the room
+  // 2) TikTok tile → poster opens TikTok in new tab
+  // 3) Local MP4 → hover preview + lightbox
   const tile = frameCol.querySelector('.tile');
-  if (data.tile?.tiktok){
-    tile.dataset.title = data.title;
+  tile.dataset.title = data.title;
+
+  if (data.targetRoom){
+    tile.dataset.target = data.targetRoom;
+    tile.innerHTML = `
+      <img class="thumb" src="${data.poster}" alt="Poster: ${data.title}" loading="lazy" />
+      <div class="overlay"><div class="title">${data.title}</div><div class="badge">Enter this Room</div></div>
+    `;
+  } else if (data.tile?.tiktok){
     tile.dataset.tiktok = data.tile.tiktok;
     tile.innerHTML = `
       <img class="thumb" src="${data.tile.poster}" alt="Poster: ${data.title}" loading="lazy" />
       <div class="overlay"><div class="title">${data.title}</div><div class="badge">Click to watch on TikTok</div></div>
     `;
   } else {
-    tile.dataset.title = data.title;
     tile.dataset.video = data.mp4;
     tile.innerHTML = `
       <img class="thumb" src="${data.poster}" alt="Poster: ${data.title}" loading="lazy" />
@@ -346,19 +364,17 @@ function buildExhibit(data){
   const ctaRow = plaque.querySelector('.cta-row');
   const parts = [];
 
-  if (data.key === 'abstracts' && data.isActiveRoom){
+  if (data.targetRoom){
+    parts.push(`<a class="cta" href="${data.targetRoom}" target="_self" rel="noopener">🏛 Enter this Room</a>`);
+  } else if (data.key === 'abstracts' && data.isActiveRoom){
     parts.push(
       `<a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>`,
       `<button class="cta" id="enterAbstracts" type="button"
                data-intro="${data.introSrc}" data-target="${data.target}"
                aria-haspopup="dialog">🏛 Enter this Room</button>`
     );
-  } else if (!data.isActiveRoom){
-    parts.push(`<button class="cta" aria-disabled="true" title="Room under construction">▶︎ Enter Room (Coming Soon)</button>`);
-  }
-
-  // Per-exhibit hover-sound toggle (only when local MP4)
-  if (!data.tile?.tiktok){
+  } else if (!data.tile?.tiktok && data.mp4){
+    // Per-exhibit hover-sound toggle (only when local MP4)
     parts.push(`<button class="mini-toggle hover-sound-toggle" type="button" aria-pressed="false" title="Toggle sound while hovering this artwork">🔊 Hover Sound: Off</button>`);
   }
 
@@ -381,10 +397,11 @@ function buildExhibit(data){
 }
 
 /* ============ Render ============ */
+/* Order: 1) Featured (Wings → Narrative & Memory), 2) Abstracts, 3) others */
 const exhibitsEl = document.getElementById('exhibits');
-[ABSTRACTS, ...shuffle([...OTHERS])].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
+[FEATURED, ABSTRACTS, ...shuffle([...OTHERS])].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
 
-/* ============ Hover previews & Lightbox ============ */
+/* ============ Hover previews & Lightbox / Navigation ============ */
 const tiles = document.querySelectorAll('.tile');
 const safeSrc = (p)=> encodeURI(p);
 
@@ -403,7 +420,7 @@ function ensureVideo(tile){
 }
 function reveal(tile){ if (!tile.classList.contains('revealed')) tile.classList.add('revealed'); }
 function startPreview(tile, userGesture=false){
-  if (tile.dataset.tiktok) return;
+  if (tile.dataset.tiktok || tile.dataset.target) return;
   const v = ensureVideo(tile); if (!v) return;
   reveal(tile);
   const ex = tile.closest('.exhibit');
@@ -424,13 +441,17 @@ tiles.forEach(tile=>{
   tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
 });
 
-/* Lightbox for local MP4 tiles only */
+/* Navigation / Lightbox click */
 const lb = document.getElementById('lightbox');
 const lbVideo = document.getElementById('lbVideo');
 const lbTitle = document.getElementById('lbTitle');
 const lbClose = document.getElementById('lbClose');
 
 function openLightboxFromTile(tile){
+  if (tile.dataset.target){
+    window.location.assign(tile.dataset.target);
+    return;
+  }
   if (tile.dataset.tiktok){
     window.open(tile.dataset.tiktok, '_blank', 'noopener');
     return;
@@ -505,6 +526,7 @@ tiles.forEach(tile=>{
 })();
 </script>
 
+  <!-- Additive lobby rows (unchanged) -->
   <script src="rooms_manifest.js"></script>
   <script src="lobby-rooms.js"></script>
 </body>
