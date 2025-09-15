@@ -134,7 +134,7 @@
   .player{position:relative;background:#000}
   .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 
-  /* Intro overlay (for Abstracts room) */
+  /* Intro overlay (for any room) */
   .intro-overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center; background:#000; }
   .intro-overlay.open{ display:grid }
   .intro-shell{
@@ -172,7 +172,7 @@
     <section id="exhibits" class="exhibits"></section>
   </div>
 
-  <!-- Fullscreen Intro overlay (Abstracts) -->
+  <!-- Fullscreen Intro overlay (shared for all rooms) -->
   <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
     <div class="intro-shell">
       <video id="introVideo"
@@ -219,11 +219,13 @@
 })();
 
 /* ============ Data ============ */
-/* 1) Featured entry-hall exhibit (local MP4 hover) with plaque CTA to the room */
+/* 1) Featured entry-hall exhibit (local MP4 hover) with plaque CTA to the room (with intro pre-roll) */
 const WINGS_FEATURED = {
   key:'wings', title:'Wings for Marie', room:'Narrative & Memory',
   desc:'Enter <strong>Narrative &amp; Memory</strong> — curated works on recollection, meaning, and time.',
   mp4:'./Wings For Marie.mp4', poster:'./Wings.png',
+  /* open this room AFTER playing the transfer video you uploaded */
+  introSrc:'room-narrative-memory/Media/NarrativeMemoryRoom.mp4',
   roomTarget:'room-narrative-memory/index.html'
 };
 
@@ -328,15 +330,21 @@ function buildExhibit(data){
   if (data.key === 'abstracts' && data.isActiveRoom){
     parts.push(
       `<a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>`,
-      `<button class="cta" id="enterAbstracts" type="button"
+      `<button class="cta enter-room" type="button"
                data-intro="${data.introSrc}" data-target="${data.target}"
                aria-haspopup="dialog">🏛 Enter this Room</button>`
     );
   }
 
-  // Local MP4 exhibits: sound toggle always; optional room entry button via roomTarget
+  // Local MP4 exhibits: sound toggle always; optional room entry button
   if (!data.tile?.tiktok){
-    if (data.roomTarget){
+    if (data.roomTarget && data.introSrc){
+      /* Wings (now with intro) */
+      parts.push(`<button class="cta enter-room" type="button"
+                          data-intro="${data.introSrc}" data-target="${data.roomTarget}"
+                          aria-haspopup="dialog">🏛 Enter this Room</button>`);
+    } else if (data.roomTarget){
+      /* fallback: direct link (others when they become rooms later) */
       parts.push(`<a class="cta" href="${data.roomTarget}" target="_self" rel="noopener">🏛 Enter this Room</a>`);
     }
     parts.push(`<button class="mini-toggle hover-sound-toggle" type="button" aria-pressed="false" title="Toggle sound while hovering this artwork">🔊 Hover Sound: Off</button>`);
@@ -361,7 +369,7 @@ function buildExhibit(data){
 }
 
 /* ============ Render (order fixed) ============ */
-/* Wings first (hover MP4), then the image tile that starts the list (Grunge on Dune), then the rest */
+/* Wings first (hover MP4 with intro), then Abstracts image tile, then the rest */
 const exhibitsEl = document.getElementById('exhibits');
 [WINGS_FEATURED, ABSTRACTS, ...OTHERS].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
 
@@ -435,36 +443,29 @@ tiles.forEach(tile=>{
   tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
 });
 
-/* ===== Fullscreen Intro overlay flow (Abstracts image tile) ===== */
+/* ===== Fullscreen Intro overlay flow (generic for any room button) ===== */
 (function(){
-  const btn = document.getElementById('enterAbstracts');
-  if(!btn) return;
-
   const overlay = document.getElementById('introOverlay');
   const video   = document.getElementById('introVideo');
   const skipBtn = document.getElementById('skipIntro');
 
-  function resolveTarget(){
-    const raw = btn.dataset.target || 'room-abstract/index.html';
-    try { return new URL(raw, window.location.href).href; }
-    catch { return raw; }
-  }
   function cleanup(){
     try { video.pause(); } catch(e){}
     video.removeAttribute('src'); video.load();
     overlay.classList.remove('open');
     document.body.style.overflow = '';
   }
-  function goNow(){
-    const href = resolveTarget();
+  function goNow(href){
     cleanup();
     window.location.assign(href);
   }
 
-  btn.addEventListener('click', async (e)=>{
-    e.preventDefault(); e.stopPropagation();
+  function handleEnterClick(btn){
     const introSrc = btn.dataset.intro;
-    if(!introSrc){ goNow(); return; }
+    const targetRaw = btn.dataset.target;
+    const targetHref = (()=>{ try { return new URL(targetRaw, window.location.href).href; } catch { return targetRaw; } })();
+
+    if(!introSrc){ goNow(targetHref); return; }
 
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -472,17 +473,24 @@ tiles.forEach(tile=>{
     video.setAttribute('playsinline',''); 
     video.setAttribute('webkit-playsinline','');
 
-    try {
-      video.muted = false; video.volume = 1.0;
-      await video.play();
-    } catch {
-      video.muted = true;
-      try { await video.play(); } catch { goNow(); return; }
-    }
+    (async ()=>{
+      try {
+        video.muted = false; video.volume = 1.0;
+        await video.play();
+      } catch {
+        video.muted = true;
+        try { await video.play(); } catch { goNow(targetHref); return; }
+      }
+    })();
 
-    video.addEventListener('ended', ()=>goNow(), {once:true});
-    skipBtn.onclick = ()=>goNow();
-  }, {passive:false});
+    video.addEventListener('ended', ()=>goNow(targetHref), {once:true});
+    skipBtn.onclick = ()=>goNow(targetHref);
+  }
+
+  // Bind all "Enter this Room" buttons that specify data-intro and data-target
+  document.querySelectorAll('button.enter-room[data-target]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); handleEnterClick(btn); }, {passive:false});
+  });
 })();
 </script>
 
