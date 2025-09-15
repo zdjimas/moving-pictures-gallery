@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Natural Histories — Moving Pictures</title>
+<title>Moving Pictures — Lobby</title>
 <style>
   :root{ --ink:#eceff4; --muted:#b7becd; --gold:#d8b765; --shadow:0 16px 40px rgba(0,0,0,.40);
          --tile-aspect: 3 / 4; --wall-solid:#221014; }
@@ -12,7 +12,6 @@
   .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 80px}
   h1{margin:0 0 10px;font-size:clamp(24px,3.2vw,40px)}
   .note{color:var(--muted);font-size:14px;margin:6px 0 18px}
-  a.back{display:inline-block;margin:8px 0 24px;color:#cfe1ff;text-decoration:none}
   .exhibits{display:grid;gap:36px}
   .exhibit{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
   .exhibit.pl-left .plaque-col{order:1} .exhibit.pl-left .frame-col{order:2}
@@ -29,18 +28,10 @@
   }
   .plaque h2{margin:0 0 6px;font-size:clamp(18px,2.2vw,24px)}
   .plaque p{margin:0 12px 12px 0;color:#eae4d6;line-height:1.45}
-  .plaque .body{max-height:6.5em; overflow:hidden; position:relative}
-  .plaque .body::after{
-    content:""; position:absolute; left:0; right:0; bottom:0; height:2.4em;
-    background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.55));
-    pointer-events:none
+  .plaque .cta{margin-top:8px}
+  .plaque .cta button{
+    background:#cfe1ff;color:#000;padding:6px 10px;border-radius:6px;border:0;cursor:pointer
   }
-  .plaque.expanded .body{max-height:none}
-  .plaque.expanded .body::after{display:none}
-  .plaque .toggle{
-    display:inline-block; font-size:12px; color:#cfe1ff; background:transparent; border:0; cursor:pointer; padding:4px 0
-  }
-
   .frame-wrap{filter:drop-shadow(0 18px 24px rgba(0,0,0,.35));transform:rotate(var(--frame-tilt,0deg))}
   .frame{position:relative;box-shadow:var(--shadow);border-radius:14px;border:10px solid transparent}
   .finish-gilded .frame{
@@ -60,11 +51,10 @@
     linear-gradient(25deg,#3b2414 0%,#5a3820 30%,#7a4b2b 55%,#4b2d19 80%,#3b2414 100%) border-box;
   }
   .frame::after{content:"";position:absolute;inset:8px;border-radius:8px;border:2px solid #f4e8c7;pointer-events:none}
-  .mat{margin:16px;background:#f4efe6;border:1px solid #ddd2be;border-radius:8px;
-       box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12)}
+  .mat{margin:16px;background:#f4efe6;border:1px solid #ddd2be;border-radius:8px}
   .tile{position:relative;aspect-ratio:var(--tile-aspect);overflow:hidden;border:1px solid rgba(0,0,0,.25);
         background:#000;display:block;touch-action:manipulation;border-radius:6px}
-  .thumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
+  .thumb, video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
   .overlay{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
            padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:#e9eef6}
   .title{font-weight:600;font-size:14px}
@@ -73,172 +63,116 @@
 </head>
 <body>
   <div class="wrap">
-    <a href="../index.html" class="back">← Back to Lobby</a>
-    <h1>Natural Histories</h1>
-    <div class="note">Posters link to TikTok. Frames/plaque styles vary per tile.</div>
-    <section id="exhibits" class="exhibits"></section>
+    <h1>Lobby — Moving Pictures</h1>
+    <div class="note">Hover tiles preview with sound toggle. Click plaques to enter rooms.</div>
+    <section id="exhibits" class="exhibits">
+
+      <!-- Exhibit 1: Wings for Marie -->
+      <article class="exhibit pl-left finish-gilded">
+        <div class="plaque-col">
+          <div class="plaque">
+            <h2>Wings for Marie</h2>
+            <p class="body">Opening to the Narrative & Memory Room.</p>
+            <div class="cta"><button id="enter-narrative">Enter this Room</button></div>
+          </div>
+        </div>
+        <div class="frame-col">
+          <div class="frame-wrap"><div class="frame"><div class="mat">
+            <video id="wingsVideo" muted preload="metadata" poster="img/wings.jpg">
+              <source src="media/wings.mp4" type="video/mp4">
+            </video>
+            <div class="overlay"><div class="title">Wings for Marie</div><div class="badge">Hover to preview</div></div>
+          </div></div></div>
+        </div>
+      </article>
+
+      <!-- Exhibit 2: Reflections -->
+      <article class="exhibit pl-right finish-walnut">
+        <div class="plaque-col">
+          <div class="plaque"><h2>Reflections from a Jazz Club</h2></div>
+        </div>
+        <div class="frame-col">
+          <div class="frame-wrap"><div class="frame"><div class="mat">
+            <video muted preload="metadata" poster="img/jazz.jpg">
+              <source src="media/jazz.mp4" type="video/mp4">
+            </video>
+            <div class="overlay"><div class="title">Reflections</div></div>
+          </div></div></div>
+        </div>
+      </article>
+
+      <!-- Exhibit 3: Vacancy -->
+      <article class="exhibit pl-left finish-ebony">
+        <div class="plaque-col">
+          <div class="plaque"><h2>Vacancy — AI Cover of Dream Theater</h2></div>
+        </div>
+        <div class="frame-col">
+          <div class="frame-wrap"><div class="frame"><div class="mat">
+            <video muted preload="metadata" poster="img/vacancy.jpg">
+              <source src="media/vacancy.mp4" type="video/mp4">
+            </video>
+            <div class="overlay"><div class="title">Vacancy</div></div>
+          </div></div></div>
+        </div>
+      </article>
+
+      <!-- Exhibit 4: Grudge on Dune (Abstracts intro) -->
+      <article class="exhibit pl-right finish-brass">
+        <div class="plaque-col">
+          <div class="plaque">
+            <h2>The Grudge on Dune</h2>
+            <div class="cta"><button id="enter-abstracts">Enter Abstracts</button></div>
+          </div>
+        </div>
+        <div class="frame-col">
+          <div class="frame-wrap"><div class="frame"><div class="mat">
+            <img class="thumb" src="img/grudge.jpg" alt="Poster: Grudge on Dune"/>
+            <div class="overlay"><div class="title">Abstracts</div><div class="badge">Click to open</div></div>
+          </div></div></div>
+        </div>
+      </article>
+
+    </section>
   </div>
 
 <script>
-/* ========= 1) CAPTIONS: put your per-artwork write-ups here ========= */
-var CAPTIONS = {
-  "Home Again":
-    "A return to small moments: morning light, soft shadows, and the relief of ordinary rhythm.\n\n" +
-    "Composed with layered stills and micro-motion to feel like breath.",
-  "Fragile as a Leaf":
-    "An ode to resilience. Dew collects like galaxies—each droplet a lens to a larger sky.\n" +
-    "*Guitar textures* shimmer; **percussion** is restrained to keep the pulse calm.",
-  "Goodbye Blue Skies":
-    "Farewell and gratitude in one frame. A study in color temperature shifts and dissolve timing.",
-  "Maynard's Vinyard Trip":
-    "Industrial pacing over pastoral imagery—tension on purpose. Watch the snare vs. horizon cuts.",
-  "Humbling River Journey":
-    "Water as memory carrier. Repeated motifs echo the lyric’s circular questions.",
-  "Run Like Hell Coyote Edition":
-    "Coyotes at midnight, neon edges. Kinetic cuts map to the bassline’s footfall.",
-  "The Embracing Circle":
-    "Closure scene. Subjects rotate toward center; crossfades emulate a slow inhale."
-};
-
-/* ========= 2) Tiles (same as your baseline, with optional inline 'caption' per item) ========= */
-var INTRO_TEXT = "Poster-only room. Click any artwork to watch on TikTok.";
-var TILES = [
-  { "title": "Home Again", "href": "https://www.tiktok.com/@chrisjmurphy65/video/7547825996448238903", "poster": "img/Home.png" },
-  { "title": "Fragile as a Leaf", "href": "https://www.tiktok.com/@chrisjmurphy65/video/7544857293385436471?is_from_webapp=1&sender_device=pc&web_id=7547882178648278583", "poster": "img/Fragile.png" },
-  { "title": "Goodbye Blue Skies", "href": "https://www.tiktok.com/@chrisjmurphy65/video/7535986424672193847?is_from_webapp=1&sender_device=pc&web_id=7547882178648278583", "poster": "img/GoodbyeBlueSkies.png" },
-  { "title": "Maynard's Vinyard Trip", "href": "https://www.tiktok.com/@chrisjmurphy65/video/7535985905044032782?is_from_webapp=1&sender_device=pc&web_id=7547882178648278583", "poster": "img/Maynard.png" },
-  { "title": "Humbling River Journey", "href": "https://www.tiktok.com/@chrisjmurphy65/video/7535203737095261453?is_from_webapp=1&sender_device=pc&web_id=7547882178648278583", "poster": "img/Humbling.png" },
-  { "title": "Run Like Hell Coyote Edition", "href": "https://www.tiktok.com/@chrisjmurphy65/video/7534796505446698253?is_from_webapp=1&sender_device=pc&web_id=7547882178648278583", "poster": "img/Coyote.png" },
-  { "title": "The Embracing Circle", "href": "https://www.tiktok.com/@chrisjmurphy65/video/7532314216787610935?is_from_webapp=1&sender_device=pc&web_id=7547882178648278583", "poster": "img/Circle.png" }
-];
-
-/* ========= 3) Helpers ========= */
-function rand(min,max){ return Math.random()*(max-min)+min; }
-function choose(a){ return a[Math.floor(Math.random()*a.length)]; }
-var FINISHES = ["finish-gilded","finish-ebony","finish-brass","finish-walnut"];
-
-/* Very small, safe formatter: supports \n, *italic*, **bold** */
-function formatCaption(text){
-  var s = (text||"").toString();
-  s = s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-  s = s.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");
-  s = s.replace(/\*([^*]+)\*/g,"<em>$1</em>");
-  s = s.replace(/\n{2,}/g,"</p><p>").replace(/\n/g,"<br>");
-  return "<p>"+s+"</p>";
-}
-
-/* ========= 4) Build tiles with per-art captions ========= */
-function buildExhibit(tile){
-  var ex = document.createElement('article');
-  var plaqueLeft = Math.random() < 0.5;
-  var finish = choose(FINISHES);
-  var frameTilt = (rand(-0.35,0.35)).toFixed(3) + "deg";
-  var plaqueTilt = (rand(-0.4,0.4)).toFixed(3) + "deg";
-  var plaqueW = Math.round(rand(240,340)) + "px";
-  var plaqueTop = Math.round(rand(0,24)) + "px";
-  var spacing = Math.round(rand(16,52));
-
-  ex.className = "exhibit " + (plaqueLeft ? "pl-left" : "pl-right") + " " + finish;
-  ex.style.marginBottom = spacing + "px";
-  ex.style.setProperty("--frame-tilt", frameTilt);
-  ex.style.setProperty("--pl-tilt", plaqueTilt);
-  ex.style.setProperty("--plaqueW", plaqueW);
-  ex.style.setProperty("--plaqueTop", plaqueTop);
-
-  var captionText = tile.caption || CAPTIONS[tile.title] || INTRO_TEXT;
-
-  var plaque = document.createElement('div');
-  plaque.className = "plaque-col";
-  plaque.innerHTML =
-    '<div class="plaque" role="group" aria-label="Plaque for '+tile.title.replace(/"/g,'&quot;')+'">' +
-      '<h2>'+ tile.title +'</h2>' +
-      '<div class="body">'+ formatCaption(captionText) +'</div>' +
-      '<button class="toggle" type="button" aria-expanded="false">More</button>' +
-    '</div>';
-
-  var frameCol = document.createElement('div');
-  frameCol.className = "frame-col";
-  frameCol.innerHTML =
-    '<div class="frame-wrap"><div class="frame"><div class="mat">' +
-      '<article class="tile" data-href="' + (tile.href || '') + '" tabindex="0" aria-label="Open '+tile.title+' on TikTok">' +
-        '<img class="thumb" src="' + tile.poster + '" alt="Poster: ' + tile.title.replace(/"/g,'&quot;') + '" loading="lazy" />' +
-        '<div class="overlay"><div class="title">' + tile.title + '</div><div class="badge">Click to watch on TikTok</div></div>' +
-      '</article>' +
-    '</div></div></div>';
-
-  ex.appendChild(plaque);
-  ex.appendChild(frameCol);
-  return ex;
-}
-
-var root = document.getElementById('exhibits');
-TILES.forEach(function(t){ root.appendChild(buildExhibit(t)); });
-
-/* ========= 5) Behavior: TikTok guard + plaque expand/collapse ========= */
-function isLikelyTikTokUrl(u){
-  try { return /^https?:\/\/(www\.)?tiktok\.com\/@[^/]+\/video\/\d{6,25}(?:[?#].*)?$/i.test(u.trim()); }
-  catch(e){ return false; }
-}
-document.addEventListener('click', function(e){
-  var t = e.target.closest('.tile');
-  if(t){
-    var href=(t.dataset.href||'').trim();
-    if(!href||!isLikelyTikTokUrl(href)){
-      var b=t.querySelector('.badge'); if(b) b.textContent='Link pending';
-      e.preventDefault(); return;
-    }
-    window.open(href,'_blank','noopener');
-  }
-  var btn = e.target.closest('.toggle');
-  if(btn){
-    var plaque = btn.closest('.plaque');
-    var expanded = plaque.classList.toggle('expanded');
-    btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-    btn.textContent = expanded ? 'Less' : 'More';
-  }
+// Hover preview (play/pause)
+document.querySelectorAll("video").forEach(v=>{
+  v.addEventListener("mouseenter", ()=>v.play().catch(()=>{}));
+  v.addEventListener("mouseleave", ()=>v.pause());
+  v.addEventListener("touchstart", ()=>v.play().catch(()=>{}));
+  v.addEventListener("touchend", ()=>v.pause());
 });
 
-/* ========= 6) Narrative & Memory intro video overlay → then route =========
-   This mirrors the existing Abstracts “play intro mp4, then enter room” flow.
-   It intercepts clicks on either:
-     - any element with data-narrative-intro, OR
-     - any <a href="/room-narrative-memory/">
-*/
-(function(){
-  var SELECTORS = '[data-narrative-intro], a[href="/room-narrative-memory/"]';
-  var targets = document.querySelectorAll(SELECTORS);
-  if (!targets.length) return;
+// Plaque button: Narrative & Memory intro relay
+document.getElementById("enter-narrative").addEventListener("click", function(e){
+  e.preventDefault();
+  var wrap=document.createElement("div");
+  wrap.style.cssText="position:fixed;inset:0;background:#000;display:grid;place-items:center;z-index:9999";
+  var v=document.createElement("video");
+  v.src="/room-narrative-memory/Media/NarrativeMemoryRoom.mp4";
+  v.playsInline=true; v.style.cssText="width:100svw;height:100svh;object-fit:contain;background:#000";
+  wrap.appendChild(v); document.body.appendChild(wrap);
+  v.muted=false; v.play().catch(()=>{v.muted=true; v.play().catch(()=>{});});
+  v.addEventListener("ended", ()=>location.assign("/room-narrative-memory/"));
+  wrap.addEventListener("click", ev=>{if(ev.target===wrap) location.assign("/room-narrative-memory/");});
+  document.addEventListener("keydown", ev=>{if(ev.key==="Escape") location.assign("/room-narrative-memory/");},{once:true});
+});
 
-  function launchIntro(src, nextHref){
-    var wrap = document.createElement('div');
-    wrap.style.cssText = 'position:fixed;inset:0;background:#000;display:grid;place-items:center;z-index:9999';
-    var v = document.createElement('video');
-    v.src = src;               // case-sensitive path
-    v.playsInline = true;
-    v.style.cssText = 'width:100svw;height:100svh;object-fit:contain;background:#000';
-    wrap.appendChild(v);
-    document.body.appendChild(wrap);
-
-    // Try unmuted → fallback muted if autoplay is blocked
-    v.muted = false;
-    v.play().catch(function(){ v.muted = true; v.play().catch(function(){}); });
-
-    v.addEventListener('ended', function(){ location.assign(nextHref); });
-    // Allow skip via click on black background or ESC
-    wrap.addEventListener('click', function(ev){ if (ev.target === wrap) location.assign(nextHref); });
-    function onKey(ev){ if (ev.key === 'Escape') location.assign(nextHref); }
-    document.addEventListener('keydown', onKey, { once:true });
-  }
-
-  targets.forEach(function(el){
-    el.addEventListener('click', function(e){
-      // Respect modifier keys / middle click for new-tab behavior
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1) return;
-      e.preventDefault();
-      launchIntro('/room-narrative-memory/Media/NarrativeMemoryRoom.mp4', '/room-narrative-memory/');
-    });
-  });
-})();
+// Plaque button: Abstracts intro relay (existing behavior)
+document.getElementById("enter-abstracts").addEventListener("click", function(e){
+  e.preventDefault();
+  var wrap=document.createElement("div");
+  wrap.style.cssText="position:fixed;inset:0;background:#000;display:grid;place-items:center;z-index:9999";
+  var v=document.createElement("video");
+  v.src="/room-abstract/media/GhoulsDoor.mp4";
+  v.playsInline=true; v.style.cssText="width:100svw;height:100svh;object-fit:contain;background:#000";
+  wrap.appendChild(v); document.body.appendChild(wrap);
+  v.muted=false; v.play().catch(()=>{v.muted=true; v.play().catch(()=>{});});
+  v.addEventListener("ended", ()=>location.assign("/room-abstract/"));
+  wrap.addEventListener("click", ev=>{if(ev.target===wrap) location.assign("/room-abstract/");});
+  document.addEventListener("keydown", ev=>{if(ev.key==="Escape") location.assign("/room-abstract/");},{once:true});
+});
 </script>
 </body>
 </html>
