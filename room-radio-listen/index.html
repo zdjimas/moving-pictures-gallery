@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>KSNO • Frasier‑Style Radio (Local MP3)</title>
+  <title>KSNO • Frasier‑Style Radio (Local MP3, Safe‑Encoded Paths)</title>
   <style>
     :root{ --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8; --bg1:#0a0e1a; --bg2:#111a33; --bg3:#0c1022; --card:#151a29; --line:#22324d; --shadow:0 18px 50px rgba(0,0,0,.45); }
     html,body{height:100%}
@@ -111,12 +111,19 @@
   </div>
 
   <script>
-    // ========== Hard-coded local playlist ==========
-    // EXACT filenames you provided (case/spacing preserved)
+    // ===== Helper: encode each path segment (spaces, parentheses, etc.) =====
+    function pathToUrl(rel){
+      const segs = rel.split('/').map(s => encodeURIComponent(s));
+      const joined = segs.join('/');
+      const base = new URL('.', location.href); // current directory
+      return new URL(joined, base).href;
+    }
+
+    // ========== Hard-coded local playlist (EXACT filenames) ==========
     const PLAYLIST = [
-      { title: 'Bend the clock - 70s Barn Jam Edition', file: 'Media/Bend the clock - 70s Barn Jam Edition.mp3' },
-      { title: 'Cover Of Wings For Marie (Part 1) v1', file: 'Media/Cover Of Wings For Marie (Part 1) v1.mp3' },
       { title: 'Fear Inoculum (Cover) v1', file: 'Media/Fear Inoculum (Cover) v1.mp3' },
+      { title: 'Cover Of Wings For Marie (Part 1) v1', file: 'Media/Cover Of Wings For Marie (Part 1) v1.mp3' },
+      { title: 'Bend the clock - 70s Barn Jam Edition', file: 'Media/Bend the clock - 70s Barn Jam Edition.mp3' },
       { title: 'More Guitars at Luna Park', file: 'Media/More Guitars at Luna Park.mp3' },
       { title: 'The Spirit Carries On (Live Rehearsal 2) (Remix)', file: 'Media/The Spirit Carries On (Live Rehearsal 2) (Remix).mp3' }
     ];
@@ -132,7 +139,6 @@
       btnMute: document.getElementById('btnMute'), vol: document.getElementById('vol')
     };
 
-    // Persisted UI state
     let current = -1, isPlaying = false;
     const K = { vol:'radio.vol', muted:'radio.muted', shuffle:'radio.shuffle', loop:'radio.loop' };
     els.vol.value = localStorage.getItem(K.vol) || '0.8';
@@ -143,17 +149,15 @@
     if(isShuffle){ els.btnShuffle.classList.add('active'); els.btnShuffle.setAttribute('aria-pressed','true'); }
     const loopSaved = localStorage.getItem(K.loop); if(loopSaved!==null) els.loopAll.checked = loopSaved==='true';
 
-    // Build playlist
     function renderList(){
       els.list.innerHTML = '';
       PLAYLIST.forEach((t,i)=>{
         const row = document.createElement('div'); row.className='track'; row.role='option'; row.tabIndex=0; row.dataset.idx=i;
-        const pathText = t.file.replace(/^\.\//,'');
-        const abs = encodeURI(new URL(t.file, location.href).href);
+        const link = pathToUrl(t.file);
         row.innerHTML = `<div class="tidx">${i+1}</div>
           <div class="tmeta">
             <div class="ttitle">${escapeHtml(t.title)}</div>
-            <div class="subtitle"><a href="${abs}" target="_blank" rel="noopener">${escapeHtml(pathText)}</a></div>
+            <div class="subtitle"><a href="${link}" target="_blank" rel="noopener">${escapeHtml(t.file)}</a></div>
           </div>
           <button class="btn" title="Play">Play</button>`;
         row.querySelector('button').addEventListener('click', ()=> startAt(i));
@@ -162,6 +166,7 @@
         els.list.appendChild(row);
       });
       enableTransport(!!PLAYLIST.length); highlight();
+      checkTracks();
     }
 
     function enableTransport(on){ els.btnPlay.disabled=!on; els.btnNext.disabled=!on; els.btnPrev.disabled=!on; els.btnStop.disabled=!on; }
@@ -188,8 +193,7 @@
         const onErr = ()=>{ els.audio.removeEventListener('error', onErr); reject(new Error('load error')); };
         els.audio.addEventListener('loadedmetadata', onMeta, { once:true });
         els.audio.addEventListener('error', onErr, { once:true });
-        const abs = encodeURI(new URL(src, location.href).href); // absolute + encoded (spaces, parentheses)
-        els.audio.src = abs; els.audio.load();
+        els.audio.src = pathToUrl(src); els.audio.load();
       });
     }
 
@@ -197,7 +201,6 @@
     function prev(){ if(!PLAYLIST.length) return; if(isShuffle){ startAt(Math.floor(Math.random()*PLAYLIST.length)); } else { startAt((current-1+PLAYLIST.length)%PLAYLIST.length); } }
     function stopAll(){ els.audio.pause(); isPlaying=false; els.btnPlay.textContent='▶︎ Start Station'; els.btnPlay.ariaLabel='Play'; els.onAir.style.display='none'; notify('stopped'); }
 
-    // Events
     els.audio.addEventListener('ended', next);
     els.audio.addEventListener('error', ()=>{ notify('Playback error. Skipping…'); next(); });
     els.audio.addEventListener('waiting', ()=>{ els.nowSub.textContent='Buffering…'; });
@@ -216,6 +219,22 @@
     els.vol.addEventListener('input', ()=>{ const v=parseFloat(els.vol.value||'0.8'); els.audio.volume=v; localStorage.setItem(K.vol, String(v)); });
 
     window.addEventListener('keydown', (e)=>{ if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return; if(e.code==='Space'){ e.preventDefault(); els.btnPlay.click(); } if(e.key==='n'||e.key==='N'){ e.preventDefault(); els.btnNext.click(); } if(e.key==='p'||e.key==='P'){ e.preventDefault(); els.btnPrev.click(); } if(e.key==='s'||e.key==='S'){ e.preventDefault(); els.btnShuffle.click(); } if(e.key==='m'||e.key==='M'){ e.preventDefault(); els.btnMute.click(); } });
+
+    // Diagnostics: HEAD check with encoded URLs; show badge ok/404
+    async function checkTracks(){
+      const rows = [...els.list.children];
+      await Promise.all(PLAYLIST.map(async (t, i)=>{
+        const row = rows[i]; if(!row) return;
+        const info = document.createElement('span'); info.className='badge'; info.style.marginLeft='8px'; info.textContent='checking…';
+        row.querySelector('.tmeta').appendChild(info);
+        try{
+          const url = pathToUrl(t.file);
+          const res = await fetch(url, { method:'HEAD', cache:'no-store' });
+          if(res.ok){ info.textContent = 'ok'; info.style.background='#0f2012'; info.style.borderColor='#214d37'; }
+          else{ info.textContent = '404?'; info.style.background='#3f1a1a'; info.style.borderColor='#6b2a2a'; }
+        }catch(e){ info.textContent = 'fetch error'; info.style.background='#3f1a1a'; info.style.borderColor='#6b2a2a'; }
+      }));
+    }
 
     renderList();
   </script>
