@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -78,8 +78,9 @@
 
       <details>
         <summary>Add / Replace playlist</summary>
-        <p class="hint">Paste one Suno <strong>audio</strong> URL per line. Direct <code>.mp3</code>, <code>.aac</code>, or <code>.m3u8</code> stream links are ideal. Page/HTML links will not play in the audio element.</p>
-        <textarea id="urlsBox" placeholder="https://cdn.suno.ai/…/track1.m3u8\nhttps://cdn.suno.ai/…/track2.mp3"></textarea>
+        <p class="hint">Paste one Suno <strong>audio</strong> URL per line. Direct <code>.mp3</code>, <code>.aac</code>, or <code>.m3u8</code> stream links are required. Share pages/HTML links will not play.</p>
+        <textarea id="urlsBox" placeholder="https://cdn.suno.ai/…/track1.m3u8
+https://cdn.suno.ai/…/track2.mp3"></textarea>
         <div class="row" style="margin-top:8px">
           <button id="btnLoad">Load URLs</button>
           <button id="btnSave" title="Persist playlist in this browser">Save playlist</button>
@@ -89,27 +90,19 @@
       </details>
 
       <footer>
-        Notes: To satisfy browser autoplay policies, click <em>Start Radio</em> once; playback will continue track‑to‑track (including when the tab is in the background) until you press Stop or close the tab.
+        Notes: Click <em>Start Radio</em> once to satisfy browser autoplay policy. Playback continues track‑to‑track until you press Stop or close the tab.
       </footer>
 
       <audio id="audio" preload="metadata" crossorigin="anonymous"></audio>
     </section>
   </div>
 
-  <!-- HLS support for .m3u8 streams (Chrome/Edge require this; Safari/iOS can play HLS natively) -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js"></script>
   <script>
     // =========================
     // Configuration / Playlist
     // =========================
-    // Provide your initial playlist here, or paste URLs via the UI below.
-    // Each entry may be: { title: "My Track", url: "https://…/audio.mp3" }
-    // Title is optional; if omitted, the filename/URL will be shown.
-    let playlist = [
-      // Example placeholders — replace with your Suno audio stream links
-      // { title: "Demo A", url: "https://example.com/audio-a.mp3" },
-      // { title: "Demo B (HLS)", url: "https://example.com/audio-b.m3u8" }
-    ];
+    let playlist = [];
 
     const els = {
       audio: document.getElementById('audio'),
@@ -131,24 +124,35 @@
       loadHint: document.getElementById('loadHint')
     };
 
-    // State
+    // State & persistence keys
     let current = -1;
     let isPlaying = false;
-    let isShuffle = JSON.parse(localStorage.getItem('suno.radio.shuffle')||'false');
+    const K = {
+      playlist: 'suno.radio.playlist',
+      shuffle: 'suno.radio.shuffle',
+      loop: 'suno.radio.loop'
+    };
+
+    let isShuffle = JSON.parse(localStorage.getItem(K.shuffle) || 'false');
     els.btnShuffle.classList.toggle('active', isShuffle);
     els.btnShuffle.setAttribute('aria-pressed', String(isShuffle));
 
-    // Load saved playlist if present
-    try {
-      const saved = localStorage.getItem('suno.radio.playlist');
-      if(saved){ playlist = JSON.parse(saved); }
-    } catch(_){}
+    // Load saved state on boot
+    (function init(){
+      try {
+        const saved = localStorage.getItem(K.playlist);
+        if(saved){ playlist = JSON.parse(saved) || []; }
+      } catch(_){}
+      const loopSaved = localStorage.getItem(K.loop);
+      if(loopSaved!==null){ els.loopAll.checked = loopSaved === 'true'; }
+      renderList();
+    })();
 
     // Render playlist UI
     function renderList(){
       els.list.innerHTML = '';
       if(!playlist.length){
-        els.list.innerHTML = '<div class="hint">No tracks loaded yet.</div>';
+        els.list.innerHTML = '<div class="hint">No tracks loaded yet. Paste your direct audio links below.</div>';
         disableTransport();
         return;
       }
@@ -183,14 +187,27 @@
       [...els.list.children].forEach((c,idx)=> c.classList.toggle('active', idx===current));
     }
 
-    // Playback core
+    // ===== Playback core =====
     let hls = null; // hls.js instance when using HLS
+    let playRetryTimer = null;
+
+    function isStreamUrl(url){
+      return (/\.(mp3|aac|m3u8|ogg|wav)(\?.*)?$/i).test(url);
+    }
 
     function attachSource(url){
       cleanupHls();
+      els.audio.src = '';
+      els.audio.load();
+
+      if(!isStreamUrl(url)){
+        notify('Non-audio link detected (needs direct .mp3/.aac/.m3u8). Skipping…');
+        return false;
+      }
+
       if(/\.m3u8($|\?)/i.test(url)){
         if(window.Hls && Hls.isSupported()){
-          hls = new Hls({maxBufferLength:30});
+          hls = new Hls({maxBufferLength:20, enableWorker:true});
           hls.loadSource(url);
           hls.attachMedia(els.audio);
         }else if(els.audio.canPlayType('application/vnd.apple.mpegurl')){
@@ -207,8 +224,7 @@
 
     function cleanupHls(){
       if(hls){ try{ hls.destroy(); }catch(_){} hls = null; }
-      els.audio.removeAttribute('src');
-      els.audio.load();
+      clearTimeout(playRetryTimer); playRetryTimer = null;
     }
 
     function startAt(index){
@@ -216,21 +232,46 @@
       current = index % playlist.length;
       const track = playlist[current];
       els.nowTitle.textContent = titleOf(track);
-      els.nowSub.textContent = 'Streaming…';
+      els.nowSub.textContent = 'Loading…';
       els.status.textContent = `track ${current+1} / ${playlist.length}`;
       highlightActive();
+
       const ok = attachSource(track.url);
-      if(!ok){
-        nextTrack();
-        return;
-      }
-      els.audio.play().then(()=>{
-        isPlaying = true;
-        els.btnPlay.textContent = '⏸︎ Pause';
-        els.btnPlay.ariaLabel = 'Pause';
-      }).catch(err => {
-        notify('Click Start to allow audio playback.');
-        console.warn(err);
+      if(!ok){ nextTrack(); return; }
+
+      // Wait for readiness then play (prevents endless buffering)
+      playWhenReady()
+        .then(()=> {
+          isPlaying = true;
+          els.btnPlay.textContent = '⏸︎ Pause';
+          els.btnPlay.ariaLabel = 'Pause';
+        })
+        .catch(()=>{ notify('Could not start playback. Skipping…'); nextTrack(); });
+    }
+
+    function playWhenReady(){
+      return new Promise((resolve, reject)=>{
+        const tryPlay = ()=>{
+          els.audio.play().then(()=>{ resolve(); }).catch(err=>{
+            // If user gesture not granted yet or stall, retry briefly
+            playRetryTimer = setTimeout(tryPlay, 300);
+          });
+        };
+
+        if(hls){
+          const onReady = ()=>{ hls?.off(Hls.Events.MANIFEST_PARSED, onReady); tryPlay(); };
+          hls.on(Hls.Events.MANIFEST_PARSED, onReady);
+          // Safety: if already parsed
+          if(hls.media && hls.media.readyState >= 2){ tryPlay(); }
+          // Also handle level loaded (some streams fire this instead)
+          hls.on(Hls.Events.LEVEL_LOADED, ()=>{ /* noop: manifest ready */ });
+        }else{
+          if(els.audio.readyState >= 2){ tryPlay(); }
+          else{
+            const onCanPlay = ()=>{ els.audio.removeEventListener('canplay', onCanPlay); tryPlay(); };
+            els.audio.addEventListener('canplay', onCanPlay, { once:true });
+          }
+        }
       });
     }
 
@@ -266,13 +307,13 @@
     els.audio.addEventListener('error', ()=> { notify('Playback error. Skipping…'); nextTrack(); });
     els.audio.addEventListener('playing', ()=> { els.nowSub.textContent = 'Playing'; });
     els.audio.addEventListener('waiting', ()=> { els.nowSub.textContent = 'Buffering…'; });
+    els.audio.addEventListener('stalled', ()=> { els.nowSub.textContent = 'Stalled…'; });
 
     els.btnPlay.addEventListener('click', ()=>{
       if(!playlist.length){ notify('Load some URLs first.'); return; }
       if(isPlaying){ els.audio.pause(); isPlaying=false; els.btnPlay.textContent='▶︎ Start Radio'; els.btnPlay.ariaLabel='Play'; }
       else{
-        if(current<0) startAt(0); else els.audio.play();
-        isPlaying=true; els.btnPlay.textContent='⏸︎ Pause'; els.btnPlay.ariaLabel='Pause';
+        if(current<0) startAt(0); else playWhenReady();
       }
     });
 
@@ -284,8 +325,12 @@
       isShuffle = !isShuffle;
       els.btnShuffle.classList.toggle('active', isShuffle);
       els.btnShuffle.setAttribute('aria-pressed', String(isShuffle));
-      localStorage.setItem('suno.radio.shuffle', JSON.stringify(isShuffle));
+      localStorage.setItem(K.shuffle, JSON.stringify(isShuffle));
       notify(isShuffle ? 'Shuffle: ON' : 'Shuffle: OFF');
+    });
+
+    els.loopAll.addEventListener('change', ()=>{
+      localStorage.setItem(K.loop, els.loopAll.checked ? 'true' : 'false');
     });
 
     // Keyboard shortcuts
@@ -297,24 +342,32 @@
       if(e.key==='s' || e.key==='S'){ e.preventDefault(); els.btnShuffle.click(); }
     });
 
-    // Loader UI
+    // Loader UI — now auto‑saves so your playlist persists across refreshes
     els.btnLoad.addEventListener('click', ()=>{
-      const lines = els.urlsBox.value.split(/\n|\r/).map(s=>s.trim()).filter(Boolean);
+      const lines = els.urlsBox.value.split(/
+|
+/).map(s=>s.trim()).filter(Boolean);
       const items = lines.map(u=> ({ title: guessTitle(u), url: u }));
-      if(items.length){ playlist = items; renderList(); els.loadHint.textContent = `Loaded ${items.length} track(s).`; current = -1; }
-      else{ els.loadHint.textContent = 'No valid lines found.'; }
+      if(items.length){
+        playlist = items; current = -1; renderList(); stopAll();
+        persistPlaylist();
+        els.loadHint.textContent = `Loaded & saved ${items.length} track(s).`;
+      } else {
+        els.loadHint.textContent = 'No valid lines found.';
+      }
     });
-    els.btnSave.addEventListener('click', ()=>{ localStorage.setItem('suno.radio.playlist', JSON.stringify(playlist)); els.loadHint.textContent='Saved to this browser.'; });
-    els.btnClear.addEventListener('click', ()=>{ playlist = []; renderList(); localStorage.removeItem('suno.radio.playlist'); els.urlsBox.value=''; els.loadHint.textContent='Cleared.'; current=-1; stopAll(); });
+    els.btnSave.addEventListener('click', ()=>{ persistPlaylist(); els.loadHint.textContent='Saved to this browser.'; });
+    els.btnClear.addEventListener('click', ()=>{ playlist = []; renderList(); localStorage.removeItem(K.playlist); els.urlsBox.value=''; els.loadHint.textContent='Cleared.'; current=-1; stopAll(); });
+
+    function persistPlaylist(){
+      try{ localStorage.setItem(K.playlist, JSON.stringify(playlist)); }catch(e){ notify('Could not save playlist (storage full or blocked).'); }
+    }
 
     function guessTitle(u){
       try{ const {pathname, hostname} = new URL(u); const last = pathname.split('/').pop(); return decodeURIComponent((last||u).replace(/\.(mp3|aac|m3u8|wav|ogg)(\?.*)?$/i,'')) + (hostname?` — ${hostname.replace(/^www\./,'')}`:''); }catch{ return u; }
     }
 
     function notify(msg){ els.status.textContent = msg; }
-
-    // Initial paint
-    renderList();
   </script>
 </body>
 </html>
