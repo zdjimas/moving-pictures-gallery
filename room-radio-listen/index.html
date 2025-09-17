@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Suno Radio — Continuous Player</title>
+  <style>
+    :root{
+      --bg:#0f1115; --card:#171a21; --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
+      --shadow: 0 8px 30px rgba(0,0,0,.35);
+    }
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0f1115,#0d0f14);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .wrap{max-width:980px;margin:0 auto;padding:28px 16px 80px}
+    header{display:flex;gap:14px;align-items:center;justify-content:space-between;margin:4px 0 18px}
+    h1{font-weight:700;margin:0;font-size:20px;letter-spacing:.2px}
+    .badge{font-size:12px;padding:4px 8px;border-radius:999px;background:#0b0d12;color:var(--muted);border:1px solid #1f2633}
+    .card{background:var(--card);border:1px solid #202635;border-radius:18px;box-shadow:var(--shadow)}
+    .player{display:grid;grid-template-columns:1fr;gap:14px;padding:16px}
+    .now{display:flex;align-items:center;gap:14px}
+    .cover{width:80px;height:80px;border-radius:12px;background:linear-gradient(135deg,#202838,#131722);display:flex;align-items:center;justify-content:center;font-weight:600;color:#7aa2f7}
+    .meta{min-width:0}
+    .title{font-size:16px;font-weight:600;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .subtitle{margin:0;color:var(--muted);font-size:12px}
+    .controls{display:flex;align-items:center;gap:10px}
+    button, .btn{background:#0f131a;color:var(--ink);border:1px solid #2a3344;border-radius:999px;padding:10px 14px;cursor:pointer}
+    .controls button{padding:10px 12px}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .primary{background:var(--brand);border-color:transparent;color:#051320;font-weight:700}
+    .toggle.active{background:var(--accent);color:#06220e;border-color:transparent}
+    .danger{background:#1a1012;border-color:#3a1a22;color:#ffdfe6}
+    .row{display:flex;flex-wrap:wrap;gap:10px}
+    .mode{display:flex;align-items:center;gap:8px}
+    .list{margin-top:6px;padding:10px;max-height:340px;overflow:auto;border-top:1px solid #232b3b}
+    .track{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;border:1px solid transparent}
+    .track:hover{background:#111721;border-color:#263045}
+    .track .tidx{width:28px;height:28px;display:grid;place-items:center;background:#0c1016;border-radius:8px;color:#88a; font-size:12px}
+    .track .tmeta{flex:1;min-width:0}
+    .track .tmeta .ttitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .track.active{outline: 2px solid #2d6cdf}
+    details{border:1px dashed #2a3344;border-radius:14px;padding:10px;margin-top:14px}
+    textarea{width:100%;min-height:120px;background:#0b0f14;color:var(--ink);border:1px solid #2a3344;border-radius:10px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .hint{color:var(--muted);font-size:12px}
+    footer{margin-top:18px;color:var(--muted);font-size:12px}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Suno Radio <span class="badge">sequential / shuffle</span></h1>
+      <div class="badge" id="status">idle</div>
+    </header>
+
+    <section class="card player" aria-label="Suno Radio player">
+      <div class="now">
+        <div class="cover" id="cover">♪</div>
+        <div class="meta">
+          <p class="title" id="nowTitle">Nothing playing</p>
+          <p class="subtitle" id="nowSub">Load your Suno links below and press Start.</p>
+        </div>
+      </div>
+
+      <div class="row controls" role="group" aria-label="Playback controls">
+        <button id="btnPrev" title="Previous (P)" aria-label="Previous" disabled>⏮︎</button>
+        <button id="btnPlay" class="primary" title="Play/Pause (Space)" aria-label="Play">▶︎ Start Radio</button>
+        <button id="btnNext" title="Next (N)" aria-label="Next" disabled>⏭︎</button>
+        <button id="btnStop" class="danger" title="Stop" aria-label="Stop" disabled>■ Stop</button>
+        <span class="mode" style="margin-left:auto">
+          <button id="btnShuffle" class="toggle" title="Toggle shuffle (S)" aria-pressed="false">Shuffle</button>
+          <label class="sr-only" for="loopAll">Loop Playlist</label>
+          <input id="loopAll" type="checkbox" checked />
+          <span class="hint">Loop</span>
+        </span>
+      </div>
+
+      <div class="list" id="trackList" role="listbox" aria-label="Playlist"></div>
+
+      <details>
+        <summary>Add / Replace playlist</summary>
+        <p class="hint">Paste one Suno <strong>audio</strong> URL per line. Direct <code>.mp3</code>, <code>.aac</code>, or <code>.m3u8</code> stream links are ideal. Page/HTML links will not play in the audio element.</p>
+        <textarea id="urlsBox" placeholder="https://cdn.suno.ai/…/track1.m3u8\nhttps://cdn.suno.ai/…/track2.mp3"></textarea>
+        <div class="row" style="margin-top:8px">
+          <button id="btnLoad">Load URLs</button>
+          <button id="btnSave" title="Persist playlist in this browser">Save playlist</button>
+          <button id="btnClear">Clear playlist</button>
+          <span class="hint" id="loadHint" style="margin-left:auto"></span>
+        </div>
+      </details>
+
+      <footer>
+        Notes: To satisfy browser autoplay policies, click <em>Start Radio</em> once; playback will continue track‑to‑track (including when the tab is in the background) until you press Stop or close the tab.
+      </footer>
+
+      <audio id="audio" preload="metadata" crossorigin="anonymous"></audio>
+    </section>
+  </div>
+
+  <!-- HLS support for .m3u8 streams (Chrome/Edge require this; Safari/iOS can play HLS natively) -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js"></script>
+  <script>
+    // =========================
+    // Configuration / Playlist
+    // =========================
+    // Provide your initial playlist here, or paste URLs via the UI below.
+    // Each entry may be: { title: "My Track", url: "https://…/audio.mp3" }
+    // Title is optional; if omitted, the filename/URL will be shown.
+    let playlist = [
+      // Example placeholders — replace with your Suno audio stream links
+      // { title: "Demo A", url: "https://example.com/audio-a.mp3" },
+      // { title: "Demo B (HLS)", url: "https://example.com/audio-b.m3u8" }
+    ];
+
+    const els = {
+      audio: document.getElementById('audio'),
+      status: document.getElementById('status'),
+      nowTitle: document.getElementById('nowTitle'),
+      nowSub: document.getElementById('nowSub'),
+      cover: document.getElementById('cover'),
+      list: document.getElementById('trackList'),
+      btnPrev: document.getElementById('btnPrev'),
+      btnPlay: document.getElementById('btnPlay'),
+      btnNext: document.getElementById('btnNext'),
+      btnStop: document.getElementById('btnStop'),
+      btnShuffle: document.getElementById('btnShuffle'),
+      loopAll: document.getElementById('loopAll'),
+      urlsBox: document.getElementById('urlsBox'),
+      btnLoad: document.getElementById('btnLoad'),
+      btnSave: document.getElementById('btnSave'),
+      btnClear: document.getElementById('btnClear'),
+      loadHint: document.getElementById('loadHint')
+    };
+
+    // State
+    let current = -1;
+    let isPlaying = false;
+    let isShuffle = JSON.parse(localStorage.getItem('suno.radio.shuffle')||'false');
+    els.btnShuffle.classList.toggle('active', isShuffle);
+    els.btnShuffle.setAttribute('aria-pressed', String(isShuffle));
+
+    // Load saved playlist if present
+    try {
+      const saved = localStorage.getItem('suno.radio.playlist');
+      if(saved){ playlist = JSON.parse(saved); }
+    } catch(_){}
+
+    // Render playlist UI
+    function renderList(){
+      els.list.innerHTML = '';
+      if(!playlist.length){
+        els.list.innerHTML = '<div class="hint">No tracks loaded yet.</div>';
+        disableTransport();
+        return;
+      }
+      playlist.forEach((t, i)=>{
+        const row = document.createElement('div');
+        row.className = 'track';
+        row.role = 'option';
+        row.tabIndex = 0;
+        row.dataset.idx = i;
+        row.innerHTML = `<div class="tidx">${i+1}</div>
+                         <div class="tmeta"><div class="ttitle">${escapeHtml(titleOf(t))}</div>
+                         <div class="hint">${escapeHtml(shortUrl(t.url))}</div></div>
+                         <button class="btn" title="Play this">Play</button>`;
+        row.querySelector('button').addEventListener('click', ()=> startAt(i));
+        row.addEventListener('dblclick', ()=> startAt(i));
+        row.addEventListener('keydown', (e)=>{ if(e.key==='Enter') startAt(i); });
+        els.list.appendChild(row);
+      });
+      enableTransport();
+      highlightActive();
+    }
+
+    function titleOf(t){ return t.title?.trim() || t.url.split('/').pop() || t.url; }
+    function shortUrl(u){ try{ const x=new URL(u); return (x.hostname+ x.pathname).replace(/^www\./,''); }catch{ return u; } }
+
+    function escapeHtml(s){ return s.replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+
+    function enableTransport(){ els.btnPlay.disabled=false; els.btnNext.disabled=false; els.btnPrev.disabled=false; els.btnStop.disabled=false; }
+    function disableTransport(){ els.btnPlay.disabled=true; els.btnNext.disabled=true; els.btnPrev.disabled=true; els.btnStop.disabled=true; }
+
+    function highlightActive(){
+      [...els.list.children].forEach((c,idx)=> c.classList.toggle('active', idx===current));
+    }
+
+    // Playback core
+    let hls = null; // hls.js instance when using HLS
+
+    function attachSource(url){
+      cleanupHls();
+      if(/\.m3u8($|\?)/i.test(url)){
+        if(window.Hls && Hls.isSupported()){
+          hls = new Hls({maxBufferLength:30});
+          hls.loadSource(url);
+          hls.attachMedia(els.audio);
+        }else if(els.audio.canPlayType('application/vnd.apple.mpegurl')){
+          els.audio.src = url; // Safari/iOS
+        }else{
+          notify('HLS not supported in this browser. Skipping…');
+          return false;
+        }
+      }else{
+        els.audio.src = url;
+      }
+      return true;
+    }
+
+    function cleanupHls(){
+      if(hls){ try{ hls.destroy(); }catch(_){} hls = null; }
+      els.audio.removeAttribute('src');
+      els.audio.load();
+    }
+
+    function startAt(index){
+      if(!playlist.length) return;
+      current = index % playlist.length;
+      const track = playlist[current];
+      els.nowTitle.textContent = titleOf(track);
+      els.nowSub.textContent = 'Streaming…';
+      els.status.textContent = `track ${current+1} / ${playlist.length}`;
+      highlightActive();
+      const ok = attachSource(track.url);
+      if(!ok){
+        nextTrack();
+        return;
+      }
+      els.audio.play().then(()=>{
+        isPlaying = true;
+        els.btnPlay.textContent = '⏸︎ Pause';
+        els.btnPlay.ariaLabel = 'Pause';
+      }).catch(err => {
+        notify('Click Start to allow audio playback.');
+        console.warn(err);
+      });
+    }
+
+    function nextTrack(){
+      if(!playlist.length){ return; }
+      if(isShuffle){
+        let n; do { n = Math.floor(Math.random()*playlist.length); } while(playlist.length>1 && n===current);
+        startAt(n);
+      }else{
+        const n = current + 1;
+        if(n < playlist.length){ startAt(n); }
+        else if(els.loopAll.checked){ startAt(0); }
+        else { stopAll(); }
+      }
+    }
+
+    function prevTrack(){
+      if(!playlist.length){ return; }
+      if(isShuffle){ startAt(Math.floor(Math.random()*playlist.length)); }
+      else { startAt((current - 1 + playlist.length) % playlist.length); }
+    }
+
+    function stopAll(){
+      els.audio.pause();
+      isPlaying = false;
+      els.btnPlay.textContent = '▶︎ Start Radio';
+      els.btnPlay.ariaLabel = 'Play';
+      els.status.textContent = 'stopped';
+    }
+
+    // Events
+    els.audio.addEventListener('ended', ()=> nextTrack());
+    els.audio.addEventListener('error', ()=> { notify('Playback error. Skipping…'); nextTrack(); });
+    els.audio.addEventListener('playing', ()=> { els.nowSub.textContent = 'Playing'; });
+    els.audio.addEventListener('waiting', ()=> { els.nowSub.textContent = 'Buffering…'; });
+
+    els.btnPlay.addEventListener('click', ()=>{
+      if(!playlist.length){ notify('Load some URLs first.'); return; }
+      if(isPlaying){ els.audio.pause(); isPlaying=false; els.btnPlay.textContent='▶︎ Start Radio'; els.btnPlay.ariaLabel='Play'; }
+      else{
+        if(current<0) startAt(0); else els.audio.play();
+        isPlaying=true; els.btnPlay.textContent='⏸︎ Pause'; els.btnPlay.ariaLabel='Pause';
+      }
+    });
+
+    els.btnNext.addEventListener('click', nextTrack);
+    els.btnPrev.addEventListener('click', prevTrack);
+    els.btnStop.addEventListener('click', stopAll);
+
+    els.btnShuffle.addEventListener('click', ()=>{
+      isShuffle = !isShuffle;
+      els.btnShuffle.classList.toggle('active', isShuffle);
+      els.btnShuffle.setAttribute('aria-pressed', String(isShuffle));
+      localStorage.setItem('suno.radio.shuffle', JSON.stringify(isShuffle));
+      notify(isShuffle ? 'Shuffle: ON' : 'Shuffle: OFF');
+    });
+
+    // Keyboard shortcuts
+    window.addEventListener('keydown', (e)=>{
+      if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if(e.code==='Space'){ e.preventDefault(); els.btnPlay.click(); }
+      if(e.key==='n' || e.key==='N'){ e.preventDefault(); els.btnNext.click(); }
+      if(e.key==='p' || e.key==='P'){ e.preventDefault(); els.btnPrev.click(); }
+      if(e.key==='s' || e.key==='S'){ e.preventDefault(); els.btnShuffle.click(); }
+    });
+
+    // Loader UI
+    els.btnLoad.addEventListener('click', ()=>{
+      const lines = els.urlsBox.value.split(/\n|\r/).map(s=>s.trim()).filter(Boolean);
+      const items = lines.map(u=> ({ title: guessTitle(u), url: u }));
+      if(items.length){ playlist = items; renderList(); els.loadHint.textContent = `Loaded ${items.length} track(s).`; current = -1; }
+      else{ els.loadHint.textContent = 'No valid lines found.'; }
+    });
+    els.btnSave.addEventListener('click', ()=>{ localStorage.setItem('suno.radio.playlist', JSON.stringify(playlist)); els.loadHint.textContent='Saved to this browser.'; });
+    els.btnClear.addEventListener('click', ()=>{ playlist = []; renderList(); localStorage.removeItem('suno.radio.playlist'); els.urlsBox.value=''; els.loadHint.textContent='Cleared.'; current=-1; stopAll(); });
+
+    function guessTitle(u){
+      try{ const {pathname, hostname} = new URL(u); const last = pathname.split('/').pop(); return decodeURIComponent((last||u).replace(/\.(mp3|aac|m3u8|wav|ogg)(\?.*)?$/i,'')) + (hostname?` — ${hostname.replace(/^www\./,'')}`:''); }catch{ return u; }
+    }
+
+    function notify(msg){ els.status.textContent = msg; }
+
+    // Initial paint
+    renderList();
+  </script>
+</body>
+</html>
