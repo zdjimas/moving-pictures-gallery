@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Suno Radio — Minimal Playlist (Hard‑coded)</title>
+  <title>Suno Radio — Direct Audio Playlist</title>
   <style>
     :root{ --bg:#0f1115; --card:#171a21; --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8; --shadow:0 8px 30px rgba(0,0,0,.35); }
     html,body{height:100%}
@@ -66,7 +66,7 @@
       <div class="list" id="trackList" role="listbox" aria-label="Playlist"></div>
 
       <footer>
-        To add tracks later: edit <code>PLAYLIST</code> in this file (one object per line). You may paste either direct audio streams (<code>.mp3/.m3u8</code>) or Suno share links (<code>suno.com/s/&lt;id&gt;</code>). Share links are automatically resolved to CDN audio where possible.
+        To add tracks later: edit <code>PLAYLIST</code> in this file. <strong>Important:</strong> Suno share links (e.g., <code>suno.com/s/…</code>) are not direct audio and usually cannot be played by the browser due to cross‑origin restrictions. Download/export your songs as MP3 from Suno, place them in <code>./Media/</code>, and reference them here.
       </footer>
 
       <audio id="audio" preload="metadata" crossorigin="anonymous"></audio>
@@ -80,11 +80,11 @@
     // Each item can be: { title: 'Optional title', url: 'https://…' }
     // You provided three Suno share links; we'll resolve them to audio at runtime.
     const PLAYLIST = [
-      { title: 'Track A', url: 'https://suno.com/s/yTmv5qlw2eKOJrPE' },
-      { title: 'Track B', url: 'https://suno.com/s/jjovsURH8ahL1NJP' },
-      { title: 'Track C', url: 'https://suno.com/s/V2prj8N4ddRQnJWN' }
-      // Add more like: { title: 'My Song', url: 'https://suno.com/s/XXXXXXXX' },
-      // or direct streams: { title: 'Direct MP3', url: 'https://cdn1.suno.ai/UUID.mp3' }
+      // Replace these with actual direct audio files you host (recommended: put MP3s in ./Media/)
+      { title: 'Track A', url: './Media/suno_yTmv5qlw2eKOJrPE.mp3' },
+      { title: 'Track B', url: './Media/suno_jjovsURH8ahL1NJP.mp3' },
+      { title: 'Track C', url: './Media/suno_V2prj8N4ddRQnJWN.mp3' }
+      // Add more like: { title: 'My Song', url: './Media/my_song.mp3' }
     ];
 
     // ============== UI refs & state ==============
