@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>KSNO • Frasier‑Style Radio (Local MP3, Safe‑Encoded Paths)</title>
+  <meta name="viewport" content="width=device-width initial-scale=1" />
+  <title>KZAK • Frasier-Style Free Radio </title>
   <style>
-    :root{ --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8; --bg1:#0a0e1a; --bg2:#111a33; --bg3:#0c1022; --card:#151a29; --line:#22324d; --shadow:0 18px 50px rgba(0,0,0,.45); }
+    :root{ --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
+           --bg1:#0a0e1a; --bg2:#111a33; --bg3:#0c1022; --card:#151a29; --line:#22324d; --shadow:0 18px 50px rgba(0,0,0,.45); }
     html,body{height:100%}
-    body{margin:0;color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:radial-gradient(1200px 600px at 70% -10%,#1a2550 0%,transparent 60%) fixed,linear-gradient(180deg,var(--bg1),var(--bg2) 55%,var(--bg3));overflow-y:overlay}
+    body{margin:0;color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+         background:radial-gradient(1200px 600px at 70% -10%,#1a2550 0%,transparent 60%) fixed,
+                    linear-gradient(180deg,var(--bg1),var(--bg2) 55%,var(--bg3)); overflow-y:overlay}
     .wrap{max-width:1000px;margin:0 auto;padding:28px 16px 100px;position:relative}
 
     header{display:flex;align-items:center;gap:14px;justify-content:space-between;margin:2px 0 18px}
@@ -16,7 +19,8 @@
     .brand .tower:after{content:"";position:absolute;left:50%;top:-6px;width:2px;height:16px;background:#6aa2ff;transform:translateX(-50%)}
     h1{font-weight:700;margin:0;font-size:20px;letter-spacing:.2px}
     .badge{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid #2a3958;background:#0d1222;color:var(--muted)}
-    .onair{color:#1a0a0a;background:#ff2e2e;border-color:#6b1212;box-shadow:0 0 16px rgba(255,46,46,.35) inset,0 0 12px rgba(255,46,46,.25);font-weight:800;letter-spacing:.6px}
+    .onair{color:#1a0a0a;background:#ff2e2e;border-color:#6b1212;box-shadow:0 0 16px rgba(255,46,46,.35) inset,0 0 12px rgba(255,46,46,.25);
+           font-weight:800;letter-spacing:.6px}
     .onair .dot{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:#ffe9e9;animation:pulse 1.4s infinite}
     @keyframes pulse{0%{opacity:.4}50%{opacity:1}100%{opacity:.4}}
 
@@ -59,7 +63,7 @@
     <header>
       <div class="brand">
         <div class="tower" aria-hidden="true"></div>
-        <h1>KSNO • Frasier‑Style Jazz Radio</h1>
+        <h1>KZAK • Frasier-Style Free Radio of zdjimas and cjmurphy music creations </h1>
       </div>
       <div class="badge" id="status">idle</div>
     </header>
@@ -85,7 +89,7 @@
         <button id="btnPrev" aria-label="Previous" disabled>⏮︎</button>
         <button id="btnPlay" class="primary" aria-label="Play">▶︎ Start Station</button>
         <button id="btnNext" aria-label="Next" disabled>⏭︎</button>
-        <button id="btnStop" class="danger" aria-label="Stop" disabled>■ Stop</button>
+        <button id="btnStop" class="danger" aria-label="Stop/Pause" disabled>■ Stop/Pause</button>
         <button id="btnShuffle" class="toggle" aria-pressed="false">Shuffle</button>
         <label style="display:flex;align-items:center;gap:6px"><input id="loopAll" type="checkbox" checked /> <span>Loop</span></label>
         <button id="btnMute" class="muted" aria-pressed="false" title="Mute (M)">🔇 Mute</button>
@@ -94,9 +98,7 @@
 
       <div class="list" id="trackList" role="listbox" aria-label="Playlist"></div>
 
-      <footer>
-        <strong>Add songs:</strong> put MP3 files in <code>Media/</code> and edit the <code>PLAYLIST</code> below. Paths are case‑sensitive.
-      </footer>
+      <footer><strong>Add songs:</strong> put MP3 files in <code>Media/</code> and edit the <code>PLAYLIST</code> below. Paths are case-sensitive.</footer>
 
       <audio id="audio" preload="metadata" playsinline></audio>
     </section>
@@ -111,15 +113,15 @@
   </div>
 
   <script>
-    // ===== Helper: encode each path segment (spaces, parentheses, etc.) =====
+    // Encode each path segment (spaces, parentheses, etc.)
     function pathToUrl(rel){
       const segs = rel.split('/').map(s => encodeURIComponent(s));
       const joined = segs.join('/');
-      const base = new URL('.', location.href); // current directory
+      const base = new URL('.', location.href);
       return new URL(joined, base).href;
     }
 
-    // ========== Hard-coded local playlist (EXACT filenames) ==========
+    // Your exact filenames
     const PLAYLIST = [
       { title: 'Fear Inoculum (Cover) v1', file: 'Media/Fear Inoculum (Cover) v1.mp3' },
       { title: 'Cover Of Wings For Marie (Part 1) v1', file: 'Media/Cover Of Wings For Marie (Part 1) v1.mp3' },
@@ -153,11 +155,10 @@
       els.list.innerHTML = '';
       PLAYLIST.forEach((t,i)=>{
         const row = document.createElement('div'); row.className='track'; row.role='option'; row.tabIndex=0; row.dataset.idx=i;
-        const link = pathToUrl(t.file);
         row.innerHTML = `<div class="tidx">${i+1}</div>
           <div class="tmeta">
             <div class="ttitle">${escapeHtml(t.title)}</div>
-            <div class="subtitle"><a href="${link}" target="_blank" rel="noopener">${escapeHtml(t.file)}</a></div>
+            <div class="subtitle">${escapeHtml(t.file)}</div>
           </div>
           <button class="btn" title="Play">Play</button>`;
         row.querySelector('button').addEventListener('click', ()=> startAt(i));
@@ -166,12 +167,11 @@
         els.list.appendChild(row);
       });
       enableTransport(!!PLAYLIST.length); highlight();
-      checkTracks();
     }
 
     function enableTransport(on){ els.btnPlay.disabled=!on; els.btnNext.disabled=!on; els.btnPrev.disabled=!on; els.btnStop.disabled=!on; }
     function highlight(){ [...els.list.children].forEach((c,idx)=> c.classList.toggle('active', idx===current)); }
-    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+    function escapeHtml(s){ return (s||'').replace(/[&<>\"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
     function notify(msg){ els.status.textContent = msg; }
 
     async function startAt(i){
@@ -182,7 +182,8 @@
       notify(`track ${current+1} / ${PLAYLIST.length}`); highlight();
       try{
         await attach(track.file); await els.audio.play();
-        isPlaying = true; els.btnPlay.textContent='⏸︎ Pause'; els.btnPlay.ariaLabel='Pause'; els.onAir.style.display=''; els.nowSub.textContent='Playing';
+        isPlaying = true; els.btnPlay.textContent='⏸︎ Pause'; els.btnPlay.ariaLabel='Pause';
+        els.onAir.style.display=''; els.nowSub.textContent='Playing';
       }catch(err){ notify('Could not play this file. Skipping…'); next(); }
     }
 
@@ -190,17 +191,21 @@
       return new Promise((resolve,reject)=>{
         els.audio.pause(); els.audio.removeAttribute('src'); els.audio.load();
         const onMeta = ()=>{ els.audio.removeEventListener('loadedmetadata', onMeta); resolve(); };
-        const onErr = ()=>{ els.audio.removeEventListener('error', onErr); reject(new Error('load error')); };
+        const onErr  = ()=>{ els.audio.removeEventListener('error', onErr); reject(new Error('load error')); };
         els.audio.addEventListener('loadedmetadata', onMeta, { once:true });
         els.audio.addEventListener('error', onErr, { once:true });
         els.audio.src = pathToUrl(src); els.audio.load();
       });
     }
 
-    function next(){ if(!PLAYLIST.length) return; if(isShuffle){ let n; do{ n=Math.floor(Math.random()*PLAYLIST.length); } while(PLAYLIST.length>1 && n===current); startAt(n); } else { const n=current+1; if(n<PLAYLIST.length) startAt(n); else if(els.loopAll.checked) startAt(0); else stopAll(); } }
-    function prev(){ if(!PLAYLIST.length) return; if(isShuffle){ startAt(Math.floor(Math.random()*PLAYLIST.length)); } else { startAt((current-1+PLAYLIST.length)%PLAYLIST.length); } }
+    function next(){ if(!PLAYLIST.length) return;
+      if(isShuffle){ let n; do{ n=Math.floor(Math.random()*PLAYLIST.length); } while(PLAYLIST.length>1 && n===current); startAt(n); }
+      else { const n=current+1; if(n<PLAYLIST.length) startAt(n); else if(els.loopAll.checked) startAt(0); else stopAll(); } }
+    function prev(){ if(!PLAYLIST.length) return; if(isShuffle){ startAt(Math.floor(Math.random()*PLAYLIST.length)); }
+      else { startAt((current-1+PLAYLIST.length)%PLAYLIST.length); } }
     function stopAll(){ els.audio.pause(); isPlaying=false; els.btnPlay.textContent='▶︎ Start Station'; els.btnPlay.ariaLabel='Play'; els.onAir.style.display='none'; notify('stopped'); }
 
+    // Events
     els.audio.addEventListener('ended', next);
     els.audio.addEventListener('error', ()=>{ notify('Playback error. Skipping…'); next(); });
     els.audio.addEventListener('waiting', ()=>{ els.nowSub.textContent='Buffering…'; });
@@ -211,30 +216,22 @@
     els.btnPrev.addEventListener('click', prev);
     els.btnStop.addEventListener('click', stopAll);
 
-    els.btnShuffle.addEventListener('click', ()=>{ isShuffle=!isShuffle; els.btnShuffle.classList.toggle('active', isShuffle); els.btnShuffle.setAttribute('aria-pressed', String(isShuffle)); localStorage.setItem(K.shuffle, JSON.stringify(isShuffle)); notify(isShuffle?'Shuffle: ON':'Shuffle: OFF'); });
+    els.btnShuffle.addEventListener('click', ()=>{ isShuffle=!isShuffle; els.btnShuffle.classList.toggle('active', isShuffle);
+      els.btnShuffle.setAttribute('aria-pressed', String(isShuffle)); localStorage.setItem(K.shuffle, JSON.stringify(isShuffle));
+      notify(isShuffle?'Shuffle: ON':'Shuffle: OFF'); });
     els.loopAll.addEventListener('change', ()=> localStorage.setItem(K.loop, els.loopAll.checked?'true':'false'));
 
-    function setMuteUi(muted){ if(muted){ els.btnMute.textContent='🔊 Sound On'; els.btnMute.classList.remove('muted'); els.btnMute.setAttribute('aria-pressed','true'); } else { els.btnMute.textContent='🔇 Mute'; els.btnMute.classList.add('muted'); els.btnMute.setAttribute('aria-pressed','false'); } }
+    function setMuteUi(muted){ if(muted){ els.btnMute.textContent='🔊 Sound On'; els.btnMute.classList.remove('muted'); els.btnMute.setAttribute('aria-pressed','true'); }
+      else { els.btnMute.textContent='🔇 Mute'; els.btnMute.classList.add('muted'); els.btnMute.setAttribute('aria-pressed','false'); } }
     els.btnMute.addEventListener('click', ()=>{ const m = !els.audio.muted; els.audio.muted = m; localStorage.setItem(K.muted, JSON.stringify(m)); setMuteUi(m); });
     els.vol.addEventListener('input', ()=>{ const v=parseFloat(els.vol.value||'0.8'); els.audio.volume=v; localStorage.setItem(K.vol, String(v)); });
 
-    window.addEventListener('keydown', (e)=>{ if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return; if(e.code==='Space'){ e.preventDefault(); els.btnPlay.click(); } if(e.key==='n'||e.key==='N'){ e.preventDefault(); els.btnNext.click(); } if(e.key==='p'||e.key==='P'){ e.preventDefault(); els.btnPrev.click(); } if(e.key==='s'||e.key==='S'){ e.preventDefault(); els.btnShuffle.click(); } if(e.key==='m'||e.key==='M'){ e.preventDefault(); els.btnMute.click(); } });
-
-    // Diagnostics: HEAD check with encoded URLs; show badge ok/404
-    async function checkTracks(){
-      const rows = [...els.list.children];
-      await Promise.all(PLAYLIST.map(async (t, i)=>{
-        const row = rows[i]; if(!row) return;
-        const info = document.createElement('span'); info.className='badge'; info.style.marginLeft='8px'; info.textContent='checking…';
-        row.querySelector('.tmeta').appendChild(info);
-        try{
-          const url = pathToUrl(t.file);
-          const res = await fetch(url, { method:'HEAD', cache:'no-store' });
-          if(res.ok){ info.textContent = 'ok'; info.style.background='#0f2012'; info.style.borderColor='#214d37'; }
-          else{ info.textContent = '404?'; info.style.background='#3f1a1a'; info.style.borderColor='#6b2a2a'; }
-        }catch(e){ info.textContent = 'fetch error'; info.style.background='#3f1a1a'; info.style.borderColor='#6b2a2a'; }
-      }));
-    }
+    window.addEventListener('keydown', (e)=>{ if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if(e.code==='Space'){ e.preventDefault(); els.btnPlay.click(); }
+      if(e.key==='n'||e.key==='N'){ e.preventDefault(); els.btnNext.click(); }
+      if(e.key==='p'||e.key==='P'){ e.preventDefault(); els.btnPrev.click(); }
+      if(e.key==='s'||e.key==='S'){ e.preventDefault(); els.btnShuffle.click(); }
+      if(e.key==='m'||e.key==='M'){ e.preventDefault(); els.btnMute.click(); } });
 
     renderList();
   </script>
