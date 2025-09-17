@@ -140,9 +140,11 @@
     // Place your audio files in ./Media/ and reference them here.
     // You can rename the files; ensure paths match exactly (case‑sensitive on Pages).
     const PLAYLIST = [
-      { title: 'New Beginnings', file: 'Media/New_Beginnings.mp3' },
-      { title: 'Continuum — Octavarium Remix', file: 'Media/Continuum.mp3' },
-      { title: 'If Pigs and Sheep — Remix', file: 'Media/If_Pigs_And_Sheep_Remix.mp3' }
+      { title: 'Fear Inoculum (Cover) v1', file: 'Media/Fear Inoculum (Cover) v1.mp3' },
+      { title: 'Cover Of Wings For Marie (Part 1) v1', file: 'Media/Cover Of Wings For Marie (Part 1) v1.mp3' },
+      { title: 'Bend the clock - 70s Barn Jam Edition', file: 'Media/Bend the clock - 70s Barn Jam Edition.mp3' },
+      { title: 'More Guitars at Luna Park', file: 'Media/More Guitars at Luna Park.mp3' },
+      { title: 'The Spirit Carries On (Live Rehearsal 2) (Remix)', file: 'Media/The Spirit Carries On (Live Rehearsal 2) (Remix).mp3' }
     ];
 
     // Elements
@@ -222,7 +224,7 @@
         const onErr = ()=>{ els.audio.removeEventListener('error', onErr); reject(new Error('load error')); };
         els.audio.addEventListener('loadedmetadata', onMeta, { once:true });
         els.audio.addEventListener('error', onErr, { once:true });
-        els.audio.src = src; // relative same-origin path to ./Media/*.mp3
+        els.audio.src = encodeURI(src); // relative same-origin path to ./Media/*.mp3 (encode spaces/(), etc.)
       });
     }
 
@@ -277,7 +279,7 @@
           if(!(ct.startsWith('audio/') || ct.includes('mpegurl'))){ info.textContent = 'not audio'; info.style.background='#3f1a1a'; info.style.borderColor='#6b2a2a'; info.title = `content-type: ${ct} size: ${len}`; return; }
           info.textContent = 'ok'; info.style.background='#0f2012'; info.style.borderColor='#214d37'; info.title = `content-type: ${ct} size: ${len}`;
           // Make the path clickable to open directly
-          const sub = row.querySelector('.subtitle'); if(sub && !sub.querySelector('a')){ const a=document.createElement('a'); a.href=t.file; a.target='_blank'; a.rel='noopener'; a.textContent=sub.textContent; sub.textContent=''; sub.appendChild(a); }
+          const sub = row.querySelector('.subtitle'); if(sub && !sub.querySelector('a')){ const a=document.createElement('a'); a.href=encodeURI(t.file); a.target='_blank'; a.rel='noopener'; a.textContent=sub.textContent; sub.textContent=''; sub.appendChild(a); }
         }catch(e){ info.textContent = 'fetch error'; info.style.background='#3f1a1a'; info.style.borderColor='#6b2a2a'; }
       }));
     }
