@@ -115,7 +115,7 @@
         <strong>How to add songs:</strong> put MP3 files in <code>./Media/</code> and edit the <code>PLAYLIST</code> array in this file. Works on GitHub Pages. No proxy required.
       </footer>
 
-      <audio id="audio" preload="metadata"></audio>
+      <audio id="audio" preload="metadata" playsinline></audio>
     </section>
   </div>
 
@@ -140,10 +140,9 @@
     // Place your audio files in ./Media/ and reference them here.
     // You can rename the files; ensure paths match exactly (case‑sensitive on Pages).
     const PLAYLIST = [
-      { title: 'New Beginnings', file: './Media/New_Beginnings.mp3' },
-      { title: 'Continuum — Octavarium Remix', file: './Media/Continuum.mp3' },
-      { title: 'If Pigs and Sheep — Remix', file: './Media/If_Pigs_And_Sheep_Remix.mp3' }
-      // Add more like: { title: 'My Song', file: './Media/My_Song.mp3' },
+      { title: 'New Beginnings', file: 'Media/New_Beginnings.mp3' },
+      { title: 'Continuum — Octavarium Remix', file: 'Media/Continuum.mp3' },
+      { title: 'If Pigs and Sheep — Remix', file: 'Media/If_Pigs_And_Sheep_Remix.mp3' }
     ];
 
     // Elements
@@ -262,6 +261,27 @@
 
     // Initialize
     renderList();
+
+    // --- Diagnostics: check each file exists and is audio ---
+    async function checkTracks(){
+      const rows = [...els.list.children];
+      await Promise.all(PLAYLIST.map(async (t, i)=>{
+        const row = rows[i]; if(!row) return;
+        const info = document.createElement('span'); info.className='badge'; info.style.marginLeft='8px'; info.textContent='checking…';
+        row.querySelector('.tmeta').appendChild(info);
+        try{
+          const res = await fetch(t.file, { method:'HEAD', cache:'no-store' });
+          const ct = (res.headers.get('content-type')||'').toLowerCase();
+          const len = res.headers.get('content-length')||'?';
+          if(!res.ok){ info.textContent = '404?'; info.style.background='#3f1a1a'; info.style.borderColor='#6b2a2a'; return; }
+          if(!(ct.startsWith('audio/') || ct.includes('mpegurl'))){ info.textContent = 'not audio'; info.style.background='#3f1a1a'; info.style.borderColor='#6b2a2a'; info.title = `content-type: ${ct} size: ${len}`; return; }
+          info.textContent = 'ok'; info.style.background='#0f2012'; info.style.borderColor='#214d37'; info.title = `content-type: ${ct} size: ${len}`;
+          // Make the path clickable to open directly
+          const sub = row.querySelector('.subtitle'); if(sub && !sub.querySelector('a')){ const a=document.createElement('a'); a.href=t.file; a.target='_blank'; a.rel='noopener'; a.textContent=sub.textContent; sub.textContent=''; sub.appendChild(a); }
+        }catch(e){ info.textContent = 'fetch error'; info.style.background='#3f1a1a'; info.style.borderColor='#6b2a2a'; }
+      }));
+    }
+    checkTracks();
   </script>
 </body>
 </html>
