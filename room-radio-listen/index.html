@@ -1,237 +1,67 @@
- <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Suno Radio — Direct Audio Playlist</title>
-  <style>
-    :root{ --bg:#0f1115; --card:#171a21; --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8; --shadow:0 8px 30px rgba(0,0,0,.35); }
-    html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#0f1115,#0d0f14);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-    .wrap{max-width:900px;margin:0 auto;padding:28px 16px 80px}
-    header{display:flex;gap:14px;align-items:center;justify-content:space-between;margin:4px 0 18px}
-    h1{font-weight:700;margin:0;font-size:20px;letter-spacing:.2px}
-    .badge{font-size:12px;padding:4px 8px;border-radius:999px;background:#0b0d12;color:var(--muted);border:1px solid #1f2633}
-    .card{background:var(--card);border:1px solid #202635;border-radius:18px;box-shadow:var(--shadow)}
-    .player{display:grid;grid-template-columns:1fr;gap:14px;padding:16px}
-    .now{display:flex;align-items:center;gap:14px}
-    .cover{width:80px;height:80px;border-radius:12px;background:linear-gradient(135deg,#202838,#131722);display:flex;align-items:center;justify-content:center;font-weight:600;color:#7aa2f7}
-    .meta{min-width:0}
-    .title{font-size:16px;font-weight:600;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .subtitle{margin:0;color:var(--muted);font-size:12px}
-    .controls{display:flex;align-items:center;gap:10px}
-    button{background:#0f131a;color:var(--ink);border:1px solid #2a3344;border-radius:999px;padding:10px 14px;cursor:pointer}
-    .controls button{padding:10px 12px}
-    button:disabled{opacity:.5;cursor:not-allowed}
-    .primary{background:var(--brand);border-color:transparent;color:#051320;font-weight:700}
-    .toggle.active{background:var(--accent);color:#06220e;border-color:transparent}
-    .danger{background:#1a1012;border-color:#3a1a22;color:#ffdfe6}
-    .list{margin-top:6px;padding:10px;max-height:340px;overflow:auto;border-top:1px solid #232b3b}
-    .track{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;border:1px solid transparent}
-    .track:hover{background:#111721;border-color:#263045}
-    .track .tidx{width:28px;height:28px;display:grid;place-items:center;background:#0c1016;border-radius:8px;color:#88a;font-size:12px}
-    .track .tmeta{flex:1;min-width:0}
-    .track .tmeta .ttitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .track.active{outline:2px solid #2d6cdf}
-    footer{margin-top:8px;color:var(--muted);font-size:12px}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <h1>Suno Radio <span class="badge">hard‑coded playlist</span></h1>
-      <div class="badge" id="status">idle</div>
-    </header>
+ // filename: suno-proxy-worker.js
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type,Range',
+  'Access-Control-Expose-Headers': 'Accept-Ranges,Content-Length,Content-Range,Content-Type'
+};
+const UA = 'Mozilla/5.0 (compatible; SunoRadioProxy/1.0)';
 
-    <section class="card player" aria-label="Suno Radio player">
-      <div class="now">
-        <div class="cover" id="cover">♪</div>
-        <div class="meta">
-          <p class="title" id="nowTitle">Nothing playing</p>
-          <p class="subtitle" id="nowSub">Press Start. Sequential by default; toggle Shuffle if desired.</p>
-        </div>
-      </div>
+export default {
+  async fetch(req) {
+    if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
 
-      <div class="controls" role="group" aria-label="Playback controls">
-        <button id="btnPrev" aria-label="Previous" disabled>⏮︎</button>
-        <button id="btnPlay" class="primary" aria-label="Play">▶︎ Start Radio</button>
-        <button id="btnNext" aria-label="Next" disabled>⏭︎</button>
-        <button id="btnStop" class="danger" aria-label="Stop" disabled>■ Stop</button>
-        <button id="btnShuffle" class="toggle" aria-pressed="false" style="margin-left:auto">Shuffle</button>
-        <label style="display:flex;align-items:center;gap:6px;margin-left:8px">
-          <input id="loopAll" type="checkbox" checked /> <span>Loop</span>
-        </label>
-      </div>
+    const { searchParams } = new URL(req.url);
+    const raw = searchParams.get('u');
+    if (!raw) return new Response('Missing u param', { status: 400, headers: CORS });
 
-      <div class="list" id="trackList" role="listbox" aria-label="Playlist"></div>
-
-      <footer>
-        To add tracks later: edit <code>PLAYLIST</code> in this file. <strong>Important:</strong> Suno share links (e.g., <code>suno.com/s/…</code>) are not direct audio and usually cannot be played by the browser due to cross‑origin restrictions. Download/export your songs as MP3 from Suno, place them in <code>./Media/</code>, and reference them here.
-      </footer>
-
-      <audio id="audio" preload="metadata" crossorigin="anonymous"></audio>
-    </section>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js"></script>
-  <script>
-    // =========================
-    // HARD‑CODED PLAYLIST — add/remove items directly
-    // Each item can be: { title: 'Optional title', url: 'https://…' }
-    // You provided three Suno share links; we'll resolve them to audio at runtime.
-    const PLAYLIST = [
-      // Replace these with actual direct audio files you host (recommended: put MP3s in ./Media/)
-      { title: 'Track A', url: './Media/suno_yTmv5qlw2eKOJrPE.mp3' },
-      { title: 'Track B', url: './Media/suno_jjovsURH8ahL1NJP.mp3' },
-      { title: 'Track C', url: './Media/suno_V2prj8N4ddRQnJWN.mp3' }
-      // Add more like: { title: 'My Song', url: './Media/my_song.mp3' }
-    ];
-
-    // ============== UI refs & state ==============
-    const els = {
-      audio: document.getElementById('audio'),
-      status: document.getElementById('status'),
-      nowTitle: document.getElementById('nowTitle'),
-      nowSub: document.getElementById('nowSub'),
-      list: document.getElementById('trackList'),
-      btnPrev: document.getElementById('btnPrev'),
-      btnPlay: document.getElementById('btnPlay'),
-      btnNext: document.getElementById('btnNext'),
-      btnStop: document.getElementById('btnStop'),
-      btnShuffle: document.getElementById('btnShuffle'),
-      loopAll: document.getElementById('loopAll')
-    };
-
-    let current = -1;
-    let isPlaying = false;
-    let isShuffle = false;
-    let hls = null;
-
-    // ============== Helpers ==============
-    function titleOf(t){ return t.title?.trim() || t.url.split('/').pop() || t.url; }
-    function shortUrl(u){ try{ const x=new URL(u); return (x.hostname+x.pathname).replace(/^www\./,''); }catch{ return u; } }
-    function escapeHtml(s){ return s.replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
-    function notify(msg){ els.status.textContent = msg; }
-
-    // Try to convert a Suno share URL to a direct CDN audio URL.
-    // Heuristic based on common public patterns: cdn1/2.suno.ai/<ID>.mp3
-    function resolveToCandidateUrls(url){
-      try{
-        const u = new URL(url);
-        if(u.hostname.endsWith('suno.com') && u.pathname.startsWith('/s/')){
-          const id = u.pathname.split('/').pop();
-          // Prefer mp3 on cdn1; provide a few fallbacks.
-          return [
-            `https://cdn1.suno.ai/${id}.mp3`,
-            `https://cdn1.suno.ai/${id}.m4a`,
-            `https://cdn2.suno.ai/${id}.mp3`
-          ];
-        }
-      }catch{ /* not a URL */ }
-      return [url];
+    // If caller already passed a direct audio URL, just stream it.
+    if (/\.(mp3|m4a|aac|wav|ogg|m3u8)(\?|$)/i.test(raw)) {
+      return stream(raw);
     }
 
-    function renderList(){
-      els.list.innerHTML = '';
-      PLAYLIST.forEach((t,i)=>{
-        const row = document.createElement('div');
-        row.className = 'track'; row.role='option'; row.tabIndex=0; row.dataset.idx=i;
-        row.innerHTML = `<div class="tidx">${i+1}</div>
-          <div class="tmeta"><div class="ttitle">${escapeHtml(titleOf(t))}</div>
-          <div class="hint">${escapeHtml(shortUrl(t.url))}</div></div>
-          <button class="btn" title="Play this">Play</button>`;
-        row.querySelector('button').addEventListener('click', ()=> startAt(i));
-        row.addEventListener('dblclick', ()=> startAt(i));
-        row.addEventListener('keydown', e=>{ if(e.key==='Enter') startAt(i); });
-        els.list.appendChild(row);
-      });
-      enableTransport();
-      highlightActive();
-    }
+    // If it's a Suno share page, try to discover an audio URL.
+    try {
+      const share = new URL(raw);
+      const isSunoShare = share.hostname.endsWith('suno.com') && share.pathname.startsWith('/s/');
+      if (!isSunoShare) return new Response('Unsupported URL', { status: 400, headers: CORS });
 
-    function enableTransport(){ els.btnPlay.disabled=false; els.btnNext.disabled=false; els.btnPrev.disabled=false; els.btnStop.disabled=false; }
-    function disableTransport(){ els.btnPlay.disabled=true; els.btnNext.disabled=true; els.btnPrev.disabled=true; els.btnStop.disabled=true; }
-    function highlightActive(){ [...els.list.children].forEach((c,idx)=> c.classList.toggle('active', idx===current)); }
+      const page = await fetch(raw, { headers: { 'User-Agent': UA } });
+      const html = await page.text();
 
-    function cleanupHls(){ if(hls){ try{ hls.destroy(); }catch(_){} hls=null; } els.audio.removeAttribute('src'); els.audio.load(); }
+      // 1) Scrape any obvious audio URLs on the page (mp3/m3u8 etc.)
+      const found = [];
+      const rx = /(https?:\/\/[^"'\\s]+\\.(?:mp3|m4a|aac|wav|ogg|m3u8)[^"'\\s]*)/gi;
+      let m; while ((m = rx.exec(html)) !== null) found.push(m[1]);
 
-    // Attach first working source from candidates, then play
-    async function attachAndPlay(url){
-      cleanupHls();
-      const candidates = resolveToCandidateUrls(url);
-      for(const src of candidates){
-        try{
-          const ok = await attachSource(src);
-          if(ok){ await els.audio.play(); return true; }
-        }catch{ /* try next */ }
+      // 2) Fallback guesses based on share id pattern
+      const id = share.pathname.split('/').pop();
+      if (id) {
+        found.push(`https://cdn1.suno.ai/${id}.mp3`);
+        found.push(`https://cdn2.suno.ai/${id}.mp3`);
+        found.push(`https://cdn1.suno.ai/${id}.m4a`);
       }
-      return false;
-    }
 
-    function attachSource(url){
-      return new Promise((resolve, reject)=>{
-        // HLS stream
-        if(/\.m3u8($|\?)/i.test(url)){
-          if(window.Hls && Hls.isSupported()){
-            hls = new Hls({ maxBufferLength:20, enableWorker:true });
-            hls.on(Hls.Events.MANIFEST_PARSED, ()=> resolve(true));
-            hls.on(Hls.Events.ERROR, (evt, data)=>{ if(data?.fatal){ try{ hls.destroy(); }catch(_){} hls=null; reject(new Error('HLS fatal')); } });
-            hls.loadSource(url); hls.attachMedia(els.audio);
-          }else if(els.audio.canPlayType('application/vnd.apple.mpegurl')){
-            const onReady = ()=> resolve(true);
-            els.audio.addEventListener('loadedmetadata', onReady, { once:true });
-            els.audio.src = url;
-          }else{ reject(new Error('HLS unsupported')); }
-        }else{ // Regular audio
-          const onReady = ()=> resolve(true);
-          els.audio.addEventListener('loadedmetadata', onReady, { once:true });
-          els.audio.src = url;
+      // Try candidates in order until one streams
+      for (const u of found) {
+        const test = await fetch(u, { method: 'HEAD', headers: { 'User-Agent': UA } });
+        const ct = test.headers.get('content-type') || '';
+        if (test.ok && (ct.startsWith('audio/') || ct.includes('mpegurl'))) {
+          return stream(u);
         }
-      });
-    }
-
-    async function startAt(index){
-      current = index % PLAYLIST.length;
-      const track = PLAYLIST[current];
-      els.nowTitle.textContent = titleOf(track);
-      els.nowSub.textContent = 'Loading…';
-      notify(`track ${current+1} / ${PLAYLIST.length}`);
-      highlightActive();
-
-      const ok = await attachAndPlay(track.url);
-      if(ok){
-        isPlaying = true; els.btnPlay.textContent='⏸︎ Pause'; els.btnPlay.ariaLabel='Pause'; els.nowSub.textContent='Playing';
-      }else{
-        notify('Could not stream this link. Skipping…'); nextTrack();
       }
+
+      return new Response('No playable audio found for this share URL.', { status: 404, headers: CORS });
+    } catch (e) {
+      return new Response('Resolution error', { status: 500, headers: CORS });
     }
 
-    function nextTrack(){
-      if(!PLAYLIST.length) return;
-      if(isShuffle){ let n; do{ n=Math.floor(Math.random()*PLAYLIST.length); } while(PLAYLIST.length>1 && n===current); startAt(n); }
-      else{ const n=current+1; if(n<PLAYLIST.length) startAt(n); else if(els.loopAll.checked) startAt(0); else stopAll(); }
+    async function stream(u) {
+      const r = await fetch(u, { headers: { 'User-Agent': UA }, redirect: 'follow' });
+      // Pass through byte-range streaming and content type
+      const headers = new Headers(r.headers);
+      for (const [k, v] of Object.entries(CORS)) headers.set(k, v);
+      return new Response(r.body, { status: r.status, headers });
     }
-
-    function prevTrack(){ if(!PLAYLIST.length) return; if(isShuffle){ startAt(Math.floor(Math.random()*PLAYLIST.length)); } else { startAt((current-1+PLAYLIST.length)%PLAYLIST.length); } }
-    function stopAll(){ els.audio.pause(); isPlaying=false; els.btnPlay.textContent='▶︎ Start Radio'; els.btnPlay.ariaLabel='Play'; notify('stopped'); }
-
-    // ===== Events =====
-    els.audio.addEventListener('ended', nextTrack);
-    els.audio.addEventListener('error', ()=>{ notify('Playback error. Skipping…'); nextTrack(); });
-    els.audio.addEventListener('waiting', ()=>{ els.nowSub.textContent='Buffering…'; });
-    els.audio.addEventListener('playing', ()=>{ els.nowSub.textContent='Playing'; });
-
-    els.btnPlay.addEventListener('click', ()=>{
-      if(isPlaying){ els.audio.pause(); isPlaying=false; els.btnPlay.textContent='▶︎ Start Radio'; els.btnPlay.ariaLabel='Play'; }
-      else { if(current<0) startAt(0); else els.audio.play().catch(()=>startAt(current)); }
-    });
-    els.btnNext.addEventListener('click', nextTrack);
-    els.btnPrev.addEventListener('click', prevTrack);
-    els.btnStop.addEventListener('click', stopAll);
-    els.btnShuffle.addEventListener('click', ()=>{ isShuffle=!isShuffle; els.btnShuffle.classList.toggle('active', isShuffle); els.btnShuffle.setAttribute('aria-pressed', String(isShuffle)); notify(isShuffle?'Shuffle: ON':'Shuffle: OFF'); });
-
-    // Initial paint
-    renderList();
-  </script>
-</body>
-</html>
+  }
+};
