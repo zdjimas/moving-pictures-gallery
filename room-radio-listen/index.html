@@ -116,6 +116,7 @@
       </footer>
 
       <audio id="audio" preload="metadata" playsinline></audio>
+      <video id="video" preload="metadata" playsinline style="display:none;width:0;height:0"></video>
     </section>
   </div>
 
@@ -150,6 +151,7 @@
     // Elements
     const els = {
       audio: document.getElementById('audio'),
+      video: document.getElementById('video'),
       status: document.getElementById('status'),
       onAir: document.getElementById('onAir'),
       nowTitle: document.getElementById('nowTitle'),
@@ -209,21 +211,49 @@
       els.nowSub.textContent = 'Loading…'; notify(`track ${current+1} / ${PLAYLIST.length}`);
       highlight();
       try{
-        await attach(track.file);
-        await els.audio.play();
+        const player = await attach(track.file);
+        await player.play();
         isPlaying = true; els.btnPlay.textContent='⏸︎ Pause'; els.btnPlay.ariaLabel='Pause';
         els.onAir.style.display = '';
         els.nowSub.textContent = 'Playing';
       }catch(e){ notify('Could not play this file. Skipping…'); next(); }
     }
 
-    function attach(src){
-      return new Promise((resolve,reject)=>{
-        els.audio.pause(); els.audio.src=''; els.audio.load();
-        const onMeta = ()=>{ els.audio.removeEventListener('loadedmetadata', onMeta); resolve(); };
+    async function attach(src){
+      // Reset both players
+      [els.audio, els.video].forEach(m=>{ try{ m.pause(); }catch(_){} m.removeAttribute('src'); m.load(); });
+
+      // Detect by HEAD if possible
+      let ct = '';
+      try{
+        const res = await fetch(encodeURI(src), { method:'HEAD', cache:'no-store' });
+        ct = (res.headers.get('content-type')||'').toLowerCase();
+      }catch(_){ /* HEAD may be blocked on some hosts; we will fall back */ }
+
+      // Choose element
+      const lower = src.toLowerCase();
+      const looksMp4 = /\.mp4(\?|$)/.test(lower) || ct.includes('video/mp4');
+      const looksM4a = /\.m4a(\?|$)/.test(lower) || ct.includes('audio/mp4');
+      const target = looksMp4 ? els.video : els.audio; // prefer <video> for video/mp4
+
+      // Wire volume/mute state to both
+      els.audio.muted = els.video.muted = JSON.parse(localStorage.getItem(K.muted)||'false');
+      els.audio.volume = els.video.volume = parseFloat(els.vol.value||'0.8');
+
+      await new Promise((resolve,reject)=>{
+        const onMeta = ()=>{ target.removeEventListener('loadedmetadata', onMeta); resolve(); };
+        const onErr = ()=>{ target.removeEventListener('error', onErr); reject(new Error('load error')); };
+        target.addEventListener('loadedmetadata', onMeta, { once:true });
+        target.addEventListener('error', onErr, { once:true });
+        target.src = encodeURI(src);
+        target.load();
+      });
+
+      return target; // return the active media element
+    };
         const onErr = ()=>{ els.audio.removeEventListener('error', onErr); reject(new Error('load error')); };
         els.audio.addEventListener('loadedmetadata', onMeta, { once:true });
-        els.audio.addEventListener('error', onErr, { once:true });
+        [els.audio, els.video].forEach(m=> m.addEventListener('error', ()=>{ notify('Playback error. Skipping…'); next(); }));
         els.audio.src = encodeURI(src); // relative same-origin path to ./Media/*.mp3 (encode spaces/(), etc.)
       });
     }
@@ -231,15 +261,15 @@
     function next(){ if(!PLAYLIST.length) return; if(isShuffle){ let n; do{ n=Math.floor(Math.random()*PLAYLIST.length); } while(PLAYLIST.length>1 && n===current); startAt(n); } else { const n=current+1; if(n<PLAYLIST.length) startAt(n); else if(els.loopAll.checked) startAt(0); else stopAll(); } }
     function prev(){ if(!PLAYLIST.length) return; if(isShuffle){ startAt(Math.floor(Math.random()*PLAYLIST.length)); } else { startAt((current-1+PLAYLIST.length)%PLAYLIST.length); } }
 
-    function stopAll(){ els.audio.pause(); isPlaying=false; els.btnPlay.textContent='▶︎ Start Station'; els.btnPlay.ariaLabel='Play'; els.onAir.style.display='none'; notify('stopped'); }
+    function stopAll(){ [els.audio, els.video].forEach(m=>{ try{ m.pause(); }catch(_){} }); isPlaying=false; els.btnPlay.textContent='▶︎ Start Station'; els.btnPlay.ariaLabel='Play'; els.onAir.style.display='none'; notify('stopped'); }
 
     // Events
-    els.audio.addEventListener('ended', next);
+    [els.audio, els.video].forEach(m=> m.addEventListener('ended', next));
     els.audio.addEventListener('error', ()=>{ notify('Playback error. Skipping…'); next(); });
-    els.audio.addEventListener('waiting', ()=>{ els.nowSub.textContent='Buffering…'; });
-    els.audio.addEventListener('playing', ()=>{ els.nowSub.textContent='Playing'; });
+    [els.audio, els.video].forEach(m=> m.addEventListener('waiting', ()=>{ els.nowSub.textContent='Buffering…'; }));
+    [els.audio, els.video].forEach(m=> m.addEventListener('playing', ()=>{ els.nowSub.textContent='Playing'; }));
 
-    els.btnPlay.addEventListener('click', ()=>{ if(isPlaying){ els.audio.pause(); isPlaying=false; els.btnPlay.textContent='▶︎ Start Station'; els.btnPlay.ariaLabel='Play'; els.onAir.style.display='none'; } else { if(current<0) startAt(0); else els.audio.play().catch(()=>startAt(current)); } });
+    els.btnPlay.addEventListener('click', ()=>{ if(isPlaying){ [els.audio, els.video].forEach(m=>{ try{ m.pause(); }catch(_){} }); isPlaying=false; els.btnPlay.textContent='▶︎ Start Station'; els.btnPlay.ariaLabel='Play'; els.onAir.style.display='none'; } else { if(current<0) startAt(0); else { const m = els.video.src ? els.video : els.audio; m.play().catch(()=>startAt(current)); } } });
     els.btnNext.addEventListener('click', next);
     els.btnPrev.addEventListener('click', prev);
     els.btnStop.addEventListener('click', stopAll);
@@ -248,8 +278,8 @@
     els.loopAll.addEventListener('change', ()=> localStorage.setItem(K.loop, els.loopAll.checked?'true':'false'));
 
     // Mute + Volume
-    els.btnMute.addEventListener('click', ()=>{ els.audio.muted = !els.audio.muted; localStorage.setItem(K.muted, JSON.stringify(els.audio.muted)); if(els.audio.muted){ els.btnMute.textContent='🔊 Sound On'; els.btnMute.classList.remove('muted'); els.btnMute.setAttribute('aria-pressed','true'); } else { els.btnMute.textContent='🔇 Mute'; els.btnMute.classList.add('muted'); els.btnMute.setAttribute('aria-pressed','false'); } });
-    els.vol.addEventListener('input', ()=>{ els.audio.volume = parseFloat(els.vol.value||'0.8'); localStorage.setItem(K.vol, String(els.audio.volume)); });
+    els.btnMute.addEventListener('click', ()=>{ const muted = !(els.audio.muted || els.video.muted); els.audio.muted = els.video.muted = muted; localStorage.setItem(K.muted, JSON.stringify(muted)); if(muted){ els.btnMute.textContent='🔊 Sound On'; els.btnMute.classList.remove('muted'); els.btnMute.setAttribute('aria-pressed','true'); } else { els.btnMute.textContent='🔇 Mute'; els.btnMute.classList.add('muted'); els.btnMute.setAttribute('aria-pressed','false'); } });
+    els.vol.addEventListener('input', ()=>{ const v = parseFloat(els.vol.value||'0.8'); els.audio.volume = els.video.volume = v; localStorage.setItem(K.vol, String(v)); });
 
     // Keyboard shortcuts
     window.addEventListener('keydown', (e)=>{
