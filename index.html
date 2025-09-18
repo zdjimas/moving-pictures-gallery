@@ -10,9 +10,7 @@
     --ink:#eceff4; --muted:#b7becd; --gold:#d8b765;
     --shadow:0 16px 40px rgba(0,0,0,.40);
     --tile-aspect: 3 / 4;
-
-    /* flat, solid wall per theme */
-    --wall-solid:#221014;
+    --wall-solid:#221014; /* flat, solid wall per theme */
   }
 
   /* ---------- Themes ---------- */
@@ -146,7 +144,8 @@
              max(8px, env(safe-area-inset-left));
   }
   .intro-video{ width:100%; height:100%; object-fit:contain; background:#000; }
-  .intro-actions{ position:fixed; right:16px; bottom:16px; z-index:2; }
+  .intro-actions{ position:fixed; right:16px; bottom:16px; z-index:2; display:flex; gap:10px; align-items:center; }
+  .intro-status{ color:#e9ecf2; font-size:14px; background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.18); padding:8px 12px; border-radius:999px; }
   .intro-skip{ border:1px solid #394355; background:#121a25; color:#e9ecf2; padding:10px 14px; border-radius:10px; cursor:pointer }
   .intro-skip:hover{ background:#17202c }
 </style>
@@ -183,6 +182,7 @@
              disablepictureinpicture></video>
     </div>
     <div class="intro-actions">
+      <p id="introStatus" class="intro-status" aria-live="polite">Loading room transition video… hit Skip if slow</p>
       <button id="skipIntro" class="intro-skip">Skip →</button>
     </div>
   </div>
@@ -219,17 +219,25 @@
 })();
 
 /* ============ Data ============ */
+/* 0) KZAK Radio Room (static image tile; pre-roll intro + same-tab nav) */
+const RADIO_KZAK = {
+  key:'kzak', title:'KZAK • Frasier-Style Free Radio', room:'Radio Listening',
+  desc:'A curated stream of instrumentals & remixes — no chatter, just music.',
+  tile:{ image:'./RadioMusicListening.jpg' },
+  introSrc:'room-radio-listen/radio-room-entry.mp4',
+  roomTarget:'room-radio-listen/index.html'
+};
+
 /* 1) Featured entry-hall exhibit (local MP4 hover) with plaque CTA to the room (with intro pre-roll) */
 const WINGS_FEATURED = {
   key:'wings', title:'Wings for Marie', room:'Narrative & Memory',
   desc:'Enter <strong>Narrative &amp; Memory</strong> — curated works on recollection, meaning, and time.',
   mp4:'./Wings For Marie.mp4', poster:'./Wings.png',
-  /* open this room AFTER playing the transfer video you uploaded */
   introSrc:'room-narrative-memory/Media/NarrativeMemoryRoom.mp4',
   roomTarget:'room-narrative-memory/index.html'
 };
 
-/* 2) Your image tile that links to the Abstracts room (with intro overlay) */
+/* 2) Abstracts room (TikTok tile + intro overlay into room) */
 const ABSTRACTS = {
   key: 'abstracts',
   title: 'The Grudge on Dune',
@@ -302,18 +310,24 @@ function buildExhibit(data){
   `;
 
   // Tile types:
-  // - TikTok image tile (Abstracts)
-  // - Local MP4 hover/lightbox tile (Wings, Jazz, Vacancy, Xavier)
   const tile = frameCol.querySelector('.tile');
   tile.dataset.title = data.title;
 
   if (data.tile?.tiktok){
+    // TikTok image tile (Abstracts)
     tile.dataset.tiktok = data.tile.tiktok;
     tile.innerHTML = `
       <img class="thumb" src="${data.tile.poster}" alt="Poster: ${data.title}" loading="lazy" />
       <div class="overlay"><div class="title">${data.title}</div><div class="badge">Click to watch on TikTok</div></div>
     `;
+  } else if (data.tile?.image){
+    // STATIC IMAGE TILE (KZAK)
+    tile.innerHTML = `
+      <img class="thumb" src="${data.tile.image}" alt="Poster: ${data.title}" loading="lazy" />
+      <div class="overlay"><div class="title">${data.title}</div><div class="badge">Click plaque to enter</div></div>
+    `;
   } else {
+    // Local MP4 hover/lightbox tile (Wings, Jazz, Vacancy, Xavier)
     tile.dataset.video = data.mp4;
     tile.innerHTML = `
       <img class="thumb" src="${data.poster}" alt="Poster: ${data.title}" loading="lazy" />
@@ -326,7 +340,6 @@ function buildExhibit(data){
   const ctaRow = plaque.querySelector('.cta-row');
   const parts = [];
 
-  // Abstracts: TikTok + intro overlay to enter room
   if (data.key === 'abstracts' && data.isActiveRoom){
     parts.push(
       `<a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>`,
@@ -336,26 +349,29 @@ function buildExhibit(data){
     );
   }
 
-  // Local MP4 exhibits: sound toggle always; optional room entry button
-  if (!data.tile?.tiktok){
+  if (data.key === 'kzak'){
+    parts.push(`<button class="cta enter-room" type="button"
+                  data-intro="${data.introSrc}" data-target="${data.roomTarget}"
+                  aria-haspopup="dialog">🏛 Enter this Room</button>`);
+  }
+
+  if (!data.tile?.tiktok && data.key !== 'kzak'){
     if (data.roomTarget && data.introSrc){
-      /* Wings (now with intro) */
       parts.push(`<button class="cta enter-room" type="button"
                           data-intro="${data.introSrc}" data-target="${data.roomTarget}"
                           aria-haspopup="dialog">🏛 Enter this Room</button>`);
     } else if (data.roomTarget){
-      /* fallback: direct link (others when they become rooms later) */
       parts.push(`<a class="cta" href="${data.roomTarget}" target="_self" rel="noopener">🏛 Enter this Room</a>`);
     }
-    parts.push(`<button class="mini-toggle hover-sound-toggle" type="button" aria-pressed="false" title="Toggle sound while hovering this artwork">🔊 Hover Sound: Off</button>`);
+    if (data.mp4){
+      parts.push(`<button class="mini-toggle hover-sound-toggle" type="button" aria-pressed="false" title="Toggle sound while hovering this artwork">🔊 Hover Sound: Off</button>`);
+    }
   }
 
   ctaRow.innerHTML = parts.join(' ');
-
   ex.appendChild(plaque);
   ex.appendChild(frameCol);
 
-  // Wire the hover-sound toggle (if present)
   const toggle = ctaRow.querySelector('.hover-sound-toggle');
   if (toggle){
     toggle.addEventListener('click', ()=>{
@@ -368,10 +384,9 @@ function buildExhibit(data){
   return ex;
 }
 
-/* ============ Render (order fixed) ============ */
-/* Wings first (hover MP4 with intro), then Abstracts image tile, then the rest */
+/* ============ Render (order fixed: KZAK → Wings → Abstracts → Others) ============ */
 const exhibitsEl = document.getElementById('exhibits');
-[WINGS_FEATURED, ABSTRACTS, ...OTHERS].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
+[RADIO_KZAK, WINGS_FEATURED, ABSTRACTS, ...OTHERS].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
 
 /* ============ Hover previews & Lightbox / Navigation ============ */
 const tiles = document.querySelectorAll('.tile');
@@ -392,7 +407,7 @@ function ensureVideo(tile){
 }
 function reveal(tile){ if (!tile.classList.contains('revealed')) tile.classList.add('revealed'); }
 function startPreview(tile, userGesture=false){
-  if (tile.dataset.tiktok) return;
+  if (tile.dataset.tiktok || !tile.querySelector('video.clip')) return;
   const v = ensureVideo(tile); if (!v) return;
   reveal(tile);
   const ex = tile.closest('.exhibit');
@@ -420,11 +435,8 @@ const lbTitle = document.getElementById('lbTitle');
 const lbClose = document.getElementById('lbClose');
 
 function openLightboxFromTile(tile){
-  if (tile.dataset.tiktok){
-    window.open(tile.dataset.tiktok, '_blank', 'noopener');
-    return;
-  }
-  const vPrev = tile.querySelector('video.clip');
+  if (tile.dataset.tiktok){ window.open(tile.dataset.tiktok, '_blank', 'noopener'); return; }
+  const vPrev = tile.querySelector('video.clip'); if (!vPrev) return;
   lbTitle.textContent = tile.dataset.title || 'Untitled';
   lbVideo.src = safeSrc(tile.dataset.video);
   lb.classList.add('open');
@@ -443,10 +455,11 @@ tiles.forEach(tile=>{
   tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
 });
 
-/* ===== Fullscreen Intro overlay flow (generic for any room button) ===== */
+/* ===== Fullscreen Intro overlay (rooms) ===== */
 (function(){
   const overlay = document.getElementById('introOverlay');
   const video   = document.getElementById('introVideo');
+  const status  = document.getElementById('introStatus');
   const skipBtn = document.getElementById('skipIntro');
 
   function cleanup(){
@@ -455,10 +468,7 @@ tiles.forEach(tile=>{
     overlay.classList.remove('open');
     document.body.style.overflow = '';
   }
-  function goNow(href){
-    cleanup();
-    window.location.assign(href);
-  }
+  function goNow(href){ cleanup(); window.location.assign(href); }
 
   function handleEnterClick(btn){
     const introSrc = btn.dataset.intro;
@@ -469,27 +479,36 @@ tiles.forEach(tile=>{
 
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
+    status.textContent = 'Loading room transition video… hit Skip if slow';
+
     video.src = introSrc;
     video.setAttribute('playsinline',''); 
     video.setAttribute('webkit-playsinline','');
 
+    let slowTimer = setTimeout(()=>{ status.textContent = 'Still loading… you can hit Skip → if it feels slow'; }, 2500);
+
     (async ()=>{
-      try {
-        video.muted = false; video.volume = 1.0;
-        await video.play();
-      } catch {
+      try { video.muted = false; video.volume = 1.0; await video.play(); status.textContent = 'Starting…'; }
+      catch {
         video.muted = true;
-        try { await video.play(); } catch { goNow(targetHref); return; }
+        try { await video.play(); status.textContent = 'Starting (muted)…'; }
+        catch { status.textContent = 'Autoplay blocked. Click Skip → to enter the room'; return; }
       }
     })();
 
+    video.addEventListener('waiting', ()=>{ status.textContent = 'Buffering… hit Skip → if slow'; });
+    video.addEventListener('loadeddata', ()=>{ status.textContent = 'Starting…'; });
+    video.addEventListener('error', ()=>{ status.textContent = 'Trouble loading video. Skipping…'; goNow(targetHref); });
     video.addEventListener('ended', ()=>goNow(targetHref), {once:true});
     skipBtn.onclick = ()=>goNow(targetHref);
+    video.addEventListener('play', ()=> clearTimeout(slowTimer), {once:true});
   }
 
-  // Bind all "Enter this Room" buttons that specify data-intro and data-target
-  document.querySelectorAll('button.enter-room[data-target]').forEach(btn=>{
-    btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); handleEnterClick(btn); }, {passive:false});
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button.enter-room[data-target]');
+    if(!btn) return;
+    e.preventDefault(); e.stopPropagation();
+    handleEnterClick(btn);
   });
 })();
 </script>
