@@ -6,51 +6,31 @@
   <title>Moving Pictures — Museum Lobby</title>
   <style>
     :root{
-      --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
+      --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1;
       --bg:#0a0e1a; --tile:#0f131a; --line:#22324d; --shadow:0 18px 50px rgba(0,0,0,.45);
     }
     html,body{height:100%}
-    body{margin:0;color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:#0a0e1a}
+    body{margin:0;color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg)}
     .wrap{max-width:1200px;margin:0 auto;padding:28px 16px 80px}
 
     header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
     h1{margin:0;font-size:20px}
     .theme{display:flex;gap:8px;align-items:center}
     .theme button{border:1px solid var(--line);border-radius:999px;background:#0f131a;color:var(--ink);padding:8px 12px;cursor:pointer}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
 
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
     .tile{position:relative;background:var(--tile);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
-    .poster{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
-    .tile .hovervid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s}
+    .media{position:relative;width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#0f131a,#0b0f1f)}
+    .poster{display:block;width:100%;height:100%;object-fit:cover}
+    .hovervid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s}
     .tile:hover .hovervid[data-sound="on"]{opacity:.9}
-    .tile .meta{padding:12px}
+
+    .meta{padding:12px}
     .tile h3{margin:0 0 4px;font-size:16px}
     .desc{margin:0;color:var(--muted);font-size:12px}
     .plaque{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
     .cta, .sound{border:1px solid var(--line);border-radius:999px;background:#0f131a;color:var(--ink);padding:8px 12px;cursor:pointer}
     .sound[data-sound="on"]{background:var(--accent);color:#062211;border-color:transparent}
-
-    /* Pre-roll overlay */
-    .room-intro-overlay{
-      position:fixed; inset:0; z-index:9999; display:grid; place-items:center;
-      background:rgba(0,0,0,.65);
-    }
-    .intro-frame{ width:min(960px, 92vw); aspect-ratio:16/9; position:relative; }
-    .intro-video{ width:100%; height:100%; object-fit:cover; border-radius:14px; box-shadow:var(--shadow); background:#000; }
-    .intro-ui{
-      position:absolute; left:0; right:0; bottom:10px; display:flex; gap:12px; align-items:center;
-      justify-content:space-between; padding:10px 12px;
-    }
-    .intro-status{
-      margin:0; padding:.35rem .75rem; font-size:14px; color:#e6e9ef; background:rgba(0,0,0,.45);
-      border:1px solid rgba(255,255,255,.18); border-radius:999px;
-    }
-    .intro-skip{
-      background:#0f131a; color:#e6e9ef; border:1px solid #2a3344; border-radius:999px;
-      padding:8px 14px; cursor:pointer;
-    }
-    .intro-skip:hover{ background:#121826; }
-    .intro-skip:focus{ outline:2px solid #89b4fa; outline-offset:2px; }
 
     footer{margin-top:24px;color:var(--muted);font-size:12px;text-align:center}
   </style>
@@ -69,10 +49,11 @@
     </header>
 
     <section class="grid" aria-label="Exhibits">
-
-      <!-- 1) KZAK Radio Room (static tile; plaque CTA triggers pre-roll then nav) -->
+      <!-- 1) KZAK Radio Room (static image tile; plaque CTA plays intro then same-tab nav) -->
       <article class="tile" aria-labelledby="kzak-title">
-        <img class="poster" src="./RadioMusicListening.jpg" alt="KZAK Radio Room poster"/>
+        <div class="media">
+          <img class="poster" src="./RadioMusicListening.jpg" alt="KZAK Radio Room poster"/>
+        </div>
         <div class="meta">
           <h3 id="kzak-title">KZAK • Frasier-Style Free Radio</h3>
           <p class="desc">A curated stream of instrumentals & remixes — no chatter, just music.</p>
@@ -85,11 +66,13 @@
         </div>
       </article>
 
-      <!-- 2) Wings for Marie (local MP4 hover preview, sound toggle, plaque CTA) -->
+      <!-- 2) Wings for Marie (local MP4 hover preview + sound toggle; plaque CTA to room) -->
       <article class="tile" aria-labelledby="wings-title">
-        <img class="poster" src="room-narrative-memory/Media/wings-poster.jpg" alt="" />
-        <video class="hovervid" muted preload="metadata" playsinline
-               src="room-narrative-memory/Media/NarrativeMemoryRoom.mp4" data-sound="off"></video>
+        <div class="media">
+          <!-- no poster image to avoid 404s; video covers it -->
+          <video class="hovervid" muted preload="metadata" playsinline
+                 src="room-narrative-memory/Media/NarrativeMemoryRoom.mp4" data-sound="off"></video>
+        </div>
         <div class="meta">
           <h3 id="wings-title">Wings for Marie — Narrative & Memory</h3>
           <p class="desc">Hover to preview. Toggle sound, then enter the room.</p>
@@ -103,9 +86,9 @@
         </div>
       </article>
 
-      <!-- 3) The Grudge on Dune / Abstracts (TikTok tile OR local intro) -->
+      <!-- 3) The Grudge on Dune / Abstracts (plaque CTA plays GhoulsDoor then nav) -->
       <article class="tile" aria-labelledby="abstracts-title">
-        <img class="poster" src="room-abstract/media/abstracts-poster.jpg" alt="Abstracts poster"/>
+        <div class="media"><!-- placeholder panel; no poster required --></div>
         <div class="meta">
           <h3 id="abstracts-title">The Grudge on Dune — Abstracts</h3>
           <p class="desc">Enter the Abstracts room. A moody gateway piece.</p>
@@ -118,11 +101,12 @@
         </div>
       </article>
 
-      <!-- 4) Jazz / Vacancy / Xavier (local MP4 hover previews with sound toggles) -->
+      <!-- 4) Jazz (local MP4 hover preview with toggle; lightbox preview on click) -->
       <article class="tile" aria-labelledby="jazz-title">
-        <img class="poster" src="showcase-jazz/poster.jpg" alt="" />
-        <video class="hovervid" muted preload="metadata" playsinline
-               src="showcase-jazz/preview.mp4" data-sound="off"></video>
+        <div class="media">
+          <video class="hovervid" muted preload="metadata" playsinline
+                 src="showcase-jazz/preview.mp4" data-sound="off"></video>
+        </div>
         <div class="meta">
           <h3 id="jazz-title">Jazz — Late Night Takes</h3>
           <p class="desc">Hover to preview. Toggle sound for audio.</p>
@@ -133,10 +117,12 @@
         </div>
       </article>
 
+      <!-- Vacancy -->
       <article class="tile" aria-labelledby="vacancy-title">
-        <img class="poster" src="showcase-vacancy/poster.jpg" alt="" />
-        <video class="hovervid" muted preload="metadata" playsinline
-               src="showcase-vacancy/preview.mp4" data-sound="off"></video>
+        <div class="media">
+          <video class="hovervid" muted preload="metadata" playsinline
+                 src="showcase-vacancy/preview.mp4" data-sound="off"></video>
+        </div>
         <div class="meta">
           <h3 id="vacancy-title">Vacancy — Neon Stories</h3>
           <p class="desc">Hover to preview. Toggle sound for audio.</p>
@@ -147,10 +133,12 @@
         </div>
       </article>
 
+      <!-- Xavier -->
       <article class="tile" aria-labelledby="xavier-title">
-        <img class="poster" src="showcase-xavier/poster.jpg" alt="" />
-        <video class="hovervid" muted preload="metadata" playsinline
-               src="showcase-xavier/preview.mp4" data-sound="off"></video>
+        <div class="media">
+          <video class="hovervid" muted preload="metadata" playsinline
+                 src="showcase-xavier/preview.mp4" data-sound="off"></video>
+        </div>
         <div class="meta">
           <h3 id="xavier-title">Xavier — Study in Motion</h3>
           <p class="desc">Hover to preview. Toggle sound for audio.</p>
@@ -160,7 +148,6 @@
           </div>
         </div>
       </article>
-
     </section>
 
     <footer>
@@ -168,8 +155,8 @@
     </footer>
   </div>
 
+  <!-- Theme switcher (persist) -->
   <script>
-    // ===== Theme switcher (persist) =====
     (function(){
       const KEY='venue.theme';
       const saved = localStorage.getItem(KEY) || 'theme-default';
@@ -183,7 +170,7 @@
       });
     })();
 
-    // ===== Hover sound toggles for local MP4 showcase tiles =====
+    // Hover sound toggles for local MP4 showcase tiles (baseline behavior)
     document.addEventListener('click', (e)=>{
       const btn = e.target.closest('.sound');
       if(!btn) return;
@@ -197,88 +184,36 @@
       }
     });
 
-    // Play hover video on hover (visual only if sound off)
-    document.querySelectorAll('.tile .hovervid').forEach(v=>{
+    // Hover play/pause (visual only if sound off)
+    document.querySelectorAll('.hovervid').forEach(v=>{
       v.addEventListener('mouseenter', ()=>{ v.play().catch(()=>{}); });
       v.addEventListener('mouseleave', ()=>{ v.pause(); });
     });
 
-    // ===== Lightbox opener for non-room showcases =====
+    // Simple lightbox for showcase previews (no room navigation)
     document.addEventListener('click', (e)=>{
       const btn = e.target.closest('[data-lightbox]');
       if(!btn) return;
       e.preventDefault();
       const src = btn.getAttribute('data-lightbox');
-      openLightbox(src);
-    });
-
-    function openLightbox(src){
       const wrap = document.createElement('div');
       wrap.className='room-intro-overlay';
+      wrap.style.cssText='position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:rgba(0,0,0,.65)';
       wrap.innerHTML = `
-        <div class="intro-frame">
-          <video class="intro-video" playsinline controls src="${src}"></video>
-          <div class="intro-ui">
-            <p class="intro-status">Preview — press Esc to close</p>
-            <button type="button" class="intro-skip">Close ✕</button>
-          </div>
+        <div style="width:min(960px,92vw);aspect-ratio:16/9;position:relative">
+          <video style="width:100%;height:100%;object-fit:cover;border-radius:14px;background:#000" playsinline controls src="${src}"></video>
+          <button type="button" style="position:absolute;right:12px;bottom:10px;background:#0f131a;color:#e6e9ef;border:1px solid #2a3344;border-radius:999px;padding:8px 14px;cursor:pointer">Close ✕</button>
         </div>`;
       document.body.appendChild(wrap);
       const close = ()=> wrap.remove();
-      wrap.querySelector('.intro-skip').addEventListener('click', close);
+      wrap.querySelector('button').addEventListener('click', close);
       wrap.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
-      wrap.tabIndex = -1; wrap.focus();
-    }
-
-    // ===== Pre-roll: play intro then navigate, with clearer loading message =====
-    function buildIntroOverlay(message){
-      const wrap = document.createElement('div');
-      wrap.className = 'room-intro-overlay';
-      wrap.setAttribute('role','dialog');
-      wrap.setAttribute('aria-modal','true');
-      wrap.innerHTML = `
-        <div class="intro-frame">
-          <video class="intro-video" playsinline preload="auto"></video>
-          <div class="intro-ui">
-            <p class="intro-status" aria-live="polite">${message}</p>
-            <button type="button" class="intro-skip" aria-label="Skip transition and enter room">Skip →</button>
-          </div>
-        </div>`;
-      document.body.appendChild(wrap);
-      return wrap;
-    }
-
-    function playIntroThenGo(introSrc, roomTarget){
-      const overlay = buildIntroOverlay('Loading room transition video… hit Skip if slow');
-      const vid = overlay.querySelector('.intro-video');
-      const skip = overlay.querySelector('.intro-skip');
-      const status = overlay.querySelector('.intro-status');
-      const go = ()=> location.href = roomTarget;
-
-      let slowHintTimer = setTimeout(()=>{ status.textContent = 'Still loading… you can hit Skip → if it feels slow'; }, 2500);
-
-      skip.addEventListener('click', go);
-      overlay.addEventListener('keydown', e=>{ if(e.key==='Escape') go(); });
-
-      vid.addEventListener('loadeddata', ()=>{ status.textContent = 'Starting…'; });
-      vid.addEventListener('waiting', ()=>{ status.textContent = 'Buffering… hit Skip → if slow'; });
-      vid.addEventListener('error', ()=>{ status.textContent = 'Trouble loading video. Skipping…'; go(); });
-      vid.addEventListener('ended', go);
-
-      vid.src = introSrc;
-      vid.play().catch(()=>{ status.textContent = 'Autoplay blocked. Click Skip → to enter the room'; });
-    }
-
-    // Bind plaque CTAs (generic handler)
-    document.addEventListener('click', (e)=>{
-      const btn = e.target.closest('.enter-room');
-      if(!btn) return;
-      e.preventDefault();
-      const intro = btn.getAttribute('data-intro');
-      const target = btn.getAttribute('data-target');
-      if(intro) playIntroThenGo(intro, target);
-      else if(target) location.href = target;
+      wrap.tabIndex=-1; wrap.focus();
     });
   </script>
+
+  <!-- Keep only these two JS files per baseline -->
+  <script src="rooms_manifest.js"></script>
+  <script src="lobby-rooms.js"></script>
 </body>
 </html>
