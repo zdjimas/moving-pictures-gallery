@@ -7,17 +7,11 @@
 <style>
   /* ---------- Base tokens (overridden by theme classes) ---------- */
   :root{
-    /* core */
     --ink:#eceff4; --muted:#b7becd; --gold:#d8b765;
     --shadow:0 16px 40px rgba(0,0,0,.40);
     --tile-aspect: 3 / 4;
 
-    /* legacy beam/marble/floor (now disabled globally) */
-    --beam-a: rgba(255,255,210,.20); --beam-b: rgba(255,240,190,.16);
-    --marble-top:#e7dcc3; --marble-mid:#b9a67b; --marble-edge:#8f7846;
-    --floor-1:#e9e7de; --floor-2:#cfc7b6; --floor-3:#b8ae99;
-
-    /* single solid wall color per theme */
+    /* flat, solid wall per theme */
     --wall-solid:#221014;
   }
 
@@ -25,10 +19,7 @@
   body.theme-default{ --wall-solid:#221014; --ink:#eceff4; --muted:#b7becd; }
   body.theme-louvre{  --wall-solid:#3f0c0e; --ink:#f7f7f9; --muted:#e0d5c7; }
   body.theme-met{     --wall-solid:#1f4750; --ink:#f2f7f8; --muted:#d6e4e6; }
-  body.theme-la{
-    --wall-solid:#f7f3ee; --ink:#111; --muted:#4b5563; --gold:#bdbdbd;
-    --beam-a: rgba(255,255,255,0); --beam-b: rgba(255,255,255,0);
-  }
+  body.theme-la{      --wall-solid:#f7f3ee; --ink:#111; --muted:#4b5563; --gold:#bdbdbd; }
 
   html,body{height:100%}
   body{
@@ -37,7 +28,7 @@
     background: var(--wall-solid);
   }
 
-  /* Disable decorative overlays for a flat background across all themes */
+  /* remove any legacy wallpaper/beams */
   .beams{ display:none !important; }
   body::before, body::after{ display:none !important; content:""; }
 
@@ -94,6 +85,7 @@
   .mini-toggle[aria-pressed="true"]{background:#14202c;border-color:#46607a}
   body.theme-la .mini-toggle{ background:#fff; color:#111; border:1px solid #c9c9c9; }
 
+  /* Frames & tiles */
   .frame-wrap{filter:drop-shadow(0 18px 24px rgba(0,0,0,.35)); transform: rotate(var(--frame-tilt, 0deg));}
   .frame{position:relative; box-shadow:var(--shadow); border-radius:14px; border:10px solid transparent;}
   .finish-gilded .frame{
@@ -112,7 +104,7 @@
   }
   .finish-walnut .frame{
     background:linear-gradient(#0000,#0000) padding-box,
-      linear-gradient(25deg, #3b2414 0%, #5a3820 30%, #7a4b2b 55%, #4b2d19 80%, #3b2414 100%) border-box;
+      linear-gradient(25deg, #3b2414 0%,#5a3820 30%,#7a4b2b 55%,#4b2d19 80%,#3b2414 100%) border-box;
   }
   .frame::after{content:"";position:absolute;inset:8px;border-radius:8px;border:2px solid #f4e8c7;pointer-events:none}
   .mat{margin:16px;background:#f4efe6;border:1px solid #ddd2be;border-radius:8px;
@@ -121,14 +113,10 @@
 
   .tile{position:relative;aspect-ratio:var(--tile-aspect);overflow:hidden;border:1px solid rgba(0,0,0,.25);
         background:#000;display:block;touch-action:manipulation;border-radius:6px}
-  .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-  .thumb{background:#000}
-  /* Critical: video layer transparent so it never shows a black fill before frames */
-  .clip{opacity:0;transition:opacity .15s ease-out;background:transparent}
-  /* Once revealed (after a real frame), keep video visible—even when paused */
-  .tile.revealed .clip{opacity:1}
+  .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
+  .clip{opacity:0;transition:opacity .15s ease-out}
+  .tile.is-previewing .clip,.tile.revealed .clip{opacity:1}
   .tile.revealed .thumb{opacity:0;pointer-events:none}
-
   .overlay{position:absolute;inset:auto 0 0 0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
            padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
   .title{font-weight:600;font-size:14px}
@@ -146,7 +134,7 @@
   .player{position:relative;background:#000}
   .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 
-  /* ===== FULLSCREEN INTRO OVERLAY (unchanged) ===== */
+  /* Intro overlay (for any room) */
   .intro-overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center; background:#000; }
   .intro-overlay.open{ display:grid }
   .intro-shell{
@@ -184,10 +172,15 @@
     <section id="exhibits" class="exhibits"></section>
   </div>
 
-  <!-- Fullscreen Intro overlay -->
+  <!-- Fullscreen Intro overlay (shared for all rooms) -->
   <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
     <div class="intro-shell">
-      <video id="introVideo" class="intro-video" playsinline webkit-playsinline preload="metadata" controlslist="nodownload noplaybackrate" disablepictureinpicture></video>
+      <video id="introVideo"
+             class="intro-video"
+             playsinline webkit-playsinline
+             preload="metadata"
+             controlslist="nodownload noplaybackrate"
+             disablepictureinpicture></video>
     </div>
     <div class="intro-actions">
       <button id="skipIntro" class="intro-skip">Skip →</button>
@@ -225,7 +218,18 @@
   });
 })();
 
-/* ============ Data (same as 9/13) ============ */
+/* ============ Data ============ */
+/* 1) Featured entry-hall exhibit (local MP4 hover) with plaque CTA to the room (with intro pre-roll) */
+const WINGS_FEATURED = {
+  key:'wings', title:'Wings for Marie', room:'Narrative & Memory',
+  desc:'Enter <strong>Narrative &amp; Memory</strong> — curated works on recollection, meaning, and time.',
+  mp4:'./Wings For Marie.mp4', poster:'./Wings.png',
+  /* open this room AFTER playing the transfer video you uploaded */
+  introSrc:'room-narrative-memory/Media/NarrativeMemoryRoom.mp4',
+  roomTarget:'room-narrative-memory/index.html'
+};
+
+/* 2) Your image tile that links to the Abstracts room (with intro overlay) */
 const ABSTRACTS = {
   key: 'abstracts',
   title: 'The Grudge on Dune',
@@ -237,25 +241,22 @@ const ABSTRACTS = {
   tile: { tiktok: 'https://www.tiktok.com/t/ZT63YRxNR/', poster: './IMG_0494.jpg' }
 };
 
+/* 3) Other local MP4 showcases (hover preview + sound toggle) */
 const OTHERS = [
-  { key:'xavier', title:"Xavier's Perspectives", room:'Portraits in Motion',
-    desc:'Intimate character studies that flicker between realism and dream. Faces, gestures, and mood as moving compositions.',
-    mp4:'./xaviers-perspectives.mp4', poster:'./xaviers-perspectives-poster.png' },
   { key:'jazz', title:'Reflections from a Jazz Club', room:'Noir & Jazz Abstractions',
     desc:'Smoke, brass, and neon. Improvised camera rhythms meet graphic motifs in a low-lit synesthetic lounge.',
     mp4:'./Reflections from a Jazz Club.mp4', poster:'./Jazz.png' },
   { key:'vacancy', title:'Vacancy — an AI cover of Dream Theater', room:'Cinematic Covers',
     desc:'Classic tracks reimagined as moving paintings—lyric moods translated into light and motion.',
     mp4:'./Vacancy - an AI cover of Dream Theater.mp4', poster:'./Vacancy.png' },
-  { key:'wings', title:'Wings for Marie', room:'Devotional Motion',
-    desc:'Elegiac studies about memory and lift—where textures arc upward and time seems to glow.',
-    mp4:'./Wings For Marie.mp4', poster:'./Wings.png' }
+  { key:'xavier', title:"Xavier's Perspectives", room:'Portraits in Motion',
+    desc:'Intimate character studies that flicker between realism and dream. Faces, gestures, and mood as moving compositions.',
+    mp4:'./xaviers-perspectives.mp4', poster:'./xaviers-perspectives-poster.png' }
 ];
 
 /* ============ Utilities ============ */
 const rand = (min,max)=> Math.random()*(max-min)+min;
 const choose = arr => arr[Math.floor(Math.random()*arr.length)];
-function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
 const FINISHES = ['finish-gilded','finish-ebony','finish-brass','finish-walnut'];
 
 /* ============ Build one exhibit row ============ */
@@ -284,7 +285,7 @@ function buildExhibit(data){
   plaque.innerHTML = `
     <div class="plaque">
       <h2>${data.title}</h2>
-      <div class="room">Room: ${data.room}${data.isActiveRoom ? '' : ' (coming soon)'}</div>
+      <div class="room">Room: ${data.room}${data.isActiveRoom ? '' : ''}</div>
       <p>${data.desc}</p>
       <div class="cta-row"></div>
     </div>
@@ -300,17 +301,19 @@ function buildExhibit(data){
     </div>
   `;
 
-  // Tile content (MP4 hover vs TikTok)
+  // Tile types:
+  // - TikTok image tile (Abstracts)
+  // - Local MP4 hover/lightbox tile (Wings, Jazz, Vacancy, Xavier)
   const tile = frameCol.querySelector('.tile');
+  tile.dataset.title = data.title;
+
   if (data.tile?.tiktok){
-    tile.dataset.title = data.title;
     tile.dataset.tiktok = data.tile.tiktok;
     tile.innerHTML = `
       <img class="thumb" src="${data.tile.poster}" alt="Poster: ${data.title}" loading="lazy" />
       <div class="overlay"><div class="title">${data.title}</div><div class="badge">Click to watch on TikTok</div></div>
     `;
   } else {
-    tile.dataset.title = data.title;
     tile.dataset.video = data.mp4;
     tile.innerHTML = `
       <img class="thumb" src="${data.poster}" alt="Poster: ${data.title}" loading="lazy" />
@@ -319,23 +322,31 @@ function buildExhibit(data){
     `;
   }
 
-  // CTA(s)
+  // CTAs
   const ctaRow = plaque.querySelector('.cta-row');
   const parts = [];
 
+  // Abstracts: TikTok + intro overlay to enter room
   if (data.key === 'abstracts' && data.isActiveRoom){
     parts.push(
       `<a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>`,
-      `<button class="cta" id="enterAbstracts" type="button"
+      `<button class="cta enter-room" type="button"
                data-intro="${data.introSrc}" data-target="${data.target}"
                aria-haspopup="dialog">🏛 Enter this Room</button>`
     );
-  } else if (!data.isActiveRoom){
-    parts.push(`<button class="cta" aria-disabled="true" title="Room under construction">▶︎ Enter Room (Coming Soon)</button>`);
   }
 
-  // Per-exhibit hover-sound toggle (only when local MP4)
+  // Local MP4 exhibits: sound toggle always; optional room entry button
   if (!data.tile?.tiktok){
+    if (data.roomTarget && data.introSrc){
+      /* Wings (now with intro) */
+      parts.push(`<button class="cta enter-room" type="button"
+                          data-intro="${data.introSrc}" data-target="${data.roomTarget}"
+                          aria-haspopup="dialog">🏛 Enter this Room</button>`);
+    } else if (data.roomTarget){
+      /* fallback: direct link (others when they become rooms later) */
+      parts.push(`<a class="cta" href="${data.roomTarget}" target="_self" rel="noopener">🏛 Enter this Room</a>`);
+    }
     parts.push(`<button class="mini-toggle hover-sound-toggle" type="button" aria-pressed="false" title="Toggle sound while hovering this artwork">🔊 Hover Sound: Off</button>`);
   }
 
@@ -357,11 +368,12 @@ function buildExhibit(data){
   return ex;
 }
 
-/* ============ Render ============ */
+/* ============ Render (order fixed) ============ */
+/* Wings first (hover MP4 with intro), then Abstracts image tile, then the rest */
 const exhibitsEl = document.getElementById('exhibits');
-[ABSTRACTS, ...shuffle([...OTHERS])].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
+[WINGS_FEATURED, ABSTRACTS, ...OTHERS].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
 
-/* ============ Hover previews (freeze-frame) & Lightbox ============ */
+/* ============ Hover previews & Lightbox / Navigation ============ */
 const tiles = document.querySelectorAll('.tile');
 const safeSrc = (p)=> encodeURI(p);
 
@@ -371,37 +383,24 @@ function ensureVideo(tile){
   if (!v.dataset.bound){
     v.dataset.bound = '1';
     v.src = safeSrc(tile.dataset.video);
-    v.preload = 'auto';              // ensure we get a drawable frame
+    v.preload = 'metadata';
     v.playsInline = true;
     v.setAttribute('playsinline','');
     v.setAttribute('webkit-playsinline','');
-
-    // Reveal ONLY after a real frame is available
-    const revealOnce = ()=> tile.classList.add('revealed');
-    v.addEventListener('loadeddata', revealOnce, {once:true});
-    v.addEventListener('timeupdate', function onTU(){ revealOnce(); v.removeEventListener('timeupdate', onTU); }, {once:true});
   }
   return v;
 }
-
+function reveal(tile){ if (!tile.classList.contains('revealed')) tile.classList.add('revealed'); }
 function startPreview(tile, userGesture=false){
   if (tile.dataset.tiktok) return;
   const v = ensureVideo(tile); if (!v) return;
+  reveal(tile);
   const ex = tile.closest('.exhibit');
   v.muted = !(ex && ex.dataset.sound === 'on');
   const p = v.play(); if (userGesture && p) p.catch(()=>{});
+  tile.classList.add('is-previewing');
 }
-
-function stopPreview(tile){
-  const v = tile.querySelector('video.clip');
-  if (!v) return;
-  // Pause only if we already have current data—this freezes the last frame.
-  if (v.readyState >= 2 /* HAVE_CURRENT_DATA */){
-    v.pause();
-    // Nudge a paint of the current frame in some engines
-    requestAnimationFrame(()=>{ try{ v.currentTime = v.currentTime; }catch(e){} });
-  }
-}
+function stopPreview(tile){ const v = tile.querySelector('video.clip'); if (v) v.pause(); tile.classList.remove('is-previewing'); }
 
 tiles.forEach(tile=>{
   tile.addEventListener('pointerenter', ()=>startPreview(tile,false));
@@ -414,7 +413,7 @@ tiles.forEach(tile=>{
   tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
 });
 
-/* Lightbox for local MP4 tiles only */
+/* Lightbox for local MP4 tiles only; TikTok opens new tab */
 const lb = document.getElementById('lightbox');
 const lbVideo = document.getElementById('lbVideo');
 const lbTitle = document.getElementById('lbTitle');
@@ -422,7 +421,8 @@ const lbClose = document.getElementById('lbClose');
 
 function openLightboxFromTile(tile){
   if (tile.dataset.tiktok){
-    window.open(tile.dataset.tiktok, '_blank', 'noopener'); return;
+    window.open(tile.dataset.tiktok, '_blank', 'noopener');
+    return;
   }
   const vPrev = tile.querySelector('video.clip');
   lbTitle.textContent = tile.dataset.title || 'Untitled';
@@ -443,36 +443,29 @@ tiles.forEach(tile=>{
   tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
 });
 
-/* ===== Fullscreen Intro overlay (Abstracts room) ===== */
+/* ===== Fullscreen Intro overlay flow (generic for any room button) ===== */
 (function(){
-  const btn = document.getElementById('enterAbstracts');
-  if(!btn) return;
-
   const overlay = document.getElementById('introOverlay');
   const video   = document.getElementById('introVideo');
   const skipBtn = document.getElementById('skipIntro');
 
-  function resolveTarget(){
-    const raw = btn.dataset.target || 'room-abstract/index.html';
-    try { return new URL(raw, window.location.href).href; }
-    catch { return raw; }
-  }
   function cleanup(){
     try { video.pause(); } catch(e){}
     video.removeAttribute('src'); video.load();
     overlay.classList.remove('open');
     document.body.style.overflow = '';
   }
-  function goNow(){
-    const href = resolveTarget();
+  function goNow(href){
     cleanup();
     window.location.assign(href);
   }
 
-  btn.addEventListener('click', async (e)=>{
-    e.preventDefault(); e.stopPropagation();
+  function handleEnterClick(btn){
     const introSrc = btn.dataset.intro;
-    if(!introSrc){ goNow(); return; }
+    const targetRaw = btn.dataset.target;
+    const targetHref = (()=>{ try { return new URL(targetRaw, window.location.href).href; } catch { return targetRaw; } })();
+
+    if(!introSrc){ goNow(targetHref); return; }
 
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -480,20 +473,28 @@ tiles.forEach(tile=>{
     video.setAttribute('playsinline',''); 
     video.setAttribute('webkit-playsinline','');
 
-    try {
-      video.muted = false; video.volume = 1.0;
-      await video.play();
-    } catch {
-      video.muted = true;
-      try { await video.play(); } catch { goNow(); return; }
-    }
+    (async ()=>{
+      try {
+        video.muted = false; video.volume = 1.0;
+        await video.play();
+      } catch {
+        video.muted = true;
+        try { await video.play(); } catch { goNow(targetHref); return; }
+      }
+    })();
 
-    video.addEventListener('ended', ()=>goNow(), {once:true});
-    skipBtn.onclick = ()=>goNow();
-  }, {passive:false});
+    video.addEventListener('ended', ()=>goNow(targetHref), {once:true});
+    skipBtn.onclick = ()=>goNow(targetHref);
+  }
+
+  // Bind all "Enter this Room" buttons that specify data-intro and data-target
+  document.querySelectorAll('button.enter-room[data-target]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); handleEnterClick(btn); }, {passive:false});
+  });
 })();
 </script>
 
+  <!-- Additive lobby rows (rooms list) -->
   <script src="rooms_manifest.js"></script>
   <script src="lobby-rooms.js"></script>
 </body>
