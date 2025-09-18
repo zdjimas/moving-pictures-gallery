@@ -78,9 +78,6 @@
 
     footer{margin-top:10px;color:var(--muted);font-size:12px}
 
-    /* Removed the decorative skyline completely */
-    /* .skyline{ ... }  — deleted */
-    
     /* Return-to-lobby pill link */
     .btn-link{display:inline-flex;align-items:center;gap:8px;text-decoration:none;background:#0f131a;border:1px solid #2a3344;color:var(--ink);padding:10px 14px;border-radius:999px}
     .btn-link:hover{background:#121826}
@@ -139,8 +136,6 @@
       <audio id="audio" preload="metadata" playsinline></audio>
     </section>
   </div>
-
-  <!-- skyline markup removed -->
 
   <script>
     // ===== Helper: encode each path segment =====
@@ -231,19 +226,19 @@
       }
     }
 
-    // Try to attach the requested src; if it errors, retry with normalized variants
+    // Try requested src; if it errors, retry with normalized variants
     async function attachWithFallback(src){
       const variants = buildSourceVariants(src);
       for(const candidate of variants){
         try{
           await attach(candidate);
-          return; // success
+          return;
         }catch(e){ /* try next */ }
       }
-      // if all variants failed, throw
       throw new Error('All source variants failed');
     }
 
+    // >>> Stronger variant generator to catch NBSP/dash/quote/case issues <<<
     function buildSourceVariants(src){
       const out = new Set();
       const add = s => out.add(s);
@@ -251,17 +246,30 @@
       const original = src;
       add(original);
 
-      // Unicode normalize (NFKC)
-      try { add(original.normalize('NFKC')); } catch(_){}
+      const norm = s => (s.normalize ? s.normalize('NFKC') : s);
+      const fixSpaces = s => norm(s).replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim();
+      const dashy = /[\u2010\u2011\u2012\u2013\u2014\u2015\u2212\u2043]/g; // various dashes/minus
+      const fixQuotes = s => s
+        .replace(/[\u2018\u2019\u2032]/g, "'")
+        .replace(/[\u201C\u201D\u2033]/g, '"');
 
-      // Replace en dash & em dash with hyphen
-      add(original.replace(/\u2013|\u2014/g, '-'));
+      const permute = s => fixQuotes(fixSpaces(s)).replace(dashy, '-');
 
-      // Replace curly quotes with ASCII
-      add(original.replace(/[\u2018\u2019\u2032]/g, "'").replace(/[\u201C\u201D\u2033]/g, '"'));
+      // normalized base
+      add(permute(original));
 
-      // Do both (dash + quotes)
-      add(original.replace(/\u2013|\u2014/g, '-').replace(/[\u2018\u2019\u2032]/g, "'").replace(/[\u201C\u201D\u2033]/g, '"'));
+      // only dash fix (retain quotes if any)
+      add(fixSpaces(original).replace(dashy, '-'));
+
+      // ensure .mp3 lower/upper cases
+      add(permute(original).replace(/\.mp3$/i, '.mp3'));
+      add(permute(original).replace(/\.mp3$/i, '.MP3'));
+
+      // space around dashes
+      add(permute(original).replace(/\s*-\s*/g, ' - '));
+
+      // final fallback: collapse multiple spaces everywhere
+      add(permute(original).replace(/\s+/g, ' '));
 
       return Array.from(out);
     }
