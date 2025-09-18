@@ -1,316 +1,558 @@
  <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>KZAK • Frasier-Style Free Radio </title>
-  <style>
-    :root{
-      --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
-      --bg1:#0a0e1a; --bg2:#111a33; --bg3:#0c1022; --card:#151a29; --line:#22324d;
-      --shadow:0 18px 50px rgba(0,0,0,.45);
-    }
-    html,body{height:100%}
-    body{
-      margin:0; color:var(--ink);
-      font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-      background: url("Media/RadioMusicListening.jpg") center / cover fixed no-repeat;
-      position: relative; overflow-y: overlay;
-    }
-    body::before{
-      content:""; position: fixed; inset: 0; pointer-events: none;
-      background: linear-gradient(180deg, rgba(10,14,26,0.45), rgba(17,26,51,0.60) 55%, rgba(12,16,34,0.80));
-      z-index: 0;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Moving Pictures — Museum Lobby</title>
+<style>
+  /* ---------- Base tokens (overridden by theme classes) ---------- */
+  :root{
+    /* core */
+    --ink:#eceff4; --muted:#b7becd; --gold:#d8b765;
+    --shadow:0 16px 40px rgba(0,0,0,.40);
+    --tile-aspect: 3 / 4;
 
-    .wrap{max-width:1000px;margin:0 auto;padding:28px 16px 100px;position:relative; z-index:1}
-    header{display:flex;align-items:center;gap:14px;justify-content:space-between;margin:2px 0 18px}
-    .brand{display:flex;align-items:center;gap:12px}
-    .brand .tower{width:28px;height:28px;border:2px solid #6aa2ff;border-radius:50%;position:relative;box-shadow:0 0 16px rgba(85,135,255,.45) inset}
-    .brand .tower:after{content:"";position:absolute;left:50%;top:-6px;width:2px;height:16px;background:#6aa2ff;transform:translateX(-50%)}
-    h1{font-weight:700;margin:0;font-size:20px;letter-spacing:.2px}
-    .righthead{display:flex;align-items:center;gap:10px}
-    .badge{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid #2a3958;background:#0d1222;color:var(--muted)}
-    .onair{color:#1a0a0a;background:#ff2e2e;border-color:#6b1212;box-shadow:0 0 16px rgba(255,46,46,.35) inset,0 0 12px rgba(255,46,46,.25);font-weight:800;letter-spacing:.6px}
-    .onair .dot{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:#ffe9e9;animation:pulse 1.4s infinite}
-    @keyframes pulse{0%{opacity:.4}50%{opacity:1}100%{opacity:.4}}
+    /* legacy beam/marble/floor (now disabled globally) */
+    --beam-a: rgba(255,255,210,.20); --beam-b: rgba(255,240,190,.16);
+    --marble-top:#e7dcc3; --marble-mid:#b9a67b; --marble-edge:#8f7846;
+    --floor-1:#e9e7de; --floor-2:#cfc7b6; --floor-3:#b8ae99;
 
-    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow); position:relative; z-index:1}
-    .radio{display:grid;grid-template-columns:1fr;gap:16px;padding:18px}
-    .now{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-    .cover{width:92px;height:92px;border-radius:14px;background:linear-gradient(135deg,#202a41,#121827);display:flex;align-items:center;justify-content:center}
-    .cover svg{opacity:.9}
-    .meta{min-width:0; flex:1}
-    .title-row{display:flex;align-items:center;gap:10px;min-width:0}
-    .title{font-size:18px;font-weight:700;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .subtitle{margin:0;color:var(--muted);font-size:12px}
+    /* NEW: single solid wall color per theme */
+    --wall-solid:#221014;
+  }
 
-    .controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    button{background:#0f131a;color:var(--ink);border:1px solid #2a3344;border-radius:999px;padding:10px 14px;cursor:pointer}
-    .controls button{padding:10px 12px}
-    button:disabled{opacity:.5;cursor:not-allowed}
-    .primary{background:var(--brand);border-color:transparent;color:#061326;font-weight:700}
-    .danger{background:#1a1012;border-color:#3a1a22;color:#ffdfe6}
-    .toggle.active{background:var(--accent);border-color:transparent;color:#062211}
-    .muted{background:#101010;border-color:#444}
-    .vol{display:flex;align-items:center;gap:8px;margin-left:auto}
-    .vol input{accent-color:#9dc2ff}
+  /* ---------- Themes (now define --wall-solid per theme) ---------- */
+  body.theme-default{
+    --wall-solid:#221014;
+    --ink:#eceff4; --muted:#b7becd;
+  }
+  body.theme-louvre{
+    --wall-solid:#3f0c0e; /* deep royal red */
+    --ink:#f7f7f9; --muted:#e0d5c7;
+  }
+  body.theme-met{
+    --wall-solid:#1f4750; /* teal stone */
+    --ink:#f2f7f8; --muted:#d6e4e6;
+  }
+  /* LA Modern — warm white with dark fonts (high contrast, modern) */
+  body.theme-la{
+    --wall-solid:#f7f3ee; /* warm white */
+    --ink:#111111;        /* dark body text */
+    --muted:#4b5563;      /* modern neutral */
+    --gold:#bdbdbd;       /* keep neutral metallics for frames */
+    --beam-a: rgba(255,255,255,.00); /* irrelevant now, backgrounds are flat */
+    --beam-b: rgba(255,255,255,.00);
+  }
 
-    .list{padding:10px;max-height:360px;overflow:auto;border-top:1px solid var(--line);border-radius:12px}
-    .track{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;border:1px solid transparent}
-    .track:hover{background:#0f1524;border-color:#273553}
-    .tidx{width:28px;height:28px;display:grid;place-items:center;background:#0c1016;border-radius:8px;color:#88a;font-size:12px}
-    .tmeta{flex:1;min-width:0}
-    .tmeta .ttitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .track.active{outline:2px solid #2d6cdf}
+zdjimas@FVFYR583J1WT Downloads % cat index.html
+ <!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Moving Pictures — Museum Lobby</title>
+<style>
+  /* ---------- Base tokens (overridden by theme classes) ---------- */
+  :root{
+    /* core */
+    --ink:#eceff4; --muted:#b7becd; --gold:#d8b765;
+    --shadow:0 16px 40px rgba(0,0,0,.40);
+    --tile-aspect: 3 / 4;
 
-    footer{margin-top:10px;color:var(--muted);font-size:12px}
+    /* legacy beam/marble/floor (now disabled globally) */
+    --beam-a: rgba(255,255,210,.20); --beam-b: rgba(255,240,190,.16);
+    --marble-top:#e7dcc3; --marble-mid:#b9a67b; --marble-edge:#8f7846;
+    --floor-1:#e9e7de; --floor-2:#cfc7b6; --floor-3:#b8ae99;
 
-    .btn-link{display:inline-flex;align-items:center;gap:8px;text-decoration:none;background:#0f131a;border:1px solid #2a3344;color:var(--ink);padding:10px 14px;border-radius:999px}
-    .btn-link:hover{background:#121826}
-    .btn-link:focus{outline:2px solid #2d6cdf;outline-offset:2px}
+    /* NEW: single solid wall color per theme */
+    --wall-solid:#221014;
+  }
 
-    .toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:#0f131a;border:1px solid #2a3344;color:var(--ink);padding:10px 14px;border-radius:999px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s ease}
-    .toast.show{opacity:1}
-  </style>
+  /* ---------- Themes (now define --wall-solid per theme) ---------- */
+  body.theme-default{
+    --wall-solid:#221014;
+    --ink:#eceff4; --muted:#b7becd;
+  }
+  body.theme-louvre{
+    --wall-solid:#3f0c0e; /* deep royal red */
+    --ink:#f7f7f9; --muted:#e0d5c7;
+  }
+  body.theme-met{
+    --wall-solid:#1f4750; /* teal stone */
+    --ink:#f2f7f8; --muted:#d6e4e6;
+  }
+  /* LA Modern — warm white with dark fonts (high contrast, modern) */
+  body.theme-la{
+    --wall-solid:#f7f3ee; /* warm white */
+    --ink:#111111;        /* dark body text */
+    --muted:#4b5563;      /* modern neutral */
+    --gold:#bdbdbd;       /* keep neutral metallics for frames */
+    --beam-a: rgba(255,255,255,.00); /* irrelevant now, backgrounds are flat */
+    --beam-b: rgba(255,255,255,.00);
+  }
+
+  html,body{height:100%}
+  body{
+    margin:0;
+    color:var(--ink);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    /* NEW: flat, solid background across ALL themes */
+    background: var(--wall-solid);
+  }
+
+  /* Disable decorative overlays for a flat background across all themes */
+  .beams{ display:none !important; }
+  body::before, body::after{ display:none !important; content:""; }
+
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 120px; position:relative; z-index:1}
+  h1{margin:0 0 10px;font-size:clamp(24px,3.2vw,40px);letter-spacing:.02em}
+  .note{color:var(--muted);font-size:14px;margin:6px 0 12px}
+
+  /* Controls row */
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 24px}
+  .select,.btn{
+    appearance:none;border:1px solid #3a2a20;background:#1a1412;color:#f2f5f9;
+    padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);cursor:pointer
+  }
+  /* Make selector legible on LA’s light background */
+  body.theme-la .select, body.theme-la .btn{
+    background:#ffffff;
+    color:#111;
+    border:1px solid #c9c9c9;
+    box-shadow:0 4px 16px rgba(0,0,0,.08);
+  }
+  .label{font-size:13px;color:var(--muted)}
+
+  /* Exhibits grid */
+  .exhibits{display:grid; gap:36px}
+  .exhibit{ display:grid; grid-template-columns: 1fr 1fr; gap:26px; align-items:start; }
+  .exhibit.pl-left  .plaque-col{ order:1 } .exhibit.pl-left  .frame-col{ order:2 }
+  .exhibit.pl-right .plaque-col{ order:2 } .exhibit.pl-right .frame-col{ order:1 }
+  @media (max-width: 900px){ .exhibit{ grid-template-columns: 1fr; } .plaque-col,.frame-col{ order:initial } }
+
+  .plaque-col{ transform: rotate(var(--pl-tilt, 0deg)); }
+  .plaque{
+    width:min(var(--plaqueW, 320px), 100%);
+    background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.55));
+    border:1px solid color-mix(in oklab, var(--gold) 60%, black);
+    border-left:6px solid var(--gold);
+    border-radius:14px; padding:16px 16px 12px; margin-top:var(--plaqueTop,0px);
+    backdrop-filter: blur(3px); box-shadow: var(--shadow);
+    color:#f4efe6;
+  }
+  /* On LA’s light canvas, keep plaque readable but soften */
+  body.theme-la .plaque{
+    background:linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.34));
+    border-color:#d7d7d7; border-left-color:#bdbdbd; color:#f7f7f7;
+  }
+  .plaque h2{margin:0 0 6px;font-size:clamp(18px,2.2vw,24px)}
+  .plaque .room{margin:0 0 6px;color:color-mix(in oklab, var(--gold) 85%, white 20%);font-weight:600}
+  .plaque p{margin:0 12px 12px 0;color:#eae4d6;line-height:1.45}
+  body.theme-la .plaque p{ color:#f0ede7; }
+
+  .cta{display:inline-flex;align-items:center;gap:8px;background:#121a20;color:#f2f5f9;border:1px solid #38424f;
+       padding:10px 12px;border-radius:10px;text-decoration:none;cursor:pointer}
+  .cta + .cta{margin-left:8px}
+  .cta[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+  .cta:hover{background:#161f26}
+  /* LA buttons on light background */
+  body.theme-la .cta{ background:#111; color:#fff; border-color:#222; }
+  body.theme-la .cta:hover{ background:#161616; }
+
+  .mini-toggle{font-size:.9rem;padding:8px 10px;border-radius:10px;border:1px solid #3a4656;background:#0f151c;color:#eaf2ff;cursor:pointer}
+  .mini-toggle[aria-pressed="true"]{background:#14202c;border-color:#46607a}
+  body.theme-la .mini-toggle{ background:#fff; color:#111; border:1px solid #c9c9c9; }
+
+  .frame-wrap{filter:drop-shadow(0 18px 24px rgba(0,0,0,.35)); transform: rotate(var(--frame-tilt, 0deg));}
+  .frame{position:relative; box-shadow:var(--shadow); border-radius:14px; border:10px solid transparent;}
+  .finish-gilded .frame{
+    background:linear-gradient(#0000,#0000) padding-box,
+      conic-gradient(from 20deg,#6b4e0f,#caa54b 12%,#ffeb9c 24%,#d3ab4a 36%,#6b4e0f 48%,#e2c266 60%,#fff1b5 72%,#c3972e 84%,#6b4e0f) border-box;
+  }
+  .finish-ebony .frame{
+    border-color:#0a0d12;
+    background:linear-gradient(180deg,#0a0f14,#131a22) padding-box,
+      linear-gradient(145deg, #1c232c, #090d12 60%, #1a212a) border-box;
+  }
+  .finish-brass .frame{
+    background:linear-gradient(#0000,#0000) padding-box,
+      conic-gradient(from -30deg,#3c2e14,#b49352,#6f582b,#d7b778,#4a3a18,#b49352) border-box;
+    filter:saturate(1.06);
+  }
+  .finish-walnut .frame{
+    background:linear-gradient(#0000,#0000) padding-box,
+      linear-gradient(25deg, #3b2414 0%, #5a3820 30%, #7a4b2b 55%, #4b2d19 80%, #3b2414 100%) border-box;
+  }
+  .frame::after{content:"";position:absolute;inset:8px;border-radius:8px;border:2px solid #f4e8c7;pointer-events:none}
+  .mat{margin:16px;background:#f4efe6;border:1px solid #ddd2be;border-radius:8px;
+       box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12)}
+  body.theme-la .mat{ background:#fff7ee; border-color:#eadfcd; }
+
+  .tile{position:relative;aspect-ratio:var(--tile-aspect);overflow:hidden;border:1px solid rgba(0,0,0,.25);
+        background:#000;display:block;touch-action:manipulation;border-radius:6px}
+  .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
+  .clip{opacity:0;transition:opacity .15s ease-out}
+  .tile.is-previewing .clip,.tile.revealed .clip{opacity:1}
+  .tile.revealed .thumb{opacity:0;pointer-events:none}
+  .overlay{position:absolute;inset:auto 0 0 0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
+           padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .title{font-weight:600;font-size:14px}
+  .badge{font-size:12px;color:#c5e4ff;background:rgba(124,198,255,.08);border:1px solid rgba(124,198,255,.3);
+         padding:4px 8px;border-radius:999px}
+
+  /* Lightbox */
+  .lightbox{position:fixed;inset:0;background:rgba(8,10,14,.72);backdrop-filter:blur(6px);
+            display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
+  .lightbox.open{display:flex}
+  .lightbox-card{width:min(900px,92vw);background:#0f1218;border:1px solid #222936;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .lightbox-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #1b222e}
+  .lightbox-title{font-weight:600}
+  .x{border:0;background:transparent;color:#9aa0a6;font-size:22px;cursor:pointer}
+  .player{position:relative;background:#000}
+  .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+
+  /* ===== FULLSCREEN INTRO OVERLAY (unchanged) ===== */
+  .intro-overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center; background:#000; }
+  .intro-overlay.open{ display:grid }
+  .intro-shell{
+    width:100svw; height:100svh;
+    display:flex; align-items:center; justify-content:center;
+    padding: max(8px, env(safe-area-inset-top))
+             max(8px, env(safe-area-inset-right))
+             max(8px, env(safe-area-inset-bottom))
+             max(8px, env(safe-area-inset-left));
+  }
+  .intro-video{ width:100%; height:100%; object-fit:contain; background:#000; }
+  .intro-actions{ position:fixed; right:16px; bottom:16px; z-index:2; }
+  .intro-skip{ border:1px solid #394355; background:#121a25; color:#e9ecf2; padding:10px 14px; border-radius:10px; cursor:pointer }
+  .intro-skip:hover{ background:#17202c }
+</style>
 </head>
-<body>
+<body class="theme-default">
+  <div class="beams" aria-hidden="true"></div>
+
   <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="tower" aria-hidden="true"></div>
-        <h1>KZAK • Frasier-Style Free Radio without the talking</h1>
-      </div>
-      <div class="righthead">
-        <div class="badge" id="status">idle</div>
-        <a href="../index.html" class="btn-link" aria-label="Return to Museum Lobby (go up one level)">🏛 Return to Museum Lobby</a>
-      </div>
-    </header>
+    <h1>Moving Pictures — Museum Lobby</h1>
+    <div class="note">Each visit rehangs the lobby slightly. Plaques sit left or right, frames tilt and finish vary—just like a living museum.</div>
 
-    <section class="card radio" aria-label="Local Radio Player">
-      <div class="now">
-        <div class="cover" aria-hidden="true">
-          <svg viewBox="0 0 80 80" width="56" height="56" fill="none">
-            <rect x="10" y="34" width="60" height="26" rx="6" stroke="#7aa2f7"/>
-            <circle cx="24" cy="47" r="6" stroke="#7aa2f7"/>
-            <rect x="38" y="43" width="22" height="8" rx="3" stroke="#7aa2f7"/>
-            <path d="M50 34V18" stroke="#7aa2f7"/><circle cx="50" cy="16" r="2" fill="#7aa2f7"/>
-          </svg>
-        </div>
+    <!-- Theme control -->
+    <div class="controls">
+      <label for="venueSelect" class="label">Venue:</label>
+      <select id="venueSelect" class="select">
+        <option value="theme-default" selected>Default Lobby</option>
+        <option value="theme-louvre">Louvre — Royal Red + Gold</option>
+        <option value="theme-met">Met — Teal Stone + Wood</option>
+        <option value="theme-la">LA Modern — Warm White</option>
+      </select>
+    </div>
 
-        <div class="meta">
-          <div class="title-row">
-            <p class="title" id="nowTitle">Nothing playing</p>
-            <!-- Share is ALWAYS visible here -->
-            <button id="btnShare" title="Share: copies a link and opens your email/chat" aria-label="Share current track">↗︎ Share</button>
-          </div>
-          <p class="subtitle" id="nowSub">Upload MP3s to <code>Media/</code> and press Start.</p>
-        </div>
-
-        <span class="badge onair" id="onAir" style="display:none"><span class="dot"></span>ON AIR</span>
-      </div>
-
-      <div class="controls" role="group" aria-label="Playback controls">
-        <button id="btnPrev" aria-label="Previous" disabled>⏮︎</button>
-        <button id="btnPlay" class="primary" aria-label="Play">▶︎ Start Station</button>
-        <button id="btnNext" aria-label="Next" disabled>⏭︎</button>
-        <button id="btnStop" class="danger" aria-label="Stop/Pause" disabled>■ Stop/Pause</button>
-        <button id="btnShuffle" class="toggle" aria-pressed="false">Shuffle</button>
-        <label style="display:flex;align-items:center;gap:6px"><input id="loopAll" type="checkbox" checked /> <span>Loop</span></label>
-        <button id="btnMute" class="muted" aria-pressed="false" title="Mute (M)">🔇 Mute</button>
-        <span class="vol"><span>Vol</span> <input id="vol" type="range" min="0" max="1" step="0.01" value="0.8" /></span>
-      </div>
-
-      <div class="list" id="trackList" role="listbox" aria-label="Playlist"></div>
-
-      <footer>
-        <strong>Copyright 2025:</strong> zdjimas and cjmurphy creators and authors
-      </footer>
-
-      <audio id="audio" preload="metadata" playsinline></audio>
-    </section>
+    <section id="exhibits" class="exhibits"></section>
   </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <!-- Fullscreen Intro overlay -->
+  <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
+    <div class="intro-shell">
+      <video id="introVideo"
+             class="intro-video"
+             playsinline webkit-playsinline
+             preload="metadata"
+             controlslist="nodownload noplaybackrate"
+             disablepictureinpicture></video>
+    </div>
+    <div class="intro-actions">
+      <button id="skipIntro" class="intro-skip">Skip →</button>
+    </div>
+  </div>
 
-  <script>
-    function pathToUrl(rel){
-      const segs = rel.split('/').map(s => encodeURIComponent(s));
-      const joined = segs.join('/');
-      const base = new URL('.', location.href);
-      return new URL(joined, base).href;
-    }
-    function showToast(msg, ms=1600){
-      const t = document.getElementById('toast');
-      t.textContent = msg; t.classList.add('show');
-      setTimeout(()=>t.classList.remove('show'), ms);
-    }
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Video player">
+    <div class="lightbox-card">
+      <div class="lightbox-head">
+        <div class="lightbox-title" id="lbTitle">Title</div>
+        <button class="x" id="lbClose" aria-label="Close">✕</button>
+      </div>
+      <div class="player">
+        <video id="lbVideo" controls playsinline></video>
+      </div>
+    </div>
+  </div>
 
-    // ===== Playlist =====
-const PLAYLIST = [
-  { title: 'A Demo in Time of Dying', file: 'Media/A Demo in Time of Dying.mp3' },
-  { title: 'A Demo of Poor Tom', file: 'Media/A Demo of Poor Tom.mp3' },
-  { title: 'A Madman Plays Seville', file: 'Media/A Madman Plays Seville.mp3' },
-  { title: 'A Spec of a Blue Dot', file: 'Media/A Spec of a Blue Dot.mp3' },
-  { title: 'All that glitters is gold Acoustic Blend', file: 'Media/All that glitters is gold Acoustic Blend.mp3' },
-  { title: 'All that glitters is gold remains', file: 'Media/All that glitters is gold remains.mp3' },
-  { title: 'All that glitters is gold', file: 'Media/All that glitters is gold.mp3' },
-  { title: 'Ballad of a Bleak Future', file: 'Media/Ballad of a Bleak Future.mp3' },
-  { title: 'Bend the clock - 70s Barn Jam Edition', file: 'Media/Bend the clock - 70s Barn Jam Edition.mp3' },
-  { title: 'Beyond My Understanding', file: 'Media/Beyond My Understanding.mp3' },
-  { title: "Bolotone's Intro", file: "Media/Bolotone's Intro.mp3" },
-  { title: 'Cover Of Wings For Marie (Part 1) v1', file: 'Media/Cover Of Wings For Marie (Part 1) v1.mp3' },
-  { title: 'Covering my Eyes', file: 'Media/Covering my Eyes.mp3' },
-  { title: 'Fear Inoculum (Cover) v1', file: 'Media/Fear Inoculum (Cover) v1.mp3' },
-  { title: 'Friends in FrontierLand', file: 'Media/Friends in FrontierLand.mp3' },
-  { title: 'Leaving You', file: 'Media/Leaving You.mp3' },
-  { title: 'More Guitars at Luna Park', file: 'Media/More Guitars at Luna Park.mp3' },
-  { title: 'Rain Song Replayed', file: 'Media/Rain Song Replayed.mp3' },
-  { title: 'The Canelo-Crawford Event Round 1', file: 'Media/The Canelo-Crawford Event Round 1.mp3' },
-  { title: 'The Canelo-Crawford Event', file: 'Media/The Canelo-Crawford Event.mp3' },
-  { title: 'The Greatest Debate Ever', file: 'Media/The Greatest Debate Ever.mp3' },
-  { title: 'The Madman Plays in Cancun', file: 'Media/The Madman Plays in Cancun.mp3' },
-  { title: 'The Spirit Carries On (Live Rehearsal 2) (Remix)', file: 'Media/The Spirit Carries On (Live Rehearsal 2) (Remix).mp3' },
-  { title: 'The X Aspect shortened', file: 'Media/The X Aspect shortened.mp3' },
+<script>
+/* ===== Theme switcher (with persistence) ===== */
+(function(){
+  const sel = document.getElementById('venueSelect');
+  const saved = localStorage.getItem('mpg-theme');
+  if(saved){
+    document.body.classList.remove('theme-default','theme-louvre','theme-met','theme-la');
+    document.body.classList.add(saved);
+    sel.value = saved;
+  }
+  sel.addEventListener('change', ()=>{
+    const t = sel.value;
+    document.body.classList.remove('theme-default','theme-louvre','theme-met','theme-la');
+    document.body.classList.add(t);
+    localStorage.setItem('mpg-theme', t);
+  });
+})();
+
+/* ============ Data ============ */
+const ABSTRACTS = {
+  key: 'abstracts',
+  title: 'The Grudge on Dune',
+  room: 'Abstracts, Tools & Ghouls',
+  desc: 'Dark, rebellious remixes—surreal mechanics, ritual light, and riffs re-forged. Enter for the full series.',
+  isActiveRoom: true,
+  introSrc: 'room-abstract/media/GhoulsDoor.mp4',
+  target:   'room-abstract/index.html',
+  tile: { tiktok: 'https://www.tiktok.com/t/ZT63YRxNR/', poster: './IMG_0494.jpg' }
+};
+
+const OTHERS = [
+  { key:'xavier', title:"Xavier's Perspectives", room:'Portraits in Motion',
+    desc:'Intimate character studies that flicker between realism and dream. Faces, gestures, and mood as moving compositions.',
+    mp4:'./xaviers-perspectives.mp4', poster:'./xaviers-perspectives-poster.png' },
+  { key:'jazz', title:'Reflections from a Jazz Club', room:'Noir & Jazz Abstractions',
+    desc:'Smoke, brass, and neon. Improvised camera rhythms meet graphic motifs in a low-lit synesthetic lounge.',
+    mp4:'./Reflections from a Jazz Club.mp4', poster:'./Jazz.png' },
+  { key:'vacancy', title:'Vacancy — an AI cover of Dream Theater', room:'Cinematic Covers',
+    desc:'Classic tracks reimagined as moving paintings—lyric moods translated into light and motion.',
+    mp4:'./Vacancy - an AI cover of Dream Theater.mp4', poster:'./Vacancy.png' },
+  { key:'wings', title:'Wings for Marie', room:'Devotional Motion',
+    desc:'Elegiac studies about memory and lift—where textures arc upward and time seems to glow.',
+    mp4:'./Wings For Marie.mp4', poster:'./Wings.png' }
 ];
 
-    const els = {
-      audio: document.getElementById('audio'),
-      status: document.getElementById('status'), onAir: document.getElementById('onAir'),
-      nowTitle: document.getElementById('nowTitle'), nowSub: document.getElementById('nowSub'),
-      list: document.getElementById('trackList'),
-      btnPrev: document.getElementById('btnPrev'), btnPlay: document.getElementById('btnPlay'),
-      btnNext: document.getElementById('btnNext'), btnStop: document.getElementById('btnStop'),
-      btnShuffle: document.getElementById('btnShuffle'), loopAll: document.getElementById('loopAll'),
-      btnMute: document.getElementById('btnMute'), vol: document.getElementById('vol'),
-      btnShare: document.getElementById('btnShare')
-    };
+/* ============ Utilities ============ */
+const rand = (min,max)=> Math.random()*(max-min)+min;
+const choose = arr => arr[Math.floor(Math.random()*arr.length)];
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+const FINISHES = ['finish-gilded','finish-ebony','finish-brass','finish-walnut'];
 
-    let current = -1, isPlaying = false;
-    const K = { vol:'radio.vol', muted:'radio.muted', shuffle:'radio.shuffle', loop:'radio.loop' };
-    els.vol.value = localStorage.getItem(K.vol) || '0.8';
-    els.audio.volume = parseFloat(els.vol.value);
-    els.audio.muted = JSON.parse(localStorage.getItem(K.muted)||'false');
-    setMuteUi(els.audio.muted);
-    let isShuffle = JSON.parse(localStorage.getItem(K.shuffle)||'false');
-    if(isShuffle){ els.btnShuffle.classList.add('active'); els.btnShuffle.setAttribute('aria-pressed','true'); }
-    const loopSaved = localStorage.getItem(K.loop); if(loopSaved!==null) els.loopAll.checked = loopSaved==='true';
+/* ============ Build one exhibit row ============ */
+function buildExhibit(data){
+  const ex = document.createElement('article');
+  const plaqueLeft = Math.random() < 0.5;
+  const finish = choose(FINISHES);
+  const frameTilt = (rand(-0.35,0.35)).toFixed(3)+'deg';
+  const plaqueTilt = (rand(-0.4,0.4)).toFixed(3)+'deg';
+  const plaqueW = Math.round(rand(240, 340))+'px';
+  const plaqueTop = Math.round(rand(0, 24))+'px';
+  const spacing = Math.round(rand(16, 52));
 
-    function renderList(){
-      els.list.innerHTML = '';
-      PLAYLIST.forEach((t,i)=>{
-        const row = document.createElement('div'); row.className='track'; row.role='option'; row.tabIndex=0; row.dataset.idx=i;
-        row.innerHTML = `<div class="tidx">${i+1}</div>
-          <div class="tmeta">
-            <div class="ttitle">${escapeHtml(t.title)}</div>
-            <div class="subtitle">${escapeHtml(t.file)}</div>
-          </div>
-          <button class="btn" title="Play">Play</button>`;
-        row.querySelector('button').addEventListener('click', ()=> startAt(i));
-        row.addEventListener('dblclick', ()=> startAt(i));
-        row.addEventListener('keydown', e=>{ if(e.key==='Enter') startAt(i); });
-        els.list.appendChild(row);
-      });
-      enableTransport(!!PLAYLIST.length); highlight();
-    }
+  ex.className = `exhibit ${plaqueLeft ? 'pl-left':'pl-right'} ${finish}`;
+  ex.style.marginBottom = spacing+'px';
+  ex.style.setProperty('--frame-tilt', frameTilt);
+  ex.style.setProperty('--pl-tilt', plaqueTilt);
+  ex.style.setProperty('--plaqueW', plaqueW);
+  ex.style.setProperty('--plaqueTop', plaqueTop);
 
-    function enableTransport(on){
-      els.btnPlay.disabled=!on; els.btnNext.disabled=!on; els.btnPrev.disabled=!on; els.btnStop.disabled=!on;
-    }
-    function highlight(){ [...els.list.children].forEach((c,idx)=> c.classList.toggle('active', idx===current)); }
-    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
-    function notify(msg){ els.status.textContent = msg; }
+  // default: hover sound OFF per exhibit
+  ex.dataset.sound = 'off';
 
-    async function startAt(i){
-      if(!PLAYLIST.length) return;
-      current = i % PLAYLIST.length;
-      const track = PLAYLIST[current];
-      els.nowTitle.textContent = track.title; els.nowSub.textContent = 'Loading…';
-      notify(`track ${current+1} / ${PLAYLIST.length}`); highlight();
-      try{
-        await attach(track.file); await els.audio.play();
-        isPlaying = true;
-        els.btnPlay.textContent='⏸︎ Pause'; els.btnPlay.ariaLabel='Pause';
-        els.onAir.style.display=''; els.nowSub.textContent='Playing';
-      }catch(err){ notify('Could not play this file. Skipping…'); next(); }
-    }
+  const plaque = document.createElement('div');
+  plaque.className = 'plaque-col';
+  plaque.innerHTML = `
+    <div class="plaque">
+      <h2>${data.title}</h2>
+      <div class="room">Room: ${data.room}${data.isActiveRoom ? '' : ' (coming soon)'}</div>
+      <p>${data.desc}</p>
+      <div class="cta-row"></div>
+    </div>
+  `;
 
-    function attach(src){
-      return new Promise((resolve,reject)=>{
-        els.audio.pause(); els.audio.removeAttribute('src'); els.audio.load();
-        const onMeta = ()=>{ els.audio.removeEventListener('loadedmetadata', onMeta); els.audio.removeEventListener('error', onErr); resolve(); };
-        const onErr  = ()=>{ els.audio.removeEventListener('loadedmetadata', onMeta); els.audio.removeEventListener('error', onErr); reject(new Error('load error')); };
-        els.audio.addEventListener('loadedmetadata', onMeta, { once:true });
-        els.audio.addEventListener('error', onErr, { once:true });
-        els.audio.src = pathToUrl(src); els.audio.load();
-      });
-    }
+  const frameCol = document.createElement('div');
+  frameCol.className = 'frame-col';
+  frameCol.innerHTML = `
+    <div class="frame-wrap">
+      <div class="frame"><div class="mat">
+        <article class="tile" tabindex="0"></article>
+      </div></div>
+    </div>
+  `;
 
-    function next(){ if(!PLAYLIST.length) return; if(isShuffle){ let n; do{ n=Math.floor(Math.random()*PLAYLIST.length); } while(PLAYLIST.length>1 && n===current); startAt(n); } else { const n=current+1; if(n<PLAYLIST.length) startAt(n); else if(els.loopAll.checked) startAt(0); else stopAll(); } }
-    function prev(){ if(!PLAYLIST.length) return; if(isShuffle){ startAt(Math.floor(Math.random()*PLAYLIST.length)); } else { startAt((current-1+PLAYLIST.length)%PLAYLIST.length); } }
-    function stopAll(){ els.audio.pause(); isPlaying=false; els.btnPlay.textContent='▶︎ Start Station'; els.btnPlay.ariaLabel='Play'; els.onAir.style.display='none'; notify('stopped'); }
+  // Tile content (MP4 hover vs TikTok)
+  const tile = frameCol.querySelector('.tile');
+  if (data.tile?.tiktok){
+    tile.dataset.title = data.title;
+    tile.dataset.tiktok = data.tile.tiktok;
+    tile.innerHTML = `
+      <img class="thumb" src="${data.tile.poster}" alt="Poster: ${data.title}" loading="lazy" />
+      <div class="overlay"><div class="title">${data.title}</div><div class="badge">Click to watch on TikTok</div></div>
+    `;
+  } else {
+    tile.dataset.title = data.title;
+    tile.dataset.video = data.mp4;
+    tile.innerHTML = `
+      <img class="thumb" src="${data.poster}" alt="Poster: ${data.title}" loading="lazy" />
+      <video class="clip" preload="metadata" playsinline muted></video>
+      <div class="overlay"><div class="title">${data.title}</div><div class="badge">Hover to preview</div></div>
+    `;
+  }
 
-    // ===== SHARE CURRENT TRACK =====
-    async function shareCurrent(){
-      // Use currently selected track if any, otherwise default to first
-      const idx = current >= 0 ? current : 0;
-      const track = PLAYLIST[idx];
-      const url = pathToUrl(track.file);
-      const title = `🎧 ${track.title} — KZAK Radio`;
-      const text  = `Listening on KZAK • Frasier-Style Free Radio:\n${track.title}\n\n${url}`;
+  // CTA(s)
+  const ctaRow = plaque.querySelector('.cta-row');
+  const parts = [];
 
-      if (navigator.share){
-        try{
-          await navigator.share({ title, text, url });
-          showToast('Shared!');
-          return;
-        }catch(e){ /* cancel or not supported -> fallback */ }
-      }
+  if (data.key === 'abstracts' && data.isActiveRoom){
+    parts.push(
+      `<a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>`,
+      `<button class="cta" id="enterAbstracts" type="button"
+               data-intro="${data.introSrc}" data-target="${data.target}"
+               aria-haspopup="dialog">🏛 Enter this Room</button>`
+    );
+  } else if (!data.isActiveRoom){
+    parts.push(`<button class="cta" aria-disabled="true" title="Room under construction">▶︎ Enter Room (Coming Soon)</button>`);
+  }
 
-      try{
-        await navigator.clipboard.writeText(url);
-        showToast('Link copied to clipboard');
-      }catch(e){
-        showToast('Copy failed—opening email…', 1200);
-      }
+  // Per-exhibit hover-sound toggle (only when local MP4)
+  if (!data.tile?.tiktok){
+    parts.push(`<button class="mini-toggle hover-sound-toggle" type="button" aria-pressed="false" title="Toggle sound while hovering this artwork">🔊 Hover Sound: Off</button>`);
+  }
 
-      const mailto = `mailto:?subject=${encodeURIComponent('Check this track')}&body=${encodeURIComponent(text)}`;
-      window.open(mailto, '_blank', 'noopener,noreferrer');
-    }
+  ctaRow.innerHTML = parts.join(' ');
 
-    // Player events
-    els.audio.addEventListener('ended', next);
-    els.audio.addEventListener('error', ()=>{ notify('Playback error. Skipping…'); next(); });
-    els.audio.addEventListener('waiting', ()=>{ els.nowSub.textContent='Buffering…'; });
-    els.audio.addEventListener('playing', ()=>{ els.nowSub.textContent='Playing'; });
-    els.audio.addEventListener('play',   ()=>{ els.onAir.style.display=''; });
-    els.audio.addEventListener('pause',  ()=>{ els.onAir.style.display='none'; });
-    els.audio.addEventListener('ended',  ()=>{ els.onAir.style.display='none'; });
+  ex.appendChild(plaque);
+  ex.appendChild(frameCol);
 
-    // Controls
-    els.btnPlay.addEventListener('click', ()=>{ if(isPlaying){ stopAll(); } else { if(current<0) startAt(0); else els.audio.play().catch(()=>startAt(current)); } });
-    els.btnNext.addEventListener('click', next);
-    els.btnPrev.addEventListener('click', prev);
-    els.btnStop.addEventListener('click', stopAll);
-    els.btnShuffle.addEventListener('click', ()=>{ isShuffle=!isShuffle; els.btnShuffle.classList.toggle('active', isShuffle); els.btnShuffle.setAttribute('aria-pressed','true'); localStorage.setItem(K.shuffle, JSON.stringify(isShuffle)); notify(isShuffle?'Shuffle: ON':'Shuffle: OFF'); });
-    els.loopAll.addEventListener('change', ()=> localStorage.setItem(K.loop, els.loopAll.checked?'true':'false'));
-    els.btnShare.addEventListener('click', shareCurrent);
-
-    function setMuteUi(muted){ if(muted){ els.btnMute.textContent='🔊 Sound On'; els.btnMute.classList.remove('muted'); els.btnMute.setAttribute('aria-pressed','true'); } else { els.btnMute.textContent='🔇 Mute'; els.btnMute.classList.add('muted'); els.btnMute.setAttribute('aria-pressed','false'); } }
-    els.btnMute.addEventListener('click', ()=>{ const m = !els.audio.muted; els.audio.muted = m; localStorage.setItem(K.muted, JSON.stringify(m)); setMuteUi(m); });
-    els.vol.addEventListener('input', ()=>{ const v=parseFloat(els.vol.value||'0.8'); els.audio.volume=v; localStorage.setItem(K.vol, String(v)); });
-
-    window.addEventListener('keydown', (e)=>{
-      if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
-      if(e.code==='Space'){ e.preventDefault(); els.btnPlay.click(); }
-      if(e.key==='n'||e.key==='N'){ e.preventDefault(); els.btnNext.click(); }
-      if(e.key==='p'||e.key==='P'){ e.preventDefault(); els.btnPrev.click(); }
-      if(e.key==='s'||e.key==='S'){ e.preventDefault(); els.btnShuffle.click(); }
-      if(e.key==='m'||e.key==='M'){ e.preventDefault(); els.btnMute.click(); }
-      if(e.key==='u'||e.key==='U'){ e.preventDefault(); shareCurrent(); } // keyboard share
+  // Wire the hover-sound toggle (if present)
+  const toggle = ctaRow.querySelector('.hover-sound-toggle');
+  if (toggle){
+    toggle.addEventListener('click', ()=>{
+      const on = ex.dataset.sound === 'on';
+      ex.dataset.sound = on ? 'off' : 'on';
+      toggle.setAttribute('aria-pressed', String(!on));
+      toggle.textContent = !on ? '🔊 Hover Sound: On' : '🔊 Hover Sound: Off';
     });
+  }
+  return ex;
+}
 
-    renderList();
-  </script>
+/* ============ Render ============ */
+const exhibitsEl = document.getElementById('exhibits');
+[ABSTRACTS, ...shuffle([...OTHERS])].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
+
+/* ============ Hover previews & Lightbox ============ */
+const tiles = document.querySelectorAll('.tile');
+const safeSrc = (p)=> encodeURI(p);
+
+function ensureVideo(tile){
+  const v = tile.querySelector('video.clip');
+  if (!v) return null;
+  if (!v.dataset.bound){
+    v.dataset.bound = '1';
+    v.src = safeSrc(tile.dataset.video);
+    v.preload = 'metadata';
+    v.playsInline = true;
+    v.setAttribute('playsinline','');
+    v.setAttribute('webkit-playsinline','');
+  }
+  return v;
+}
+function reveal(tile){ if (!tile.classList.contains('revealed')) tile.classList.add('revealed'); }
+function startPreview(tile, userGesture=false){
+  if (tile.dataset.tiktok) return;
+  const v = ensureVideo(tile); if (!v) return;
+  reveal(tile);
+  const ex = tile.closest('.exhibit');
+  v.muted = !(ex && ex.dataset.sound === 'on');
+  const p = v.play(); if (userGesture && p) p.catch(()=>{});
+  tile.classList.add('is-previewing');
+}
+function stopPreview(tile){ const v = tile.querySelector('video.clip'); if (v) v.pause(); tile.classList.remove('is-previewing'); }
+
+tiles.forEach(tile=>{
+  tile.addEventListener('pointerenter', ()=>startPreview(tile,false));
+  tile.addEventListener('pointerleave', ()=>stopPreview(tile));
+  tile.addEventListener('pointerdown', ()=>startPreview(tile,true));
+  tile.addEventListener('pointerup',   ()=>stopPreview(tile));
+  tile.addEventListener('pointercancel',()=>stopPreview(tile));
+  tile.addEventListener('touchstart', ()=>startPreview(tile,true), {passive:true});
+  tile.addEventListener('touchend',   ()=>stopPreview(tile), {passive:true});
+  tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
+});
+
+/* Lightbox for local MP4 tiles only */
+const lb = document.getElementById('lightbox');
+const lbVideo = document.getElementById('lbVideo');
+const lbTitle = document.getElementById('lbTitle');
+const lbClose = document.getElementById('lbClose');
+
+function openLightboxFromTile(tile){
+  if (tile.dataset.tiktok){
+    window.open(tile.dataset.tiktok, '_blank', 'noopener');
+    return;
+  }
+  const vPrev = tile.querySelector('video.clip');
+  lbTitle.textContent = tile.dataset.title || 'Untitled';
+  lbVideo.src = safeSrc(tile.dataset.video);
+  lb.classList.add('open');
+  const resumeAt = vPrev && !isNaN(vPrev.currentTime) ? vPrev.currentTime : 0;
+  lbVideo.addEventListener('loadedmetadata', function onMeta(){
+    lbVideo.removeEventListener('loadedmetadata', onMeta);
+    try { lbVideo.currentTime = resumeAt; } catch(e){}
+  });
+}
+function closeLightbox(){ lbVideo.pause(); lbVideo.src=''; lb.classList.remove('open'); }
+lbClose.addEventListener('click', closeLightbox);
+lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
+tiles.forEach(tile=>{
+  tile.addEventListener('click', ()=>openLightboxFromTile(tile));
+  tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
+});
+
+/* ===== Fullscreen Intro overlay (Abstracts room) ===== */
+(function(){
+  const btn = document.getElementById('enterAbstracts');
+  if(!btn) return;
+
+  const overlay = document.getElementById('introOverlay');
+  const video   = document.getElementById('introVideo');
+  const skipBtn = document.getElementById('skipIntro');
+
+  function resolveTarget(){
+    const raw = btn.dataset.target || 'room-abstract/index.html';
+    try { return new URL(raw, window.location.href).href; }
+    catch { return raw; }
+  }
+  function cleanup(){
+    try { video.pause(); } catch(e){}
+    video.removeAttribute('src'); video.load();
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function goNow(){
+    const href = resolveTarget();
+    cleanup();
+    window.location.assign(href);
+  }
+
+  btn.addEventListener('click', async (e)=>{
+    e.preventDefault(); e.stopPropagation();
+    const introSrc = btn.dataset.intro;
+    if(!introSrc){ goNow(); return; }
+
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    video.src = introSrc;
+    video.setAttribute('playsinline',''); 
+    video.setAttribute('webkit-playsinline','');
+
+    try {
+      video.muted = false; video.volume = 1.0;
+      await video.play();
+    } catch {
+      video.muted = true;
+      try { await video.play(); } catch { goNow(); return; }
+    }
+
+    video.addEventListener('ended', ()=>goNow(), {once:true});
+    skipBtn.onclick = ()=>goNow();
+  }, {passive:false});
+})();
+</script>
+
+  <script src="rooms_manifest.js"></script>
+  <script src="lobby-rooms.js"></script>
 </body>
-</html>
+</html>%                                   
