@@ -11,32 +11,19 @@
       --shadow:0 18px 50px rgba(0,0,0,.45);
     }
     html,body{height:100%}
-
-    /* Background image + subtle gradient film for contrast */
     body{
-      margin:0;
-      color:var(--ink);
+      margin:0; color:var(--ink);
       font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
       background: url("Media/RadioMusicListening.jpg") center / cover fixed no-repeat;
-      position: relative;
-      overflow-y: overlay;
+      position: relative; overflow-y: overlay;
     }
     body::before{
-      content:"";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(
-        180deg,
-        rgba(10,14,26,0.45),
-        rgba(17,26,51,0.60) 55%,
-        rgba(12,16,34,0.80)
-      );
+      content:""; position: fixed; inset: 0; pointer-events: none;
+      background: linear-gradient(180deg, rgba(10,14,26,0.45), rgba(17,26,51,0.60) 55%, rgba(12,16,34,0.80));
       z-index: 0;
     }
 
     .wrap{max-width:1000px;margin:0 auto;padding:28px 16px 100px;position:relative; z-index:1}
-
     header{display:flex;align-items:center;gap:14px;justify-content:space-between;margin:2px 0 18px}
     .brand{display:flex;align-items:center;gap:12px}
     .brand .tower{width:28px;height:28px;border:2px solid #6aa2ff;border-radius:50%;position:relative;box-shadow:0 0 16px rgba(85,135,255,.45) inset}
@@ -50,10 +37,11 @@
 
     .card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow); position:relative; z-index:1}
     .radio{display:grid;grid-template-columns:1fr;gap:16px;padding:18px}
-    .now{display:flex;align-items:center;gap:16px}
+    .now{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
     .cover{width:92px;height:92px;border-radius:14px;background:linear-gradient(135deg,#202a41,#121827);display:flex;align-items:center;justify-content:center}
     .cover svg{opacity:.9}
-    .meta{min-width:0}
+    .meta{min-width:0; flex:1}
+    .title-row{display:flex;align-items:center;gap:10px;min-width:0}
     .title{font-size:18px;font-weight:700;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .subtitle{margin:0;color:var(--muted);font-size:12px}
 
@@ -78,12 +66,10 @@
 
     footer{margin-top:10px;color:var(--muted);font-size:12px}
 
-    /* Return-to-lobby pill link */
     .btn-link{display:inline-flex;align-items:center;gap:8px;text-decoration:none;background:#0f131a;border:1px solid #2a3344;color:var(--ink);padding:10px 14px;border-radius:999px}
     .btn-link:hover{background:#121826}
     .btn-link:focus{outline:2px solid #2d6cdf;outline-offset:2px}
 
-    /* Small toast */
     .toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:#0f131a;border:1px solid #2a3344;color:var(--ink);padding:10px 14px;border-radius:999px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s ease}
     .toast.show{opacity:1}
   </style>
@@ -97,9 +83,7 @@
       </div>
       <div class="righthead">
         <div class="badge" id="status">idle</div>
-        <a href="../index.html" class="btn-link" aria-label="Return to Museum Lobby (go up one level)">
-          🏛 Return to Museum Lobby
-        </a>
+        <a href="../index.html" class="btn-link" aria-label="Return to Museum Lobby (go up one level)">🏛 Return to Museum Lobby</a>
       </div>
     </header>
 
@@ -113,10 +97,16 @@
             <path d="M50 34V18" stroke="#7aa2f7"/><circle cx="50" cy="16" r="2" fill="#7aa2f7"/>
           </svg>
         </div>
+
         <div class="meta">
-          <p class="title" id="nowTitle">Nothing playing</p>
+          <div class="title-row">
+            <p class="title" id="nowTitle">Nothing playing</p>
+            <!-- Share is ALWAYS visible here -->
+            <button id="btnShare" title="Share: copies a link and opens your email/chat" aria-label="Share current track">↗︎ Share</button>
+          </div>
           <p class="subtitle" id="nowSub">Upload MP3s to <code>Media/</code> and press Start.</p>
         </div>
+
         <span class="badge onair" id="onAir" style="display:none"><span class="dot"></span>ON AIR</span>
       </div>
 
@@ -129,8 +119,6 @@
         <label style="display:flex;align-items:center;gap:6px"><input id="loopAll" type="checkbox" checked /> <span>Loop</span></label>
         <button id="btnMute" class="muted" aria-pressed="false" title="Mute (M)">🔇 Mute</button>
         <span class="vol"><span>Vol</span> <input id="vol" type="range" min="0" max="1" step="0.01" value="0.8" /></span>
-        <!-- NEW: Share button -->
-        <button id="btnShare" aria-label="Share current track" title="Share this track" disabled>↗︎ Share</button>
       </div>
 
       <div class="list" id="trackList" role="listbox" aria-label="Playlist"></div>
@@ -146,7 +134,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-    // ===== Helper: encode each path segment =====
     function pathToUrl(rel){
       const segs = rel.split('/').map(s => encodeURIComponent(s));
       const joined = segs.join('/');
@@ -155,12 +142,11 @@
     }
     function showToast(msg, ms=1600){
       const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
+      t.textContent = msg; t.classList.add('show');
       setTimeout(()=>t.classList.remove('show'), ms);
     }
 
-    // ========== Local playlist (EXACT filenames in Media/) ==========
+    // ===== Playlist =====
 const PLAYLIST = [
   { title: 'A Demo in Time of Dying', file: 'Media/A Demo in Time of Dying.mp3' },
   { title: 'A Demo of Poor Tom', file: 'Media/A Demo of Poor Tom.mp3' },
@@ -204,8 +190,8 @@ const PLAYLIST = [
     const K = { vol:'radio.vol', muted:'radio.muted', shuffle:'radio.shuffle', loop:'radio.loop' };
     els.vol.value = localStorage.getItem(K.vol) || '0.8';
     els.audio.volume = parseFloat(els.vol.value);
-    const savedMuted = JSON.parse(localStorage.getItem(K.muted)||'false');
-    els.audio.muted = savedMuted; setMuteUi(savedMuted);
+    els.audio.muted = JSON.parse(localStorage.getItem(K.muted)||'false');
+    setMuteUi(els.audio.muted);
     let isShuffle = JSON.parse(localStorage.getItem(K.shuffle)||'false');
     if(isShuffle){ els.btnShuffle.classList.add('active'); els.btnShuffle.setAttribute('aria-pressed','true'); }
     const loopSaved = localStorage.getItem(K.loop); if(loopSaved!==null) els.loopAll.checked = loopSaved==='true';
@@ -230,7 +216,6 @@ const PLAYLIST = [
 
     function enableTransport(on){
       els.btnPlay.disabled=!on; els.btnNext.disabled=!on; els.btnPrev.disabled=!on; els.btnStop.disabled=!on;
-      els.btnShare.disabled = current < 0; // share needs a selected track
     }
     function highlight(){ [...els.list.children].forEach((c,idx)=> c.classList.toggle('active', idx===current)); }
     function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
@@ -244,8 +229,9 @@ const PLAYLIST = [
       notify(`track ${current+1} / ${PLAYLIST.length}`); highlight();
       try{
         await attach(track.file); await els.audio.play();
-        isPlaying = true; els.btnPlay.textContent='⏸︎ Pause'; els.btnPlay.ariaLabel='Pause'; els.onAir.style.display=''; els.nowSub.textContent='Playing';
-        els.btnShare.disabled = false; // enable Share now that a track is selected
+        isPlaying = true;
+        els.btnPlay.textContent='⏸︎ Pause'; els.btnPlay.ariaLabel='Pause';
+        els.onAir.style.display=''; els.nowSub.textContent='Playing';
       }catch(err){ notify('Could not play this file. Skipping…'); next(); }
     }
 
@@ -264,39 +250,35 @@ const PLAYLIST = [
     function prev(){ if(!PLAYLIST.length) return; if(isShuffle){ startAt(Math.floor(Math.random()*PLAYLIST.length)); } else { startAt((current-1+PLAYLIST.length)%PLAYLIST.length); } }
     function stopAll(){ els.audio.pause(); isPlaying=false; els.btnPlay.textContent='▶︎ Start Station'; els.btnPlay.ariaLabel='Play'; els.onAir.style.display='none'; notify('stopped'); }
 
-    // Share logic
+    // ===== SHARE CURRENT TRACK =====
     async function shareCurrent(){
-      if (current < 0) return;
-      const track = PLAYLIST[current];
-      const url = pathToUrl(track.file); // absolute URL to the MP3
+      // Use currently selected track if any, otherwise default to first
+      const idx = current >= 0 ? current : 0;
+      const track = PLAYLIST[idx];
+      const url = pathToUrl(track.file);
       const title = `🎧 ${track.title} — KZAK Radio`;
       const text  = `Listening on KZAK • Frasier-Style Free Radio:\n${track.title}\n\n${url}`;
 
-      // Try native Web Share on supported devices
       if (navigator.share){
         try{
           await navigator.share({ title, text, url });
           showToast('Shared!');
           return;
-        }catch(e){
-          // user canceled or not supported for file type—fall through to fallback
-        }
+        }catch(e){ /* cancel or not supported -> fallback */ }
       }
 
-      // Fallback: copy link + open email draft
       try{
         await navigator.clipboard.writeText(url);
-        showToast('Link copied!');
+        showToast('Link copied to clipboard');
       }catch(e){
-        // ignore, best-effort
+        showToast('Copy failed—opening email…', 1200);
       }
 
       const mailto = `mailto:?subject=${encodeURIComponent('Check this track')}&body=${encodeURIComponent(text)}`;
-      // Pop an email composer in a new window/tab (won’t block single-page flow)
       window.open(mailto, '_blank', 'noopener,noreferrer');
     }
 
-    // Player events (keep ON AIR in sync for all paths)
+    // Player events
     els.audio.addEventListener('ended', next);
     els.audio.addEventListener('error', ()=>{ notify('Playback error. Skipping…'); next(); });
     els.audio.addEventListener('waiting', ()=>{ els.nowSub.textContent='Buffering…'; });
@@ -325,7 +307,7 @@ const PLAYLIST = [
       if(e.key==='p'||e.key==='P'){ e.preventDefault(); els.btnPrev.click(); }
       if(e.key==='s'||e.key==='S'){ e.preventDefault(); els.btnShuffle.click(); }
       if(e.key==='m'||e.key==='M'){ e.preventDefault(); els.btnMute.click(); }
-      if(e.key==='u'||e.key==='U'){ e.preventDefault(); shareCurrent(); } // quick keyboard share
+      if(e.key==='u'||e.key==='U'){ e.preventDefault(); shareCurrent(); } // keyboard share
     });
 
     renderList();
