@@ -10,11 +10,8 @@
     --ink:#eceff4; --muted:#b7becd; --gold:#d8b765;
     --shadow:0 16px 40px rgba(0,0,0,.40);
     --tile-aspect: 3 / 4;
-
-    /* flat, solid wall per theme */
     --wall-solid:#221014;
   }
-
   /* ---------- Themes ---------- */
   body.theme-default{ --wall-solid:#221014; --ink:#eceff4; --muted:#b7becd; }
   body.theme-louvre{  --wall-solid:#3f0c0e; --ink:#f7f7f9; --muted:#e0d5c7; }
@@ -22,21 +19,16 @@
   body.theme-la{      --wall-solid:#f7f3ee; --ink:#111; --muted:#4b5563; --gold:#bdbdbd; }
 
   html,body{height:100%}
-  body{
-    margin:0; color:var(--ink);
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-    background: var(--wall-solid);
-  }
+  body{ margin:0; color:var(--ink);
+        font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+        background: var(--wall-solid); }
 
-  /* remove any legacy wallpaper/beams */
-  .beams{ display:none !important; }
-  body::before, body::after{ display:none !important; content:""; }
+  .beams{ display:none !important; } body::before, body::after{ display:none !important; content:""; }
 
   .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 120px; position:relative; z-index:1}
   h1{margin:0 0 10px;font-size:clamp(24px,3.2vw,40px);letter-spacing:.02em}
   .note{color:var(--muted);font-size:14px;margin:6px 0 12px}
 
-  /* Controls row */
   .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 24px}
   .select,.btn{
     appearance:none;border:1px solid #3a2a20;background:#1a1412;color:#f2f5f9;
@@ -47,7 +39,6 @@
   }
   .label{font-size:13px;color:var(--muted)}
 
-  /* Exhibits grid */
   .exhibits{display:grid; gap:36px}
   .exhibit{ display:grid; grid-template-columns: 1fr 1fr; gap:26px; align-items:start; }
   .exhibit.pl-left  .plaque-col{ order:1 } .exhibit.pl-left  .frame-col{ order:2 }
@@ -61,8 +52,7 @@
     border:1px solid color-mix(in oklab, var(--gold) 60%, black);
     border-left:6px solid var(--gold);
     border-radius:14px; padding:16px 16px 12px; margin-top:var(--plaqueTop,0px);
-    backdrop-filter: blur(3px); box-shadow: var(--shadow);
-    color:#f4efe6;
+    backdrop-filter: blur(3px); box-shadow: var(--shadow); color:#f4efe6;
   }
   body.theme-la .plaque{
     background:linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.34));
@@ -85,7 +75,6 @@
   .mini-toggle[aria-pressed="true"]{background:#14202c;border-color:#46607a}
   body.theme-la .mini-toggle{ background:#fff; color:#111; border:1px solid #c9c9c9; }
 
-  /* Frames & tiles */
   .frame-wrap{filter:drop-shadow(0 18px 24px rgba(0,0,0,.35)); transform: rotate(var(--frame-tilt, 0deg));}
   .frame{position:relative; box-shadow:var(--shadow); border-radius:14px; border:10px solid transparent;}
   .finish-gilded .frame{
@@ -134,7 +123,7 @@
   .player{position:relative;background:#000}
   .player video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 
-  /* Intro overlay (for any room) */
+  /* Intro overlay (shared) */
   .intro-overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center; background:#000; }
   .intro-overlay.open{ display:grid }
   .intro-shell{
@@ -172,7 +161,7 @@
     <section id="exhibits" class="exhibits"></section>
   </div>
 
-  <!-- Fullscreen Intro overlay (shared for all rooms) -->
+  <!-- Fullscreen Intro overlay -->
   <div id="introOverlay" class="intro-overlay" role="dialog" aria-modal="true" aria-label="Room intro">
     <div class="intro-shell">
       <video id="introVideo"
@@ -219,17 +208,16 @@
 })();
 
 /* ============ Data ============ */
-/* 1) Featured entry-hall exhibit (local MP4 hover) with plaque CTA to the room (with intro pre-roll) */
+/* 1) Featured: Wings (hover MP4) with intro pre-roll then room */
 const WINGS_FEATURED = {
   key:'wings', title:'Wings for Marie', room:'Narrative & Memory',
   desc:'Enter <strong>Narrative &amp; Memory</strong> — curated works on recollection, meaning, and time.',
   mp4:'./Wings For Marie.mp4', poster:'./Wings.png',
-  /* open this room AFTER playing the transfer video you uploaded */
   introSrc:'room-narrative-memory/Media/NarrativeMemoryRoom.mp4',
   roomTarget:'room-narrative-memory/index.html'
 };
 
-/* 2) Your image tile that links to the Abstracts room (with intro overlay) */
+/* 2) Abstracts image tile with intro overlay */
 const ABSTRACTS = {
   key: 'abstracts',
   title: 'The Grudge on Dune',
@@ -241,7 +229,21 @@ const ABSTRACTS = {
   tile: { tiktok: 'https://www.tiktok.com/t/ZT63YRxNR/', poster: './IMG_0494.jpg' }
 };
 
-/* 3) Other local MP4 showcases (hover preview + sound toggle) */
+/* 3) NEW: KZAK Radio Room (image link, no hover video) */
+const RADIO_ROOM = {
+  key:'kzak',
+  title:'KZAK • Frasier-Style Free Radio',
+  room:'KZAK Radio Room',
+  desc:'An always-on, ad-free stream of my originals and remixes. Shuffle or loop—no DJ chatter.',
+  ctaLabel:'Enter KZAK Radio Room',
+  tile: {
+    href: 'room-radio-listen/index.html',
+    poster: './room-radio-listen/Media/RadioMusicListening.jpg',
+    a11y: 'Collage of vintage radios and audio gear'
+  }
+};
+
+/* 4) Other local MP4 showcases (hover preview + sound toggle) */
 const OTHERS = [
   { key:'jazz', title:'Reflections from a Jazz Club', room:'Noir & Jazz Abstractions',
     desc:'Smoke, brass, and neon. Improvised camera rhythms meet graphic motifs in a low-lit synesthetic lounge.',
@@ -277,16 +279,15 @@ function buildExhibit(data){
   ex.style.setProperty('--plaqueW', plaqueW);
   ex.style.setProperty('--plaqueTop', plaqueTop);
 
-  // default: hover sound OFF per exhibit
-  ex.dataset.sound = 'off';
+  ex.dataset.sound = 'off'; // default hover sound OFF
 
   const plaque = document.createElement('div');
   plaque.className = 'plaque-col';
   plaque.innerHTML = `
     <div class="plaque">
       <h2>${data.title}</h2>
-      <div class="room">Room: ${data.room}${data.isActiveRoom ? '' : ''}</div>
-      <p>${data.desc}</p>
+      <div class="room">Room: ${data.room || ''}</div>
+      <p>${data.desc || ''}</p>
       <div class="cta-row"></div>
     </div>
   `;
@@ -296,22 +297,26 @@ function buildExhibit(data){
   frameCol.innerHTML = `
     <div class="frame-wrap">
       <div class="frame"><div class="mat">
-        <article class="tile" tabindex="0"></article>
+        <article class="tile" tabindex="0" ${data.tile?.a11y ? `aria-label="${data.tile.a11y}"` : ''}></article>
       </div></div>
     </div>
   `;
 
-  // Tile types:
-  // - TikTok image tile (Abstracts)
-  // - Local MP4 hover/lightbox tile (Wings, Jazz, Vacancy, Xavier)
   const tile = frameCol.querySelector('.tile');
   tile.dataset.title = data.title;
 
+  // Tile types: TikTok link, Generic href image link, or local MP4 hover
   if (data.tile?.tiktok){
     tile.dataset.tiktok = data.tile.tiktok;
     tile.innerHTML = `
       <img class="thumb" src="${data.tile.poster}" alt="Poster: ${data.title}" loading="lazy" />
       <div class="overlay"><div class="title">${data.title}</div><div class="badge">Click to watch on TikTok</div></div>
+    `;
+  } else if (data.tile?.href){
+    tile.dataset.href = data.tile.href;
+    tile.innerHTML = `
+      <img class="thumb" src="${data.tile.poster}" alt="Poster: ${data.title}" loading="lazy" />
+      <div class="overlay"><div class="title">${data.title}</div><div class="badge">Enter the Room</div></div>
     `;
   } else {
     tile.dataset.video = data.mp4;
@@ -326,7 +331,7 @@ function buildExhibit(data){
   const ctaRow = plaque.querySelector('.cta-row');
   const parts = [];
 
-  // Abstracts: TikTok + intro overlay to enter room
+  // Abstracts: TikTok + intro overlay
   if (data.key === 'abstracts' && data.isActiveRoom){
     parts.push(
       `<a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>`,
@@ -336,17 +341,21 @@ function buildExhibit(data){
     );
   }
 
-  // Local MP4 exhibits: sound toggle always; optional room entry button
-  if (!data.tile?.tiktok){
-    if (data.roomTarget && data.introSrc){
-      /* Wings (now with intro) */
-      parts.push(`<button class="cta enter-room" type="button"
-                          data-intro="${data.introSrc}" data-target="${data.roomTarget}"
-                          aria-haspopup="dialog">🏛 Enter this Room</button>`);
-    } else if (data.roomTarget){
-      /* fallback: direct link (others when they become rooms later) */
-      parts.push(`<a class="cta" href="${data.roomTarget}" target="_self" rel="noopener">🏛 Enter this Room</a>`);
-    }
+  // Wings (local MP4 + intro pre-roll)
+  if (data.key === 'wings'){
+    parts.push(`<button class="cta enter-room" type="button"
+                    data-intro="${data.introSrc}" data-target="${data.roomTarget}"
+                    aria-haspopup="dialog">🏛 Enter this Room</button>`,
+               `<button class="mini-toggle hover-sound-toggle" type="button" aria-pressed="false" title="Toggle sound while hovering this artwork">🔊 Hover Sound: Off</button>`);
+  }
+
+  // KZAK Radio Room (image link)
+  if (data.key === 'kzak' && data.tile?.href){
+    parts.push(`<a class="cta" href="${data.tile.href}" aria-label="Enter KZAK Radio Room – Frasier-Style Free Radio">${data.ctaLabel || 'Enter this Room'}</a>`);
+  }
+
+  // Generic local MP4 showcases: add sound toggle
+  if (!data.tile?.tiktok && !data.tile?.href && data.key !== 'wings'){
     parts.push(`<button class="mini-toggle hover-sound-toggle" type="button" aria-pressed="false" title="Toggle sound while hovering this artwork">🔊 Hover Sound: Off</button>`);
   }
 
@@ -355,7 +364,7 @@ function buildExhibit(data){
   ex.appendChild(plaque);
   ex.appendChild(frameCol);
 
-  // Wire the hover-sound toggle (if present)
+  // Hover-sound toggle
   const toggle = ctaRow.querySelector('.hover-sound-toggle');
   if (toggle){
     toggle.addEventListener('click', ()=>{
@@ -369,9 +378,9 @@ function buildExhibit(data){
 }
 
 /* ============ Render (order fixed) ============ */
-/* Wings first (hover MP4 with intro), then Abstracts image tile, then the rest */
+/* Wings → Abstracts → KZAK Radio → Other showcases */
 const exhibitsEl = document.getElementById('exhibits');
-[WINGS_FEATURED, ABSTRACTS, ...OTHERS].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
+[WINGS_FEATURED, ABSTRACTS, RADIO_ROOM, ...OTHERS].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
 
 /* ============ Hover previews & Lightbox / Navigation ============ */
 const tiles = document.querySelectorAll('.tile');
@@ -392,7 +401,7 @@ function ensureVideo(tile){
 }
 function reveal(tile){ if (!tile.classList.contains('revealed')) tile.classList.add('revealed'); }
 function startPreview(tile, userGesture=false){
-  if (tile.dataset.tiktok) return;
+  if (tile.dataset.tiktok || tile.dataset.href) return;
   const v = ensureVideo(tile); if (!v) return;
   reveal(tile);
   const ex = tile.closest('.exhibit');
@@ -413,17 +422,24 @@ tiles.forEach(tile=>{
   tile.addEventListener('touchcancel',()=>stopPreview(tile), {passive:true});
 });
 
-/* Lightbox for local MP4 tiles only; TikTok opens new tab */
+/* Lightbox / click-through */
 const lb = document.getElementById('lightbox');
 const lbVideo = document.getElementById('lbVideo');
 const lbTitle = document.getElementById('lbTitle');
 const lbClose = document.getElementById('lbClose');
 
-function openLightboxFromTile(tile){
+function openFromTile(tile){
+  // TikTok external
   if (tile.dataset.tiktok){
     window.open(tile.dataset.tiktok, '_blank', 'noopener');
     return;
   }
+  // Generic href (KZAK Radio) — same tab
+  if (tile.dataset.href){
+    window.location.assign(tile.dataset.href);
+    return;
+  }
+  // Local MP4 lightbox
   const vPrev = tile.querySelector('video.clip');
   lbTitle.textContent = tile.dataset.title || 'Untitled';
   lbVideo.src = safeSrc(tile.dataset.video);
@@ -438,12 +454,13 @@ function closeLightbox(){ lbVideo.pause(); lbVideo.src=''; lb.classList.remove('
 lbClose.addEventListener('click', closeLightbox);
 lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
+
 tiles.forEach(tile=>{
-  tile.addEventListener('click', ()=>openLightboxFromTile(tile));
-  tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
+  tile.addEventListener('click', ()=>openFromTile(tile));
+  tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openFromTile(tile); });
 });
 
-/* ===== Fullscreen Intro overlay flow (generic for any room button) ===== */
+/* ===== Generic Fullscreen Intro overlay flow ===== */
 (function(){
   const overlay = document.getElementById('introOverlay');
   const video   = document.getElementById('introVideo');
@@ -474,20 +491,14 @@ tiles.forEach(tile=>{
     video.setAttribute('webkit-playsinline','');
 
     (async ()=>{
-      try {
-        video.muted = false; video.volume = 1.0;
-        await video.play();
-      } catch {
-        video.muted = true;
-        try { await video.play(); } catch { goNow(targetHref); return; }
-      }
+      try { video.muted = false; video.volume = 1.0; await video.play(); }
+      catch { video.muted = true; try { await video.play(); } catch { goNow(targetHref); return; } }
     })();
 
     video.addEventListener('ended', ()=>goNow(targetHref), {once:true});
     skipBtn.onclick = ()=>goNow(targetHref);
   }
 
-  // Bind all "Enter this Room" buttons that specify data-intro and data-target
   document.querySelectorAll('button.enter-room[data-target]').forEach(btn=>{
     btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); handleEnterClick(btn); }, {passive:false});
   });
