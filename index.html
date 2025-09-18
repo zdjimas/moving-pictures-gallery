@@ -12,7 +12,6 @@
     html,body{height:100%}
     body{margin:0;color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg)}
     .wrap{max-width:1200px;margin:0 auto;padding:28px 16px 80px}
-
     header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
     h1{margin:0;font-size:20px}
     .theme{display:flex;gap:8px;align-items:center}
@@ -22,15 +21,12 @@
     .tile{position:relative;background:var(--tile);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
     .media{position:relative;width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#0f131a,#0b0f1f)}
     .poster{display:block;width:100%;height:100%;object-fit:cover}
-    .hovervid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s}
-    .tile:hover .hovervid[data-sound="on"]{opacity:.9}
 
     .meta{padding:12px}
     .tile h3{margin:0 0 4px;font-size:16px}
     .desc{margin:0;color:var(--muted);font-size:12px}
     .plaque{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
-    .cta, .sound{border:1px solid var(--line);border-radius:999px;background:#0f131a;color:var(--ink);padding:8px 12px;cursor:pointer}
-    .sound[data-sound="on"]{background:var(--accent);color:#062211;border-color:transparent}
+    .cta{border:1px solid var(--line);border-radius:999px;background:#0f131a;color:var(--ink);padding:8px 12px;cursor:pointer}
 
     footer{margin-top:24px;color:var(--muted);font-size:12px;text-align:center}
   </style>
@@ -49,7 +45,7 @@
     </header>
 
     <section class="grid" aria-label="Exhibits">
-      <!-- 1) KZAK Radio Room (static image tile; plaque CTA plays intro then same-tab nav) -->
+      <!-- 1) KZAK Radio Room (known-good poster + pre-roll CTA) -->
       <article class="tile" aria-labelledby="kzak-title">
         <div class="media">
           <img class="poster" src="./RadioMusicListening.jpg" alt="KZAK Radio Room poster"/>
@@ -66,18 +62,13 @@
         </div>
       </article>
 
-      <!-- 2) Wings for Marie (local MP4 hover preview + sound toggle; plaque CTA to room) -->
+      <!-- 2) Wings for Marie (no poster/hover media to avoid 404; plaque CTA only) -->
       <article class="tile" aria-labelledby="wings-title">
-        <div class="media">
-          <!-- no poster image to avoid 404s; video covers it -->
-          <video class="hovervid" muted preload="metadata" playsinline
-                 src="room-narrative-memory/Media/NarrativeMemoryRoom.mp4" data-sound="off"></video>
-        </div>
+        <div class="media"></div>
         <div class="meta">
           <h3 id="wings-title">Wings for Marie — Narrative & Memory</h3>
-          <p class="desc">Hover to preview. Toggle sound, then enter the room.</p>
+          <p class="desc">Enter to view the room’s intro film.</p>
           <div class="plaque">
-            <button class="sound" data-target=".hovervid" data-sound="off" aria-pressed="false">🔈 Hover Sound: Off</button>
             <button class="cta enter-room"
                     data-intro="room-narrative-memory/Media/NarrativeMemoryRoom.mp4"
                     data-target="room-narrative-memory/index.html"
@@ -86,12 +77,12 @@
         </div>
       </article>
 
-      <!-- 3) The Grudge on Dune / Abstracts (plaque CTA plays GhoulsDoor then nav) -->
+      <!-- 3) The Grudge on Dune — Abstracts (CTA only) -->
       <article class="tile" aria-labelledby="abstracts-title">
-        <div class="media"><!-- placeholder panel; no poster required --></div>
+        <div class="media"></div>
         <div class="meta">
           <h3 id="abstracts-title">The Grudge on Dune — Abstracts</h3>
-          <p class="desc">Enter the Abstracts room. A moody gateway piece.</p>
+          <p class="desc">Enter the Abstracts room (gateway piece plays first).</p>
           <div class="plaque">
             <button class="cta enter-room"
                     data-intro="room-abstract/media/GhoulsDoor.mp4"
@@ -101,50 +92,39 @@
         </div>
       </article>
 
-      <!-- 4) Jazz (local MP4 hover preview with toggle; lightbox preview on click) -->
+      <!-- 4–6) Placeholders for Jazz / Vacancy / Xavier (no hover media to keep stable) -->
       <article class="tile" aria-labelledby="jazz-title">
-        <div class="media">
-          <video class="hovervid" muted preload="metadata" playsinline
-                 src="showcase-jazz/preview.mp4" data-sound="off"></video>
-        </div>
+        <div class="media"></div>
         <div class="meta">
           <h3 id="jazz-title">Jazz — Late Night Takes</h3>
-          <p class="desc">Hover to preview. Toggle sound for audio.</p>
+          <p class="desc">Showcase preview available inside the room.</p>
           <div class="plaque">
-            <button class="sound" data-target=".hovervid" data-sound="off" aria-pressed="false">🔈 Hover Sound: Off</button>
-            <button class="cta" aria-label="Open Jazz showcase lightbox" data-lightbox="showcase-jazz/preview.mp4">▶︎ Open Preview</button>
+            <button class="cta enter-room"
+                    data-target="showcase-jazz/index.html">▶︎ Open Preview</button>
           </div>
         </div>
       </article>
 
-      <!-- Vacancy -->
       <article class="tile" aria-labelledby="vacancy-title">
-        <div class="media">
-          <video class="hovervid" muted preload="metadata" playsinline
-                 src="showcase-vacancy/preview.mp4" data-sound="off"></video>
-        </div>
+        <div class="media"></div>
         <div class="meta">
           <h3 id="vacancy-title">Vacancy — Neon Stories</h3>
-          <p class="desc">Hover to preview. Toggle sound for audio.</p>
+          <p class="desc">Showcase preview available inside the room.</p>
           <div class="plaque">
-            <button class="sound" data-target=".hovervid" data-sound="off" aria-pressed="false">🔈 Hover Sound: Off</button>
-            <button class="cta" aria-label="Open Vacancy showcase lightbox" data-lightbox="showcase-vacancy/preview.mp4">▶︎ Open Preview</button>
+            <button class="cta enter-room"
+                    data-target="showcase-vacancy/index.html">▶︎ Open Preview</button>
           </div>
         </div>
       </article>
 
-      <!-- Xavier -->
       <article class="tile" aria-labelledby="xavier-title">
-        <div class="media">
-          <video class="hovervid" muted preload="metadata" playsinline
-                 src="showcase-xavier/preview.mp4" data-sound="off"></video>
-        </div>
+        <div class="media"></div>
         <div class="meta">
           <h3 id="xavier-title">Xavier — Study in Motion</h3>
-          <p class="desc">Hover to preview. Toggle sound for audio.</p>
+          <p class="desc">Showcase preview available inside the room.</p>
           <div class="plaque">
-            <button class="sound" data-target=".hovervid" data-sound="off" aria-pressed="false">🔈 Hover Sound: Off</button>
-            <button class="cta" aria-label="Open Xavier showcase lightbox" data-lightbox="showcase-xavier/preview.mp4">▶︎ Open Preview</button>
+            <button class="cta enter-room"
+                    data-target="showcase-xavier/index.html">▶︎ Open Preview</button>
           </div>
         </div>
       </article>
@@ -169,50 +149,9 @@
         });
       });
     })();
-
-    // Hover sound toggles for local MP4 showcase tiles (baseline behavior)
-    document.addEventListener('click', (e)=>{
-      const btn = e.target.closest('.sound');
-      if(!btn) return;
-      const tile = btn.closest('.tile');
-      const vid = tile.querySelector(btn.getAttribute('data-target'));
-      const on = btn.getAttribute('data-sound') === 'on';
-      if(on){
-        vid.muted = true; vid.setAttribute('data-sound','off'); btn.setAttribute('data-sound','off'); btn.textContent='🔈 Hover Sound: Off'; btn.setAttribute('aria-pressed','false');
-      }else{
-        vid.muted = false; vid.setAttribute('data-sound','on'); btn.setAttribute('data-sound','on'); btn.textContent='🔊 Hover Sound: On'; btn.setAttribute('aria-pressed','true');
-      }
-    });
-
-    // Hover play/pause (visual only if sound off)
-    document.querySelectorAll('.hovervid').forEach(v=>{
-      v.addEventListener('mouseenter', ()=>{ v.play().catch(()=>{}); });
-      v.addEventListener('mouseleave', ()=>{ v.pause(); });
-    });
-
-    // Simple lightbox for showcase previews (no room navigation)
-    document.addEventListener('click', (e)=>{
-      const btn = e.target.closest('[data-lightbox]');
-      if(!btn) return;
-      e.preventDefault();
-      const src = btn.getAttribute('data-lightbox');
-      const wrap = document.createElement('div');
-      wrap.className='room-intro-overlay';
-      wrap.style.cssText='position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:rgba(0,0,0,.65)';
-      wrap.innerHTML = `
-        <div style="width:min(960px,92vw);aspect-ratio:16/9;position:relative">
-          <video style="width:100%;height:100%;object-fit:cover;border-radius:14px;background:#000" playsinline controls src="${src}"></video>
-          <button type="button" style="position:absolute;right:12px;bottom:10px;background:#0f131a;color:#e6e9ef;border:1px solid #2a3344;border-radius:999px;padding:8px 14px;cursor:pointer">Close ✕</button>
-        </div>`;
-      document.body.appendChild(wrap);
-      const close = ()=> wrap.remove();
-      wrap.querySelector('button').addEventListener('click', close);
-      wrap.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
-      wrap.tabIndex=-1; wrap.focus();
-    });
   </script>
 
-  <!-- Keep only these two JS files per baseline -->
+  <!-- Baseline-only scripts (original behavior) -->
   <script src="rooms_manifest.js"></script>
   <script src="lobby-rooms.js"></script>
 </body>
