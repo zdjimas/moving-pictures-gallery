@@ -184,18 +184,26 @@
 })();
 
 /* ===== Data ===== */
-/* FIRST: KZAK Radio Room (image link) */
-const RADIO_ROOM = {
-  key:'kzak',
-  title:'KZAK • Frasier-Style Free Radio',
-  room:'KZAK Radio Room',
-  desc:'An always-on, ad-free stream of my originals and remixes. Shuffle or loop—no DJ chatter.',
-  ctaLabel:'Enter KZAK Radio Room',
-  tile: {
-    href: 'room-radio-listen/index.html',
-    poster: './RadioMusicListening.jpg',
-    a11y: 'Collage of vintage radios and audio gear'
-  }
+// KZAK Radio Room (image tile + intro pre-roll on CTA)
+if (data.key === 'kzak') {
+  // Make the tile a simple image (no hover video, no direct link)
+  tile.innerHTML = `
+    <img class="thumb" src="${data.poster}" alt="Poster: ${data.title}" loading="lazy" />
+    <div class="overlay"><div class="title">${data.title}</div><div class="badge">Enter the Room</div></div>
+  `;
+
+  // Plaque CTA uses the shared intro overlay flow
+  parts.push(
+    `<button class="cta enter-room" type="button"
+             data-intro="${data.introSrc}"
+             data-target="${data.roomTarget}"
+             aria-haspopup="dialog"
+             aria-label="Enter KZAK Radio Room – Frasier-Style Free Radio">
+       ${data.ctaLabel || 'Enter this Room'}
+     </button>`
+  );
+}
+
 };
 
 /* Wings (hover MP4) with intro pre-roll to room */
