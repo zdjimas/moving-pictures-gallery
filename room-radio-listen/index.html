@@ -57,7 +57,18 @@
     .vol{display:flex;align-items:center;gap:8px;margin-left:auto}
     .vol input{accent-color:#9dc2ff}
 
-    .list{padding:10px;max-height:360px;overflow:auto;border-top:1px solid var(--line);border-radius:12px}
+    /* PLAYLIST: make it a self-contained scroller again */
+    .list{
+      padding:10px;
+      height:clamp(220px, 40vh, 420px);   /* visible area */
+      max-height:420px;
+      overflow:auto;
+      border-top:1px solid var(--line);
+      border-radius:12px;
+      overscroll-behavior:contain;
+      -webkit-overflow-scrolling:touch;   /* iOS momentum scroll */
+      background:linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.12));
+    }
     .track{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;border:1px solid transparent}
     .track:hover{background:#0f1524;border-color:#273553}
     .tidx{width:28px;height:28px;display:grid;place-items:center;background:#0c1016;border-radius:8px;color:#88a;font-size:12px}
@@ -113,7 +124,7 @@
             <p class="title" id="nowTitle">Nothing playing</p>
             <button id="btnShare" title="Share: copies a link and opens your email/chat" aria-label="Share current track">↗︎ Share</button>
           </div>
-          <p class="subtitle" id="nowSub">Scroll to pick a song <code>Media/</code> and press Start.</p>
+          <p class="subtitle" id="nowSub">Upload MP3s to <code>Media/</code> and press Start.</p>
         </div>
 
         <span class="onair" id="onAir" style="display:none"><span class="dot"></span>ON AIR</span>
@@ -178,7 +189,7 @@
       setTimeout(()=>t.classList.remove('show'), ms);
     }
 
-    /* ===== Playlist (your working set) ===== */
+    /* ===== Playlist ===== */
 const PLAYLIST = [
   { title: 'A Demo in Time of Dying', file: 'Media/A Demo in Time of Dying.mp3' },
   { title: 'A Demo of Poor Tom', file: 'Media/A Demo of Poor Tom.mp3' },
@@ -239,7 +250,7 @@ const PLAYLIST = [
 
     function enableTransport(on){ btnPlay.disabled=!on; btnNext.disabled=!on; btnPrev.disabled=!on; btnStop.disabled=!on; }
     function highlight(){ [...list.children].forEach((c,idx)=> c.classList.toggle('active', idx===current)); }
-    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;","&gt;":">","\"":"&quot;","'":"&#39;"}[m])); }
     function notify(msg){ status.textContent = msg; }
 
     async function startAt(i){
