@@ -10,9 +10,7 @@
     --ink:#eceff4; --muted:#b7becd; --gold:#d8b765;
     --shadow:0 16px 40px rgba(0,0,0,.40);
     --tile-aspect: 3 / 4;
-
-    /* flat, solid wall per theme */
-    --wall-solid:#221014;
+    --wall-solid:#221014; /* flat, solid wall per theme */
   }
 
   /* ---------- Themes ---------- */
@@ -343,7 +341,6 @@ function buildExhibit(data){
   const ctaRow = plaque.querySelector('.cta-row');
   const parts = [];
 
-  // Abstracts: TikTok + intro overlay to enter room
   if (data.key === 'abstracts' && data.isActiveRoom){
     parts.push(
       `<a class="cta" href="${data.tile.tiktok}" target="_blank" rel="noopener">▶︎ Watch on TikTok</a>`,
@@ -353,14 +350,12 @@ function buildExhibit(data){
     );
   }
 
-  // Radio KZAK: plaque button triggers pre-roll then nav
   if (data.key === 'kzak'){
     parts.push(`<button class="cta enter-room" type="button"
                   data-intro="${data.introSrc}" data-target="${data.roomTarget}"
                   aria-haspopup="dialog">🏛 Enter this Room</button>`);
   }
 
-  // Local MP4 exhibits (Wings) also have room entry via pre-roll
   if (!data.tile?.tiktok && data.key !== 'kzak'){
     if (data.roomTarget && data.introSrc){
       parts.push(`<button class="cta enter-room" type="button"
@@ -369,18 +364,15 @@ function buildExhibit(data){
     } else if (data.roomTarget){
       parts.push(`<a class="cta" href="${data.roomTarget}" target="_self" rel="noopener">🏛 Enter this Room</a>`);
     }
-    // Hover sound toggle only for MP4-hover tiles
     if (data.mp4){
       parts.push(`<button class="mini-toggle hover-sound-toggle" type="button" aria-pressed="false" title="Toggle sound while hovering this artwork">🔊 Hover Sound: Off</button>`);
     }
   }
 
   ctaRow.innerHTML = parts.join(' ');
-
   ex.appendChild(plaque);
   ex.appendChild(frameCol);
 
-  // Wire the hover-sound toggle (if present)
   const toggle = ctaRow.querySelector('.hover-sound-toggle');
   if (toggle){
     toggle.addEventListener('click', ()=>{
@@ -397,7 +389,7 @@ function buildExhibit(data){
 const exhibitsEl = document.getElementById('exhibits');
 [RADIO_KZAK, WINGS_FEATURED, ABSTRACTS, ...OTHERS].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
 
-/* ============ Hover previews & Lightbox / Navigation ============ */
+/* ============ Hover previews (freeze on pause) & Lightbox / Navigation ============ */
 const tiles = document.querySelectorAll('.tile');
 const safeSrc = (p)=> encodeURI(p);
 
@@ -407,31 +399,33 @@ function ensureVideo(tile){
   if (!v.dataset.bound){
     v.dataset.bound = '1';
     v.src = safeSrc(tile.dataset.video);
-    v.preload = 'metadata';
+    v.preload = 'auto';                 // allow a drawable frame
     v.playsInline = true;
     v.setAttribute('playsinline','');
     v.setAttribute('webkit-playsinline','');
+
+    // Reveal only after we have pixels to show
+    v.addEventListener('loadeddata', ()=>{
+      tile.classList.add('revealed');   // fades poster, shows video
+    }, {once:true});
   }
   return v;
 }
-function reveal(tile){ if (!tile.classList.contains('revealed')) tile.classList.add('revealed'); }
 function startPreview(tile, userGesture=false){
-  // Only for local MP4 tiles (no TikTok, no static image tiles like KZAK)
   if (tile.dataset.tiktok || !tile.querySelector('video.clip')) return;
   const v = ensureVideo(tile); if (!v) return;
-
-  reveal(tile); // show video overlay and hide poster
-
-  // Respect per-exhibit sound toggle (OFF by default)
   const ex = tile.closest('.exhibit');
   v.muted = !(ex && ex.dataset.sound === 'on');
-
   const p = v.play();
   if (userGesture && p) p.catch(()=>{});
 }
 function stopPreview(tile){
   const v = tile.querySelector('video.clip');
-  if (v) v.pause(); // freeze on last rendered frame
+  if (!v) return;
+  // Only pause if we can freeze on a frame; otherwise keep poster visible
+  if (v.readyState >= 2 /* HAVE_CURRENT_DATA */){
+    v.pause();
+  }
 }
 
 tiles.forEach(tile=>{
@@ -452,12 +446,8 @@ const lbTitle = document.getElementById('lbTitle');
 const lbClose = document.getElementById('lbClose');
 
 function openLightboxFromTile(tile){
-  if (tile.dataset.tiktok){
-    window.open(tile.dataset.tiktok, '_blank', 'noopener');
-    return;
-  }
-  const vPrev = tile.querySelector('video.clip');
-  if (!vPrev) return; // static image tiles (e.g., KZAK) don’t open lightbox
+  if (tile.dataset.tiktok){ window.open(tile.dataset.tiktok, '_blank', 'noopener'); return; }
+  const vPrev = tile.querySelector('video.clip'); if (!vPrev) return;
   lbTitle.textContent = tile.dataset.title || 'Untitled';
   lbVideo.src = safeSrc(tile.dataset.video);
   lb.classList.add('open');
@@ -471,13 +461,12 @@ function closeLightbox(){ lbVideo.pause(); lbVideo.src=''; lb.classList.remove('
 lbClose.addEventListener('click', closeLightbox);
 lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')) closeLightbox(); });
-
 tiles.forEach(tile=>{
   tile.addEventListener('click', ()=>openLightboxFromTile(tile));
   tile.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' ') openLightboxFromTile(tile); });
 });
 
-/* ===== Fullscreen Intro overlay flow (generic for any room button) ===== */
+/* ===== Fullscreen Intro overlay (rooms) ===== */
 (function(){
   const overlay = document.getElementById('introOverlay');
   const video   = document.getElementById('introVideo');
@@ -490,10 +479,7 @@ tiles.forEach(tile=>{
     overlay.classList.remove('open');
     document.body.style.overflow = '';
   }
-  function goNow(href){
-    cleanup();
-    window.location.assign(href);
-  }
+  function goNow(href){ cleanup(); window.location.assign(href); }
 
   function handleEnterClick(btn){
     const introSrc = btn.dataset.intro;
@@ -506,22 +492,15 @@ tiles.forEach(tile=>{
     document.body.style.overflow = 'hidden';
     status.textContent = 'Loading room transition video… hit Skip if slow';
 
-    // Attach src & begin
     video.src = introSrc;
     video.setAttribute('playsinline',''); 
     video.setAttribute('webkit-playsinline','');
 
-    let slowTimer = setTimeout(()=> {
-      status.textContent = 'Still loading… you can hit Skip → if it feels slow';
-    }, 2500);
+    let slowTimer = setTimeout(()=>{ status.textContent = 'Still loading… you can hit Skip → if it feels slow'; }, 2500);
 
-    // Playback attempts + messaging
     (async ()=>{
-      try {
-        video.muted = false; video.volume = 1.0;
-        await video.play();
-        status.textContent = 'Starting…';
-      } catch {
+      try { video.muted = false; video.volume = 1.0; await video.play(); status.textContent = 'Starting…'; }
+      catch {
         video.muted = true;
         try { await video.play(); status.textContent = 'Starting (muted)…'; }
         catch { status.textContent = 'Autoplay blocked. Click Skip → to enter the room'; return; }
@@ -533,17 +512,13 @@ tiles.forEach(tile=>{
     video.addEventListener('error', ()=>{ status.textContent = 'Trouble loading video. Skipping…'; goNow(targetHref); });
     video.addEventListener('ended', ()=>goNow(targetHref), {once:true});
     skipBtn.onclick = ()=>goNow(targetHref);
-
-    // Clean slow hint if ends early
     video.addEventListener('play', ()=> clearTimeout(slowTimer), {once:true});
   }
 
-  // Bind all "Enter this Room" buttons that specify data-intro and data-target
   document.addEventListener('click', (e)=>{
     const btn = e.target.closest('button.enter-room[data-target]');
     if(!btn) return;
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault(); e.stopPropagation();
     handleEnterClick(btn);
   });
 })();
