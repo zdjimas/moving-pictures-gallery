@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>KSNO • Frasier‑Style Radio (Local MP3, Safe‑Encoded Paths)</title>
+  <title>KZAK • Frasier‑Style Free Radio </title>
   <style>
     :root{ --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8; --bg1:#0a0e1a; --bg2:#111a33; --bg3:#0c1022; --card:#151a29; --line:#22324d; --shadow:0 18px 50px rgba(0,0,0,.45); }
     html,body{height:100%}
-    body{margin:0;color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:radial-gradient(1200px 600px at 70% -10%,#1a2550 0%,transparent 60%) fixed,linear-gradient(180deg,var(--bg1),var(--bg2) 55%,var(--bg3));overflow-y:overlay}
+    body{margin:0;color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background: linear-gradient(180deg, rgba(10,14,26,0.70), rgba(17,26,51,0.85) 55%, rgba(12,16,34,0.95)), url('Media/RadioMusicListening.jpg') center / cover fixed no-repeat;overflow-y:overlay}
     .wrap{max-width:1000px;margin:0 auto;padding:28px 16px 100px;position:relative}
 
     header{display:flex;align-items:center;gap:14px;justify-content:space-between;margin:2px 0 18px}
@@ -59,7 +59,7 @@
     <header>
       <div class="brand">
         <div class="tower" aria-hidden="true"></div>
-        <h1>KSNO • Frasier‑Style Jazz Radio</h1>
+        <h1>KZAK • Frasier‑Style Free Radio without the talking</h1>
       </div>
       <div class="badge" id="status">idle</div>
     </header>
@@ -85,7 +85,7 @@
         <button id="btnPrev" aria-label="Previous" disabled>⏮︎</button>
         <button id="btnPlay" class="primary" aria-label="Play">▶︎ Start Station</button>
         <button id="btnNext" aria-label="Next" disabled>⏭︎</button>
-        <button id="btnStop" class="danger" aria-label="Stop" disabled>■ Stop</button>
+        <button id="btnStop" class="danger" aria-label="Stop/Pause" disabled>■ Stop/Pause</button>
         <button id="btnShuffle" class="toggle" aria-pressed="false">Shuffle</button>
         <label style="display:flex;align-items:center;gap:6px"><input id="loopAll" type="checkbox" checked /> <span>Loop</span></label>
         <button id="btnMute" class="muted" aria-pressed="false" title="Mute (M)">🔇 Mute</button>
@@ -95,7 +95,7 @@
       <div class="list" id="trackList" role="listbox" aria-label="Playlist"></div>
 
       <footer>
-        <strong>Add songs:</strong> put MP3 files in <code>Media/</code> and edit the <code>PLAYLIST</code> below. Paths are case‑sensitive.
+        <strong>Copyright 2025:</strong> zdjimas and cjmurphy creators and authors
       </footer>
 
       <audio id="audio" preload="metadata" playsinline></audio>
@@ -153,11 +153,10 @@
       els.list.innerHTML = '';
       PLAYLIST.forEach((t,i)=>{
         const row = document.createElement('div'); row.className='track'; row.role='option'; row.tabIndex=0; row.dataset.idx=i;
-        const link = pathToUrl(t.file);
         row.innerHTML = `<div class="tidx">${i+1}</div>
           <div class="tmeta">
             <div class="ttitle">${escapeHtml(t.title)}</div>
-            <div class="subtitle"><a href="${link}" target="_blank" rel="noopener">${escapeHtml(t.file)}</a></div>
+            <div class="subtitle">${escapeHtml(t.file)}</div>
           </div>
           <button class="btn" title="Play">Play</button>`;
         row.querySelector('button').addEventListener('click', ()=> startAt(i));
@@ -166,7 +165,6 @@
         els.list.appendChild(row);
       });
       enableTransport(!!PLAYLIST.length); highlight();
-      checkTracks();
     }
 
     function enableTransport(on){ els.btnPlay.disabled=!on; els.btnNext.disabled=!on; els.btnPrev.disabled=!on; els.btnStop.disabled=!on; }
@@ -205,6 +203,10 @@
     els.audio.addEventListener('error', ()=>{ notify('Playback error. Skipping…'); next(); });
     els.audio.addEventListener('waiting', ()=>{ els.nowSub.textContent='Buffering…'; });
     els.audio.addEventListener('playing', ()=>{ els.nowSub.textContent='Playing'; });
+    // Keep ON AIR in sync for all play paths (Start Station or resume)
+    els.audio.addEventListener('play',   ()=>{ els.onAir.style.display=''; });
+    els.audio.addEventListener('pause',  ()=>{ els.onAir.style.display='none'; });
+    els.audio.addEventListener('ended',  ()=>{ els.onAir.style.display='none'; });
 
     els.btnPlay.addEventListener('click', ()=>{ if(isPlaying){ stopAll(); } else { if(current<0) startAt(0); else els.audio.play().catch(()=>startAt(current)); } });
     els.btnNext.addEventListener('click', next);
@@ -219,22 +221,6 @@
     els.vol.addEventListener('input', ()=>{ const v=parseFloat(els.vol.value||'0.8'); els.audio.volume=v; localStorage.setItem(K.vol, String(v)); });
 
     window.addEventListener('keydown', (e)=>{ if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return; if(e.code==='Space'){ e.preventDefault(); els.btnPlay.click(); } if(e.key==='n'||e.key==='N'){ e.preventDefault(); els.btnNext.click(); } if(e.key==='p'||e.key==='P'){ e.preventDefault(); els.btnPrev.click(); } if(e.key==='s'||e.key==='S'){ e.preventDefault(); els.btnShuffle.click(); } if(e.key==='m'||e.key==='M'){ e.preventDefault(); els.btnMute.click(); } });
-
-    // Diagnostics: HEAD check with encoded URLs; show badge ok/404
-    async function checkTracks(){
-      const rows = [...els.list.children];
-      await Promise.all(PLAYLIST.map(async (t, i)=>{
-        const row = rows[i]; if(!row) return;
-        const info = document.createElement('span'); info.className='badge'; info.style.marginLeft='8px'; info.textContent='checking…';
-        row.querySelector('.tmeta').appendChild(info);
-        try{
-          const url = pathToUrl(t.file);
-          const res = await fetch(url, { method:'HEAD', cache:'no-store' });
-          if(res.ok){ info.textContent = 'ok'; info.style.background='#0f2012'; info.style.borderColor='#214d37'; }
-          else{ info.textContent = '404?'; info.style.background='#3f1a1a'; info.style.borderColor='#6b2a2a'; }
-        }catch(e){ info.textContent = 'fetch error'; info.style.background='#3f1a1a'; info.style.borderColor='#6b2a2a'; }
-      }));
-    }
 
     renderList();
   </script>
