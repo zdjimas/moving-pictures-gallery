@@ -38,6 +38,7 @@
     .brand .tower{width:28px;height:28px;border:2px solid #6aa2ff;border-radius:50%;position:relative;box-shadow:0 0 16px rgba(85,135,255,.45) inset}
     .brand .tower:after{content:"";position:absolute;left:50%;top:-6px;width:2px;height:16px;background:#6aa2ff;transform:translateX(-50%)}
     h1{font-weight:700;margin:0;font-size:20px;letter-spacing:.2px}
+    .righthead{display:flex;align-items:center;gap:10px}
     .badge{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid #2a3958;background:#0d1222;color:var(--muted)}
     .onair{color:#1a0a0a;background:#ff2e2e;border-color:#6b1212;box-shadow:0 0 16px rgba(255,46,46,.35) inset,0 0 12px rgba(255,46,46,.25);font-weight:800;letter-spacing:.6px}
     .onair .dot{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:#ffe9e9;animation:pulse 1.4s infinite}
@@ -75,6 +76,11 @@
 
     .skyline{position:fixed;left:0;right:0;bottom:-4px;height:140px;pointer-events:none;opacity:.6; z-index:1}
     .skyline svg{width:100%;height:100%;display:block}
+
+    /* Link styled as a pill button for the Lobby return */
+    .btn-link{display:inline-flex;align-items:center;gap:8px;text-decoration:none;background:#0f131a;border:1px solid #2a3344;color:var(--ink);padding:10px 14px;border-radius:999px}
+    .btn-link:hover{background:#121826}
+    .btn-link:focus{outline:2px solid #2d6cdf;outline-offset:2px}
   </style>
 </head>
 <body>
@@ -84,7 +90,14 @@
         <div class="tower" aria-hidden="true"></div>
         <h1>KZAK • Frasier-Style Free Radio without the talking</h1>
       </div>
-      <div class="badge" id="status">idle</div>
+      <div class="righthead">
+        <div class="badge" id="status">idle</div>
+        <a href="../index.html"
+           class="btn-link"
+           aria-label="Return to Museum Lobby (go up one level)">
+          🏛 Return to Museum Lobby
+        </a>
+      </div>
     </header>
 
     <section class="card radio" aria-label="Local Radio Player">
@@ -142,22 +155,26 @@
       return new URL(joined, base).href;
     }
 
-    // ========== Hard-coded local playlist (EXACT filenames) ==========
+    // Quick helper to go back to the Museum Lobby (one level up)
+    function goLobby(){
+      location.href = new URL('../index.html', location.href).href;
+    }
+
     // ========== Hard-coded local playlist (EXACT filenames in Media/) ==========
-const PLAYLIST = [
-  { title: 'A Spec of a Blue Dot', file: 'Media/A Spec of a Blue Dot.mp3' },
-  { title: 'Ballad of a Bleak Future', file: 'Media/Ballad of a Bleak Future.mp3' },
-  { title: 'Bend the clock - 70s Barn Jam Edition', file: 'Media/Bend the clock - 70s Barn Jam Edition.mp3' },
-  { title: 'Beyond My Understanding', file: 'Media/Beyond My Understanding.mp3' },
-  { title: "Bolotone's Intro", file: "Media/Bolotone's Intro.mp3" },
-  { title: 'Cover Of Wings For Marie (Part 1) v1', file: 'Media/Cover Of Wings For Marie (Part 1) v1.mp3' },
-  { title: 'Covering my Eyes', file: 'Media/Covering my Eyes.mp3' },
-  { title: 'Fear Inoculum (Cover) v1', file: 'Media/Fear Inoculum (Cover) v1.mp3' },
-  { title: 'More Guitars at Luna Park', file: 'Media/More Guitars at Luna Park.mp3' },
-  { title: 'The Canelo–Crawford Event Round 1', file: 'Media/The Canelo–Crawford Event Round 1.mp3' },
-  { title: 'The Canelo–Crawford Event', file: 'Media/The Canelo–Crawford Event.mp3' },
-  { title: 'The X Aspect shortened', file: 'Media/The X Aspect shortened.mp3' },
-];
+    const PLAYLIST = [
+      { title: 'A Spec of a Blue Dot', file: 'Media/A Spec of a Blue Dot.mp3' },
+      { title: 'Ballad of a Bleak Future', file: 'Media/Ballad of a Bleak Future.mp3' },
+      { title: 'Bend the clock - 70s Barn Jam Edition', file: 'Media/Bend the clock - 70s Barn Jam Edition.mp3' },
+      { title: 'Beyond My Understanding', file: 'Media/Beyond My Understanding.mp3' },
+      { title: "Bolotone's Intro", file: "Media/Bolotone's Intro.mp3" },
+      { title: 'Cover Of Wings For Marie (Part 1) v1', file: 'Media/Cover Of Wings For Marie (Part 1) v1.mp3' },
+      { title: 'Covering my Eyes', file: 'Media/Covering my Eyes.mp3' },
+      { title: 'Fear Inoculum (Cover) v1', file: 'Media/Fear Inoculum (Cover) v1.mp3' },
+      { title: 'More Guitars at Luna Park', file: 'Media/More Guitars at Luna Park.mp3' },
+      { title: 'The Canelo–Crawford Event Round 1', file: 'Media/The Canelo–Crawford Event Round 1.mp3' },
+      { title: 'The Canelo–Crawford Event', file: 'Media/The Canelo–Crawford Event.mp3' },
+      { title: 'The X Aspect shortened', file: 'Media/The X Aspect shortened.mp3' },
+    ];
 
     const els = {
       audio: document.getElementById('audio'),
@@ -251,7 +268,17 @@ const PLAYLIST = [
     els.btnMute.addEventListener('click', ()=>{ const m = !els.audio.muted; els.audio.muted = m; localStorage.setItem(K.muted, JSON.stringify(m)); setMuteUi(m); });
     els.vol.addEventListener('input', ()=>{ const v=parseFloat(els.vol.value||'0.8'); els.audio.volume=v; localStorage.setItem(K.vol, String(v)); });
 
-    window.addEventListener('keydown', (e)=>{ if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return; if(e.code==='Space'){ e.preventDefault(); els.btnPlay.click(); } if(e.key==='n'||e.key==='N'){ e.preventDefault(); els.btnNext.click(); } if(e.key==='p'||e.key==='P'){ e.preventDefault(); els.btnPrev.click(); } if(e.key==='s'||e.key==='S'){ e.preventDefault(); els.btnShuffle.click(); } if(e.key==='m'||e.key==='M'){ e.preventDefault(); els.btnMute.click(); } });
+    // Keyboard shortcuts (global):
+    // Space = Play/Pause, N = Next, P = Prev, S = Shuffle, M = Mute, Esc = Return to Lobby
+    window.addEventListener('keydown', (e)=>{
+      if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+      if(e.code==='Space'){ e.preventDefault(); els.btnPlay.click(); }
+      if(e.key==='n'||e.key==='N'){ e.preventDefault(); els.btnNext.click(); }
+      if(e.key==='p'||e.key==='P'){ e.preventDefault(); els.btnPrev.click(); }
+      if(e.key==='s'||e.key==='S'){ e.preventDefault(); els.btnShuffle.click(); }
+      if(e.key==='m'||e.key==='M'){ e.preventDefault(); els.btnMute.click(); }
+      if(e.key==='Escape'){ e.preventDefault(); goLobby(); }
+    });
 
     renderList();
   </script>
