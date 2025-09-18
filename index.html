@@ -111,9 +111,11 @@
 
   .tile{position:relative;aspect-ratio:var(--tile-aspect);overflow:hidden;border:1px solid rgba(0,0,0,.25);
         background:#000;display:block;touch-action:manipulation;border-radius:6px}
-  .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
-  .clip{opacity:0;transition:opacity .15s ease-out}
-  /* Freeze-frame fix: once revealed, keep clip visible even when paused */
+  .thumb,.clip{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .thumb{background:#000}
+  /* Critical fix: video layer transparent so it never shows black while waiting */
+  .clip{opacity:0;transition:opacity .15s ease-out;background:transparent}
+  /* Freeze-frame: once revealed, keep video visible even when paused */
   .tile.revealed .clip{opacity:1}
   .tile.revealed .thumb{opacity:0;pointer-events:none}
   .overlay{position:absolute;inset:auto 0 0 0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.78));
@@ -220,7 +222,6 @@
 })();
 
 /* ============ Data ============ */
-/* 0) NEW — KZAK Radio Room (static image tile; pre-roll intro + same-tab nav) */
 const RADIO_KZAK = {
   key:'kzak', title:'KZAK • Frasier-Style Free Radio', room:'Radio Listening',
   desc:'A curated stream of instrumentals & remixes — no chatter, just music.',
@@ -229,7 +230,6 @@ const RADIO_KZAK = {
   roomTarget:'room-radio-listen/index.html'
 };
 
-/* 1) Featured entry-hall exhibit (local MP4 hover) with plaque CTA to the room (with intro pre-roll) */
 const WINGS_FEATURED = {
   key:'wings', title:'Wings for Marie', room:'Narrative & Memory',
   desc:'Enter <strong>Narrative &amp; Memory</strong> — curated works on recollection, meaning, and time.',
@@ -238,7 +238,6 @@ const WINGS_FEATURED = {
   roomTarget:'room-narrative-memory/index.html'
 };
 
-/* 2) Abstracts room (TikTok tile + intro overlay into room) */
 const ABSTRACTS = {
   key: 'abstracts',
   title: 'The Grudge on Dune',
@@ -250,7 +249,6 @@ const ABSTRACTS = {
   tile: { tiktok: 'https://www.tiktok.com/t/ZT63YRxNR/', poster: './IMG_0494.jpg' }
 };
 
-/* 3) Other local MP4 showcases (hover preview + sound toggle) */
 const OTHERS = [
   { key:'jazz', title:'Reflections from a Jazz Club', room:'Noir & Jazz Abstractions',
     desc:'Smoke, brass, and neon. Improvised camera rhythms meet graphic motifs in a low-lit synesthetic lounge.',
@@ -259,7 +257,7 @@ const OTHERS = [
     desc:'Classic tracks reimagined as moving paintings—lyric moods translated into light and motion.',
     mp4:'./Vacancy - an AI cover of Dream Theater.mp4', poster:'./Vacancy.png' },
   { key:'xavier', title:"Xavier's Perspectives", room:'Portraits in Motion',
-    desc:'Intimate character studies that flicker between realism and dream. Faces, gestures, and mood as moving compositions.',
+    desc:'Intimate character studies that flicker between realism and dream.',
     mp4:'./xaviers-perspectives.mp4', poster:'./xaviers-perspectives-poster.png' }
 ];
 
@@ -286,8 +284,7 @@ function buildExhibit(data){
   ex.style.setProperty('--plaqueW', plaqueW);
   ex.style.setProperty('--plaqueTop', plaqueTop);
 
-  // default: hover sound OFF per exhibit
-  ex.dataset.sound = 'off';
+  ex.dataset.sound = 'off'; // default hover sound OFF
 
   const plaque = document.createElement('div');
   plaque.className = 'plaque-col';
@@ -310,25 +307,21 @@ function buildExhibit(data){
     </div>
   `;
 
-  // Tile types:
   const tile = frameCol.querySelector('.tile');
   tile.dataset.title = data.title;
 
   if (data.tile?.tiktok){
-    // TikTok image tile (Abstracts)
     tile.dataset.tiktok = data.tile.tiktok;
     tile.innerHTML = `
       <img class="thumb" src="${data.tile.poster}" alt="Poster: ${data.title}" loading="lazy" />
       <div class="overlay"><div class="title">${data.title}</div><div class="badge">Click to watch on TikTok</div></div>
     `;
   } else if (data.tile?.image){
-    // STATIC IMAGE TILE (KZAK)
     tile.innerHTML = `
       <img class="thumb" src="${data.tile.image}" alt="Poster: ${data.title}" loading="lazy" />
       <div class="overlay"><div class="title">${data.title}</div><div class="badge">Click plaque to enter</div></div>
     `;
   } else {
-    // Local MP4 hover/lightbox tile (Wings, Jazz, Vacancy, Xavier)
     tile.dataset.video = data.mp4;
     tile.innerHTML = `
       <img class="thumb" src="${data.poster}" alt="Poster: ${data.title}" loading="lazy" />
@@ -337,7 +330,6 @@ function buildExhibit(data){
     `;
   }
 
-  // CTAs
   const ctaRow = plaque.querySelector('.cta-row');
   const parts = [];
 
@@ -385,11 +377,11 @@ function buildExhibit(data){
   return ex;
 }
 
-/* ============ Render (order fixed: KZAK → Wings → Abstracts → Others) ============ */
+/* ============ Render (order fixed) ============ */
 const exhibitsEl = document.getElementById('exhibits');
 [RADIO_KZAK, WINGS_FEATURED, ABSTRACTS, ...OTHERS].forEach(d => exhibitsEl.appendChild(buildExhibit(d)));
 
-/* ============ Hover previews (freeze on pause) & Lightbox / Navigation ============ */
+/* ============ Hover previews (freeze on pause) & Lightbox ============ */
 const tiles = document.querySelectorAll('.tile');
 const safeSrc = (p)=> encodeURI(p);
 
@@ -399,32 +391,41 @@ function ensureVideo(tile){
   if (!v.dataset.bound){
     v.dataset.bound = '1';
     v.src = safeSrc(tile.dataset.video);
-    v.preload = 'auto';                 // allow a drawable frame
+    v.preload = 'auto';                 // get a drawable frame
     v.playsInline = true;
     v.setAttribute('playsinline','');
     v.setAttribute('webkit-playsinline','');
 
-    // Reveal only after we have pixels to show
-    v.addEventListener('loadeddata', ()=>{
-      tile.classList.add('revealed');   // fades poster, shows video
+    // Reveal only after a real frame exists
+    const revealOnce = ()=>{ tile.classList.add('revealed'); };
+    v.addEventListener('loadeddata', revealOnce, {once:true});
+    v.addEventListener('timeupdate', function onTU(){
+      tile.classList.add('revealed');
+      v.removeEventListener('timeupdate', onTU);
     }, {once:true});
   }
   return v;
 }
+
 function startPreview(tile, userGesture=false){
   if (tile.dataset.tiktok || !tile.querySelector('video.clip')) return;
   const v = ensureVideo(tile); if (!v) return;
+
   const ex = tile.closest('.exhibit');
   v.muted = !(ex && ex.dataset.sound === 'on');
+
   const p = v.play();
   if (userGesture && p) p.catch(()=>{});
 }
+
 function stopPreview(tile){
   const v = tile.querySelector('video.clip');
   if (!v) return;
-  // Only pause if we can freeze on a frame; otherwise keep poster visible
+  // Pause only if a frame is present; otherwise leave poster visible
   if (v.readyState >= 2 /* HAVE_CURRENT_DATA */){
+    // Small trick: force a paint of the current frame after pausing
     v.pause();
+    requestAnimationFrame(()=>{ try{ v.currentTime = v.currentTime; }catch(e){} });
   }
 }
 
