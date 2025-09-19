@@ -19,7 +19,7 @@
     background:
       linear-gradient(180deg, rgba(10,14,26,.35), rgba(10,14,26,.70)),
       url('Media/RadioMusicListening.jpg') center/cover no-repeat;
-    opacity:.38; /* was heavier — now brighter overall */
+    opacity:.38;
     filter:saturate(.95);
   }
 
@@ -172,7 +172,7 @@
 
 <script>
 /* ===== Helpers ===== */
-const pathToUrl = p => encodeURI(p).replace(/#/g,'%23');
+const pathToUrl = p => encodeURI(p).replace(/#/g,'%23'); // keep spaces/() and escape #
 const fmt = s => { if (!isFinite(s)) return '0:00'; const m=(s/60)|0, sec=(s%60)|0; return m+':'+(sec<10?'0':'')+sec; };
 const pick = arr => arr[Math.floor(Math.random()*arr.length)];
 
@@ -195,7 +195,7 @@ const onLamp = document.getElementById('onLamp');
 const tpos = document.getElementById('tpos');
 const ttotal = document.getElementById('ttotal');
 
-/* ===== PLAYLIST (kept from your UNCLE2 build) ===== */
+/* ===== PLAYLIST (kept exactly from UNCLE2) ===== */
 const PLAYLIST = [
   { title: "The Greatest Debate Ever", file: "Media/The Greatest Debate Ever.mp3" },
   { title: "Cover of Tool - 7empest 2", file: "Media/Cover of Tool - 7empest 2.mp3" },
@@ -205,71 +205,68 @@ const PLAYLIST = [
   { title: "Home Again", file: "Media/Home Again..mp3" },
   { title: "The X Aspect Symphony Remix", file: "Media/The X Aspect Symphony Remix.mp3" },
   { title: "Fear Inoculum - Hip Beat Remix", file: "Media/Fear Inoculum - Hip Beat Remix.mp3" },
-  { title: "Twelve Years in One Day", file: "Media/Twelve Years in One Day.mp3" },
-  { title: "My Face is My Own", file: "Media/My Face is My Own.mp3" },
-  { title: "If Pigs and Sheep Remix", file: "Media/If Pigs and Sheep Remix.mp3" },
-  { title: "Letters to my Dead Parents", file: "Media/Letters to my Dead Parents.mp3" },
-  { title: "On a School Night", file: "Media/On a School Night.mp3" },
-  { title: "Fate's One Wish", file: "Media/Fate's One Wish.mp3" },
-  { title: "The Y Factor Remix", file: "Media/The Y Factor Remix.mp3" },
-  { title: "The Grudge on Dune", file: "Media/The Grudge on Dune.mp3" },
-  { title: "EYE - Egypt", file: "Media/EYE - Egypt.mp3" },
-  { title: "Kashmir on Mars", file: "Media/Kashmir on Mars.mp3" },
-  { title: "Divesting from Space - an AI tribute to Dream Theater", file: "Media/Divesting from Space - an AI tribute to Dream Theater.mp3" },
-  { title: "Our Waiting For Sleep", file: "Media/Our Waiting For Sleep.mp3" },
-  { title: "Moving Pictures - jazz", file: "Media/Moving Pictures - jazz.mp3" },
+  { title: "Surfacing Tensions", file: "Media/Surfacing Tensions.mp3" },
+  { title: "Cover. The Grudge (v2)", file: "Media/Cover. The Grudge (v2).mp3" },
+  { title: "Trippin like Hell", file: "Media/Trippin like Hell.mp3" },
+  { title: "Another Dogs Cover - Really?", file: "Media/Another Dogs Cover - Really?.mp3" },
+  { title: "Fear Inoculum (Cover) v1", file: "Media/Fear Inoculum (Cover) v1.mp3" },
+  { title: "A Classical Aspect of X", file: "Media/A Classical Aspect of X .mp3" },
+  { title: "TheHumblingRiver = a Cover", file: "Media/TheHumblingRiver = a Cover.mp3" },
+  { title: "Octavarium en Quartet", file: "Media/Octavarium en Quartet.mp3" },
+  { title: "Schism (Cover)v1", file: "Media/Schism (Cover)v1.mp3" },
+  { title: "Leaving You", file: "Media/Leaving You.mp3" },
+  { title: "Cover of Tool - 7empest 1", file: "Media/Cover of Tool - 7empest 1.mp3" },
+  { title: "Shine On (Cover) 5 (Remastered)", file: "Media/Shine On (Cover) 5 (Remastered).mp3" },
+  { title: "A Demo of Poor Tom", file: "Media/A Demo of Poor Tom.mp3" },
+  { title: "Right In Two (Remastered) (Cover)", file: "Media/10 Right In Two (Remastered) (Cover).mp3" },
+  { title: "The Strangest of Days", file: "Media/The Strangest of Days.mp3" },
+  { title: "Labyrinths of Coral Caves", file: "Media/Labyrinths of Coral Caves .mp3" },
+  { title: "As I Am (Instrumental Demo 2003)", file: "Media/As I Am (Instrumental Demo 2003) (cover zz2).mp3" },
+  { title: "A Demo in Time of Dying", file: "Media/A Demo in Time of Dying.mp3" },
+  { title: "More Guitars at Luna Park", file: "Media/More Guitars at Luna Park.mp3" },
+  { title: "TechnoTrance The Pot V2", file: "Media/TechnoTrance The Pot V2.mp3" },
+  { title: "Fear Inoculum - Intro remix", file: "Media/Fear Inoculum - Intro remix.mp3" },
+  { title: "Continuum - an Octavarium Remix and Cover", file: "Media/Continuum - an Octavarium Remix and Cover.mp3" },
+  { title: "Wings For Marie (Part 1) (Techno Trance Remix) v2", file: "Media/Wings For Marie (Part 1) (Techno Trance Remix) v2.mp3" },
+  { title: "The Modern Count of Tuscany (Remastered)", file: "Media/The Modern Count of Tuscany (Remastered).mp3" },
+  { title: "Rosetta must be Stoned", file: "Media/Rosetta must be Stoned.mp3" },
+  { title: "Rain Song Replayed", file: "Media/Rain Song Replayed.mp3" },
+  { title: "Friends in FrontierLand", file: "Media/Friends in FrontierLand.mp3" },
+  { title: "Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)", file: "Media/Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)).mp3" },
+  { title: "The Recovering Barstool Warrior", file: "Media/The Recovering Barstool Warrior.mp3" },
+  { title: "Covering my Eyes", file: "Media/Covering my Eyes.mp3" },
+  { title: "All that glitters is gold", file: "Media/All that glitters is gold.mp3" },
+  { title: "Vicarious (Remix)", file: "Media/01 Vicarious (Remix) 1.mp3" },
+  { title: "Bolotone Desert Trip Edition", file: "Media/Bolotone Desert Trip Edition.mp3" },
+  { title: "All that glitters is gold Acoustic Blend", file: "Media/All that glitters is gold Acoustic Blend.mp3" },
+  { title: "Cover Of Wings For Marie (Part 1) v1", file: "Media/Cover Of Wings For Marie (Part 1) v1.mp3" },
+  { title: "A Madman Plays Seville", file: "Media/A Madman Plays Seville.mp3" },
+  { title: "When Pigs and Sheep Mate IV", file: "Media/When Pigs and Sheep Mate IV..mp3" },
+  { title: "Bolotone Metal Edition (Remastered)", file: "Media/Bolotone Metal Edition (Remastered).mp3" },
+  { title: "Right In Two (Remastered) (Cover) (alt)", file: "Media/10 Right In Two (Remastered) (Cover) (1).mp3" },
+  { title: "The Spirit Carries On (Live Rehearsal 2) (Remix)", file: "Media/The Spirit Carries On (Live Rehearsal 2) (Remix).mp3" },
+  { title: "Hiding the Pot", file: "Media/Hiding the Pot (1).mp3" },
+  { title: "A Demo in Time of Dying (dup)", file: "Media/A Demo in Time of Dying.mp3" },
+  { title: "Lateralus Rising", file: "Media/Lateralus Rising.mp3" },
   { title: "New Beginnings", file: "Media/New Beginnings.mp3" },
-  { title: "I like this One", file: "Media/I like this One.mp3" },
-  { title: "After All", file: "Media/After All.mp3" },
-  { title: "Storms Over Europe", file: "Media/Storms Over Europe.mp3" },
-  { title: "The Digital Mind", file: "Media/The Digital Mind.mp3" },
-  { title: "C U in the Sky", file: "Media/C U in the Sky.mp3" },
-  { title: "Reflections in a Nightclub", file: "Media/Reflections in a Nightclub.mp3" },
-  { title: "Kashmir on Mars (alt)", file: "Media/Kashmir on Mars (alt).mp3" },
-  { title: "Continuum - An Octavarium Remix and Cover", file: "Media/Continuum - An Octavarium Remix and Cover.mp3" },
-  { title: "Degrees in Tribes", file: "Media/Degrees in Tribes.mp3" },
-  { title: "The Last Job You'll Ever Hate", file: "Media/The Last Job You'll Ever Hate.mp3" },
-  { title: "Voices in the Hall", file: "Media/Voices in the Hall.mp3" },
-  { title: "Water in the Desert", file: "Media/Water in the Desert.mp3" },
-  { title: "If Pigs and Sheep Remix (dup)", file: "Media/If Pigs and Sheep Remix.mp3" },
-  { title: "Ballad of a Bleak Future (dup)", file: "Media/Ballad of a Bleak Future.mp3" },
-  { title: "On a School Night (dup)", file: "Media/On a School Night.mp3" },
-  { title: "Storms Over Europe (dup)", file: "Media/Storms Over Europe.mp3" },
-  { title: "The Grudge on Dune (dup)", file: "Media/The Grudge on Dune.mp3" },
-  { title: "Divesting from Space (dup)", file: "Media/Divesting from Space - an AI tribute to Dream Theater.mp3" },
-  { title: "Continuum (dup)", file: "Media/Continuum - An Octavarium Remix and Cover.mp3" },
-  { title: "The Greatest Debate Ever (dup)", file: "Media/The Greatest Debate Ever.mp3" },
-  { title: "Home Again (dup)", file: "Media/Home Again..mp3" },
-  { title: "The X Aspect Symphony Remix (dup)", file: "Media/The X Aspect Symphony Remix.mp3" },
-  { title: "Fear Inoculum - Hip Beat Remix (dup)", file: "Media/Fear Inoculum - Hip Beat Remix.mp3" },
-  { title: "Twelve Years in One Day (dup)", file: "Media/Twelve Years in One Day.mp3" },
-  { title: "My Face is My Own (dup)", file: "Media/My Face is My Own.mp3" },
-  { title: "Letters to my Dead Parents (dup)", file: "Media/Letters to my Dead Parents.mp3" },
-  { title: "Fate's One Wish (dup)", file: "Media/Fate's One Wish.mp3" },
-  { title: "The Y Factor Remix (dup)", file: "Media/The Y Factor Remix.mp3" },
-  { title: "EYE - Egypt (dup)", file: "Media/EYE - Egypt.mp3" },
-  { title: "Kashmir on Mars (dup2)", file: "Media/Kashmir on Mars.mp3" },
-  { title: "Our Waiting For Sleep (dup)", file: "Media/Our Waiting For Sleep.mp3" },
-  { title: "Moving Pictures - jazz (dup)", file: "Media/Moving Pictures - jazz.mp3" },
-  { title: "New Beginnings (dup)", file: "Media/New Beginnings.mp3" },
-  { title: "I like this One (dup)", file: "Media/I like this One.mp3" },
-  { title: "After All (dup)", file: "Media/After All.mp3" },
-  { title: "The Digital Mind (dup)", file: "Media/The Digital Mind.mp3" },
-  { title: "C U in the Sky (dup)", file: "Media/C U in the Sky.mp3" },
-  { title: "Reflections in a Nightclub (dup)", file: "Media/Reflections in a Nightclub.mp3" },
-  { title: "Degrees in Tribes (dup)", file: "Media/Degrees in Tribes.mp3" },
-  { title: "The Last Job You'll Ever Hate (dup)", file: "Media/The Last Job You'll Ever Hate.mp3" },
-  { title: "Voices in the Hall (dup)", file: "Media/Voices in the Hall.mp3" },
-  { title: "Water in the Desert (dup)", file: "Media/Water in the Desert.mp3" },
-  { title: "Aisha — you are listening…", file: "Media/AishaPatelYouarelisteningtoK-Z-A-K.wav" },
-  { title: "Journey D — tuned into KZAK", file: "Media/en-US-Journey-DYouaretunedintoK-Z-A-Kb.mp3" },
-  { title: "News N — this is KZAK", file: "Media/en-US-News-NThisiskZ-A-Kbringingyou.mp3" },
-  { title: "Journey D — where the f…", file: "Media/en-US-Journey-D-K_ZACH___where_the_f.wav" },
-  { title: "Amy — you are listening…", file: "Media/AmyYouarelisteningtoK-ZACHt.mp3" }
+  { title: "Cover of Wings For Marie (Part 1) v2", file: "Media/Cover of Wings For Marie (Part 1) v2.mp3" },
+  { title: "Pigs three different ones Solo (Cover)", file: "Media/Pigs three different ones Solo (Cover)2b.mp3" },
+  { title: "Barn Jam Friends", file: "Media/Barn Jam Friends.mp3" },
+  { title: "4 Degrees (Cover)v1", file: "Media/08 4 Degrees (Cover)v1.mp3" },
+  { title: "The Madman Plays in Cancun", file: "Media/The Madman Plays in Cancun.mp3" },
+  { title: "The Embracing Circle - take 3", file: "Media/“The Embracing Circle” - cover take 3.mp3" },
+  { title: "Breathe (Pink Floyd cover)", file: "Media/Breathe - (an AI pink floyd cover).mp3" },
+  { title: "4 Degrees (Cover)2", file: "Media/08 4 Degrees (Cover)2.mp3" },
+  { title: "Any Colour You Like (Live 1972)", file: "Media/14 - Any Colour You Like (Live 1972).mp3" },
+  { title: "Another Brick In The Wall p2 2 (Cover ZZ)", file: "Media/06 Another Brick In The Wall p2 2 (Cover ZZ) v2.mp3" },
+  { title: "Goodbye Blue Sky (cover zz)", file: "Media/07 Goodbye Blue Sky (cover zz) 2.mp3" },
+  { title: "The Canelo-Crawford Event Round 1", file: "Media/The Canelo-Crawford Event Round 1.mp3" },
+  { title: "Orchestra for Wings For Marie (Cover)", file: "Media/Orchestra for Wings For Marie (Cover) take 7.mp3" },
+  { title: "No Quarter (Remastered) (Cover ZZ)", file: "Media/Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ).mp3" }
 ];
 ttotal.textContent = PLAYLIST.length;
 
-/* ===== Station IDs (kept) ===== */
+/* ===== Station ID / Jingle breaks (separate folder!) ===== */
 const BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
   "MediaBreaks/AmyYouarelisteningtoK-ZACHt.mp3",
@@ -284,10 +281,10 @@ let idx = 0;
 let userScrubbing = false;
 let isBreak = false;
 let tracksSinceBreak = 0;
-let isLoading = false;       // guard async races
-let isShuffling = false;     // prevent re-entrancy
+let isLoading = false;       // guard async races (load/shuffle/ended)
+let isShuffling = false;     // avoid re-entrancy
 
-/* Separate audio element for breaks */
+/* Separate audio element just for breaks */
 const breakAudio = new Audio();
 breakAudio.crossOrigin = 'anonymous';
 
@@ -295,8 +292,8 @@ breakAudio.crossOrigin = 'anonymous';
 function setOnAir(on){ onAir.classList.toggle('active', on); }
 function pickBreakNow(){
   if (!BREAKS_CFG.enabled || audio.loop || BREAKS.length===0) return false;
-  if (BREAKS_CFG.mode==="betweenAll") return true;
   if (BREAKS_CFG.mode==="everyN"){ tracksSinceBreak++; if (tracksSinceBreak>=BREAKS_CFG.n){ tracksSinceBreak=0; return true; } return false; }
+  if (BREAKS_CFG.mode==="betweenAll") return true;
   if (BREAKS_CFG.mode==="random") return Math.random() < BREAKS_CFG.prob;
   return false;
 }
@@ -339,6 +336,7 @@ function load(i, autoplay=false){
   if (audio.readyState >= 2) start(); else audio.onloadedmetadata = start;
 }
 function play(){
+  // If a break is (still) playing, skip it and continue program audio
   if (isBreak) { cancelBreakIfAny(); next(); return; }
   audio.play().catch(()=>{});
 }
@@ -350,12 +348,11 @@ function prev(){ load(idx-1, /*autoplay=*/true); }
 function cancelBreakIfAny(){
   if (isBreak){
     try { breakAudio.pause(); } catch {}
-    isBreak = false;
+    isBreak=false;
   }
 }
-
 async function playBreakThenNext(){
-  if (audio.loop) { next(); return; }
+  if (audio.loop) { next(); return; } // skip breaks under Loop
   isBreak = true;
   const prevTitle=title.textContent, prevMeta=meta.textContent;
 
@@ -364,65 +361,38 @@ async function playBreakThenNext(){
   const file = pick(BREAKS);
   title.textContent = "Station ID • KZAK";
   meta.textContent = file.replace(/^MediaBreaks\//,'');
-
   breakAudio.src = pathToUrl(file);
 
   const goNext = () => { title.textContent=prevTitle; meta.textContent=prevMeta; isBreak=false; next(); };
   breakAudio.onerror = goNext;
   breakAudio.onended = goNext;
 
-  try{
-    await breakAudio.play();
-  }catch{
-    goNext();
-  }
+  try{ await breakAudio.play(); }catch{ goNext(); }
 }
 
 /* ===== Controls ===== */
-btnPlay.onclick = ()=>{
-  if (isBreak){ cancelBreakIfAny(); next(); return; }
-  const el=currentMedia();
-  el.paused ? el.play().catch(()=>{}) : el.pause();
-};
+btnPlay.onclick = ()=>{ if (isBreak){ cancelBreakIfAny(); next(); return; } const el=currentMedia(); el.paused?el.play().catch(()=>{}):el.pause(); };
 btnPrev.onclick = ()=>{ cancelBreakIfAny(); prev(); };
 btnNext.onclick = ()=>{ cancelBreakIfAny(); next(); };
 btnLoop.onclick = ()=>{ audio.loop=!audio.loop; btnLoop.classList.toggle('onair', audio.loop); };
 
-// Safe shuffle that keeps the current track pinned and avoids mid-load races
+// Safe shuffle: pin current track; avoid mid-load races; don't interrupt break
 btnShuffle.onclick = ()=>{
   if (isShuffling || isLoading) return;
   isShuffling = true;
-
   const cur = PLAYLIST[idx];
-  // Fisher–Yates shuffle
-  for(let i=PLAYLIST.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [PLAYLIST[i],PLAYLIST[j]]=[PLAYLIST[j],PLAYLIST[i]];
-  }
-  // Ensure current track stays active in-place
+  for(let i=PLAYLIST.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [PLAYLIST[i],PLAYLIST[j]]=[PLAYLIST[j],PLAYLIST[i]]; }
   const newIdx = PLAYLIST.findIndex(t => t === cur);
-  if (newIdx !== -1){
-    [PLAYLIST[newIdx], PLAYLIST[idx]] = [PLAYLIST[idx], PLAYLIST[newIdx]];
-  }
+  if (newIdx !== -1){ [PLAYLIST[newIdx], PLAYLIST[idx]] = [PLAYLIST[idx], PLAYLIST[newIdx]]; }
   renderList(); markActive();
-
-  // If a break is playing, don't touch playback; otherwise continue seamlessly
   isShuffling = false;
 };
 
-btnMute.onclick = ()=>{
-  const m=!currentMedia().muted;
-  audio.muted=m; breakAudio.muted=m;
-  btnMute.classList.toggle('onair', m);
-};
+btnMute.onclick = ()=>{ const m=!currentMedia().muted; audio.muted=m; breakAudio.muted=m; btnMute.classList.toggle('onair', m); };
 vol.oninput = e => { audio.volume=+e.target.value; breakAudio.volume=+e.target.value; };
 
 seek.oninput = ()=>{ userScrubbing=true; };
-seek.onchange = e => {
-  if(!isFinite(audio.duration)) { userScrubbing=false; return; }
-  audio.currentTime = audio.duration*(+e.target.value/100);
-  userScrubbing=false;
-};
+seek.onchange = e => { if(!isFinite(audio.duration)) { userScrubbing=false; return; } audio.currentTime = audio.duration*(+e.target.value/100); userScrubbing=false; };
 
 btnShare.onclick = async ()=>{
   const tr = PLAYLIST[idx];
@@ -445,15 +415,9 @@ audio.addEventListener('ended', ()=>{
   meta.textContent='Finished';
   if (pickBreakNow()) playBreakThenNext(); else next();
 });
-audio.addEventListener('timeupdate', ()=>{
-  if(!userScrubbing && isFinite(audio.duration)){
-    seek.value=(audio.currentTime/audio.duration)*100;
-    document.getElementById('elapsed').textContent = fmt(audio.currentTime);
-    document.getElementById('remaining').textContent = '-' + fmt(Math.max(0,(audio.duration - audio.currentTime)));
-  }
-});
+audio.addEventListener('timeupdate', ()=>{ if(!userScrubbing && isFinite(audio.duration)){ seek.value=(audio.currentTime/audio.duration)*100; document.getElementById('elapsed').textContent = fmt(audio.currentTime); document.getElementById('remaining').textContent = '-' + fmt(Math.max(0,(audio.duration - audio.currentTime))); } });
 
-/* ===== Break events (mirror lamp) ===== */
+/* Reflect ON AIR during breaks too */
 breakAudio.addEventListener('play', ()=> setOnAir(true));
 breakAudio.addEventListener('pause',()=> setOnAir(false));
 
