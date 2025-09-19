@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>KZAK • Frasier-Style Free Radio</title>
+<title>KZAK • Frasier-Style Free Radio without the talking</title>
 <style>
   :root{
     --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
@@ -12,21 +12,38 @@
   *{box-sizing:border-box}
   html,body{height:100%}
   body{margin:0;background:#0a0e1a;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-  .bg{position:fixed;inset:0;pointer-events:none;opacity:.28;filter:saturate(.9);
-      background:
-        linear-gradient(180deg,rgba(10,14,26,.65),rgba(10,14,26,.92)),
-        url('Media/RadioMusicListening.jpg') center/cover no-repeat;}
+
+  /* Lighter overlay so the background image pops more */
+  .bg{
+    position:fixed; inset:0; pointer-events:none;
+    background:
+      linear-gradient(180deg, rgba(10,14,26,.35), rgba(10,14,26,.70)),
+      url('Media/RadioMusicListening.jpg') center/cover no-repeat;
+    opacity:.38; /* was ~.28 with heavier gradient — now brighter overall */
+    filter:saturate(.95);
+  }
+
   .wrap{position:relative;max-width:1200px;margin:0 auto;padding:22px 18px 80px}
 
   header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .header-logo{height:48px;border-radius:6px}
-  h1{font-size:clamp(20px,3.3vw,32px);margin:0;line-height:1.15}
+  .header-logo{height:52px;border-radius:8px}
+  h1{font-size:clamp(22px,3.4vw,36px);margin:0;line-height:1.15}
   .return{margin-left:auto;text-decoration:none}
-  .pill{background:#0f1628;border:1px solid var(--line);padding:10px 16px;border-radius:999px;font-size:14px;letter-spacing:.06em;text-transform:uppercase}
-  .onair{display:flex;align-items:center;gap:10px;font-weight:600}
-  .dot{width:14px;height:14px;border-radius:50%;background:#555;box-shadow:0 0 4px #000 inset;transition:all .3s}
 
-  .grid{display:grid;grid-template-columns:1fr min(440px,42%);gap:18px}
+  /* Restored ON AIR pill – bigger, highly visible, exact on/off */
+  .onair{
+    display:inline-flex; align-items:center; gap:10px;
+    background:#101a2d; border:1px solid var(--line);
+    padding:10px 16px; border-radius:999px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.08em; font-size:14px;
+  }
+  .lamp{
+    width:14px; height:14px; border-radius:50%;
+    background:#444; box-shadow:0 0 4px #000 inset; transition:all .25s;
+  }
+  .onair.active .lamp{ background:#ff3b30; box-shadow:0 0 10px #ff3b30, 0 0 2px #ff3b30 inset; }
+
+  .grid{display:grid;grid-template-columns:1fr min(460px,44%);gap:18px}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
   .controls{padding:16px}
   .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -61,74 +78,182 @@
   <header>
     <img class="header-logo" src="Media/frasier.png" alt="Frasier badge" />
     <h1>KZAK • Frasier-Style Free Radio without the talking</h1>
-    <a class="return pill" href="../index.html" aria-label="Return to Lobby">← LOBBY</a>
-    <span id="onAir" class="pill onair">ON AIR <span class="dot" id="onAirDot"></span></span>
+    <a class="return onair" href="../index.html" aria-label="Return to Lobby">← Lobby</a>
+    <span id="onAir" class="onair" aria-live="polite">ON AIR <span class="lamp" id="onLamp"></span></span>
   </header>
 
   <section class="grid">
-    <div class="panel controls">
+    <!-- Transport & timeline -->
+    <div class="panel controls" role="region" aria-label="Player controls">
       <div class="row">
-        <button id="btnPrev">⏮︎ Prev</button>
-        <button id="btnPlay">▶︎ Start Station</button>
-        <button id="btnNext">⏭︎ Next</button>
-        <button id="btnLoop">⟲ Loop</button>
-        <button id="btnShuffle">🔀 Shuffle</button>
-        <button id="btnMute">🔇 Mute</button>
-        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9"/>
+        <button id="btnPrev" aria-label="Previous track">⏮︎ Prev</button>
+        <button id="btnPlay" aria-label="Play">▶︎ Start Station</button>
+        <button id="btnNext" aria-label="Next track">⏭︎ Next</button>
+        <button id="btnLoop" aria-label="Loop">⟲ Loop</button>
+        <button id="btnShuffle" aria-label="Shuffle">🔀 Shuffle</button>
+        <button id="btnMute" aria-label="Mute">🔇 Mute</button>
+        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" aria-label="Volume"/>
       </div>
 
-      <div id="title" class="title">—</div>
+      <div id="title" class="title" aria-live="polite">—</div>
 
       <div class="scrub">
-        <span id="elapsed">0:00</span>
-        <input id="seek" type="range" min="0" max="100" value="0"/>
-        <span id="remaining">-0:00</span>
+        <span id="elapsed" aria-label="Elapsed">0:00</span>
+        <input id="seek" type="range" min="0" max="100" value="0" aria-label="Seek"/>
+        <span id="remaining" aria-label="Remaining">-0:00</span>
       </div>
 
       <div class="meta">
         <span id="meta">Not playing</span>
-        <span id="counter" class="pill">0 of 0</span>
+        <span id="counter" class="onair">track <span id="tpos">0</span> / <span id="ttotal">0</span></span>
       </div>
 
       <div class="row" style="margin-top:10px">
-        <button id="btnShare">Share</button>
+        <button id="btnShare" aria-label="Share current track">Share</button>
       </div>
 
       <audio id="audio" preload="metadata" crossorigin="anonymous"></audio>
     </div>
 
-    <aside class="panel playlist">
+    <!-- Playlist -->
+    <aside class="panel playlist" role="region" aria-label="Playlist">
       <h3>Playlist</h3>
-      <div id="list" class="list"></div>
-      <div class="footer">Use headphones • Filenames are case-sensitive • Share copies a deep link</div>
+      <div id="list" class="list" role="listbox" aria-label="Track list"></div>
+      <div class="footer">Use headphones • Filenames are case-sensitive • Share copies a deep link to the current track</div>
     </aside>
   </section>
 
+  <!-- Creators -->
   <section class="creators">
     <div class="panel card">
       <div class="creator">
-        <img class="portrait" src="Media/ZachArt.jpeg" alt="zdjimas" />
-        <div><strong>zdjimas</strong><div class="small">Concept, curation, engineering</div></div>
+        <img class="portrait" src="Media/ZachArt.jpeg" alt="zdjimas portrait" />
+        <div>
+          <strong>zdjimas</strong><div class="small">Concept, curation, engineering</div>
+        </div>
       </div>
     </div>
     <div class="panel card">
       <div class="creator">
-        <img class="portrait" src="Media/CJMURPHY.png" alt="cjmurphy" />
-        <div><strong>cjmurphy</strong><div class="small">Composition, arrangement, sound design</div></div>
+        <img class="portrait" src="Media/CJMURPHY.png" alt="cjmurphy portrait" />
+        <div>
+          <strong>cjmurphy</strong><div class="small">Composition, arrangement, sound design</div>
+        </div>
       </div>
     </div>
   </section>
 </div>
 
 <script>
-/* PLAYLIST — replace with your full 80 entries */
-const PLAYLIST = [
-  { title: "The Grudge (Remastered)", file: "Media/01. The Grudge (Remastered).mp3" },
-  { title: "New Beginnings", file: "Media/New Beginnings.mp3" },
-  { title: "Dogs (Remix)", file: "Media/Dogs (Remix).mp3" }
-];
+/* ===== Helpers ===== */
+const pathToUrl = p => encodeURI(p).replace(/#/g,'%23'); // keep spaces/() and escape #
+const fmt = s => { if (!isFinite(s)) return '0:00'; const m=(s/60)|0, sec=(s%60)|0; return m+':'+(sec<10?'0':'')+sec; };
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
 
-/* BREAKS — exact files from your MediaBreaks folder */
+/* ===== DOM ===== */
+const audio = document.getElementById('audio');
+const btnPrev = document.getElementById('btnPrev');
+const btnPlay = document.getElementById('btnPlay');
+const btnNext = document.getElementById('btnNext');
+const btnLoop = document.getElementById('btnLoop');
+const btnShuffle = document.getElementById('btnShuffle');
+const btnMute = document.getElementById('btnMute');
+const btnShare = document.getElementById('btnShare');
+const vol = document.getElementById('vol');
+const seek = document.getElementById('seek');
+const title = document.getElementById('title');
+const meta = document.getElementById('meta');
+const list = document.getElementById('list');
+const onAir = document.getElementById('onAir');
+const onLamp = document.getElementById('onLamp');
+const tpos = document.getElementById('tpos');
+const ttotal = document.getElementById('ttotal');
+
+/* ===== PLAYLIST (full set with duplicates kept) ===== */
+const PLAYLIST = [
+  { title: "The Greatest Debate Ever", file: "Media/The Greatest Debate Ever.mp3" },
+  { title: "Cover of Tool - 7empest 2", file: "Media/Cover of Tool - 7empest 2.mp3" },
+  { title: "A Spec of a Blue Dot", file: "Media/A Spec of a Blue Dot.mp3" },
+  { title: "Dogs (Remix)", file: "Media/Dogs (Remix).mp3" },
+  { title: "Ballad of a Bleak Future", file: "Media/Ballad of a Bleak Future.mp3" },
+  { title: "Home Again", file: "Media/Home Again..mp3" },
+  { title: "The X Aspect Symphony Remix", file: "Media/The X Aspect Symphony Remix.mp3" },
+  { title: "Fear Inoculum - Hip Beat Remix", file: "Media/Fear Inoculum - Hip Beat Remix.mp3" },
+  { title: "Surfacing Tensions", file: "Media/Surfacing Tensions.mp3" },
+  { title: "Cover. The Grudge (v2)", file: "Media/Cover. The Grudge (v2).mp3" },
+  { title: "Trippin like Hell", file: "Media/Trippin like Hell.mp3" },
+  { title: "Another Dogs Cover - Really?", file: "Media/Another Dogs Cover - Really?.mp3" },
+  { title: "Fear Inoculum (Cover) v1", file: "Media/Fear Inoculum (Cover) v1.mp3" },
+  { title: "A Classical Aspect of X", file: "Media/A Classical Aspect of X .mp3" },
+  { title: "TheHumblingRiver = a Cover", file: "Media/TheHumblingRiver = a Cover.mp3" },
+  { title: "Octavarium en Quartet", file: "Media/Octavarium en Quartet.mp3" },
+  { title: "Schism (Cover)v1", file: "Media/Schism (Cover)v1.mp3" },
+  { title: "Leaving You", file: "Media/Leaving You.mp3" },
+  { title: "Cover of Tool - 7empest 1", file: "Media/Cover of Tool - 7empest 1.mp3" },
+  { title: "Shine On (Cover) 5 (Remastered)", file: "Media/Shine On (Cover) 5 (Remastered).mp3" },
+  { title: "A Demo of Poor Tom", file: "Media/A Demo of Poor Tom.mp3" },
+  { title: "Right In Two (Remastered) (Cover)", file: "Media/10 Right In Two (Remastered) (Cover).mp3" },
+  { title: "The Strangest of Days", file: "Media/The Strangest of Days.mp3" },
+  { title: "Labyrinths of Coral Caves", file: "Media/Labyrinths of Coral Caves .mp3" },
+  { title: "As I Am (Instrumental Demo 2003)", file: "Media/As I Am (Instrumental Demo 2003) (cover zz2).mp3" },
+  { title: "A Demo in Time of Dying", file: "Media/A Demo in Time of Dying.mp3" },
+  { title: "More Guitars at Luna Park", file: "Media/More Guitars at Luna Park.mp3" },
+  { title: "TechnoTrance The Pot V2", file: "Media/TechnoTrance The Pot V2.mp3" },
+  { title: "Fear Inoculum - Intro remix", file: "Media/Fear Inoculum - Intro remix.mp3" },
+  { title: "Continuum - an Octavarium Remix and Cover", file: "Media/Continuum - an Octavarium Remix and Cover.mp3" },
+  { title: "Wings For Marie (Part 1) (Techno Trance Remix) v2", file: "Media/Wings For Marie (Part 1) (Techno Trance Remix) v2.mp3" },
+  { title: "The Modern Count of Tuscany (Remastered)", file: "Media/The Modern Count of Tuscany (Remastered).mp3" },
+  { title: "Rosetta must be Stoned", file: "Media/Rosetta must be Stoned.mp3" },
+  { title: "Rain Song Replayed", file: "Media/Rain Song Replayed.mp3" },
+  { title: "Friends in FrontierLand", file: "Media/Friends in FrontierLand.mp3" },
+  { title: "Shine On You Crazy Diamond - Lap steel guitar Edition", file: "Media/Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)).mp3" },
+  { title: "The Recovering Barstool Warrior", file: "Media/The Recovering Barstool Warrior.mp3" },
+  { title: "Covering my Eyes", file: "Media/Covering my Eyes.mp3" },
+  { title: "All that glitters is gold", file: "Media/All that glitters is gold.mp3" },
+  { title: "Vicarious (Remix)", file: "Media/01 Vicarious (Remix) 1.mp3" },
+  { title: "Bolotone Desert Trip Edition", file: "Media/Bolotone Desert Trip Edition.mp3" },
+  { title: "All that glitters is gold Acoustic Blend", file: "Media/All that glitters is gold Acoustic Blend.mp3" },
+  { title: "Cover Of Wings For Marie (Part 1) v1", file: "Media/Cover Of Wings For Marie (Part 1) v1.mp3" },
+  { title: "A Madman Plays Seville", file: "Media/A Madman Plays Seville.mp3" },
+  { title: "When Pigs and Sheep Mate IV", file: "Media/When Pigs and Sheep Mate IV..mp3" },
+  { title: "Bolotone Metal Edition (Remastered)", file: "Media/Bolotone Metal Edition (Remastered).mp3" },
+  { title: "Right In Two (Remastered) (Cover) (alt)", file: "Media/10 Right In Two (Remastered) (Cover) (1).mp3" },
+  { title: "Rosetta Stoned (Cover) take 1", file: "Media/08 Rosetta Stoned (Cover) take 1.mp3" },
+  { title: "The Grudge (Remastered)", file: "Media/01. The Grudge (Remastered).mp3" },
+  { title: "All that glitters is gold remains", file: "Media/All that glitters is gold remains.mp3" },
+  { title: "S2N (Dream Theater Remix)", file: "Media/S2N an AI Cover of Dream Theater (Remix).mp3" },
+  { title: "Dogs (Cover) X2 tripper", file: "Media/03. Dogs (Cover) X2 tripper.mp3" },
+  { title: "Reflection (Cover) V2", file: "Media/11. Reflection (Cover) V2.mp3" },
+  { title: "Degrees (Cover)3 (Spanish guitar quartet)", file: "Media/Degrees (Cover)3 (Spanish guitar quartet).mp3" },
+  { title: "Pushit (Cover) v2", file: "Media/11. Pushit (Cover) v2.mp3" },
+  { title: "The Canelo-Crawford Event", file: "Media/The Canelo-Crawford Event.mp3" },
+  { title: "TechnoTrance The Pot V1", file: "Media/TechnoTrance The Pot V1.mp3" },
+  { title: "Beyond My Understanding", file: "Media/Beyond My Understanding.mp3" },
+  { title: "Degrees (Cover)3 (alt copy)", file: "Media/_Degrees (Cover)3 (Spanish guitar quartet ) (1).mp3" },
+  { title: "Bolotone's Intro", file: "Media/Bolotone's Intro.mp3" },
+  { title: "The Spirit Carries On (Live Rehearsal 2) (Remix)", file: "Media/The Spirit Carries On (Live Rehearsal 2) (Remix).mp3" },
+  { title: "Hiding the Pot", file: "Media/Hiding the Pot (1).mp3" },
+  { title: "A Demo in Time of Dying (dup)", file: "Media/A Demo in Time of Dying.mp3" },
+  { title: "Lateralus Rising", file: "Media/Lateralus Rising.mp3" },
+  { title: "New Beginnings", file: "Media/New Beginnings.mp3" },
+  { title: "Cover of Wings For Marie (Part 1) v2", file: "Media/Cover of Wings For Marie (Part 1) v2.mp3" },
+  { title: "Pigs three different ones Solo (Cover)", file: "Media/Pigs three different ones Solo (Cover)2b.mp3" },
+  { title: "Barn Jam Friends", file: "Media/Barn Jam Friends.mp3" },
+  { title: "4 Degrees (Cover)v1", file: "Media/08 4 Degrees (Cover)v1.mp3" },
+  { title: "The Madman Plays in Cancun", file: "Media/The Madman Plays in Cancun.mp3" },
+  { title: "The Embracing Circle - take 3", file: "Media/“The Embracing Circle” - cover take 3.mp3" },
+  { title: "Breathe (Pink Floyd cover)", file: "Media/Breathe - (an AI pink floyd cover).mp3" },
+  { title: "4 Degrees (Cover)2", file: "Media/08 4 Degrees (Cover)2.mp3" },
+  { title: "Any Colour You Like (Live 1972)", file: "Media/14 - Any Colour You Like (Live 1972).mp3" },
+  { title: "Another Brick In The Wall p2 2 (Cover ZZ)", file: "Media/06 Another Brick In The Wall p2 2 (Cover ZZ) v2.mp3" },
+  { title: "Goodbye Blue Sky (cover zz)", file: "Media/07 Goodbye Blue Sky (cover zz) 2.mp3" },
+  { title: "The Canelo-Crawford Event Round 1", file: "Media/The Canelo-Crawford Event Round 1.mp3" },
+  { title: "Orchestra for Wings For Marie (Cover)", file: "Media/Orchestra for Wings For Marie (Cover) take 7.mp3" },
+  { title: "No Quarter (Remastered) (Cover ZZ)", file: "Media/Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ).mp3" }
+];
+ttotal.textContent = PLAYLIST.length;
+
+/* ===== Station ID / Jingle breaks ===== */
 const BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
   "MediaBreaks/AmyYouarelisteningtoK-ZACHt.mp3",
@@ -136,32 +261,25 @@ const BREAKS = [
   "MediaBreaks/en-US-Journey-DYouaretunedintoK-Z-A-Kb.mp3",
   "MediaBreaks/en-US-News-NThisiskZ-A-Kbringingyou.mp3"
 ];
-
 const BREAKS_CFG = { enabled:true, mode:"everyN", n:3, prob:0.33 };
 
-const pathToUrl = p => encodeURI(p).replace(/#/g,'%23');
-const fmt = s => { if (!isFinite(s)) return '0:00'; const m=(s/60)|0, sec=(s%60)|0; return m+':'+(sec<10?'0':'')+sec; };
-const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+/* ===== State ===== */
+let idx = 0, userScrubbing = false;
+const breakAudio = new Audio();
+let isBreak = false, tracksSinceBreak = 0;
 
-const audio=document.getElementById('audio');
-const btnPrev=btnPlay=btnNext=btnLoop=btnShuffle=btnMute=btnShare=null;
-document.querySelectorAll('button').forEach(b=>{window[b.id]=b;});
-const vol=document.getElementById('vol'), seek=document.getElementById('seek');
-const title=document.getElementById('title'), meta=document.getElementById('meta');
-const list=document.getElementById('list'), onAirDot=document.getElementById('onAirDot'), counter=document.getElementById('counter');
-
-let idx=0,userScrubbing=false;
-const breakAudio=new Audio(); let isBreak=false,tracksSinceBreak=0;
-
-function shouldInsertBreak(){
-  if(!BREAKS_CFG.enabled||audio.loop||BREAKS.length===0)return false;
-  if(BREAKS_CFG.mode==="betweenAll")return true;
-  if(BREAKS_CFG.mode==="everyN"){tracksSinceBreak++;if(tracksSinceBreak>=BREAKS_CFG.n){tracksSinceBreak=0;return true;}return false;}
-  if(BREAKS_CFG.mode==="random")return Math.random()<BREAKS_CFG.prob;
+/* ===== UI helpers ===== */
+function setOnAir(on){ onAir.classList.toggle('active', on); }
+function pickBreakNow(){
+  if (!BREAKS_CFG.enabled || audio.loop || BREAKS.length===0) return false;
+  if (BREAKS_CFG.mode==="betweenAll") return true;
+  if (BREAKS_CFG.mode==="everyN"){ tracksSinceBreak++; if (tracksSinceBreak>=BREAKS_CFG.n){ tracksSinceBreak=0; return true; } return false; }
+  if (BREAKS_CFG.mode==="random") return Math.random() < BREAKS_CFG.prob;
   return false;
 }
-function currentMediaEl(){return isBreak?breakAudio:audio;}
+function currentMedia(){ return isBreak ? breakAudio : audio; }
 
+/* ===== Playlist UI ===== */
 function renderList(){
   list.innerHTML='';
   PLAYLIST.forEach((t,i)=>{
@@ -169,61 +287,90 @@ function renderList(){
     row.className='track';
     row.innerHTML=`<span class="idx">${String(i+1).padStart(2,'0')}</span>
                    <div><div>${t.title}</div><div class="small">${t.file.replace(/^Media\//,'')}</div></div>`;
-    row.onclick=()=>{if(isBreak){breakAudio.pause();isBreak=false;}load(i);play();};
+    row.onclick=()=>{ if(isBreak){breakAudio.pause();isBreak=false;} load(i); play(); };
     list.appendChild(row);
   });
 }
-function updateActive(){[...list.children].forEach((el,i)=>el.querySelector('.idx').classList.toggle('now',i===idx));}
+function markActive(){
+  [...list.children].forEach((el,i)=>el.querySelector('.idx').classList.toggle('now', i===idx));
+}
 
+/* ===== Core playback ===== */
 function load(i){
-  idx=(i+PLAYLIST.length)%PLAYLIST.length;
-  const tr=PLAYLIST[idx];
-  audio.src=pathToUrl(tr.file);
-  title.textContent=tr.title;
-  counter.textContent=`${idx+1} of ${PLAYLIST.length}`;
-  updateActive();
-  const url=new URL(location);url.searchParams.set('t',idx);history.replaceState({},'',url);
+  idx = (i+PLAYLIST.length)%PLAYLIST.length;
+  const tr = PLAYLIST[idx];
+  audio.src = pathToUrl(tr.file);
+  title.textContent = tr.title;
+  tpos.textContent = idx+1;
+  markActive();
+  const u=new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u);
 }
-function play(){currentMediaEl().play().catch(()=>{});}
-function pause(){currentMediaEl().pause();}
-function next(){load(idx+1);play();}
-function prev(){load(idx-1);play();}
+function play(){ currentMedia().play().catch(()=>{}); }
+function pause(){ currentMedia().pause(); }
+function next(){ load(idx+1); play(); }
+function prev(){ load(idx-1); play(); }
 
+/* ===== Break handling ===== */
 async function playBreakThenNext(){
-  isBreak=true;
-  const prevTitle=title.textContent,prevMeta=meta.textContent;
-  breakAudio.volume=audio.volume;breakAudio.muted=audio.muted;
-  const file=pick(BREAKS);
-  title.textContent="Station ID • KZAK";meta.textContent=file.replace(/^MediaBreaks\//,'');
-  breakAudio.src=pathToUrl(file);
-  try{await breakAudio.play();}catch{}
-  breakAudio.onended=()=>{title.textContent=prevTitle;meta.textContent=prevMeta;isBreak=false;next();};
+  isBreak = true;
+  const prevTitle=title.textContent, prevMeta=meta.textContent;
+  breakAudio.volume = audio.volume; breakAudio.muted = audio.muted;
+  const file = pick(BREAKS);
+  title.textContent = "Station ID • KZAK";
+  meta.textContent = file.replace(/^MediaBreaks\//,'');
+  breakAudio.src = pathToUrl(file);
+  try{ await breakAudio.play(); }catch{}
+  breakAudio.onended = () => { title.textContent=prevTitle; meta.textContent=prevMeta; isBreak=false; next(); };
 }
 
-/* Controls */
-btnPlay.onclick=()=>{const el=currentMediaEl();el.paused?el.play():el.pause();};
-btnPrev.onclick=()=>{if(isBreak){breakAudio.pause();isBreak=false;}prev();};
-btnNext.onclick=()=>{if(isBreak){breakAudio.pause();isBreak=false;}next();};
-btnLoop.onclick=()=>{audio.loop=!audio.loop;btnLoop.classList.toggle('pill',audio.loop);};
-btnShuffle.onclick=()=>{const cur=PLAYLIST[idx];for(let i=PLAYLIST.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[PLAYLIST[i],PLAYLIST[j]]=[PLAYLIST[j],PLAYLIST[i]];}idx=PLAYLIST.findIndex(t=>t===cur);renderList();updateActive();};
-btnMute.onclick=()=>{const now=!currentMediaEl().muted;audio.muted=now;breakAudio.muted=now;btnMute.classList.toggle('pill',now);};
-vol.oninput=e=>{audio.volume=+e.target.value;breakAudio.volume=+e.target.value;};
-seek.oninput=()=>{userScrubbing=true;};
-seek.onchange=e=>{if(isFinite(audio.duration))audio.currentTime=audio.duration*(+e.target.value/100);userScrubbing=false;};
-btnShare.onclick=async()=>{const tr=PLAYLIST[idx];const url=new URL(location.href);url.searchParams.set('t',idx);const shareData={title:'Listen with me — KZAK',text:tr.title,url:url.toString()};try{if(navigator.share)await navigator.share(shareData);else throw 0;}catch{try{await navigator.clipboard.writeText(url.toString());alert('Link copied!');}catch{location.href=`mailto:?subject=${encodeURIComponent('Listen — '+tr.title)}&body=${encodeURIComponent(url.toString())}`;}}};
+/* ===== Controls ===== */
+btnPlay.onclick = ()=>{ const el=currentMedia(); el.paused?el.play():el.pause(); };
+btnPrev.onclick = ()=>{ if(isBreak){breakAudio.pause();isBreak=false;} prev(); };
+btnNext.onclick = ()=>{ if(isBreak){breakAudio.pause();isBreak=false;} next(); };
+btnLoop.onclick = ()=>{ audio.loop=!audio.loop; btnLoop.classList.toggle('onair', audio.loop); };
+btnShuffle.onclick = ()=>{ const cur=PLAYLIST[idx]; for(let i=PLAYLIST.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [PLAYLIST[i],PLAYLIST[j]]=[PLAYLIST[j],PLAYLIST[i]]; } idx=PLAYLIST.findIndex(t=>t===cur); renderList(); markActive(); };
+btnMute.onclick = ()=>{ const m=!currentMedia().muted; audio.muted=m; breakAudio.muted=m; btnMute.classList.toggle('onair', m); };
+vol.oninput = e => { audio.volume=+e.target.value; breakAudio.volume=+e.target.value; };
 
-/* Events */
-function setOnAir(on){onAirDot.style.background=on?'#f33':'#555';onAirDot.style.boxShadow=on?'0 0 8px #f33':'0 0 4px #000 inset';}
-audio.onplay=()=>{setOnAir(true);btnPlay.textContent='⏸︎ Pause';meta.textContent='Playing';};
-audio.onpause=()=>{setOnAir(false);btnPlay.textContent='▶︎ Start Station';meta.textContent='Paused';};
-audio.onended=()=>{setOnAir(false);meta.textContent='Finished';if(shouldInsertBreak())playBreakThenNext();else next();};
-audio.ontimeupdate=()=>{if(!userScrubbing&&isFinite(audio.duration)){seek.value=(audio.currentTime/audio.duration)*100;elapsed.textContent=fmt(audio.currentTime);remaining.textContent='-'+fmt(Math.max(0,audio.duration-audio.currentTime));}};
+seek.oninput = ()=>{ userScrubbing=true; };
+seek.onchange = e => { if(isFinite(audio.duration)) audio.currentTime = audio.duration*(+e.target.value/100); userScrubbing=false; };
 
-breakAudio.onplay=()=>setOnAir(true);
-breakAudio.onpause=()=>setOnAir(false);
+btnShare.onclick = async ()=>{
+  const tr = PLAYLIST[idx];
+  const url = new URL(location.href); url.searchParams.set('t', idx);
+  const shareData = { title:'Listen with me — KZAK', text: tr.title, url: url.toString() };
+  try{
+    if(navigator.share) await navigator.share(shareData);
+    else throw 0;
+  }catch{
+    try{ await navigator.clipboard.writeText(url.toString()); alert('Link copied to clipboard!'); }
+    catch{ location.href = `mailto:?subject=${encodeURIComponent('Listen — '+tr.title)}&body=${encodeURIComponent(url.toString())}`; }
+  }
+};
 
-/* Init */
-(function(){renderList();const p=parseInt(new URL(location.href).searchParams.get('t'),10);const s=Number.isFinite(p)?Math.max(0,Math.min(PLAYLIST.length-1,p)):0;load(s);})();
+/* ===== Events ===== */
+audio.addEventListener('play', ()=>{ setOnAir(true); btnPlay.textContent='⏸︎ Pause'; meta.textContent='Playing'; });
+audio.addEventListener('pause', ()=>{ setOnAir(false); btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; });
+audio.addEventListener('ended', ()=>{ setOnAir(false); meta.textContent='Finished'; if(pickBreakNow()) playBreakThenNext(); else next(); });
+audio.addEventListener('timeupdate', ()=>{
+  if(!userScrubbing && isFinite(audio.duration)){
+    seek.value=(audio.currentTime/audio.duration)*100;
+    document.getElementById('elapsed').textContent = fmt(audio.currentTime);
+    document.getElementById('remaining').textContent = '-' + fmt(Math.max(0,(audio.duration - audio.currentTime)));
+  }
+});
+
+/* Reflect ON AIR during breaks too */
+breakAudio.addEventListener('play', ()=> setOnAir(true));
+breakAudio.addEventListener('pause',()=> setOnAir(false));
+
+/* ===== Init ===== */
+(function init(){
+  renderList();
+  const p = parseInt(new URL(location.href).searchParams.get('t'),10);
+  const startIdx = Number.isFinite(p) ? Math.max(0, Math.min(PLAYLIST.length-1, p)) : 0;
+  load(startIdx);
+})();
 </script>
 </body>
 </html>
