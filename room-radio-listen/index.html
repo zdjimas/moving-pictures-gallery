@@ -45,8 +45,8 @@
   .panel .body{padding:14px}
   .controls{display:flex;flex-wrap:wrap;gap:8px}
   button, .btn{appearance:none;border:1px solid var(--line);background:#0f1626;color:var(--ink);
-               padding:8px 12px;border-radius:12px;font-weight:600;cursor:pointer}
-  button:hover{border-color:#2b3c5b}
+               padding:8px 12px;border-radius:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  button:hover, .btn:hover{border-color:#2b3c5b}
   .btn.small{padding:6px 10px;font-size:.92rem}
   .btn.ghost{background:transparent}
   .btn.onair{background:#202a40}
@@ -93,6 +93,13 @@
         <div class="sub">Larger controls • ON AIR lamp • Station ID every 3 songs • Share deep links</div>
       </div>
       <div class="spacer"></div>
+
+      <!-- Return to Lobby button (same-tab) -->
+      <a href="../index.html"
+         id="btnLobby"
+         class="btn small ghost"
+         aria-label="Return to Museum Lobby">← Lobby</a>
+
       <div id="onAir" class="onair" aria-live="polite">
         <span id="onLamp" class="lamp"></span>
         <span class="txt">ON&nbsp;AIR</span>
