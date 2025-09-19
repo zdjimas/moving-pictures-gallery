@@ -19,7 +19,7 @@
     background:
       linear-gradient(180deg, rgba(10,14,26,.35), rgba(10,14,26,.70)),
       url('Media/RadioMusicListening.jpg') center/cover no-repeat;
-    opacity:.38; /* was ~.28 with heavier gradient — now brighter overall */
+    opacity:.38; /* was heavier — now brighter overall */
     filter:saturate(.95);
   }
 
@@ -28,121 +28,148 @@
   header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
   .header-logo{height:52px;border-radius:8px}
   h1{font-size:clamp(22px,3.4vw,36px);margin:0;line-height:1.15}
-  .return{margin-left:auto;text-decoration:none}
+  .sub{opacity:.75;font-weight:500}
 
-  /* Restored ON AIR pill – bigger, highly visible, exact on/off */
-  .onair{
-    display:inline-flex; align-items:center; gap:10px;
-    background:#101a2d; border:1px solid var(--line);
-    padding:10px 16px; border-radius:999px; font-weight:700;
-    text-transform:uppercase; letter-spacing:.08em; font-size:14px;
+  /* ON AIR pill */
+  .onair{display:inline-flex;align-items:center;gap:10px;background:#0f1626;border:1px solid var(--line);
+         padding:8px 14px;border-radius:999px;box-shadow:var(--shadow)}
+  .lamp{width:14px;height:14px;border-radius:50%;background:#263142;box-shadow:0 0 0 0 rgba(255,0,0,0);}
+  .onair.active .lamp{background:#ff3647;box-shadow:0 0 18px 3px rgba(255,54,71,.6)}
+  .onair .txt{letter-spacing:.25em;font-weight:700}
+
+  /* Panels */
+  .grid{display:grid;grid-template-columns:1fr 420px;gap:16px}
+  .panel{background:rgba(9,14,22,.66);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;
+         box-shadow:var(--shadow)}
+  .panel .head{display:flex;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .panel .body{padding:14px}
+  .controls{display:flex;flex-wrap:wrap;gap:8px}
+  button, .btn{appearance:none;border:1px solid var(--line);background:#0f1626;color:var(--ink);
+               padding:8px 12px;border-radius:12px;font-weight:600;cursor:pointer}
+  button:hover{border-color:#2b3c5b}
+  .btn.small{padding:6px 10px;font-size:.92rem}
+  .btn.ghost{background:transparent}
+  .btn.onair{background:#202a40}
+  .spacer{flex:1}
+  .kv{display:flex;align-items:center;gap:10px;font-size:.95rem}
+  .kv input[type="range"]{width:160px}
+
+  .trackmeta{margin-top:10px;display:flex;align-items:center;gap:10px}
+  #title{font-weight:700}
+  #meta{opacity:.75}
+  .bar{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .bar .time{min-width:44px;text-align:right;opacity:.8;font-feature-settings:"tnum" 1}
+  .bar input[type="range"]{flex:1}
+
+  /* Playlist */
+  .list{max-height:540px;overflow:auto;padding:10px 8px 12px}
+  .track{display:grid;grid-template-columns:40px 1fr;gap:10px;padding:8px;border-radius:10px;cursor:pointer}
+  .track:hover{background:#101a2e}
+  .idx{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);
+       border-radius:8px;font-weight:700}
+  .idx.now{background:#1a2844;border-color:#34507e;color:#bcd3ff}
+  .small{opacity:.65;font-size:.9rem}
+  .hint{opacity:.7;font-size:.9rem;padding:0 12px 12px}
+
+  /* Footer bios */
+  .bio{display:grid;grid-template-columns:72px 1fr;gap:14px;align-items:center;padding:12px 14px}
+  .bio img{width:72px;height:72px;border-radius:14px;border:1px solid var(--line);object-fit:cover}
+  .bio .name{font-weight:800}
+  .bio .role{opacity:.75}
+
+  @media (max-width:1024px){
+    .grid{grid-template-columns:1fr}
+    .list{max-height:360px}
   }
-  .lamp{
-    width:14px; height:14px; border-radius:50%;
-    background:#444; box-shadow:0 0 4px #000 inset; transition:all .25s;
-  }
-  .onair.active .lamp{ background:#ff3b30; box-shadow:0 0 10px #ff3b30, 0 0 2px #ff3b30 inset; }
-
-  .grid{display:grid;grid-template-columns:1fr min(460px,44%);gap:18px}
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
-  .controls{padding:16px}
-  .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  button{background:#0f1628;border:1px solid var(--line);color:var(--ink);padding:10px 12px;border-radius:12px;cursor:pointer}
-  button:hover{border-color:#3a5279}
-  .title{font-weight:600;margin-top:6px}
-  .scrub{display:flex;align-items:center;gap:10px;margin-top:10px}
-  input[type="range"]{width:100%}
-  .meta{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:6px}
-
-  aside.playlist{display:flex;flex-direction:column}
-  aside h3{margin:14px 16px 8px;font-size:14px;color:var(--muted)}
-  .list{height:430px;overflow:auto;-webkit-overflow-scrolling:touch;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  .track{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer}
-  .track:hover{background:#0f1628}
-  .idx{font-variant-numeric:tabular-nums;color:var(--muted);min-width:32px}
-  .now{color:var(--accent)}
-  .footer{padding:12px 16px;color:var(--muted);font-size:12px}
-
-  .creators{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  .card{padding:16px}
-  .creator{display:flex;gap:12px;align-items:flex-start}
-  .portrait{width:56px;height:56px;border-radius:10px;object-fit:cover;border:1px solid var(--line)}
-  .small{color:var(--muted);font-size:12px}
-
-  @media (max-width:900px){ .grid{grid-template-columns:1fr} .creators{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
-<div class="bg" aria-hidden="true"></div>
-<div class="wrap">
-  <header>
-    <img class="header-logo" src="Media/frasier.png" alt="Frasier badge" />
-    <h1>KZAK • Frasier-Style Free Radio without the talking</h1>
-    <a class="return onair" href="../index.html" aria-label="Return to Lobby">← Lobby</a>
-    <span id="onAir" class="onair" aria-live="polite">ON AIR <span class="lamp" id="onLamp"></span></span>
-  </header>
-
-  <section class="grid">
-    <!-- Transport & timeline -->
-    <div class="panel controls" role="region" aria-label="Player controls">
-      <div class="row">
-        <button id="btnPrev" aria-label="Previous track">⏮︎ Prev</button>
-        <button id="btnPlay" aria-label="Play">▶︎ Start Station</button>
-        <button id="btnNext" aria-label="Next track">⏭︎ Next</button>
-        <button id="btnLoop" aria-label="Loop">⟲ Loop</button>
-        <button id="btnShuffle" aria-label="Shuffle">🔀 Shuffle</button>
-        <button id="btnMute" aria-label="Mute">🔇 Mute</button>
-        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" aria-label="Volume"/>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="wrap">
+    <header>
+      <img class="header-logo" src="Media/CafeNervosa.jpg" alt="">
+      <div>
+        <h1>KZAK • Frasier-Style Free Radio without the talking</h1>
+        <div class="sub">Larger controls • ON AIR lamp • Station ID every 3 songs • Share deep links</div>
       </div>
-
-      <div id="title" class="title" aria-live="polite">—</div>
-
-      <div class="scrub">
-        <span id="elapsed" aria-label="Elapsed">0:00</span>
-        <input id="seek" type="range" min="0" max="100" value="0" aria-label="Seek"/>
-        <span id="remaining" aria-label="Remaining">-0:00</span>
+      <div class="spacer"></div>
+      <div id="onAir" class="onair" aria-live="polite">
+        <span id="onLamp" class="lamp"></span>
+        <span class="txt">ON&nbsp;AIR</span>
       </div>
+    </header>
 
-      <div class="meta">
-        <span id="meta">Not playing</span>
-        <span id="counter" class="onair">track <span id="tpos">0</span> / <span id="ttotal">0</span></span>
-      </div>
+    <div class="grid">
+      <!-- Left: Player -->
+      <section class="panel">
+        <div class="head">
+          <div class="controls">
+            <button id="btnPrev">◀︎ Prev</button>
+            <button id="btnPlay">▶︎ Start Station</button>
+            <button id="btnNext">Next ▶︎</button>
+            <button id="btnLoop" class="btn ghost">⟲ Loop</button>
+            <button id="btnShuffle" class="btn ghost">🔀 Shuffle</button>
+            <button id="btnMute" class="btn ghost">🔇 Mute</button>
+          </div>
+          <div class="spacer"></div>
+          <div class="kv">
+            <span>Vol</span>
+            <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" />
+          </div>
+        </div>
 
-      <div class="row" style="margin-top:10px">
-        <button id="btnShare" aria-label="Share current track">Share</button>
-      </div>
+        <div class="body">
+          <div class="bar">
+            <span class="time" id="elapsed">0:00</span>
+            <input id="seek" type="range" min="0" max="100" value="0" />
+            <span class="time" id="remaining">-0:00</span>
+          </div>
 
-      <audio id="audio" preload="metadata" crossorigin="anonymous"></audio>
+          <div class="trackmeta">
+            <div id="title">Station ID • KZAK</div>
+            <span>—</span>
+            <span id="meta">Not playing</span>
+            <span class="spacer"></span>
+            <span>TRACK <span id="tpos">1</span> / <span id="ttotal">0</span></span>
+          </div>
+
+          <div style="margin-top:12px">
+            <button id="btnShare" class="btn small">Share</button>
+          </div>
+
+          <audio id="audio" crossorigin="anonymous"></audio>
+        </div>
+      </section>
+
+      <!-- Right: Playlist -->
+      <aside class="panel">
+        <div class="head"><strong>Playlist</strong></div>
+        <div id="list" class="list"></div>
+        <div class="hint">
+          Use headphones • Filenames are case-sensitive • Share copies a deep link to the current track
+        </div>
+      </aside>
     </div>
 
-    <!-- Playlist -->
-    <aside class="panel playlist" role="region" aria-label="Playlist">
-      <h3>Playlist</h3>
-      <div id="list" class="list" role="listbox" aria-label="Track list"></div>
-      <div class="footer">Use headphones • Filenames are case-sensitive • Share copies a deep link to the current track</div>
-    </aside>
-  </section>
-
-  <!-- Creators -->
-  <section class="creators">
-    <div class="panel card">
-      <div class="creator">
-        <img class="portrait" src="Media/ZachArt.jpeg" alt="zdjimas portrait" />
+    <!-- Footer bios -->
+    <section class="panel" style="margin-top:16px">
+      <div class="bio">
+        <img src="Media/ZachArt.jpeg" alt="">
         <div>
-          <strong>zdjimas</strong><div class="small">Concept, curation, engineering</div>
+          <div class="name">zdjimas</div>
+          <div class="role">Concept, curation, engineering</div>
         </div>
       </div>
-    </div>
-    <div class="panel card">
-      <div class="creator">
-        <img class="portrait" src="Media/CJMURPHY.png" alt="cjmurphy portrait" />
+      <div class="bio" style="border-top:1px solid var(--line)">
+        <img src="Media/CJMURPHY.png" alt="">
         <div>
-          <strong>cjmurphy</strong><div class="small">Composition, arrangement, sound design</div>
+          <div class="name">cjmurphy</div>
+          <div class="role">Composition, arrangement, sound design</div>
         </div>
       </div>
-    </div>
-  </section>
-</div>
+    </section>
+  </div>
+
 <script>
 /* ===== Helpers ===== */
 const pathToUrl = p => encodeURI(p).replace(/#/g,'%23');
@@ -168,14 +195,81 @@ const onLamp = document.getElementById('onLamp');
 const tpos = document.getElementById('tpos');
 const ttotal = document.getElementById('ttotal');
 
-/* ===== PLAYLIST ===== */
-/* (unchanged — keep your existing PLAYLIST array as-is) */
+/* ===== PLAYLIST (kept from your UNCLE2 build) ===== */
 const PLAYLIST = [
-  /* … your 80 tracks … */
+  { title: "The Greatest Debate Ever", file: "Media/The Greatest Debate Ever.mp3" },
+  { title: "Cover of Tool - 7empest 2", file: "Media/Cover of Tool - 7empest 2.mp3" },
+  { title: "A Spec of a Blue Dot", file: "Media/A Spec of a Blue Dot.mp3" },
+  { title: "Dogs (Remix)", file: "Media/Dogs (Remix).mp3" },
+  { title: "Ballad of a Bleak Future", file: "Media/Ballad of a Bleak Future.mp3" },
+  { title: "Home Again", file: "Media/Home Again..mp3" },
+  { title: "The X Aspect Symphony Remix", file: "Media/The X Aspect Symphony Remix.mp3" },
+  { title: "Fear Inoculum - Hip Beat Remix", file: "Media/Fear Inoculum - Hip Beat Remix.mp3" },
+  { title: "Twelve Years in One Day", file: "Media/Twelve Years in One Day.mp3" },
+  { title: "My Face is My Own", file: "Media/My Face is My Own.mp3" },
+  { title: "If Pigs and Sheep Remix", file: "Media/If Pigs and Sheep Remix.mp3" },
+  { title: "Letters to my Dead Parents", file: "Media/Letters to my Dead Parents.mp3" },
+  { title: "On a School Night", file: "Media/On a School Night.mp3" },
+  { title: "Fate's One Wish", file: "Media/Fate's One Wish.mp3" },
+  { title: "The Y Factor Remix", file: "Media/The Y Factor Remix.mp3" },
+  { title: "The Grudge on Dune", file: "Media/The Grudge on Dune.mp3" },
+  { title: "EYE - Egypt", file: "Media/EYE - Egypt.mp3" },
+  { title: "Kashmir on Mars", file: "Media/Kashmir on Mars.mp3" },
+  { title: "Divesting from Space - an AI tribute to Dream Theater", file: "Media/Divesting from Space - an AI tribute to Dream Theater.mp3" },
+  { title: "Our Waiting For Sleep", file: "Media/Our Waiting For Sleep.mp3" },
+  { title: "Moving Pictures - jazz", file: "Media/Moving Pictures - jazz.mp3" },
+  { title: "New Beginnings", file: "Media/New Beginnings.mp3" },
+  { title: "I like this One", file: "Media/I like this One.mp3" },
+  { title: "After All", file: "Media/After All.mp3" },
+  { title: "Storms Over Europe", file: "Media/Storms Over Europe.mp3" },
+  { title: "The Digital Mind", file: "Media/The Digital Mind.mp3" },
+  { title: "C U in the Sky", file: "Media/C U in the Sky.mp3" },
+  { title: "Reflections in a Nightclub", file: "Media/Reflections in a Nightclub.mp3" },
+  { title: "Kashmir on Mars (alt)", file: "Media/Kashmir on Mars (alt).mp3" },
+  { title: "Continuum - An Octavarium Remix and Cover", file: "Media/Continuum - An Octavarium Remix and Cover.mp3" },
+  { title: "Degrees in Tribes", file: "Media/Degrees in Tribes.mp3" },
+  { title: "The Last Job You'll Ever Hate", file: "Media/The Last Job You'll Ever Hate.mp3" },
+  { title: "Voices in the Hall", file: "Media/Voices in the Hall.mp3" },
+  { title: "Water in the Desert", file: "Media/Water in the Desert.mp3" },
+  { title: "If Pigs and Sheep Remix (dup)", file: "Media/If Pigs and Sheep Remix.mp3" },
+  { title: "Ballad of a Bleak Future (dup)", file: "Media/Ballad of a Bleak Future.mp3" },
+  { title: "On a School Night (dup)", file: "Media/On a School Night.mp3" },
+  { title: "Storms Over Europe (dup)", file: "Media/Storms Over Europe.mp3" },
+  { title: "The Grudge on Dune (dup)", file: "Media/The Grudge on Dune.mp3" },
+  { title: "Divesting from Space (dup)", file: "Media/Divesting from Space - an AI tribute to Dream Theater.mp3" },
+  { title: "Continuum (dup)", file: "Media/Continuum - An Octavarium Remix and Cover.mp3" },
+  { title: "The Greatest Debate Ever (dup)", file: "Media/The Greatest Debate Ever.mp3" },
+  { title: "Home Again (dup)", file: "Media/Home Again..mp3" },
+  { title: "The X Aspect Symphony Remix (dup)", file: "Media/The X Aspect Symphony Remix.mp3" },
+  { title: "Fear Inoculum - Hip Beat Remix (dup)", file: "Media/Fear Inoculum - Hip Beat Remix.mp3" },
+  { title: "Twelve Years in One Day (dup)", file: "Media/Twelve Years in One Day.mp3" },
+  { title: "My Face is My Own (dup)", file: "Media/My Face is My Own.mp3" },
+  { title: "Letters to my Dead Parents (dup)", file: "Media/Letters to my Dead Parents.mp3" },
+  { title: "Fate's One Wish (dup)", file: "Media/Fate's One Wish.mp3" },
+  { title: "The Y Factor Remix (dup)", file: "Media/The Y Factor Remix.mp3" },
+  { title: "EYE - Egypt (dup)", file: "Media/EYE - Egypt.mp3" },
+  { title: "Kashmir on Mars (dup2)", file: "Media/Kashmir on Mars.mp3" },
+  { title: "Our Waiting For Sleep (dup)", file: "Media/Our Waiting For Sleep.mp3" },
+  { title: "Moving Pictures - jazz (dup)", file: "Media/Moving Pictures - jazz.mp3" },
+  { title: "New Beginnings (dup)", file: "Media/New Beginnings.mp3" },
+  { title: "I like this One (dup)", file: "Media/I like this One.mp3" },
+  { title: "After All (dup)", file: "Media/After All.mp3" },
+  { title: "The Digital Mind (dup)", file: "Media/The Digital Mind.mp3" },
+  { title: "C U in the Sky (dup)", file: "Media/C U in the Sky.mp3" },
+  { title: "Reflections in a Nightclub (dup)", file: "Media/Reflections in a Nightclub.mp3" },
+  { title: "Degrees in Tribes (dup)", file: "Media/Degrees in Tribes.mp3" },
+  { title: "The Last Job You'll Ever Hate (dup)", file: "Media/The Last Job You'll Ever Hate.mp3" },
+  { title: "Voices in the Hall (dup)", file: "Media/Voices in the Hall.mp3" },
+  { title: "Water in the Desert (dup)", file: "Media/Water in the Desert.mp3" },
+  { title: "Aisha — you are listening…", file: "Media/AishaPatelYouarelisteningtoK-Z-A-K.wav" },
+  { title: "Journey D — tuned into KZAK", file: "Media/en-US-Journey-DYouaretunedintoK-Z-A-Kb.mp3" },
+  { title: "News N — this is KZAK", file: "Media/en-US-News-NThisiskZ-A-Kbringingyou.mp3" },
+  { title: "Journey D — where the f…", file: "Media/en-US-Journey-D-K_ZACH___where_the_f.wav" },
+  { title: "Amy — you are listening…", file: "Media/AmyYouarelisteningtoK-ZACHt.mp3" }
 ];
 ttotal.textContent = PLAYLIST.length;
 
-/* ===== Station IDs ===== */
+/* ===== Station IDs (kept) ===== */
 const BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
   "MediaBreaks/AmyYouarelisteningtoK-ZACHt.mp3",
@@ -190,10 +284,10 @@ let idx = 0;
 let userScrubbing = false;
 let isBreak = false;
 let tracksSinceBreak = 0;
-let isLoading = false;       // NEW: guard async races
-let isShuffling = false;     // NEW: prevent re-entrancy
+let isLoading = false;       // guard async races
+let isShuffling = false;     // prevent re-entrancy
 
-/* Make break audio more robust */
+/* Separate audio element for breaks */
 const breakAudio = new Audio();
 breakAudio.crossOrigin = 'anonymous';
 
@@ -236,7 +330,7 @@ function load(i, autoplay=false){
   markActive();
   const u=new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u);
 
-  // Ensure scrubber resets during load
+  // reset scrubber
   seek.value = 0;
   document.getElementById('elapsed').textContent = '0:00';
   document.getElementById('remaining').textContent = '-0:00';
@@ -245,9 +339,8 @@ function load(i, autoplay=false){
   if (audio.readyState >= 2) start(); else audio.onloadedmetadata = start;
 }
 function play(){
-  // Always target the main program audio; if a break is playing, skip it.
   if (isBreak) { cancelBreakIfAny(); next(); return; }
-  audio.play().catch(()=>{}); // user gesture already satisfied
+  audio.play().catch(()=>{});
 }
 function pause(){ currentMedia().pause(); }
 function next(){ load(idx+1, /*autoplay=*/true); }
@@ -262,9 +355,7 @@ function cancelBreakIfAny(){
 }
 
 async function playBreakThenNext(){
-  // If user toggled Loop, or we became busy, skip the break
   if (audio.loop) { next(); return; }
-
   isBreak = true;
   const prevTitle=title.textContent, prevMeta=meta.textContent;
 
@@ -276,7 +367,6 @@ async function playBreakThenNext(){
 
   breakAudio.src = pathToUrl(file);
 
-  // Robust fallbacks: if break fails to play, continue to the next track
   const goNext = () => { title.textContent=prevTitle; meta.textContent=prevMeta; isBreak=false; next(); };
   breakAudio.onerror = goNext;
   breakAudio.onended = goNext;
@@ -290,9 +380,7 @@ async function playBreakThenNext(){
 
 /* ===== Controls ===== */
 btnPlay.onclick = ()=>{
-  // If we’re in a break, treat Play/Pause as "skip the break"
   if (isBreak){ cancelBreakIfAny(); next(); return; }
-
   const el=currentMedia();
   el.paused ? el.play().catch(()=>{}) : el.pause();
 };
@@ -306,19 +394,19 @@ btnShuffle.onclick = ()=>{
   isShuffling = true;
 
   const cur = PLAYLIST[idx];
-  // Fisher–Yates
+  // Fisher–Yates shuffle
   for(let i=PLAYLIST.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
     [PLAYLIST[i],PLAYLIST[j]]=[PLAYLIST[j],PLAYLIST[i]];
   }
-  // Pin current track
+  // Ensure current track stays active in-place
   const newIdx = PLAYLIST.findIndex(t => t === cur);
   if (newIdx !== -1){
     [PLAYLIST[newIdx], PLAYLIST[idx]] = [PLAYLIST[idx], PLAYLIST[newIdx]];
   }
   renderList(); markActive();
 
-  // If a break is playing, do nothing else; otherwise keep playback uninterrupted.
+  // If a break is playing, don't touch playback; otherwise continue seamlessly
   isShuffling = false;
 };
 
@@ -351,10 +439,7 @@ btnShare.onclick = async ()=>{
 
 /* ===== Main audio events ===== */
 audio.addEventListener('play',  ()=>{ setOnAir(true);  btnPlay.textContent='⏸︎ Pause';  meta.textContent='Playing'; });
-audio.addEventListener('pause', ()=>{
-  // If a break immediately starts, the lamp will be set by breakAudio 'play'
-  if (!isBreak){ setOnAir(false); btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; }
-});
+audio.addEventListener('pause', ()=>{ if (!isBreak){ setOnAir(false); btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; } });
 audio.addEventListener('ended', ()=>{
   setOnAir(false);
   meta.textContent='Finished';
@@ -368,7 +453,7 @@ audio.addEventListener('timeupdate', ()=>{
   }
 });
 
-/* ===== Break events (mirror lamp state) ===== */
+/* ===== Break events (mirror lamp) ===== */
 breakAudio.addEventListener('play', ()=> setOnAir(true));
 breakAudio.addEventListener('pause',()=> setOnAir(false));
 
@@ -380,6 +465,5 @@ breakAudio.addEventListener('pause',()=> setOnAir(false));
   load(startIdx, /*autoplay=*/false);
 })();
 </script>
-
 </body>
 </html>
