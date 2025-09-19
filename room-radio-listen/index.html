@@ -54,6 +54,18 @@
   .kv{display:flex;align-items:center;gap:10px;font-size:.95rem}
   .kv input[type="range"]{width:160px}
 
+  /* Prominent lobby button */
+  .btn.lobby{
+    background:var(--brand);
+    color:#0a0e1a;
+    border-color:#6e9fe7;
+    padding:10px 14px;
+    font-weight:800;
+    border-radius:999px;
+    box-shadow:0 8px 24px rgba(137,180,250,.25);
+  }
+  .btn.lobby:focus{outline:3px solid #cfe1ff; outline-offset:2px}
+
   .trackmeta{margin-top:10px;display:flex;align-items:center;gap:10px}
   #title{font-weight:700}
   #meta{opacity:.75}
@@ -94,13 +106,13 @@
       </div>
       <div class="spacer"></div>
 
-      <!-- Return to Lobby button (same-tab) -->
+      <!-- Prominent Return to Lobby button (same tab) -->
       <a href="../index.html"
          id="btnLobby"
-         class="btn small ghost"
+         class="btn lobby"
          aria-label="Return to Museum Lobby">← Lobby</a>
 
-      <div id="onAir" class="onair" aria-live="polite">
+      <div id="onAir" class="onair" aria-live="polite" style="margin-left:8px">
         <span id="onLamp" class="lamp"></span>
         <span class="txt">ON&nbsp;AIR</span>
       </div>
@@ -202,7 +214,7 @@ const onLamp = document.getElementById('onLamp');
 const tpos = document.getElementById('tpos');
 const ttotal = document.getElementById('ttotal');
 
-/* ===== PLAYLIST (kept exactly from UNCLE2) ===== */
+/* ===== PLAYLIST (exactly as provided) ===== */
 const PLAYLIST = [
   { title: "The Greatest Debate Ever", file: "Media/The Greatest Debate Ever.mp3" },
   { title: "Cover of Tool - 7empest 2", file: "Media/Cover of Tool - 7empest 2.mp3" },
@@ -239,7 +251,7 @@ const PLAYLIST = [
   { title: "Rosetta must be Stoned", file: "Media/Rosetta must be Stoned.mp3" },
   { title: "Rain Song Replayed", file: "Media/Rain Song Replayed.mp3" },
   { title: "Friends in FrontierLand", file: "Media/Friends in FrontierLand.mp3" },
-  { title: "Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)", file: "Media/Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)).mp3" },
+  { title: "Shine On You Crazy Diamond - Lap steel guitar Edition", file: "Media/Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)).mp3" },
   { title: "The Recovering Barstool Warrior", file: "Media/The Recovering Barstool Warrior.mp3" },
   { title: "Covering my Eyes", file: "Media/Covering my Eyes.mp3" },
   { title: "All that glitters is gold", file: "Media/All that glitters is gold.mp3" },
@@ -251,6 +263,19 @@ const PLAYLIST = [
   { title: "When Pigs and Sheep Mate IV", file: "Media/When Pigs and Sheep Mate IV..mp3" },
   { title: "Bolotone Metal Edition (Remastered)", file: "Media/Bolotone Metal Edition (Remastered).mp3" },
   { title: "Right In Two (Remastered) (Cover) (alt)", file: "Media/10 Right In Two (Remastered) (Cover) (1).mp3" },
+  { title: "Rosetta Stoned (Cover) take 1", file: "Media/08 Rosetta Stoned (Cover) take 1.mp3" },
+  { title: "The Grudge (Remastered)", file: "Media/01. The Grudge (Remastered).mp3" },
+  { title: "All that glitters is gold remains", file: "Media/All that glitters is gold remains.mp3" },
+  { title: "S2N (Dream Theater Remix)", file: "Media/S2N an AI Cover of Dream Theater (Remix).mp3" },
+  { title: "Dogs (Cover) X2 tripper", file: "Media/03. Dogs (Cover) X2 tripper.mp3" },
+  { title: "Reflection (Cover) V2", file: "Media/11. Reflection (Cover) V2.mp3" },
+  { title: "Degrees (Cover)3 (Spanish guitar quartet)", file: "Media/Degrees (Cover)3 (Spanish guitar quartet).mp3" },
+  { title: "Pushit (Cover) v2", file: "Media/11. Pushit (Cover) v2.mp3" },
+  { title: "The Canelo-Crawford Event", file: "Media/The Canelo-Crawford Event.mp3" },
+  { title: "TechnoTrance The Pot V1", file: "Media/TechnoTrance The Pot V1.mp3" },
+  { title: "Beyond My Understanding", file: "Media/Beyond My Understanding.mp3" },
+  { title: "Degrees (Cover)3 (alt copy)", file: "Media/_Degrees (Cover)3 (Spanish guitar quartet ) (1).mp3" },
+  { title: "Bolotone's Intro", file: "Media/Bolotone's Intro.mp3" },
   { title: "The Spirit Carries On (Live Rehearsal 2) (Remix)", file: "Media/The Spirit Carries On (Live Rehearsal 2) (Remix).mp3" },
   { title: "Hiding the Pot", file: "Media/Hiding the Pot (1).mp3" },
   { title: "A Demo in Time of Dying (dup)", file: "Media/A Demo in Time of Dying.mp3" },
@@ -273,7 +298,7 @@ const PLAYLIST = [
 ];
 ttotal.textContent = PLAYLIST.length;
 
-/* ===== Station ID / Jingle breaks (separate folder!) ===== */
+/* ===== Station ID / Jingle breaks (separate folder) ===== */
 const BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
   "MediaBreaks/AmyYouarelisteningtoK-ZACHt.mp3",
@@ -422,7 +447,13 @@ audio.addEventListener('ended', ()=>{
   meta.textContent='Finished';
   if (pickBreakNow()) playBreakThenNext(); else next();
 });
-audio.addEventListener('timeupdate', ()=>{ if(!userScrubbing && isFinite(audio.duration)){ seek.value=(audio.currentTime/audio.duration)*100; document.getElementById('elapsed').textContent = fmt(audio.currentTime); document.getElementById('remaining').textContent = '-' + fmt(Math.max(0,(audio.duration - audio.currentTime))); } });
+audio.addEventListener('timeupdate', ()=>{
+  if(!userScrubbing && isFinite(audio.duration)){
+    seek.value=(audio.currentTime/audio.duration)*100;
+    document.getElementById('elapsed').textContent = fmt(audio.currentTime);
+    document.getElementById('remaining').textContent = '-' + fmt(Math.max(0,(audio.duration - audio.currentTime)));
+  }
+});
 
 /* Reflect ON AIR during breaks too */
 breakAudio.addEventListener('play', ()=> setOnAir(true));
