@@ -16,15 +16,15 @@
       background:
         linear-gradient(180deg,rgba(10,14,26,.65),rgba(10,14,26,.92)),
         url('Media/RadioMusicListening.jpg') center/cover no-repeat;}
-  .wrap{position:relative;max-width:1150px;margin:0 auto;padding:22px 18px 80px}
+  .wrap{position:relative;max-width:1200px;margin:0 auto;padding:22px 18px 80px}
 
   header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .header-logo{height:48px;vertical-align:middle;margin-right:6px;border-radius:6px}
+  .header-logo{height:48px;border-radius:6px}
   h1{font-size:clamp(20px,3.3vw,32px);margin:0;line-height:1.15}
   .return{margin-left:auto;text-decoration:none}
-  .pill{background:#0f1628;border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:999px;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
-  .onair{display:inline-flex;align-items:center;gap:8px}
-  .dot{width:8px;height:8px;background:#f66;border-radius:50%}
+  .pill{background:#0f1628;border:1px solid var(--line);padding:10px 16px;border-radius:999px;font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+  .onair{display:flex;align-items:center;gap:10px;font-weight:600}
+  .dot{width:14px;height:14px;border-radius:50%;background:#555;box-shadow:0 0 4px #000 inset;transition:all .3s}
 
   .grid{display:grid;grid-template-columns:1fr min(440px,42%);gap:18px}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
@@ -61,29 +61,28 @@
   <header>
     <img class="header-logo" src="Media/frasier.png" alt="Frasier badge" />
     <h1>KZAK • Frasier-Style Free Radio without the talking</h1>
-    <a class="return pill" href="../index.html" aria-label="Return to Lobby">← Lobby</a>
-    <span id="onAir" class="pill onair" aria-live="polite" title="Shows when audio is playing">ON AIR <span class="dot"></span></span>
+    <a class="return pill" href="../index.html" aria-label="Return to Lobby">← LOBBY</a>
+    <span id="onAir" class="pill onair">ON AIR <span class="dot" id="onAirDot"></span></span>
   </header>
 
   <section class="grid">
-    <!-- Left: Transport & timeline -->
-    <div class="panel controls" role="region" aria-label="Player controls">
+    <div class="panel controls">
       <div class="row">
-        <button id="btnPrev" aria-label="Previous track">⏮︎ Prev</button>
-        <button id="btnPlay" aria-label="Play">▶︎ Start Station</button>
-        <button id="btnNext" aria-label="Next track">⏭︎ Next</button>
-        <button id="btnLoop" aria-label="Loop">⟲ Loop</button>
-        <button id="btnShuffle" aria-label="Shuffle">🔀 Shuffle</button>
-        <button id="btnMute" aria-label="Mute">🔇 Mute</button>
-        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" aria-label="Volume"/>
+        <button id="btnPrev">⏮︎ Prev</button>
+        <button id="btnPlay">▶︎ Start Station</button>
+        <button id="btnNext">⏭︎ Next</button>
+        <button id="btnLoop">⟲ Loop</button>
+        <button id="btnShuffle">🔀 Shuffle</button>
+        <button id="btnMute">🔇 Mute</button>
+        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9"/>
       </div>
 
-      <div id="title" class="title" aria-live="polite">—</div>
+      <div id="title" class="title">—</div>
 
       <div class="scrub">
-        <span id="elapsed" aria-label="Elapsed">0:00</span>
-        <input id="seek" type="range" min="0" max="100" value="0" aria-label="Seek"/>
-        <span id="remaining" aria-label="Remaining">-0:00</span>
+        <span id="elapsed">0:00</span>
+        <input id="seek" type="range" min="0" max="100" value="0"/>
+        <span id="remaining">-0:00</span>
       </div>
 
       <div class="meta">
@@ -92,61 +91,44 @@
       </div>
 
       <div class="row" style="margin-top:10px">
-        <button id="btnShare" aria-label="Share current track">Share</button>
+        <button id="btnShare">Share</button>
       </div>
 
       <audio id="audio" preload="metadata" crossorigin="anonymous"></audio>
     </div>
 
-    <!-- Right: Playlist -->
-    <aside class="panel playlist" role="region" aria-label="Playlist">
+    <aside class="panel playlist">
       <h3>Playlist</h3>
-      <div id="list" class="list" role="listbox" aria-label="Track list"></div>
-      <div class="footer">Use headphones • Filenames are case-sensitive • Share copies a deep link to the current track</div>
+      <div id="list" class="list"></div>
+      <div class="footer">Use headphones • Filenames are case-sensitive • Share copies a deep link</div>
     </aside>
   </section>
 
-  <!-- Creators -->
   <section class="creators">
     <div class="panel card">
       <div class="creator">
-        <img class="portrait" src="Media/ZachArt.jpeg" alt="zdjimas portrait" />
-        <div>
-          <strong>zdjimas</strong><div class="small">Concept, curation, engineering</div>
-        </div>
+        <img class="portrait" src="Media/ZachArt.jpeg" alt="zdjimas" />
+        <div><strong>zdjimas</strong><div class="small">Concept, curation, engineering</div></div>
       </div>
     </div>
     <div class="panel card">
       <div class="creator">
-        <img class="portrait" src="Media/CJMURPHY.png" alt="cjmurphy portrait" />
-        <div>
-          <strong>cjmurphy</strong><div class="small">Composition, arrangement, sound design</div>
-        </div>
+        <img class="portrait" src="Media/CJMURPHY.png" alt="cjmurphy" />
+        <div><strong>cjmurphy</strong><div class="small">Composition, arrangement, sound design</div></div>
       </div>
     </div>
   </section>
 </div>
 
 <script>
-/* =========================
-   1) YOUR PLAYLIST
-   =========================
-   Paste your full PLAYLIST constant below in this same shape.
-   I left a few demo tracks so the page runs immediately.
-*/
+/* PLAYLIST — replace with your full 80 entries */
 const PLAYLIST = [
   { title: "The Grudge (Remastered)", file: "Media/01. The Grudge (Remastered).mp3" },
   { title: "New Beginnings", file: "Media/New Beginnings.mp3" },
   { title: "Dogs (Remix)", file: "Media/Dogs (Remix).mp3" }
-  // … paste the rest of your 80-item list here …
 ];
 
-/* =========================
-   2) STATION ID / JINGLE BREAKS
-   =========================
-   EXACT filenames from your MediaBreaks folder (mixed wav/mp3).
-   Defaults to playing a break every 3rd song.
-*/
+/* BREAKS — exact files from your MediaBreaks folder */
 const BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
   "MediaBreaks/AmyYouarelisteningtoK-ZACHt.mp3",
@@ -155,198 +137,93 @@ const BREAKS = [
   "MediaBreaks/en-US-News-NThisiskZ-A-Kbringingyou.mp3"
 ];
 
-const BREAKS_CFG = {
-  enabled: true,     // flip to false to disable all breaks quickly
-  mode: "everyN",    // "betweenAll" | "everyN" | "random"
-  n: 3,              // every 3rd song (used when mode === "everyN")
-  prob: 0.33         // 33% chance after a song (used when mode === "random")
-};
+const BREAKS_CFG = { enabled:true, mode:"everyN", n:3, prob:0.33 };
 
-/* =========================
-   3) HELPERS & STATE
-   ========================= */
-const pathToUrl = p => encodeURI(p).replace(/#/g,'%23'); // preserves spaces/() and escapes #
-const fmt = s => { if (!isFinite(s)) return '0:00'; const m = (s/60)|0, sec = (s%60)|0; return m+':'+(sec<10?'0':'')+sec; };
+const pathToUrl = p => encodeURI(p).replace(/#/g,'%23');
+const fmt = s => { if (!isFinite(s)) return '0:00'; const m=(s/60)|0, sec=(s%60)|0; return m+':'+(sec<10?'0':'')+sec; };
 const pick = arr => arr[Math.floor(Math.random()*arr.length)];
 
-const audio = document.getElementById('audio');
-const btnPrev = document.getElementById('btnPrev');
-const btnPlay = document.getElementById('btnPlay');
-const btnNext = document.getElementById('btnNext');
-const btnLoop = document.getElementById('btnLoop');
-const btnShuffle = document.getElementById('btnShuffle');
-const btnMute = document.getElementById('btnMute');
-const btnShare = document.getElementById('btnShare');
-const vol = document.getElementById('vol');
-const seek = document.getElementById('seek');
-const title = document.getElementById('title');
-const meta = document.getElementById('meta');
-const list = document.getElementById('list');
-const onAir = document.getElementById('onAir');
-const counter = document.getElementById('counter');
+const audio=document.getElementById('audio');
+const btnPrev=btnPlay=btnNext=btnLoop=btnShuffle=btnMute=btnShare=null;
+document.querySelectorAll('button').forEach(b=>{window[b.id]=b;});
+const vol=document.getElementById('vol'), seek=document.getElementById('seek');
+const title=document.getElementById('title'), meta=document.getElementById('meta');
+const list=document.getElementById('list'), onAirDot=document.getElementById('onAirDot'), counter=document.getElementById('counter');
 
-let idx = 0;
-let userScrubbing = false;
-
-// Break / jingle state
-const breakAudio = new Audio();
-let isBreak = false;
-let tracksSinceBreak = 0;
+let idx=0,userScrubbing=false;
+const breakAudio=new Audio(); let isBreak=false,tracksSinceBreak=0;
 
 function shouldInsertBreak(){
-  if (!BREAKS_CFG.enabled || audio.loop || BREAKS.length === 0) return false;
-  if (BREAKS_CFG.mode === "betweenAll") return true;
-  if (BREAKS_CFG.mode === "everyN"){
-    tracksSinceBreak++;
-    if (tracksSinceBreak >= BREAKS_CFG.n){ tracksSinceBreak = 0; return true; }
-    return false;
-  }
-  if (BREAKS_CFG.mode === "random") return Math.random() < BREAKS_CFG.prob;
+  if(!BREAKS_CFG.enabled||audio.loop||BREAKS.length===0)return false;
+  if(BREAKS_CFG.mode==="betweenAll")return true;
+  if(BREAKS_CFG.mode==="everyN"){tracksSinceBreak++;if(tracksSinceBreak>=BREAKS_CFG.n){tracksSinceBreak=0;return true;}return false;}
+  if(BREAKS_CFG.mode==="random")return Math.random()<BREAKS_CFG.prob;
   return false;
 }
-function currentMediaEl(){ return isBreak ? breakAudio : audio; }
+function currentMediaEl(){return isBreak?breakAudio:audio;}
 
-/* =========================
-   4) PLAYLIST UI
-   ========================= */
 function renderList(){
-  list.innerHTML = '';
+  list.innerHTML='';
   PLAYLIST.forEach((t,i)=>{
-    const row = document.createElement('div');
-    row.className = 'track';
-    row.setAttribute('role','option');
-    row.setAttribute('aria-selected', i===idx ? 'true':'false');
-    row.innerHTML = `<span class="idx">${String(i+1).padStart(2,'0')}</span>
-                     <div><div>${t.title}</div><div class="small">${t.file.replace(/^Media\//,'')}</div></div>`;
-    row.addEventListener('click', ()=>{ if(isBreak){ breakAudio.pause(); isBreak=false; } load(i); play(); });
+    const row=document.createElement('div');
+    row.className='track';
+    row.innerHTML=`<span class="idx">${String(i+1).padStart(2,'0')}</span>
+                   <div><div>${t.title}</div><div class="small">${t.file.replace(/^Media\//,'')}</div></div>`;
+    row.onclick=()=>{if(isBreak){breakAudio.pause();isBreak=false;}load(i);play();};
     list.appendChild(row);
   });
 }
-function updateActive(){
-  [...list.children].forEach((el,i)=>{
-    el.querySelector('.idx').classList.toggle('now', i===idx);
-    el.setAttribute('aria-selected', i===idx ? 'true':'false');
-  });
-}
+function updateActive(){[...list.children].forEach((el,i)=>el.querySelector('.idx').classList.toggle('now',i===idx));}
 
-/* =========================
-   5) CORE LOAD/NAV
-   ========================= */
 function load(i){
-  idx = (i+PLAYLIST.length) % PLAYLIST.length;
-  const tr = PLAYLIST[idx];
-  audio.src = pathToUrl(tr.file);
-  title.textContent = tr.title;
-  counter.textContent = `${idx+1} of ${PLAYLIST.length}`;
+  idx=(i+PLAYLIST.length)%PLAYLIST.length;
+  const tr=PLAYLIST[idx];
+  audio.src=pathToUrl(tr.file);
+  title.textContent=tr.title;
+  counter.textContent=`${idx+1} of ${PLAYLIST.length}`;
   updateActive();
-  // deep-link ?t=idx
-  const url = new URL(location);
-  url.searchParams.set('t', idx);
-  history.replaceState({},'',url);
+  const url=new URL(location);url.searchParams.set('t',idx);history.replaceState({},'',url);
 }
-function play(){ currentMediaEl().play().catch(()=>{}); }
-function pause(){ currentMediaEl().pause(); }
-function next(){ load(idx+1); play(); }
-function prev(){ load(idx-1); play(); }
+function play(){currentMediaEl().play().catch(()=>{});}
+function pause(){currentMediaEl().pause();}
+function next(){load(idx+1);play();}
+function prev(){load(idx-1);play();}
 
-/* =========================
-   6) BREAK PLAYBACK
-   ========================= */
-async function playRandomBreakThenNext(){
-  isBreak = true;
-  const prevTitle = title.textContent;
-  const prevMeta  = meta.textContent;
-
-  // mirror volume/mute
-  breakAudio.volume = audio.volume;
-  breakAudio.muted  = audio.muted;
-
-  const file = pick(BREAKS);
-  title.textContent = "Station ID • KZAK";
-  meta.textContent  = file.replace(/^MediaBreaks\//,'');
-
-  breakAudio.src = pathToUrl(file);
-  try{ await breakAudio.play(); }catch{}
-
-  breakAudio.onended = () => {
-    title.textContent = prevTitle;
-    meta.textContent  = prevMeta;
-    isBreak = false;
-    next();
-  };
+async function playBreakThenNext(){
+  isBreak=true;
+  const prevTitle=title.textContent,prevMeta=meta.textContent;
+  breakAudio.volume=audio.volume;breakAudio.muted=audio.muted;
+  const file=pick(BREAKS);
+  title.textContent="Station ID • KZAK";meta.textContent=file.replace(/^MediaBreaks\//,'');
+  breakAudio.src=pathToUrl(file);
+  try{await breakAudio.play();}catch{}
+  breakAudio.onended=()=>{title.textContent=prevTitle;meta.textContent=prevMeta;isBreak=false;next();};
 }
 
-/* =========================
-   7) CONTROLS
-   ========================= */
-btnPlay.onclick = () => {
-  const el = currentMediaEl();
-  if (el.paused){ el.play(); } else { el.pause(); }
-};
-btnPrev.onclick = () => { if(isBreak){ breakAudio.pause(); isBreak=false; } prev(); };
-btnNext.onclick = () => { if(isBreak){ breakAudio.pause(); isBreak=false; } next(); };
-btnLoop.onclick = () => { audio.loop = !audio.loop; btnLoop.classList.toggle('pill', audio.loop); };
-btnShuffle.onclick = () => {
-  // in-place Fisher-Yates; keep current track pinned
-  const current = PLAYLIST[idx];
-  for (let i=PLAYLIST.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [PLAYLIST[i],PLAYLIST[j]]=[PLAYLIST[j],PLAYLIST[i]]; }
-  idx = PLAYLIST.findIndex(t => t===current);
-  renderList(); updateActive();
-};
-btnMute.onclick = () => {
-  const now = !currentMediaEl().muted;
-  audio.muted = now; breakAudio.muted = now;
-  btnMute.classList.toggle('pill', now);
-};
-vol.oninput = e => { audio.volume = +e.target.value; breakAudio.volume = +e.target.value; };
+/* Controls */
+btnPlay.onclick=()=>{const el=currentMediaEl();el.paused?el.play():el.pause();};
+btnPrev.onclick=()=>{if(isBreak){breakAudio.pause();isBreak=false;}prev();};
+btnNext.onclick=()=>{if(isBreak){breakAudio.pause();isBreak=false;}next();};
+btnLoop.onclick=()=>{audio.loop=!audio.loop;btnLoop.classList.toggle('pill',audio.loop);};
+btnShuffle.onclick=()=>{const cur=PLAYLIST[idx];for(let i=PLAYLIST.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[PLAYLIST[i],PLAYLIST[j]]=[PLAYLIST[j],PLAYLIST[i]];}idx=PLAYLIST.findIndex(t=>t===cur);renderList();updateActive();};
+btnMute.onclick=()=>{const now=!currentMediaEl().muted;audio.muted=now;breakAudio.muted=now;btnMute.classList.toggle('pill',now);};
+vol.oninput=e=>{audio.volume=+e.target.value;breakAudio.volume=+e.target.value;};
+seek.oninput=()=>{userScrubbing=true;};
+seek.onchange=e=>{if(isFinite(audio.duration))audio.currentTime=audio.duration*(+e.target.value/100);userScrubbing=false;};
+btnShare.onclick=async()=>{const tr=PLAYLIST[idx];const url=new URL(location.href);url.searchParams.set('t',idx);const shareData={title:'Listen with me — KZAK',text:tr.title,url:url.toString()};try{if(navigator.share)await navigator.share(shareData);else throw 0;}catch{try{await navigator.clipboard.writeText(url.toString());alert('Link copied!');}catch{location.href=`mailto:?subject=${encodeURIComponent('Listen — '+tr.title)}&body=${encodeURIComponent(url.toString())}`;}}};
 
-seek.oninput = () => { userScrubbing = true; };
-seek.onchange = e => { if(isFinite(audio.duration)) audio.currentTime = audio.duration * (+e.target.value/100); userScrubbing=false; };
+/* Events */
+function setOnAir(on){onAirDot.style.background=on?'#f33':'#555';onAirDot.style.boxShadow=on?'0 0 8px #f33':'0 0 4px #000 inset';}
+audio.onplay=()=>{setOnAir(true);btnPlay.textContent='⏸︎ Pause';meta.textContent='Playing';};
+audio.onpause=()=>{setOnAir(false);btnPlay.textContent='▶︎ Start Station';meta.textContent='Paused';};
+audio.onended=()=>{setOnAir(false);meta.textContent='Finished';if(shouldInsertBreak())playBreakThenNext();else next();};
+audio.ontimeupdate=()=>{if(!userScrubbing&&isFinite(audio.duration)){seek.value=(audio.currentTime/audio.duration)*100;elapsed.textContent=fmt(audio.currentTime);remaining.textContent='-'+fmt(Math.max(0,audio.duration-audio.currentTime));}};
 
-btnShare.onclick = async () => {
-  const tr = PLAYLIST[idx];
-  const url = new URL(location.href);
-  url.searchParams.set('t', idx);
-  const shareData = { title: 'Listen with me — KZAK', text: tr.title, url: url.toString() };
-  try{
-    if(navigator.share){ await navigator.share(shareData); }
-    else throw 0;
-  }catch{
-    try{ await navigator.clipboard.writeText(url.toString()); alert('Link copied to clipboard!'); }
-    catch{ location.href = `mailto:?subject=${encodeURIComponent('Listen with me — '+tr.title)}&body=${encodeURIComponent(url.toString())}`; }
-  }
-};
+breakAudio.onplay=()=>setOnAir(true);
+breakAudio.onpause=()=>setOnAir(false);
 
-/* =========================
-   8) AUDIO EVENTS
-   ========================= */
-audio.addEventListener('play',  ()=>{ onAir.style.opacity=1; btnPlay.textContent='⏸︎ Stop / Pause'; meta.textContent='Playing'; });
-audio.addEventListener('pause', ()=>{ btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; });
-audio.addEventListener('ended', ()=>{
-  onAir.style.opacity=.55; meta.textContent='Finished';
-  if (shouldInsertBreak()) playRandomBreakThenNext(); else next();
-});
-audio.addEventListener('timeupdate', ()=>{
-  if (!userScrubbing && isFinite(audio.duration)){
-    seek.value = (audio.currentTime / audio.duration) * 100;
-    document.getElementById('elapsed').textContent = fmt(audio.currentTime);
-    document.getElementById('remaining').textContent = '-' + fmt(Math.max(0,(audio.duration - audio.currentTime)));
-  }
-});
-
-// reflect ON AIR for breakAudio too
-breakAudio.addEventListener('play',  ()=>{ onAir.style.opacity=1; btnPlay.textContent='⏸︎ Stop / Pause'; });
-breakAudio.addEventListener('pause', ()=>{ btnPlay.textContent='▶︎ Start Station'; });
-
-/* =========================
-   9) INIT
-   ========================= */
-(function init(){
-  renderList();
-  const fromParam = parseInt(new URL(location.href).searchParams.get('t'),10);
-  const startIdx = Number.isFinite(fromParam) ? Math.max(0, Math.min(PLAYLIST.length-1, fromParam)) : 0;
-  load(startIdx);
-})();
+/* Init */
+(function(){renderList();const p=parseInt(new URL(location.href).searchParams.get('t'),10);const s=Number.isFinite(p)?Math.max(0,Math.min(PLAYLIST.length-1,p)):0;load(s);})();
 </script>
 </body>
 </html>
