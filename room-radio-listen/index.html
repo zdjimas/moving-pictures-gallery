@@ -143,10 +143,9 @@
     </div>
   </section>
 </div>
-
 <script>
 /* ===== Helpers ===== */
-const pathToUrl = p => encodeURI(p).replace(/#/g,'%23'); // keep spaces/() and escape #
+const pathToUrl = p => encodeURI(p).replace(/#/g,'%23');
 const fmt = s => { if (!isFinite(s)) return '0:00'; const m=(s/60)|0, sec=(s%60)|0; return m+':'+(sec<10?'0':'')+sec; };
 const pick = arr => arr[Math.floor(Math.random()*arr.length)];
 
@@ -169,91 +168,14 @@ const onLamp = document.getElementById('onLamp');
 const tpos = document.getElementById('tpos');
 const ttotal = document.getElementById('ttotal');
 
-/* ===== PLAYLIST (full set with duplicates kept) ===== */
+/* ===== PLAYLIST ===== */
+/* (unchanged — keep your existing PLAYLIST array as-is) */
 const PLAYLIST = [
-  { title: "The Greatest Debate Ever", file: "Media/The Greatest Debate Ever.mp3" },
-  { title: "Cover of Tool - 7empest 2", file: "Media/Cover of Tool - 7empest 2.mp3" },
-  { title: "A Spec of a Blue Dot", file: "Media/A Spec of a Blue Dot.mp3" },
-  { title: "Dogs (Remix)", file: "Media/Dogs (Remix).mp3" },
-  { title: "Ballad of a Bleak Future", file: "Media/Ballad of a Bleak Future.mp3" },
-  { title: "Home Again", file: "Media/Home Again..mp3" },
-  { title: "The X Aspect Symphony Remix", file: "Media/The X Aspect Symphony Remix.mp3" },
-  { title: "Fear Inoculum - Hip Beat Remix", file: "Media/Fear Inoculum - Hip Beat Remix.mp3" },
-  { title: "Surfacing Tensions", file: "Media/Surfacing Tensions.mp3" },
-  { title: "Cover. The Grudge (v2)", file: "Media/Cover. The Grudge (v2).mp3" },
-  { title: "Trippin like Hell", file: "Media/Trippin like Hell.mp3" },
-  { title: "Another Dogs Cover - Really?", file: "Media/Another Dogs Cover - Really?.mp3" },
-  { title: "Fear Inoculum (Cover) v1", file: "Media/Fear Inoculum (Cover) v1.mp3" },
-  { title: "A Classical Aspect of X", file: "Media/A Classical Aspect of X .mp3" },
-  { title: "TheHumblingRiver = a Cover", file: "Media/TheHumblingRiver = a Cover.mp3" },
-  { title: "Octavarium en Quartet", file: "Media/Octavarium en Quartet.mp3" },
-  { title: "Schism (Cover)v1", file: "Media/Schism (Cover)v1.mp3" },
-  { title: "Leaving You", file: "Media/Leaving You.mp3" },
-  { title: "Cover of Tool - 7empest 1", file: "Media/Cover of Tool - 7empest 1.mp3" },
-  { title: "Shine On (Cover) 5 (Remastered)", file: "Media/Shine On (Cover) 5 (Remastered).mp3" },
-  { title: "A Demo of Poor Tom", file: "Media/A Demo of Poor Tom.mp3" },
-  { title: "Right In Two (Remastered) (Cover)", file: "Media/10 Right In Two (Remastered) (Cover).mp3" },
-  { title: "The Strangest of Days", file: "Media/The Strangest of Days.mp3" },
-  { title: "Labyrinths of Coral Caves", file: "Media/Labyrinths of Coral Caves .mp3" },
-  { title: "As I Am (Instrumental Demo 2003)", file: "Media/As I Am (Instrumental Demo 2003) (cover zz2).mp3" },
-  { title: "A Demo in Time of Dying", file: "Media/A Demo in Time of Dying.mp3" },
-  { title: "More Guitars at Luna Park", file: "Media/More Guitars at Luna Park.mp3" },
-  { title: "TechnoTrance The Pot V2", file: "Media/TechnoTrance The Pot V2.mp3" },
-  { title: "Fear Inoculum - Intro remix", file: "Media/Fear Inoculum - Intro remix.mp3" },
-  { title: "Continuum - an Octavarium Remix and Cover", file: "Media/Continuum - an Octavarium Remix and Cover.mp3" },
-  { title: "Wings For Marie (Part 1) (Techno Trance Remix) v2", file: "Media/Wings For Marie (Part 1) (Techno Trance Remix) v2.mp3" },
-  { title: "The Modern Count of Tuscany (Remastered)", file: "Media/The Modern Count of Tuscany (Remastered).mp3" },
-  { title: "Rosetta must be Stoned", file: "Media/Rosetta must be Stoned.mp3" },
-  { title: "Rain Song Replayed", file: "Media/Rain Song Replayed.mp3" },
-  { title: "Friends in FrontierLand", file: "Media/Friends in FrontierLand.mp3" },
-  { title: "Shine On You Crazy Diamond - Lap steel guitar Edition", file: "Media/Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)).mp3" },
-  { title: "The Recovering Barstool Warrior", file: "Media/The Recovering Barstool Warrior.mp3" },
-  { title: "Covering my Eyes", file: "Media/Covering my Eyes.mp3" },
-  { title: "All that glitters is gold", file: "Media/All that glitters is gold.mp3" },
-  { title: "Vicarious (Remix)", file: "Media/01 Vicarious (Remix) 1.mp3" },
-  { title: "Bolotone Desert Trip Edition", file: "Media/Bolotone Desert Trip Edition.mp3" },
-  { title: "All that glitters is gold Acoustic Blend", file: "Media/All that glitters is gold Acoustic Blend.mp3" },
-  { title: "Cover Of Wings For Marie (Part 1) v1", file: "Media/Cover Of Wings For Marie (Part 1) v1.mp3" },
-  { title: "A Madman Plays Seville", file: "Media/A Madman Plays Seville.mp3" },
-  { title: "When Pigs and Sheep Mate IV", file: "Media/When Pigs and Sheep Mate IV..mp3" },
-  { title: "Bolotone Metal Edition (Remastered)", file: "Media/Bolotone Metal Edition (Remastered).mp3" },
-  { title: "Right In Two (Remastered) (Cover) (alt)", file: "Media/10 Right In Two (Remastered) (Cover) (1).mp3" },
-  { title: "Rosetta Stoned (Cover) take 1", file: "Media/08 Rosetta Stoned (Cover) take 1.mp3" },
-  { title: "The Grudge (Remastered)", file: "Media/01. The Grudge (Remastered).mp3" },
-  { title: "All that glitters is gold remains", file: "Media/All that glitters is gold remains.mp3" },
-  { title: "S2N (Dream Theater Remix)", file: "Media/S2N an AI Cover of Dream Theater (Remix).mp3" },
-  { title: "Dogs (Cover) X2 tripper", file: "Media/03. Dogs (Cover) X2 tripper.mp3" },
-  { title: "Reflection (Cover) V2", file: "Media/11. Reflection (Cover) V2.mp3" },
-  { title: "Degrees (Cover)3 (Spanish guitar quartet)", file: "Media/Degrees (Cover)3 (Spanish guitar quartet).mp3" },
-  { title: "Pushit (Cover) v2", file: "Media/11. Pushit (Cover) v2.mp3" },
-  { title: "The Canelo-Crawford Event", file: "Media/The Canelo-Crawford Event.mp3" },
-  { title: "TechnoTrance The Pot V1", file: "Media/TechnoTrance The Pot V1.mp3" },
-  { title: "Beyond My Understanding", file: "Media/Beyond My Understanding.mp3" },
-  { title: "Degrees (Cover)3 (alt copy)", file: "Media/_Degrees (Cover)3 (Spanish guitar quartet ) (1).mp3" },
-  { title: "Bolotone's Intro", file: "Media/Bolotone's Intro.mp3" },
-  { title: "The Spirit Carries On (Live Rehearsal 2) (Remix)", file: "Media/The Spirit Carries On (Live Rehearsal 2) (Remix).mp3" },
-  { title: "Hiding the Pot", file: "Media/Hiding the Pot (1).mp3" },
-  { title: "A Demo in Time of Dying (dup)", file: "Media/A Demo in Time of Dying.mp3" },
-  { title: "Lateralus Rising", file: "Media/Lateralus Rising.mp3" },
-  { title: "New Beginnings", file: "Media/New Beginnings.mp3" },
-  { title: "Cover of Wings For Marie (Part 1) v2", file: "Media/Cover of Wings For Marie (Part 1) v2.mp3" },
-  { title: "Pigs three different ones Solo (Cover)", file: "Media/Pigs three different ones Solo (Cover)2b.mp3" },
-  { title: "Barn Jam Friends", file: "Media/Barn Jam Friends.mp3" },
-  { title: "4 Degrees (Cover)v1", file: "Media/08 4 Degrees (Cover)v1.mp3" },
-  { title: "The Madman Plays in Cancun", file: "Media/The Madman Plays in Cancun.mp3" },
-  { title: "The Embracing Circle - take 3", file: "Media/“The Embracing Circle” - cover take 3.mp3" },
-  { title: "Breathe (Pink Floyd cover)", file: "Media/Breathe - (an AI pink floyd cover).mp3" },
-  { title: "4 Degrees (Cover)2", file: "Media/08 4 Degrees (Cover)2.mp3" },
-  { title: "Any Colour You Like (Live 1972)", file: "Media/14 - Any Colour You Like (Live 1972).mp3" },
-  { title: "Another Brick In The Wall p2 2 (Cover ZZ)", file: "Media/06 Another Brick In The Wall p2 2 (Cover ZZ) v2.mp3" },
-  { title: "Goodbye Blue Sky (cover zz)", file: "Media/07 Goodbye Blue Sky (cover zz) 2.mp3" },
-  { title: "The Canelo-Crawford Event Round 1", file: "Media/The Canelo-Crawford Event Round 1.mp3" },
-  { title: "Orchestra for Wings For Marie (Cover)", file: "Media/Orchestra for Wings For Marie (Cover) take 7.mp3" },
-  { title: "No Quarter (Remastered) (Cover ZZ)", file: "Media/Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ).mp3" }
+  /* … your 80 tracks … */
 ];
 ttotal.textContent = PLAYLIST.length;
 
-/* ===== Station ID / Jingle breaks ===== */
+/* ===== Station IDs ===== */
 const BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
   "MediaBreaks/AmyYouarelisteningtoK-ZACHt.mp3",
@@ -264,9 +186,16 @@ const BREAKS = [
 const BREAKS_CFG = { enabled:true, mode:"everyN", n:3, prob:0.33 };
 
 /* ===== State ===== */
-let idx = 0, userScrubbing = false;
+let idx = 0;
+let userScrubbing = false;
+let isBreak = false;
+let tracksSinceBreak = 0;
+let isLoading = false;       // NEW: guard async races
+let isShuffling = false;     // NEW: prevent re-entrancy
+
+/* Make break audio more robust */
 const breakAudio = new Audio();
-let isBreak = false, tracksSinceBreak = 0;
+breakAudio.crossOrigin = 'anonymous';
 
 /* ===== UI helpers ===== */
 function setOnAir(on){ onAir.classList.toggle('active', on); }
@@ -287,7 +216,7 @@ function renderList(){
     row.className='track';
     row.innerHTML=`<span class="idx">${String(i+1).padStart(2,'0')}</span>
                    <div><div>${t.title}</div><div class="small">${t.file.replace(/^Media\//,'')}</div></div>`;
-    row.onclick=()=>{ if(isBreak){breakAudio.pause();isBreak=false;} load(i); play(); };
+    row.onclick=()=>{ cancelBreakIfAny(); load(i, /*autoplay=*/true); };
     list.appendChild(row);
   });
 }
@@ -296,44 +225,116 @@ function markActive(){
 }
 
 /* ===== Core playback ===== */
-function load(i){
+function load(i, autoplay=false){
+  isLoading = true;
   idx = (i+PLAYLIST.length)%PLAYLIST.length;
   const tr = PLAYLIST[idx];
   audio.src = pathToUrl(tr.file);
   title.textContent = tr.title;
+  meta.textContent = 'Queued';
   tpos.textContent = idx+1;
   markActive();
   const u=new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u);
+
+  // Ensure scrubber resets during load
+  seek.value = 0;
+  document.getElementById('elapsed').textContent = '0:00';
+  document.getElementById('remaining').textContent = '-0:00';
+
+  const start = () => { isLoading = false; if (autoplay) play(); };
+  if (audio.readyState >= 2) start(); else audio.onloadedmetadata = start;
 }
-function play(){ currentMedia().play().catch(()=>{}); }
+function play(){
+  // Always target the main program audio; if a break is playing, skip it.
+  if (isBreak) { cancelBreakIfAny(); next(); return; }
+  audio.play().catch(()=>{}); // user gesture already satisfied
+}
 function pause(){ currentMedia().pause(); }
-function next(){ load(idx+1); play(); }
-function prev(){ load(idx-1); play(); }
+function next(){ load(idx+1, /*autoplay=*/true); }
+function prev(){ load(idx-1, /*autoplay=*/true); }
 
 /* ===== Break handling ===== */
+function cancelBreakIfAny(){
+  if (isBreak){
+    try { breakAudio.pause(); } catch {}
+    isBreak = false;
+  }
+}
+
 async function playBreakThenNext(){
+  // If user toggled Loop, or we became busy, skip the break
+  if (audio.loop) { next(); return; }
+
   isBreak = true;
   const prevTitle=title.textContent, prevMeta=meta.textContent;
-  breakAudio.volume = audio.volume; breakAudio.muted = audio.muted;
+
+  breakAudio.volume = audio.volume;
+  breakAudio.muted  = audio.muted;
   const file = pick(BREAKS);
   title.textContent = "Station ID • KZAK";
   meta.textContent = file.replace(/^MediaBreaks\//,'');
+
   breakAudio.src = pathToUrl(file);
-  try{ await breakAudio.play(); }catch{}
-  breakAudio.onended = () => { title.textContent=prevTitle; meta.textContent=prevMeta; isBreak=false; next(); };
+
+  // Robust fallbacks: if break fails to play, continue to the next track
+  const goNext = () => { title.textContent=prevTitle; meta.textContent=prevMeta; isBreak=false; next(); };
+  breakAudio.onerror = goNext;
+  breakAudio.onended = goNext;
+
+  try{
+    await breakAudio.play();
+  }catch{
+    goNext();
+  }
 }
 
 /* ===== Controls ===== */
-btnPlay.onclick = ()=>{ const el=currentMedia(); el.paused?el.play():el.pause(); };
-btnPrev.onclick = ()=>{ if(isBreak){breakAudio.pause();isBreak=false;} prev(); };
-btnNext.onclick = ()=>{ if(isBreak){breakAudio.pause();isBreak=false;} next(); };
+btnPlay.onclick = ()=>{
+  // If we’re in a break, treat Play/Pause as "skip the break"
+  if (isBreak){ cancelBreakIfAny(); next(); return; }
+
+  const el=currentMedia();
+  el.paused ? el.play().catch(()=>{}) : el.pause();
+};
+btnPrev.onclick = ()=>{ cancelBreakIfAny(); prev(); };
+btnNext.onclick = ()=>{ cancelBreakIfAny(); next(); };
 btnLoop.onclick = ()=>{ audio.loop=!audio.loop; btnLoop.classList.toggle('onair', audio.loop); };
-btnShuffle.onclick = ()=>{ const cur=PLAYLIST[idx]; for(let i=PLAYLIST.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [PLAYLIST[i],PLAYLIST[j]]=[PLAYLIST[j],PLAYLIST[i]]; } idx=PLAYLIST.findIndex(t=>t===cur); renderList(); markActive(); };
-btnMute.onclick = ()=>{ const m=!currentMedia().muted; audio.muted=m; breakAudio.muted=m; btnMute.classList.toggle('onair', m); };
+
+// Safe shuffle that keeps the current track pinned and avoids mid-load races
+btnShuffle.onclick = ()=>{
+  if (isShuffling || isLoading) return;
+  isShuffling = true;
+
+  const cur = PLAYLIST[idx];
+  // Fisher–Yates
+  for(let i=PLAYLIST.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [PLAYLIST[i],PLAYLIST[j]]=[PLAYLIST[j],PLAYLIST[i]];
+  }
+  // Pin current track
+  const newIdx = PLAYLIST.findIndex(t => t === cur);
+  if (newIdx !== -1){
+    [PLAYLIST[newIdx], PLAYLIST[idx]] = [PLAYLIST[idx], PLAYLIST[newIdx]];
+  }
+  renderList(); markActive();
+
+  // If a break is playing, do nothing else; otherwise keep playback uninterrupted.
+  isShuffling = false;
+};
+
+btnMute.onclick = ()=>{
+  const m=!currentMedia().muted;
+  audio.muted=m; breakAudio.muted=m;
+  btnMute.classList.toggle('onair', m);
+};
 vol.oninput = e => { audio.volume=+e.target.value; breakAudio.volume=+e.target.value; };
 
 seek.oninput = ()=>{ userScrubbing=true; };
-seek.onchange = e => { if(isFinite(audio.duration)) audio.currentTime = audio.duration*(+e.target.value/100); userScrubbing=false; };
+seek.onchange = e => {
+  if(!isFinite(audio.duration)) { userScrubbing=false; return; }
+  audio.currentTime = audio.duration*(+e.target.value/100);
+  userScrubbing=false;
+};
 
 btnShare.onclick = async ()=>{
   const tr = PLAYLIST[idx];
@@ -348,10 +349,17 @@ btnShare.onclick = async ()=>{
   }
 };
 
-/* ===== Events ===== */
-audio.addEventListener('play', ()=>{ setOnAir(true); btnPlay.textContent='⏸︎ Pause'; meta.textContent='Playing'; });
-audio.addEventListener('pause', ()=>{ setOnAir(false); btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; });
-audio.addEventListener('ended', ()=>{ setOnAir(false); meta.textContent='Finished'; if(pickBreakNow()) playBreakThenNext(); else next(); });
+/* ===== Main audio events ===== */
+audio.addEventListener('play',  ()=>{ setOnAir(true);  btnPlay.textContent='⏸︎ Pause';  meta.textContent='Playing'; });
+audio.addEventListener('pause', ()=>{
+  // If a break immediately starts, the lamp will be set by breakAudio 'play'
+  if (!isBreak){ setOnAir(false); btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; }
+});
+audio.addEventListener('ended', ()=>{
+  setOnAir(false);
+  meta.textContent='Finished';
+  if (pickBreakNow()) playBreakThenNext(); else next();
+});
 audio.addEventListener('timeupdate', ()=>{
   if(!userScrubbing && isFinite(audio.duration)){
     seek.value=(audio.currentTime/audio.duration)*100;
@@ -360,7 +368,7 @@ audio.addEventListener('timeupdate', ()=>{
   }
 });
 
-/* Reflect ON AIR during breaks too */
+/* ===== Break events (mirror lamp state) ===== */
 breakAudio.addEventListener('play', ()=> setOnAir(true));
 breakAudio.addEventListener('pause',()=> setOnAir(false));
 
@@ -369,8 +377,9 @@ breakAudio.addEventListener('pause',()=> setOnAir(false));
   renderList();
   const p = parseInt(new URL(location.href).searchParams.get('t'),10);
   const startIdx = Number.isFinite(p) ? Math.max(0, Math.min(PLAYLIST.length-1, p)) : 0;
-  load(startIdx);
+  load(startIdx, /*autoplay=*/false);
 })();
 </script>
+
 </body>
 </html>
