@@ -89,6 +89,12 @@
   .bio .name{font-weight:800}
   .bio .role{opacity:.75}
 
+  /* Tiny toast for load errors */
+  .toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);
+         background:#1b2438;border:1px solid #3b4f78;border-radius:10px;color:#e3ecff;
+         padding:10px 14px;box-shadow:var(--shadow);font-size:.95rem;z-index:9999;display:none}
+  .toast.show{display:block}
+
   @media (max-width:1024px){
     .grid{grid-template-columns:1fr}
     .list{max-height:360px}
@@ -156,7 +162,7 @@
             <button id="btnShare" class="btn small">Share</button>
           </div>
 
-          <audio id="audio" crossorigin="anonymous"></audio>
+          <audio id="audio" crossorigin="anonymous" preload="auto"></audio>
         </div>
       </section>
 
@@ -189,11 +195,23 @@
     </section>
   </div>
 
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
 <script>
-/* ===== Helpers ===== */
+/* ===== Config ===== */
+const LOAD_TIMEOUT_MS = 8000; // fall-forward if a track doesn’t load
 const pathToUrl = p => encodeURI(p).replace(/#/g,'%23'); // keep spaces/() and escape #
+
+/* ===== Helpers ===== */
 const fmt = s => { if (!isFinite(s)) return '0:00'; const m=(s/60)|0, sec=(s%60)|0; return m+':'+(sec<10?'0':'')+sec; };
 const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const showToast = msg => {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> el.classList.remove('show'), 3000);
+};
 
 /* ===== DOM ===== */
 const audio = document.getElementById('audio');
@@ -214,7 +232,7 @@ const onLamp = document.getElementById('onLamp');
 const tpos = document.getElementById('tpos');
 const ttotal = document.getElementById('ttotal');
 
-/* ===== PLAYLIST (exactly as provided) ===== */
+/* ===== PLAYLIST (exactly your 79 items) ===== */
 const PLAYLIST = [
   { title: "The Greatest Debate Ever", file: "Media/The Greatest Debate Ever.mp3" },
   { title: "Cover of Tool - 7empest 2", file: "Media/Cover of Tool - 7empest 2.mp3" },
@@ -298,7 +316,7 @@ const PLAYLIST = [
 ];
 ttotal.textContent = PLAYLIST.length;
 
-/* ===== Station ID / Jingle breaks (separate folder) ===== */
+/* ===== Station IDs (separate folder) ===== */
 const BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
   "MediaBreaks/AmyYouarelisteningtoK-ZACHt.mp3",
@@ -313,8 +331,9 @@ let idx = 0;
 let userScrubbing = false;
 let isBreak = false;
 let tracksSinceBreak = 0;
-let isLoading = false;       // guard async races (load/shuffle/ended)
-let isShuffling = false;     // avoid re-entrancy
+let isLoading = false;    // guard async races (load/shuffle/ended)
+let isShuffling = false;  // avoid re-entrancy
+let loadTimer = null;     // timeout guard per track
 
 /* Separate audio element just for breaks */
 const breakAudio = new Audio();
@@ -347,16 +366,23 @@ function markActive(){
   [...list.children].forEach((el,i)=>el.querySelector('.idx').classList.toggle('now', i===idx));
 }
 
-/* ===== Core playback ===== */
+/* ===== Core playback with robust error/timeout handling ===== */
+function clearLoadTimer(){ if (loadTimer){ clearTimeout(loadTimer); loadTimer = null; } }
+
 function load(i, autoplay=false){
   isLoading = true;
+  clearLoadTimer();
+
   idx = (i+PLAYLIST.length)%PLAYLIST.length;
   const tr = PLAYLIST[idx];
-  audio.src = pathToUrl(tr.file);
+  const src = pathToUrl(tr.file);
+
+  audio.src = src;
   title.textContent = tr.title;
   meta.textContent = 'Queued';
   tpos.textContent = idx+1;
   markActive();
+
   const u=new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u);
 
   // reset scrubber
@@ -364,13 +390,35 @@ function load(i, autoplay=false){
   document.getElementById('elapsed').textContent = '0:00';
   document.getElementById('remaining').textContent = '-0:00';
 
-  const start = () => { isLoading = false; if (autoplay) play(); };
-  if (audio.readyState >= 2) start(); else audio.onloadedmetadata = start;
+  // Start timer: if we don't get metadata in time, skip
+  loadTimer = setTimeout(()=>{
+    console.warn('Load timeout for', tr.file);
+    showToast('Skipping: could not load “' + tr.title + '”');
+    isLoading = false;
+    next(); // fail-forward
+  }, LOAD_TIMEOUT_MS);
+
+  const onReady = () => {
+    clearLoadTimer();
+    isLoading = false;
+    if (autoplay) play();
+  };
+
+  if (audio.readyState >= 2) onReady();
+  else {
+    audio.onloadedmetadata = onReady;
+    // Also react if we can start earlier
+    audio.oncanplay = ()=>{ /* nothing; wait for metadata or timeout */ };
+  }
 }
+
 function play(){
-  // If a break is (still) playing, skip it and continue program audio
   if (isBreak) { cancelBreakIfAny(); next(); return; }
-  audio.play().catch(()=>{});
+  audio.play().catch((err)=>{
+    console.error('Play error for', PLAYLIST[idx]?.file, err);
+    showToast('Playback error — skipping');
+    next();
+  });
 }
 function pause(){ currentMedia().pause(); }
 function next(){ load(idx+1, /*autoplay=*/true); }
@@ -396,10 +444,10 @@ async function playBreakThenNext(){
   breakAudio.src = pathToUrl(file);
 
   const goNext = () => { title.textContent=prevTitle; meta.textContent=prevMeta; isBreak=false; next(); };
-  breakAudio.onerror = goNext;
+  breakAudio.onerror = (e)=>{ console.error('Break load error', file, e); goNext(); };
   breakAudio.onended = goNext;
 
-  try{ await breakAudio.play(); }catch{ goNext(); }
+  try{ await breakAudio.play(); }catch(err){ console.error('Break play error', err); goNext(); }
 }
 
 /* ===== Controls ===== */
@@ -442,11 +490,23 @@ btnShare.onclick = async ()=>{
 /* ===== Main audio events ===== */
 audio.addEventListener('play',  ()=>{ setOnAir(true);  btnPlay.textContent='⏸︎ Pause';  meta.textContent='Playing'; });
 audio.addEventListener('pause', ()=>{ if (!isBreak){ setOnAir(false); btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; } });
+
+// If a track errors (404, decode error), skip it instead of hanging on "Queued"
+audio.addEventListener('error', (e)=>{
+  const tr = PLAYLIST[idx];
+  console.error('Audio load error:', tr?.file, e);
+  showToast('Skipping: could not load “' + (tr?.title||'Track') + '”');
+  clearLoadTimer();
+  isLoading = false;
+  next();
+});
+
 audio.addEventListener('ended', ()=>{
   setOnAir(false);
   meta.textContent='Finished';
   if (pickBreakNow()) playBreakThenNext(); else next();
 });
+
 audio.addEventListener('timeupdate', ()=>{
   if(!userScrubbing && isFinite(audio.duration)){
     seek.value=(audio.currentTime/audio.duration)*100;
@@ -464,6 +524,7 @@ breakAudio.addEventListener('pause',()=> setOnAir(false));
   renderList();
   const p = parseInt(new URL(location.href).searchParams.get('t'),10);
   const startIdx = Number.isFinite(p) ? Math.max(0, Math.min(PLAYLIST.length-1, p)) : 0;
+  ttotal.textContent = PLAYLIST.length; // ensure counter shows the actual list size (79 currently)
   load(startIdx, /*autoplay=*/false);
 })();
 </script>
