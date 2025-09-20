@@ -514,7 +514,7 @@ btnShare.onclick = async ()=>{
 };
 
 /* ===== Main audio events ===== */
-audio.addEventListener('play',  ()=>{ setOnAir(true);  btnPlay.textContent='⏸︎ Pause';  meta.textContent='Playing'; });
+audio.addEventListener('play',  ()=>{ setOnAir(true);  btnPlay.textContent='⏸︎ Pause Station';  meta.textContent='Playing'; });
 audio.addEventListener('pause', ()=>{ if(!isBreak){ setOnAir(false); btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; } });
 audio.addEventListener('error', ()=>{ const tr=PLAYLIST[idx]; showToast('Skipping: could not load “'+(tr?.title||'Track')+'”'); clearLoadTimer(); isLoading=false; next(); });
 audio.addEventListener('ended', ()=>{ setOnAir(false); meta.textContent='Finished'; if(pickBreakNow()) playBreakThenNext(); else next(); });
