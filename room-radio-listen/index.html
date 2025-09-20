@@ -17,20 +17,21 @@
     position:relative;
     font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
   }
-  /* Dark overlay so controls read well; during pre-roll intro make it more transparent per your ask */
+
+  /* Background overlay: normal = readable; intro = much lighter to reveal background more */
   .bg-overlay{
     position:fixed; inset:0;
-    background:linear-gradient(180deg, rgba(6,10,20,.70), rgba(6,10,20,.75));
-    transition:opacity .4s ease;
+    background:linear-gradient(180deg, rgba(6,10,20,.72), rgba(6,10,20,.78));
+    transition:opacity .35s ease;
     pointer-events:none;
+    opacity:1;
   }
-  .bg-overlay.light{ opacity:.45; }  /* used when the pre-roll plays before entering room */
+  /* previously .light ~0.45 — now we go even lighter during intro */
+  .bg-overlay.intro{ opacity:.16; }  /* <-- increased transparency during welcome */
 
   .wrap{ position:relative; z-index:1; padding:24px; max-width:1200px; margin:0 auto; }
 
-  header{
-    display:flex; align-items:center; gap:16px; margin-bottom:10px;
-  }
+  header{ display:flex; align-items:center; gap:16px; margin-bottom:10px; }
   .thumb{width:72px;height:72px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
   .thumb img{width:100%;height:100%;object-fit:cover}
   h1{font-size:32px;line-height:1.15;margin:0}
@@ -47,9 +48,7 @@
   .onair-dot{width:10px;height:10px;border-radius:50%; background:#384a63; box-shadow:0 0 0 rgba(243,58,58,0)}
   .onair.on .onair-dot{ background:#ff3b3b; box-shadow:0 0 16px rgba(255,59,59,.9) }
 
-  .player{
-    display:grid; grid-template-columns:1fr 360px; gap:22px; margin-top:16px;
-  }
+  .player{ display:grid; grid-template-columns:1fr 360px; gap:22px; margin-top:16px; }
   @media (max-width: 1000px){ .player{ grid-template-columns:1fr; } }
 
   .panel{
@@ -65,18 +64,14 @@
   .scrub{display:grid; grid-template-columns:46px 1fr 60px; align-items:center; gap:10px; margin:6px 0 12px}
   input[type="range"]{ width:100% }
 
-  .track{
-    display:grid; grid-template-columns:170px 1fr; gap:16px; align-items:flex-start;
-  }
+  .track{ display:grid; grid-template-columns:170px 1fr; gap:16px; align-items:flex-start; }
   @media (max-width: 640px){ .track{ grid-template-columns:1fr; } }
   .art{width:170px;height:170px;border-radius:14px;overflow:hidden;background:#0e1628;border:1px solid var(--line)}
   .art img{width:100%;height:100%;object-fit:cover}
   .info h3{margin:0 0 6px 0}
   .muted{color:var(--muted)}
 
-  .playlist .item{
-    padding:10px 12px; border-top:1px solid rgba(255,255,255,.04); cursor:pointer;
-  }
+  .playlist .item{ padding:10px 12px; border-top:1px solid rgba(255,255,255,.04); cursor:pointer; }
   .playlist .item:hover{background:rgba(255,255,255,.04)}
   .playlist .item.active{background:rgba(168, 200, 255, .09)}
   .tiny{font-size:12px;color:var(--muted)}
@@ -91,8 +86,6 @@
 
   .exit-wrap{ margin-top:10px }
   .volwrap{ display:flex; align-items:center; gap:12px; }
-
-  /* tiny helper badge */
   .badge{font-size:12px;color:var(--muted)}
 </style>
 </head>
@@ -174,27 +167,25 @@
   </div>
 </div>
 
-<!-- Hidden media elements -->
+<!-- Media elements -->
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
-<video id="introVideo" preload="auto" playsinline style="display:none" src="Media/KZAK-Welcome.mp3"></video>
-<!-- NOTE: We use audio for welcome; if you prefer a real video, replace above and set type accordingly -->
+<!-- Welcome: can be audio or video; keep src pointing at your welcome asset -->
+<audio id="introMedia" preload="auto" src="Media/KZAK-Welcome.mp3"></audio>
 
-<!-- Exit pre-roll that plays before returning to lobby -->
+<!-- Exit pre-roll (video) that plays before returning to lobby -->
 <video id="exitVideo" preload="auto" playsinline style="display:none" src="room-radio-listen/radio-room-entry.mp4"></video>
 
 <div class="toast" id="toast"></div>
 
 <script>
 /* ================== DATA ================== */
-/* Replace this small sample with YOUR full 113-track list (keep exact filenames). */
 const PLAYLIST = [
   { title: "01 Vicarious (Remix) 1", file: "Media/01 Vicarious (Remix) 1.mp3", art: "Media/default.jpg", story: "" },
   { title: "The Embracing Circle – cover take 3", file: "Media/The Embracing Circle – cover take 3.mp3", art: "Media/default.jpg", story: "" },
   { title: "\"The Embracing Circle\" – extract from Illumination Theory, Dream Theater-2", file: "Media/\"The Embracing Circle\" – extract from Illumination Theory, Dream Theater-2.mp3", art: "Media/default.jpg", story: "" },
-  // … paste the remaining tracks here exactly as stored in GitHub …
+  // … replace with your full 113 tracks …
 ];
 
-/* Optional: station ID breaks (UNCLE3 behavior: every 2 songs if enabled) */
 const BREAKS = [
   "Media/Snappy1.mp3","Media/Snappy2.mp3","Media/Snappy3.mp3","Media/Snappy4.mp3",
   "Media/Snappy5.mp3","Media/Snappy6.mp3","Media/Snappy7.mp3","Media/Snappy8.mp3",
@@ -203,73 +194,47 @@ const BREAKS = [
 </script>
 
 <script>
-/* ================== UTILITIES: robust encoding & resolution ================== */
-
-/* Encode each path segment; preserve "/" separators; normalize to NFC. */
+/* ================== ROBUST PATH HANDLING ================== */
 function encodePath(p){
   return p.normalize("NFC")
     .split('/')
     .map(seg => encodeURIComponent(seg))
     .join('/');
 }
-
-/* Create likely filename variants to overcome copy/paste drifts. */
 function filenameVariants(original){
   const nfc = original.normalize("NFC");
-  const asciiQuotes = nfc
-    .replace(/\u201C|\u201D|\u2033/g, '"')      // “ ” ″ → "
-    .replace(/\u2018|\u2019|\u2032/g, "'");     // ‘ ’ ′ → '
-  const collapsedSpaces = asciiQuotes
-    .replace(/\u00A0/g, ' ')                    // NBSP → space
-    .replace(/[\u200B-\u200D\uFEFF]/g, '')      // zero-width → remove
-    .replace(/\s+/g, ' ');                      // collapse runs
-  const trimmed = collapsedSpaces
-    .replace(/\s+(\.[a-z0-9]+)$/i, '$1')        // trim before extension
-    .replace(/\s+([/)\]])/g, '$1')              // trim before ) ] /
-    .replace(/([[(])\s+/g, '$1');               // trim after ( [
-
-  const uniq = new Map();
-  [nfc, asciiQuotes, collapsedSpaces, trimmed].forEach(v => { if(!uniq.has(v)) uniq.set(v,true); });
+  const asciiQuotes = nfc.replace(/\u201C|\u201D|\u2033/g, '"').replace(/\u2018|\u2019|\u2032/g, "'");
+  const collapsedSpaces = asciiQuotes.replace(/\u00A0/g, ' ').replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/\s+/g, ' ');
+  const trimmed = collapsedSpaces.replace(/\s+(\.[a-z0-9]+)$/i, '$1').replace(/\s+([/)\]])/g, '$1').replace(/([[(])\s+/g, '$1');
+  const uniq = new Map(); [nfc, asciiQuotes, collapsedSpaces, trimmed].forEach(v=>{ if(!uniq.has(v)) uniq.set(v,true); });
   return [...uniq.keys()];
 }
-
-/* Attempt to set audio.src using a list of variants; resolve when metadata loads. */
 function resolveAudioSrc(audioEl, filePath, timeoutMs=6000){
   return new Promise((resolve, reject) => {
     const variants = filenameVariants(filePath).map(encodePath);
     let i = 0, timer;
-
     const tryNext = () => {
       if (i >= variants.length) return reject(new Error('All variants failed'));
-      const url = variants[i++];
-      audioEl.src = url;
-
+      const url = variants[i++]; audioEl.src = url;
       const onReady = () => { cleanup(); resolve(url); };
       const onError = () => { cleanup(); tryNext(); };
-      const cleanup = () => {
-        clearTimeout(timer);
-        audioEl.removeEventListener('loadedmetadata', onReady);
-        audioEl.removeEventListener('error', onError);
-      };
-
+      const cleanup = () => { clearTimeout(timer); audioEl.removeEventListener('loadedmetadata', onReady); audioEl.removeEventListener('error', onError); };
       audioEl.addEventListener('loadedmetadata', onReady, { once:true });
       audioEl.addEventListener('error', onError, { once:true });
       timer = setTimeout(() => { cleanup(); tryNext(); }, timeoutMs);
     };
-
     tryNext();
   });
 }
-
-/* Small helpers */
-const $ = sel => document.querySelector(sel);
+const $ = s => document.querySelector(s);
 function fmt(t){ t|=0; const m=(t/60)|0, s=(t%60)|0; return m+':'+(s<10?'0':'')+s; }
 function showToast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2200); }
 </script>
 
 <script>
-/* ================== PLAYER STATE ================== */
+/* ================== PLAYER ================== */
 const audio = $('#audio');
+const intro = $('#introMedia');
 const onAir = $('#onAir');
 const startBtn = $('#startBtn');
 const pauseBtn = $('#pauseBtn');
@@ -288,19 +253,17 @@ const art = $('#art'), story = $('#story');
 const plistBody = $('#plistBody'), countRight = $('#countRight');
 const bgOverlay = $('#bgOverlay');
 
-let idx = 0, isShuffle=false, isLoop=false, isMuted=false, isPlaying=false, isLoading=false, allowBreaks=true;
-let songCounter = 0;
+let idx=0, isShuffle=false, isLoop=false, isMuted=false, isPlaying=false, isLoading=false, allowBreaks=true;
+let songCounter=0, welcomePlayed=false;
 
 tcount.textContent = PLAYLIST.length;
 countRight.textContent = PLAYLIST.length + ' items';
 
-/* Build playlist UI */
 function buildList(){
   plistBody.innerHTML = '';
-  PLAYLIST.forEach((tr, i) => {
-    const div = document.createElement('div');
-    div.className='item';
-    div.setAttribute('data-i', i);
+  PLAYLIST.forEach((tr,i)=>{
+    const div=document.createElement('div');
+    div.className='item'; div.dataset.i=i;
     div.innerHTML = `<div><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}</div><div class="tiny">${tr.file}</div>`;
     div.addEventListener('click', ()=> load(i, true));
     plistBody.appendChild(div);
@@ -309,30 +272,27 @@ function buildList(){
 buildList();
 
 function markActive(){
-  [...plistBody.children].forEach(n => n.classList.toggle('active', Number(n.getAttribute('data-i'))===idx));
+  [...plistBody.children].forEach(n => n.classList.toggle('active', Number(n.dataset.i)===idx));
 }
 
-/* Welcome flow: play welcome first (outside playlist); brighten background during this */
-let welcomePlayed = false;
+/* Intro/welcome flow — lighter background while intro plays */
 async function playWelcomeThenStart(){
   try{
-    bgOverlay.classList.add('light'); // more transparent while welcome plays
-    const wel = $('#introVideo'); // audio or video welcome
-    wel.currentTime = 0;
-    await wel.play();
-    wel.addEventListener('ended', async () => {
-      bgOverlay.classList.remove('light'); // return to normal
+    bgOverlay.classList.add('intro');   // << increased transparency here
+    intro.currentTime = 0;
+    await intro.play();
+    intro.addEventListener('ended', async ()=>{
+      bgOverlay.classList.remove('intro');
       welcomePlayed = true;
-      await load(idx, false); // prepare first track
+      await load(idx, false);
       play();
     }, { once:true });
   }catch(e){
-    // If autoplay is blocked, enable manual start
     showToast('Tap Start Station to begin');
   }
 }
 
-/* ================== CORE LOAD/PLAY ================== */
+/* Core load/play */
 let seekTick=null;
 function clearSeekTick(){ if(seekTick) cancelAnimationFrame(seekTick), seekTick=null; }
 
@@ -349,19 +309,17 @@ async function load(i, autoplay=false){
   art.src = (tr.art||'Media/default.jpg');
   story.textContent = tr.story || '—';
 
-  seek.value = 0; $('#elapsed').textContent = '0:00'; $('#remaining').textContent = '-0:00';
+  seek.value = 0; $('#elapsed').textContent='0:00'; $('#remaining').textContent='-0:00';
 
   const u = new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u);
 
   try{
     await resolveAudioSrc(audio, tr.file);
-    isLoading = false;
-    meta.textContent = 'Ready';
+    isLoading=false; meta.textContent='Ready';
     if (autoplay) play();
   }catch(e){
-    isLoading = false;
-    console.warn('Failed to resolve', tr.file, e);
-    showToast('Skipping: could not load “'+ (tr.title||'track') +'”');
+    isLoading=false; console.warn('Failed to resolve', tr.file, e);
+    showToast('Skipping: could not load “'+(tr.title||'track')+'”');
     next();
   }
 }
@@ -369,44 +327,30 @@ async function load(i, autoplay=false){
 function play(){
   if(isLoading) return;
   audio.play().then(()=>{
-    isPlaying = true;
-    onAir.classList.add('on');
-    startBtn.disabled = true;
-    pauseBtn.disabled = false;
-    meta.textContent = 'Playing';
-
+    isPlaying=true; onAir.classList.add('on');
+    startBtn.disabled=true; pauseBtn.disabled=false; meta.textContent='Playing';
     clearSeekTick();
     (function tick(){
-      const d = (audio.duration||0)|0, ct = (audio.currentTime||0)|0;
+      const d=(audio.duration||0)|0, ct=(audio.currentTime||0)|0;
       if (d>0){
-        $('#elapsed').textContent = fmt(ct);
-        $('#remaining').textContent = '-' + fmt(Math.max(d-ct,0));
+        $('#elapsed').textContent=fmt(ct);
+        $('#remaining').textContent='-'+fmt(Math.max(d-ct,0));
         seek.value = d ? Math.round((ct/d)*1000) : 0;
       }
-      if(isPlaying) seekTick = requestAnimationFrame(tick);
+      if(isPlaying) seekTick=requestAnimationFrame(tick);
     })();
-  }).catch(err=>{
-    console.warn('Playback failed', err);
-    showToast('Playback blocked — tap Start Station');
-  });
+  }).catch(()=> showToast('Playback blocked — tap Start Station'));
 }
-
 function pause(){
-  audio.pause();
-  isPlaying=false;
-  onAir.classList.remove('on');
-  startBtn.disabled=false;
-  pauseBtn.disabled=true;
-  meta.textContent='Paused';
+  audio.pause(); isPlaying=false; onAir.classList.remove('on');
+  startBtn.disabled=false; pauseBtn.disabled=true; meta.textContent='Paused';
 }
-
 function next(){
   if (allowBreaks && (++songCounter % 2 === 0)) {
-    // play a break, then continue
     const pick = BREAKS[Math.floor(Math.random()*BREAKS.length)];
     resolveAudioSrc(audio, pick).then(()=>{
-      meta.textContent = 'Station ID break';
-      audio.onended = ()=> { audio.onended=null; load(idx + (isShuffle? (Math.random()*PLAYLIST.length|0)+1 : 1), true); };
+      meta.textContent='Station ID break';
+      audio.onended = ()=> { audio.onended=null; load(idx + (isShuffle? ((Math.random()*PLAYLIST.length|0)+1) : 1), true); };
       audio.play().catch(()=>{ load(idx + 1, true); });
     }).catch(()=> load(idx + 1, true));
     return;
@@ -414,20 +358,16 @@ function next(){
   const step = isShuffle ? ((Math.random()*PLAYLIST.length)|0)+1 : 1;
   load(idx + step, true);
 }
-
 function prev(){ load(idx - 1, true); }
 
-/* events */
 audio.addEventListener('ended', ()=>{
-  onAir.classList.remove('on');
-  isPlaying=false;
-  if (isLoop) { audio.currentTime=0; play(); return; }
+  onAir.classList.remove('on'); isPlaying=false;
+  if (isLoop){ audio.currentTime=0; play(); return; }
   next();
 });
 audio.addEventListener('play', ()=> onAir.classList.add('on'));
 audio.addEventListener('pause', ()=> onAir.classList.remove('on'));
 
-/* controls */
 startBtn.addEventListener('click', async ()=>{
   if(!welcomePlayed){ await playWelcomeThenStart(); return; }
   if(!isPlaying) play();
@@ -438,76 +378,49 @@ prevBtn.addEventListener('click', prev);
 
 vol.addEventListener('input', ()=> audio.volume = Number(vol.value));
 muteBtn.addEventListener('click', ()=>{
-  isMuted = !isMuted;
-  audio.muted = isMuted;
-  muteBtn.textContent = isMuted ? '🔈 Unmute' : '🔇 Mute';
+  const m = !(audio.muted); audio.muted=m;
+  muteBtn.textContent = m ? '🔈 Unmute' : '🔇 Mute';
 });
-
-loopBtn.addEventListener('click', ()=>{
-  isLoop = !isLoop;
-  loopBtn.textContent = isLoop ? '⟲ Loop: On' : '⟲ Loop';
-});
-shuffleBtn.addEventListener('click', ()=>{
-  isShuffle = !isShuffle;
-  shuffleBtn.textContent = isShuffle ? '🔀 Shuffle: On' : '🔀 Shuffle';
-});
-breaksBtn.addEventListener('click', ()=>{
-  allowBreaks = !allowBreaks;
-  breaksBtn.textContent = allowBreaks ? '🛎 Breaks: On' : '🛎 Breaks: Off';
-});
+loopBtn.addEventListener('click', ()=>{ isLoop=!isLoop; loopBtn.textContent = isLoop ? '⟲ Loop: On' : '⟲ Loop'; });
+shuffleBtn.addEventListener('click', ()=>{ isShuffle=!isShuffle; shuffleBtn.textContent = isShuffle ? '🔀 Shuffle: On' : '🔀 Shuffle'; });
+breaksBtn.addEventListener('click', ()=>{ allowBreaks=!allowBreaks; breaksBtn.textContent = allowBreaks ? '🛎 Breaks: On' : '🛎 Breaks: Off'; });
 
 seek.addEventListener('input', ()=>{
   if(!audio.duration) return;
-  const t = (Number(seek.value)/1000) * audio.duration;
-  audio.currentTime = t;
+  audio.currentTime = (Number(seek.value)/1000) * audio.duration;
 });
 
 shareBtn.addEventListener('click', async ()=>{
-  const u = new URL(location.href);
-  u.searchParams.set('t', idx);
-  const link = u.toString();
-  try{
-    await navigator.clipboard.writeText(link);
-    showToast('Link copied to clipboard');
-  }catch{
-    prompt('Copy link:', link);
-  }
+  const u = new URL(location.href); u.searchParams.set('t', idx); const link = u.toString();
+  try{ await navigator.clipboard.writeText(link); showToast('Link copied to clipboard'); }
+  catch{ prompt('Copy link:', link); }
 });
 
-/* Exit pre-roll and return to lobby (same-tab navigation) */
+/* Exit pre-roll then navigate back to lobby */
 toLobby.addEventListener('click', async ()=>{
   try{
-    const v = $('#exitVideo');
-    v.currentTime = 0;
-    bgOverlay.classList.add('light');
-    v.style.display='block';
+    const v = $('#exitVideo'); v.currentTime=0; v.style.display='block';
     await v.play();
-    v.addEventListener('ended', ()=>{
-      // replace with your real lobby URL if different:
-      location.href = '../index.html';
-    }, { once:true });
-  }catch(e){
-    location.href = '../index.html';
-  }
+    v.addEventListener('ended', ()=>{ location.href='../index.html'; }, { once:true });
+  }catch{ location.href='../index.html'; }
 });
 
 /* Deep link ?t= */
 (function bootFromQuery(){
-  const p = new URL(location).searchParams;
-  const t = Number(p.get('t'));
-  if(Number.isFinite(t) && t>=0 && t<PLAYLIST.length){ idx = t|0; }
+  const p=new URL(location).searchParams; const t=Number(p.get('t'));
+  if(Number.isFinite(t) && t>=0 && t<PLAYLIST.length){ idx=t|0; }
   load(idx, false);
 })();
 
-/* Keyboard accessibility: Space=toggle, Left/Right seek, J/L YouTube-style, K toggle */
+/* Keyboard shortcuts */
 window.addEventListener('keydown', (e)=>{
   if (['INPUT','TEXTAREA','SELECT','BUTTON'].includes(document.activeElement.tagName)) return;
   if (e.code==='Space'){ e.preventDefault(); isPlaying? pause(): play(); }
   if (e.code==='ArrowRight'){ audio.currentTime = Math.min((audio.currentTime||0)+5, audio.duration||1); }
   if (e.code==='ArrowLeft'){ audio.currentTime = Math.max((audio.currentTime||0)-5, 0); }
-  if (e.key==='k' || e.key==='K'){ isPlaying? pause(): play(); }
-  if (e.key==='j' || e.key==='J'){ audio.currentTime = Math.max((audio.currentTime||0)-10, 0); }
-  if (e.key==='l' || e.key==='L'){ audio.currentTime = Math.min((audio.currentTime||0)+10, audio.duration||1); }
+  if (e.key==='k'||e.key==='K'){ isPlaying? pause(): play(); }
+  if (e.key==='j'||e.key==='J'){ audio.currentTime = Math.max((audio.currentTime||0)-10, 0); }
+  if (e.key==='l'||e.key==='L'){ audio.currentTime = Math.min((audio.currentTime||0)+10, audio.duration||1); }
 });
 </script>
 </body>
