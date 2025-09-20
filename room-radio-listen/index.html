@@ -110,6 +110,21 @@
   .overlay{position:fixed;inset:0;z-index:9999;display:none;place-items:center;
            background:radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.35), rgba(0,0,0,.75)), rgba(0,0,0,.7);}
   .frame{border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);}
+
+
+/* PATCH: lighten only the WELCOME overlay (not the exit one) */
+#welcomeOverlay.overlay{
+  /* make the background almost fully visible while the intro box is up */
+  background:
+    radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.10), rgba(0,0,0,.20)),
+    rgba(0,0,0,.20) !important;
+}
+
+/* lighten the card behind the welcome text/buttons */
+#welcomeOverlay .frame{
+  background: rgba(0,0,0,.22) !important;
+}
+
 </style>
 </head>
 <body>
