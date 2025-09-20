@@ -8,44 +8,33 @@
   :root{
     --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
     --card:#151a29; --line:#22324d; --shadow:0 18px 50px rgba(0,0,0,.45);
-    --story-img: 180px; /* artwork size (adjust 160–240px) */
-    /* NEW */
-    --logo-size: 180px;              /* Frasier logo size */
-    --lobby-arrow-size: 32px;        /* Return-to-Lobby arrow size */
+    --story-img: 180px;         /* artwork size */
+    --logo-size: 94px;          /* Frasier logo size */
+    --lobby-arrow-size: 32px;   /* Return-to-Lobby arrow size */
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{margin:0;background:#0a0e1a;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
 
-  /* Lighter overlay so the background image pops more */
-  .bg{
-    position:fixed; inset:0; pointer-events:none;
+  .bg{position:fixed; inset:0; pointer-events:none;
     background:
       linear-gradient(180deg, rgba(10,14,26,.35), rgba(10,14,26,.70)),
       url('Media/RadioMusicListening.jpg') center/cover no-repeat;
-    opacity:.38;
-    filter:saturate(.95);
-  }
+    opacity:.38; filter:saturate(.95);}
 
   .wrap{position:relative;max-width:1200px;margin:0 auto;padding:22px 18px 80px}
 
   header{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
-  .header-logo{
-    height:var(--logo-size);           /* NEW: variable size */
-    width:auto;
-    border-radius:8px;
-  }
+  .header-logo{height:var(--logo-size); width:auto; border-radius:8px;}
   h1{font-size:clamp(22px,3.4vw,36px);margin:0;line-height:1.15}
   .sub{opacity:.75;font-weight:500}
 
-  /* ON AIR pill */
   .onair{display:inline-flex;align-items:center;gap:10px;background:#0f1626;border:1px solid var(--line);
          padding:8px 14px;border-radius:999px;box-shadow:var(--shadow)}
   .lamp{width:14px;height:14px;border-radius:50%;background:#263142;box-shadow:0 0 0 0 rgba(255,0,0,0);}
   .onair.active .lamp{background:#ff3647;box-shadow:0 0 18px 3px rgba(255,54,71,.6)}
   .onair .txt{letter-spacing:.25em;font-weight:700}
 
-  /* Panels */
   .grid{display:grid;grid-template-columns:1fr 420px;gap:16px}
   .panel{background:rgba(9,14,22,.66);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;
          box-shadow:var(--shadow)}
@@ -62,19 +51,7 @@
   .kv{display:flex;align-items:center;gap:10px;font-size:.95rem}
   .kv input[type="range"]{width:160px}
 
-  /* Legacy lobby button (kept in case you need it elsewhere) */
-  .btn.lobby{
-    background:var(--brand);
-    color:#0a0e1a;
-    border-color:#6e9fe7;
-    padding:10px 14px;
-    font-weight:800;
-    border-radius:999px;
-    box-shadow:0 8px 24px rgba(137,180,250,.25);
-  }
-  .btn.lobby:focus{outline:3px solid #cfe1ff; outline-offset:2px}
-
-  /* NEW: Bigger Return-to-Lobby arrow button */
+  /* Return-to-Lobby button */
   .lobby-btn{
     display:inline-flex; align-items:center; gap:.6rem; padding:.7rem 1rem;
     border-radius:999px; border:1px solid var(--line); background:rgba(0,0,0,.35);
@@ -91,7 +68,6 @@
   .bar .time{min-width:44px;text-align:right;opacity:.8;font-feature-settings:"tnum" 1}
   .bar input[type="range"]{flex:1}
 
-  /* Playlist */
   .list{max-height:540px;overflow:auto;padding:10px 8px 12px}
   .track{display:grid;grid-template-columns:40px 1fr;gap:10px;padding:8px;border-radius:10px;cursor:pointer}
   .track:hover{background:#101a2e}
@@ -101,46 +77,25 @@
   .small{opacity:.65;font-size:.9rem}
   .hint{opacity:.7;font-size:.9rem;padding:0 12px 12px}
 
-  /* Footer bios */
   .bio{display:grid;grid-template-columns:72px 1fr;gap:14px;align-items:center;padding:12px 14px}
   .bio img{width:72px;height:72px;border-radius:14px;border:1px solid var(--line);object-fit:cover}
   .bio .name{font-weight:800}
   .bio .role{opacity:.75}
 
-  /* Tiny toast for load errors */
   .toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);
          background:#1b2438;border:1px solid #3b4f78;border-radius:10px;color:#e3ecff;
          padding:10px 14px;box-shadow:var(--shadow);font-size:.95rem;z-index:9999;display:none}
   .toast.show{display:block}
 
-  /* Story panel — grid layout (art left, title+text right) */
   .story-panel{
-    margin-top:14px;
-    padding:12px;
-    background: rgba(0,0,0,.38);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(2px);
-
-    display: grid;
-    grid-template-columns: var(--story-img) 1fr;
-    grid-auto-rows: min-content;
-    align-items: start;
-    gap: 10px 14px;
-  }
+    margin-top:14px; padding:12px; background: rgba(0,0,0,.38); border: 1px solid var(--line);
+    border-radius: 14px; box-shadow: var(--shadow); backdrop-filter: blur(2px);
+    display: grid; grid-template-columns: var(--story-img) 1fr; gap: 10px 14px; }
   .story-head{ display: contents; }
-  #storyImg{
-    grid-column: 1;
-    grid-row: 1 / span 2;
-    width: var(--story-img);
-    height: var(--story-img);
-    object-fit: cover;
-    border-radius: 10px;
-    border: 1px solid var(--line);
-  }
+  #storyImg{ grid-column: 1; grid-row: 1 / span 2; width: var(--story-img); height: var(--story-img);
+    object-fit: cover; border-radius: 10px; border: 1px solid var(--line);}
   #storyTitle{ grid-column: 2; grid-row: 1; font-weight:700; }
-  #storyBody{  grid-column: 2; grid-row: 2; color:var(--ink); opacity:.92; line-height:1.45; font-size:.95rem; }
+  #storyBody{ grid-column: 2; grid-row: 2; color:var(--ink); opacity:.92; line-height:1.45; font-size:.95rem; }
   #storyBody p{ margin: 0 0 10px }
 
   @media (max-width:1024px){
@@ -148,109 +103,131 @@
     .list{max-height:360px}
     .story-panel{ display:block; }
     #storyImg{ width:80px; height:80px; margin-bottom:8px; }
-    .header-logo{ height:120px; } /* smaller logo on narrow screens */
+    .header-logo{ height:120px; }
   }
+
+  /* Overlays */
+  .overlay{position:fixed;inset:0;z-index:9999;display:none;place-items:center;
+           background:radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.35), rgba(0,0,0,.75)), rgba(0,0,0,.7);}
+  .frame{border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);}
 </style>
 </head>
 <body>
-  <div class="bg" aria-hidden="true"></div>
-  <div class="wrap">
-    <header>
-      <img class="header-logo" src="Media/frasier.png" alt="Frasier logo">
-      <div>
-        <h1>KZAK • Frasier-Style Fun Radio without the talking</h1>
-        <div class="sub">113 Song Playlist • ON AIR lamp • Station ID every 2 songs • Share deep links</div>
-      </div>
-      <div class="spacer"></div>
-
-      <!-- NEW: Bigger Return-to-Lobby button with arrow -->
-      <button id="returnToLobby" class="lobby-btn" aria-label="Return to Lobby" title="Return to Lobby">
-        <svg class="lobby-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M12 4l1.41 1.41L8.83 10H20v2H8.83l4.58 4.59L12 18l-8-8 8-8z"/>
-        </svg>
-        <span class="lobby-label">Return to Lobby</span>
-      </button>
-
-      <div id="onAir" class="onair" aria-live="polite" style="margin-left:8px">
-        <span id="onLamp" class="lamp"></span>
-        <span class="txt">ON&nbsp;AIR</span>
-      </div>
-    </header>
-
-    <div class="grid">
-      <!-- Player -->
-      <section class="panel">
-        <div class="head">
-          <div class="controls">
-            <button id="btnPrev">◀︎ Prev</button>
-            <button id="btnPlay">▶︎ Start Station</button>
-            <button id="btnNext">Next ▶︎</button>
-            <button id="btnLoop" class="btn ghost">⟲ Loop</button>
-            <button id="btnShuffle" class="btn ghost">🔀 Shuffle</button>
-            <button id="btnMute" class="btn ghost">🔇 Mute</button>
-          </div>
-          <div class="spacer"></div>
-          <div class="kv"><span>Vol</span><input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" /></div>
-        </div>
-        <div class="body">
-          <div class="bar">
-            <span class="time" id="elapsed">0:00</span>
-            <input id="seek" type="range" min="0" max="100" value="0" />
-            <span class="time" id="remaining">-0:00</span>
-          </div>
-          <div class="trackmeta">
-            <div id="title">Station ID • KZAK</div>
-            <span>—</span>
-            <span id="meta">Not playing</span>
-            <span class="spacer"></span>
-            <span>TRACK <span id="tpos">1</span> / <span id="ttotal">0</span></span>
-          </div>
-          <div style="margin-top:12px"><button id="btnShare" class="btn small">Share</button></div>
-
-          <!-- Story panel -->
-          <section id="storyPanel" aria-live="polite" class="story-panel" hidden>
-            <div class="story-head">
-              <img id="storyImg" alt="" />
-              <div class="story-title" id="storyTitle"></div>
-            </div>
-            <div id="storyBody" class="story-body"></div>
-          </section>
-
-          <audio id="audio" crossorigin="anonymous" preload="auto"></audio>
-        </div>
-      </section>
-
-      <!-- Playlist -->
-      <aside class="panel">
-        <div class="head"><strong>Playlist</strong></div>
-        <div id="list" class="list"></div>
-        <div class="hint">Use headphones • Filenames are case-sensitive • Share copies a deep link</div>
-      </aside>
+<div class="bg" aria-hidden="true"></div>
+<div class="wrap">
+  <header>
+    <img class="header-logo" src="Media/frasier.png" alt="Frasier logo">
+    <div>
+      <h1>KZAK • Frasier-Style Fun Radio without the talking</h1>
+      <div class="sub">113 Song Playlist • ON AIR lamp • Breaks every 2 songs • Share deep links</div>
     </div>
+    <div class="spacer"></div>
+    <button id="returnToLobby" class="lobby-btn" aria-label="Return to Lobby" title="Return to Lobby">
+      <svg class="lobby-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 4l1.41 1.41L8.83 10H20v2H8.83l4.58 4.59L12 18l-8-8 8-8z"/>
+      </svg>
+      <span class="lobby-label">Return to Lobby</span>
+    </button>
+    <div id="onAir" class="onair" aria-live="polite" style="margin-left:8px">
+      <span id="onLamp" class="lamp"></span>
+      <span class="txt">ON&nbsp;AIR</span>
+    </div>
+  </header>
 
-    <!-- Footer -->
-    <section class="panel" style="margin-top:16px">
-      <div class="bio"><img src="Media/ZachArt.jpeg" alt=""><div><div class="name">zdjimas</div><div class="role">Concept, curation, engineering</div></div></div>
-      <div class="bio" style="border-top:1px solid var(--line)"><img src="Media/CJMURPHY.png" alt=""><div><div class="name">cjmurphy</div><div class="role">Composition, arrangement, sound design</div></div></div>
+  <div class="grid">
+    <!-- Player -->
+    <section class="panel">
+      <div class="head">
+        <div class="controls">
+          <button id="btnPrev">◀︎ Prev</button>
+          <button id="btnPlay">▶︎ Start Station</button>
+          <button id="btnNext">Next ▶︎</button>
+          <button id="btnLoop" class="btn ghost" title="Loop current track">⟲ Loop</button>
+          <button id="btnShuffle" class="btn ghost" title="Shuffle playlist">🔀 Shuffle</button>
+          <button id="btnMute" class="btn ghost" title="Mute audio">🔇 Mute</button>
+          <button id="btnBreaks" class="btn ghost" title="Toggle breaks">🎙 Breaks: On</button>
+        </div>
+        <div class="spacer"></div>
+        <div class="kv"><span>Vol</span><input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" /></div>
+      </div>
+      <div class="body">
+        <div class="bar">
+          <span class="time" id="elapsed">0:00</span>
+          <input id="seek" type="range" min="0" max="100" value="0" />
+          <span class="time" id="remaining">-0:00</span>
+        </div>
+        <div class="trackmeta">
+          <div id="title">Station ID • KZAK</div>
+          <span>—</span>
+          <span id="meta">Not playing</span>
+          <span class="spacer"></span>
+          <span>TRACK <span id="tpos">1</span> / <span id="ttotal">0</span></span>
+        </div>
+        <div style="margin-top:12px"><button id="btnShare" class="btn small">Share</button></div>
+
+        <!-- Story panel -->
+        <section id="storyPanel" aria-live="polite" class="story-panel" hidden>
+          <div class="story-head">
+            <img id="storyImg" alt="" />
+            <div class="story-title" id="storyTitle"></div>
+          </div>
+          <div id="storyBody" class="story-body"></div>
+        </section>
+
+        <audio id="audio" crossorigin="anonymous" preload="auto"></audio>
+      </div>
     </section>
+
+    <!-- Playlist -->
+    <aside class="panel">
+      <div class="head"><strong>Playlist</strong></div>
+      <div id="list" class="list"></div>
+      <div class="hint">Use headphones • Filenames are case-sensitive • Share copies a deep link</div>
+    </aside>
   </div>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <!-- Footer -->
+  <section class="panel" style="margin-top:16px">
+    <div class="bio"><img src="Media/ZachArt.jpeg" alt=""><div><div class="name">zdjimas</div><div class="role">Concept, curation, engineering</div></div></div>
+    <div class="bio" style="border-top:1px solid var(--line)"><img src="Media/CJMURPHY.png" alt=""><div><div class="name">cjmurphy</div><div class="role">Composition, arrangement, sound design</div></div></div>
+  </section>
+</div>
 
-  <!-- NEW: Exit pre-roll overlay -->
-  <div id="exitOverlay" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;display:none;place-items:center;background:
-  radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.35), rgba(0,0,0,.75)), rgba(0,0,0,.7);">
-    <video id="exitVideo" playsinline preload="auto" style="max-width:min(100vw,1200px);max-height:100vh;width:100%;border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000;">
-      <source src="Media/FrasierExit.mp4" type="video/mp4" />
-    </video>
-    <div class="overlay-ui" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:1rem 1.25rem;pointer-events:none;">
-      <div style="color:#e6e9ef;opacity:.85;text-shadow:0 2px 14px rgba(0,0,0,.7);">Leaving the Radio Room…</div>
-      <button id="skipExit" class="btn" style="pointer-events:auto;">Skip</button>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- EXIT pre-roll overlay -->
+<div id="exitOverlay" class="overlay" aria-hidden="true">
+  <video id="exitVideo" playsinline preload="auto" style="max-width:min(100vw,1200px);max-height:100vh;width:100%;border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000;">
+    <source src="Media/FrasierExit.mp4" type="video/mp4" />
+  </video>
+  <div class="overlay-ui" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:1rem 1.25rem;pointer-events:none;">
+    <div style="color:#e6e9ef;opacity:.85;text-shadow:0 2px 14px rgba(0,0,0,.7);">Leaving the Radio Room…</div>
+    <button id="skipExit" class="btn" style="pointer-events:auto;">Skip</button>
+  </div>
+</div>
+
+<!-- WELCOME overlay (always shows on entry) -->
+<div id="welcomeOverlay" class="overlay" aria-hidden="true" style="display:grid">
+  <div class="frame" style="padding:32px; background:rgba(0,0,0,.6);">
+    <div style="text-align:center; color:#e6e9ef; margin-bottom:16px; font-size:1.15rem; font-weight:700;">
+      Welcome to the KZAK On-Air Studio
+    </div>
+    <div style="text-align:center; color:#e6e9ef; opacity:.9; margin-bottom:18px;">
+      We’ll play a short welcome message. You can skip it if you like.
+    </div>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button id="btnPlayWelcome" class="btn">▶︎ Play Welcome</button>
+      <button id="btnSkipWelcome" class="btn">Skip</button>
     </div>
   </div>
+</div>
+<!-- Welcome VO lives outside the playlist and never lights ON AIR -->
+<audio id="welcomeAudio" preload="auto" src="Media/KZAK-Welcome.mp3" crossorigin="anonymous"></audio>
 
 <script>
-/* ===== Config & helpers ===== */
+/* ======================
+   Config & helpers
+   ====================== */
 const LOAD_TIMEOUT_MS = 8000;
 const DEFAULT_STORY_IMG = "Media/default.jpg";
 const DEFAULT_STORY_TEXT = `Under Construction: a special writeup about this specific music creation and its meaning or influence it had on the creators and the artwork shown will follow shortly.`;
@@ -260,16 +237,18 @@ const pick = arr => arr[Math.floor(Math.random()*arr.length)];
 const showToast = msg => { const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(showToast._t); showToast._t=setTimeout(()=> el.classList.remove('show'),3000); };
 function paragraphsFrom(text){ if(!text) return ""; return text.split(/\n\s*\n/g).map(s=>s.trim()).filter(Boolean).map(s=>`<p>${s.replace(/\n/g,'<br>')}</p>`).join(""); }
 
-/* ===== DOM ===== */
+/* DOM */
 const audio=document.getElementById('audio'); const btnPrev=document.getElementById('btnPrev'); const btnPlay=document.getElementById('btnPlay');
 const btnNext=document.getElementById('btnNext'); const btnLoop=document.getElementById('btnLoop'); const btnShuffle=document.getElementById('btnShuffle');
 const btnMute=document.getElementById('btnMute'); const btnShare=document.getElementById('btnShare'); const vol=document.getElementById('vol');
 const seek=document.getElementById('seek'); const title=document.getElementById('title'); const meta=document.getElementById('meta');
 const list=document.getElementById('list'); const onAir=document.getElementById('onAir'); const tpos=document.getElementById('tpos'); const ttotal=document.getElementById('ttotal');
 const storyPanel=document.getElementById('storyPanel'); const storyImg=document.getElementById('storyImg'); const storyTitle=document.getElementById('storyTitle'); const storyBody=document.getElementById('storyBody');
+const btnBreaks=document.getElementById('btnBreaks');
 
-/* ===== PLAYLIST (full, with one expanded entry) ===== */
-/* ===== PLAYLIST (generated from your Media/ listing) ===== */
+/* ======================
+   PLAYLIST (from Media/)
+   ====================== */
 const PLAYLIST = [
   { title: "Degrees (Cover)3 (Spanish guitar quartet )", file: "Media/Degrees (Cover)3 (Spanish guitar quartet ).mp3" },
   { title: "Lateralus Rising", file: "Media/Lateralus Rising.mp3" },
@@ -377,11 +356,11 @@ const PLAYLIST = [
   { title: "“The Embracing Circle” - extrat from Illumination Theory, Dream Theater", file: "Media/“The Embracing Circle” - extrat from Illumination Theory, Dream Theater.mp3" },
   { title: "_Degrees (Cover)3 (Spanish guitar quartet ) (1)", file: "Media/_Degrees (Cover)3 (Spanish guitar quartet ) (1).mp3" }
 ];
-
 ttotal.textContent = PLAYLIST.length;
 
-/* ===== Station IDs ===== */
-/* ===== Station IDs + Snappy Breaks ===== */
+/* ======================
+   Station ID / Breaks
+   ====================== */
 const BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
   "MediaBreaks/AmyYourelisteningtoK-ZACHt.mp3",
@@ -392,7 +371,7 @@ const BREAKS = [
   "MediaBreaks/Snappy2.mp3",
   "MediaBreaks/Snappy3.mp3",
   "MediaBreaks/Snappy4.mp3",
-  "MediaBreaks/snappy5.mp3",   // note: lowercase "s" in filename
+  "MediaBreaks/snappy5.mp3",  // lowercase s
   "MediaBreaks/Snappy6.mp3",
   "MediaBreaks/Snappy7.mp3",
   "MediaBreaks/Snappy8.mp3",
@@ -401,12 +380,16 @@ const BREAKS = [
 ];
 const BREAKS_CFG = { enabled:true, mode:"everyN", n:2, prob:0.33 };
 
-/* ===== State ===== */
-let idx=0,isBreak=false,isLoading=false,isShuffling=false,loadTimer=null; let userScrubbing=false; let tracksSinceBreak=0;
+/* ======================
+   State
+   ====================== */
+let idx=0,isBreak=false,isLoading=false,isShuffling=false,loadTimer=null;
+let userScrubbing=false; let tracksSinceBreak=0;
 const breakAudio=new Audio(); breakAudio.crossOrigin='anonymous';
 
-/* ===== UI helpers ===== */
+/* UI helpers */
 function setOnAir(on){ onAir.classList.toggle('active',on); }
+function updateBreaksButton(){ btnBreaks.textContent = `🎙 Breaks: ${BREAKS_CFG.enabled ? 'On' : 'Off'}`; btnBreaks.classList.toggle('onair', BREAKS_CFG.enabled); }
 function pickBreakNow(){
   if(!BREAKS_CFG.enabled||audio.loop||BREAKS.length===0) return false;
   if(BREAKS_CFG.mode==="everyN"){ tracksSinceBreak++; if(tracksSinceBreak>=BREAKS_CFG.n){ tracksSinceBreak=0; return true; } return false; }
@@ -416,7 +399,7 @@ function pickBreakNow(){
 }
 function currentMedia(){ return isBreak?breakAudio:audio; }
 
-/* ===== Story rendering ===== */
+/* Story panel */
 function renderStoryFor(i){
   const item=PLAYLIST[i];
   if(!item){ storyPanel.hidden=true; return; }
@@ -427,7 +410,7 @@ function renderStoryFor(i){
   storyPanel.hidden=false;
 }
 
-/* ===== Playlist UI ===== */
+/* Playlist UI */
 function renderList(){
   list.innerHTML='';
   PLAYLIST.forEach((t,i)=>{
@@ -441,12 +424,11 @@ function renderList(){
 }
 function markActive(){ [...list.children].forEach((el,i)=>el.querySelector('.idx').classList.toggle('now',i===idx)); }
 
-/* ===== Core playback with robust error/timeout handling ===== */
+/* Core playback */
 function clearLoadTimer(){ if(loadTimer){clearTimeout(loadTimer);loadTimer=null;} }
 
 function load(i,autoplay=false){
   isLoading=true; clearLoadTimer();
-
   idx=(i+PLAYLIST.length)%PLAYLIST.length;
   const tr=PLAYLIST[idx];
   const src=pathToUrl(tr.file);
@@ -459,17 +441,13 @@ function load(i,autoplay=false){
 
   const u=new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u);
 
-  // reset scrubber
-  seek.value=0;
-  document.getElementById('elapsed').textContent='0:00';
-  document.getElementById('remaining').textContent='-0:00';
+  // reset scrubber/times
+  seek.value=0; document.getElementById('elapsed').textContent='0:00'; document.getElementById('remaining').textContent='-0:00';
 
-  // fall-forward timeout
   loadTimer=setTimeout(()=>{
     console.warn('Load timeout for', tr.file);
     showToast('Skipping: could not load “' + tr.title + '”');
-    isLoading=false;
-    next();
+    isLoading=false; next();
   }, LOAD_TIMEOUT_MS);
 
   const onReady=()=>{
@@ -494,7 +472,7 @@ function pause(){ currentMedia().pause(); }
 function next(){ load(idx+1,true); }
 function prev(){ load(idx-1,true); }
 
-/* ===== Break handling ===== */
+/* Break handling */
 function cancelBreakIfAny(){
   if(isBreak){
     try { breakAudio.pause(); } catch {}
@@ -506,27 +484,24 @@ async function playBreakThenNext(){
   isBreak=true;
   const prevTitle=title.textContent, prevMeta=meta.textContent;
 
-  breakAudio.volume=audio.volume;
-  breakAudio.muted=audio.muted;
+  breakAudio.volume=audio.volume; breakAudio.muted=audio.muted;
   const file=pick(BREAKS);
   title.textContent="Station ID • KZAK";
   meta.textContent=file.replace(/^MediaBreaks\//,'');
   breakAudio.src=pathToUrl(file);
 
   const goNext=()=>{ title.textContent=prevTitle; meta.textContent=prevMeta; isBreak=false; next(); };
-  breakAudio.onerror=()=>goNext();
-  breakAudio.onended=goNext;
+  breakAudio.onerror=goNext; breakAudio.onended=goNext;
 
   try{ await breakAudio.play(); }catch{ goNext(); }
 }
 
-/* ===== Controls ===== */
+/* Controls */
 btnPlay.onclick = ()=>{ if(isBreak){ cancelBreakIfAny(); next(); return; } const el=currentMedia(); el.paused?el.play().catch(()=>{}):el.pause(); };
 btnPrev.onclick = ()=>{ cancelBreakIfAny(); prev(); };
 btnNext.onclick = ()=>{ cancelBreakIfAny(); next(); };
 btnLoop.onclick = ()=>{ audio.loop=!audio.loop; btnLoop.classList.toggle('onair', audio.loop); };
 
-// Safe shuffle: pin current track; avoid mid-load races; don't interrupt break
 btnShuffle.onclick = ()=>{
   if(isShuffling||isLoading) return;
   isShuffling=true;
@@ -557,8 +532,16 @@ btnShare.onclick = async ()=>{
   }
 };
 
-/* ===== Main audio events ===== */
-audio.addEventListener('play',  ()=>{ setOnAir(true);  btnPlay.textContent='⏸︎ Pause Station';  meta.textContent='Playing'; }); /* label fixed */
+/* Breaks toggle (default ON) */
+btnBreaks.onclick = ()=>{
+  BREAKS_CFG.enabled = !BREAKS_CFG.enabled;
+  updateBreaksButton();
+  if(isBreak && !BREAKS_CFG.enabled){ cancelBreakIfAny(); next(); }
+};
+updateBreaksButton();
+
+/* Main audio events */
+audio.addEventListener('play',  ()=>{ setOnAir(true);  btnPlay.textContent='⏸︎ Pause Station';  meta.textContent='Playing'; });
 audio.addEventListener('pause', ()=>{ if(!isBreak){ setOnAir(false); btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; } });
 audio.addEventListener('error', ()=>{ const tr=PLAYLIST[idx]; showToast('Skipping: could not load “'+(tr?.title||'Track')+'”'); clearLoadTimer(); isLoading=false; next(); });
 audio.addEventListener('ended', ()=>{ setOnAir(false); meta.textContent='Finished'; if(pickBreakNow()) playBreakThenNext(); else next(); });
@@ -568,17 +551,11 @@ audio.addEventListener('timeupdate', ()=>{ if(!userScrubbing && isFinite(audio.d
 breakAudio.addEventListener('play', ()=> setOnAir(true));
 breakAudio.addEventListener('pause',()=> setOnAir(false));
 
-/* ===== Init ===== */
-(function init(){
-  renderList();
-  const p=parseInt(new URL(location.href).searchParams.get('t'),10);
-  const startIdx=Number.isFinite(p)?Math.max(0,Math.min(PLAYLIST.length-1,p)):0;
-  ttotal.textContent=PLAYLIST.length;
-  load(startIdx,false);
-})();
+/* Init: only render the list; do NOT load first track yet */
+(function init(){ renderList(); })();
 </script>
 
-<!-- NEW: JS to pause audio, play exit video, then go to lobby -->
+<!-- Exit video logic -->
 <script>
 (function(){
   const audio = document.getElementById('audio');
@@ -586,7 +563,7 @@ breakAudio.addEventListener('pause',()=> setOnAir(false));
   const exitOverlay = document.getElementById('exitOverlay');
   const exitVideo = document.getElementById('exitVideo');
   const skipExit = document.getElementById('skipExit');
-  const LOBBY_URL = '../index.html';           // adjust if needed
+  const LOBBY_URL = '../index.html';
   const TIMEOUT_MS = 30000;
 
   function goLobby(){ window.location.href = LOBBY_URL; }
@@ -627,6 +604,58 @@ breakAudio.addEventListener('pause',()=> setOnAir(false));
   if (skipExit){
     skipExit.addEventListener('click', (e)=>{ e.preventDefault(); goLobby(); });
   }
+})();
+</script>
+
+<!-- Welcome audio logic (separate from playlist; no ON AIR) -->
+<script>
+(function(){
+  const welcomeOverlay = document.getElementById('welcomeOverlay');
+  const welcomeAudio   = document.getElementById('welcomeAudio');
+  const btnPlayWelcome = document.getElementById('btnPlayWelcome');
+  const btnSkipWelcome = document.getElementById('btnSkipWelcome');
+
+  let bootstrapped = false;
+  function bootstrapPlayer(){
+    if (bootstrapped) return;
+    bootstrapped = true;
+    const p = parseInt(new URL(location.href).searchParams.get('t'), 10);
+    const startIdx = Number.isFinite(p) ? Math.max(0, Math.min(PLAYLIST.length-1, p)) : 0;
+    ttotal.textContent = PLAYLIST.length;
+    load(startIdx, /*autoplay=*/false);  // load first track paused
+  }
+  function hideWelcome(){
+    welcomeOverlay.style.display='none';
+    welcomeOverlay.setAttribute('aria-hidden','true');
+    try{ welcomeAudio.pause(); }catch(e){}
+  }
+
+  // Always show overlay on entry; do NOT attempt autoplay (predictable cross-browser)
+  window.addEventListener('load', ()=>{
+    welcomeOverlay.style.display = 'grid';
+    welcomeOverlay.setAttribute('aria-hidden','false');
+  });
+
+  btnPlayWelcome.addEventListener('click', async ()=>{
+    try{ welcomeAudio.currentTime = 0; await welcomeAudio.play(); }catch(e){}
+  });
+
+  welcomeAudio.addEventListener('ended', ()=>{
+    hideWelcome();
+    bootstrapPlayer();
+  });
+
+  btnSkipWelcome.addEventListener('click', ()=>{
+    hideWelcome();
+    bootstrapPlayer();
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape' && welcomeOverlay.getAttribute('aria-hidden') === 'false'){
+      hideWelcome();
+      bootstrapPlayer();
+    }
+  });
 })();
 </script>
 </body>
