@@ -23,12 +23,6 @@
     filter:saturate(.95);
   }
 
- 
-
- <div id="netBanner" class="net-banner" role="status" aria-live="polite" hidden>
-  Offline — reconnecting… playback paused.
-</div>
-
   .wrap{position:relative;max-width:1200px;margin:0 auto;padding:22px 18px 80px}
 
   header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
@@ -101,6 +95,21 @@
          padding:10px 14px;box-shadow:var(--shadow);font-size:.95rem;z-index:9999;display:none}
   .toast.show{display:block}
 
+  /* NEW: Story panel styles */
+  .story-panel{
+    margin-top:14px; padding:12px 12px 14px;
+    background: rgba(0,0,0,.38); border: 1px solid var(--line);
+    border-radius: 14px; box-shadow: var(--shadow);
+    max-height: 28vh; overflow: auto; backdrop-filter: blur(2px)
+  }
+  .story-head{ display:flex; gap:12px; align-items:center; margin-bottom:8px }
+  .story-head img{
+    width:64px; height:64px; object-fit:cover; border-radius:10px; border:1px solid var(--line)
+  }
+  .story-title{ font-weight:600; font-size:1rem; color:var(--ink) }
+  .story-body{ color:var(--ink); opacity:.92; line-height:1.45; font-size:.95rem; white-space:normal }
+  .story-body p{ margin: 0 0 10px }
+
   @media (max-width:1024px){
     .grid{grid-template-columns:1fr}
     .list{max-height:360px}
@@ -114,7 +123,7 @@
       <img class="header-logo" src="Media/frasier.png" alt="">
       <div>
         <h1>KZAK • Frasier-Style Free Radio without the talking</h1>
-        <div class="sub">111 Song Playlist • ON AIR lamp • Station ID every 3 songs • Share deep links</div>
+        <div class="sub">Larger controls • ON AIR lamp • Station ID every 3 songs • Share deep links</div>
       </div>
       <div class="spacer"></div>
 
@@ -168,6 +177,15 @@
             <button id="btnShare" class="btn small">Share</button>
           </div>
 
+          <!-- NEW: Story panel (updates per track) -->
+          <section id="storyPanel" aria-live="polite" class="story-panel" hidden>
+            <div class="story-head">
+              <img id="storyImg" alt="" />
+              <div class="story-title" id="storyTitle"></div>
+            </div>
+            <div id="storyBody" class="story-body"></div>
+          </section>
+
           <audio id="audio" crossorigin="anonymous" preload="auto"></audio>
         </div>
       </section>
@@ -206,7 +224,11 @@
 <script>
 /* ===== Config ===== */
 const LOAD_TIMEOUT_MS = 8000; // fall-forward if a track doesn’t load
-const pathToUrl = p => encodeURI(p).replace(/#/g,'%23'); // keep spaces/() and escape #
+const DEFAULT_STORY_IMG = "Media/default.jpg";
+const DEFAULT_STORY_TEXT = `Under Construction: a special writeup about this specific music creation and its meaning or influence it had on the creators and the artwork shown will follow shortly.`;
+
+// Keep spaces/() and escape #
+const pathToUrl = p => encodeURI(p).replace(/#/g,'%23');
 
 /* ===== Helpers ===== */
 const fmt = s => { if (!isFinite(s)) return '0:00'; const m=(s/60)|0, sec=(s%60)|0; return m+':'+(sec<10?'0':'')+sec; };
@@ -218,6 +240,17 @@ const showToast = msg => {
   clearTimeout(showToast._t);
   showToast._t = setTimeout(()=> el.classList.remove('show'), 3000);
 };
+
+// NEW: simple paragraph formatter (blank line → new paragraph)
+function paragraphsFrom(text){
+  if(!text) return "";
+  return text
+    .split(/\n\s*\n/g)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map(s => `<p>${s.replace(/\n/g,'<br>')}</p>`)
+    .join("");
+}
 
 /* ===== DOM ===== */
 const audio = document.getElementById('audio');
@@ -238,7 +271,13 @@ const onLamp = document.getElementById('onLamp');
 const tpos = document.getElementById('tpos');
 const ttotal = document.getElementById('ttotal');
 
-/* ===== PLAYLIST (exactly your 111 items) ===== */
+/* NEW: Story DOM refs */
+const storyPanel = document.getElementById('storyPanel');
+const storyImg   = document.getElementById('storyImg');
+const storyTitle = document.getElementById('storyTitle');
+const storyBody  = document.getElementById('storyBody');
+
+/* ===== PLAYLIST (your 111 items; unchanged) ===== */
 const PLAYLIST = [
   { title: "Degrees (Cover)3 (Spanish guitar quartet )", file: "Media/Degrees (Cover)3 (Spanish guitar quartet ).mp3" },
   { title: "Lateralus Rising", file: "Media/Lateralus Rising.mp3" },
@@ -380,6 +419,26 @@ function pickBreakNow(){
 }
 function currentMedia(){ return isBreak ? breakAudio : audio; }
 
+/* ===== NEW: Story rendering (defaults if fields are missing) ===== */
+function renderStoryFor(index){
+  const item = PLAYLIST[index];
+  if (!item){ storyPanel.hidden = true; return; }
+
+  // Title
+  storyTitle.textContent = item.title || '';
+
+  // Image (custom or default)
+  const imgPath = item.img ? item.img : DEFAULT_STORY_IMG;
+  storyImg.src = pathToUrl(imgPath);
+  storyImg.alt = item.alt || (item.img ? (item.title || "Artwork") : "Default artwork");
+
+  // Story (custom or default)
+  const storyText = item.story ? item.story : DEFAULT_STORY_TEXT;
+  storyBody.innerHTML = paragraphsFrom(storyText);
+
+  storyPanel.hidden = false;
+}
+
 /* ===== Playlist UI ===== */
 function renderList(){
   list.innerHTML='';
@@ -431,14 +490,15 @@ function load(i, autoplay=false){
   const onReady = () => {
     clearLoadTimer();
     isLoading = false;
+    // UPDATE story as soon as track is ready (so default or custom shows immediately)
+    renderStoryFor(idx);
     if (autoplay) play();
   };
 
   if (audio.readyState >= 2) onReady();
   else {
     audio.onloadedmetadata = onReady;
-    // Also react if we can start earlier
-    audio.oncanplay = ()=>{ /* nothing; wait for metadata or timeout */ };
+    audio.oncanplay = ()=>{ /* keep waiting for metadata or timeout */ };
   }
 }
 
@@ -473,6 +533,8 @@ async function playBreakThenNext(){
   meta.textContent = file.replace(/^MediaBreaks\//,'');
   breakAudio.src = pathToUrl(file);
 
+  // DO NOT touch the story panel during breaks; it should continue showing the current song’s story
+
   const goNext = () => { title.textContent=prevTitle; meta.textContent=prevMeta; isBreak=false; next(); };
   breakAudio.onerror = (e)=>{ console.error('Break load error', file, e); goNext(); };
   breakAudio.onended = goNext;
@@ -495,6 +557,8 @@ btnShuffle.onclick = ()=>{
   const newIdx = PLAYLIST.findIndex(t => t === cur);
   if (newIdx !== -1){ [PLAYLIST[newIdx], PLAYLIST[idx]] = [PLAYLIST[idx], PLAYLIST[newIdx]]; }
   renderList(); markActive();
+  // Ensure the story panel keeps showing the current track’s notes even after shuffle
+  renderStoryFor(idx);
   isShuffling = false;
 };
 
@@ -554,7 +618,7 @@ breakAudio.addEventListener('pause',()=> setOnAir(false));
   renderList();
   const p = parseInt(new URL(location.href).searchParams.get('t'),10);
   const startIdx = Number.isFinite(p) ? Math.max(0, Math.min(PLAYLIST.length-1, p)) : 0;
-  ttotal.textContent = PLAYLIST.length; // ensure counter shows the actual list size (79 currently)
+  ttotal.textContent = PLAYLIST.length;
   load(startIdx, /*autoplay=*/false);
 })();
 </script>
