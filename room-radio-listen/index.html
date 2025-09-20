@@ -4,499 +4,659 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>KZAK • Frasier-Style Fun Radio without the talking</title>
-<meta name="color-scheme" content="dark light">
 <style>
   :root{
     --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
     --card:#151a29; --line:#22324d; --shadow:0 18px 50px rgba(0,0,0,.45);
+    --story-img: 180px;         /* artwork size */
+    --logo-size: 94px;          /* Frasier logo size */
+    --lobby-arrow-size: 32px;   /* Return-to-Lobby arrow size */
   }
-  html,body{height:100%;margin:0}
-  body{
-    color:var(--ink);
-    background:#0b1220 url('Media/RadioMusicListening.jpg') center/cover fixed no-repeat;
-    position:relative;
-    font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:#0a0e1a;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+
+  .bg{position:fixed; inset:0; pointer-events:none;
+    background:
+      linear-gradient(180deg, rgba(10,14,26,.35), rgba(10,14,26,.70)),
+      url('Media/RadioMusicListening.jpg') center/cover no-repeat;
+    opacity:.38; filter:saturate(.95);}
+
+  .wrap{position:relative;max-width:1200px;margin:0 auto;padding:22px 18px 80px}
+
+  header{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .header-logo{height:var(--logo-size); width:auto; border-radius:8px;}
+  h1{font-size:clamp(22px,3.4vw,36px);margin:0;line-height:1.15}
+  .sub{opacity:.75;font-weight:500}
+
+  .onair{display:inline-flex;align-items:center;gap:10px;background:#0f1626;border:1px solid var(--line);
+         padding:8px 14px;border-radius:999px;box-shadow:var(--shadow)}
+  .lamp{width:14px;height:14px;border-radius:50%;background:#263142;box-shadow:0 0 0 0 rgba(255,0,0,0);}
+  .onair.active .lamp{background:#ff3647;box-shadow:0 0 18px 3px rgba(255,54,71,.6)}
+  .onair .txt{letter-spacing:.25em;font-weight:700}
+
+  .grid{display:grid;grid-template-columns:1fr 420px;gap:16px}
+  .panel{background:rgba(9,14,22,.66);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;
+         box-shadow:var(--shadow)}
+  .panel .head{display:flex;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .panel .body{padding:14px}
+  .controls{display:flex;flex-wrap:wrap;gap:8px}
+  button, .btn{appearance:none;border:1px solid var(--line);background:#0f1626;color:var(--ink);
+               padding:8px 12px;border-radius:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  button:hover, .btn:hover{border-color:#2b3c5b}
+  .btn.small{padding:6px 10px;font-size:.92rem}
+  .btn.ghost{background:transparent}
+  .btn.onair{background:#202a40}
+  .spacer{flex:1}
+  .kv{display:flex;align-items:center;gap:10px;font-size:.95rem}
+  .kv input[type="range"]{width:160px}
+
+  /* Return-to-Lobby button */
+  .lobby-btn{
+    display:inline-flex; align-items:center; gap:.6rem; padding:.7rem 1rem;
+    border-radius:999px; border:1px solid var(--line); background:rgba(0,0,0,.35);
+    backdrop-filter:blur(6px); color:var(--ink); box-shadow:var(--shadow); font-weight:600;
+    transition:transform .1s ease, background .2s ease, border-color .2s ease;
+  }
+  .lobby-btn:hover{ transform:translateY(-1px); background:rgba(0,0,0,.45); }
+  .lobby-arrow{ width:var(--lobby-arrow-size); height:var(--lobby-arrow-size); fill:currentColor; }
+
+  .trackmeta{margin-top:10px;display:flex;align-items:center;gap:10px}
+  #title{font-weight:700}
+  #meta{opacity:.75}
+  .bar{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .bar .time{min-width:44px;text-align:right;opacity:.8;font-feature-settings:"tnum" 1}
+  .bar input[type="range"]{flex:1}
+
+  .list{max-height:540px;overflow:auto;padding:10px 8px 12px}
+  .track{display:grid;grid-template-columns:40px 1fr;gap:10px;padding:8px;border-radius:10px;cursor:pointer}
+  .track:hover{background:#101a2e}
+  .idx{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);
+       border-radius:8px;font-weight:700}
+  .idx.now{background:#1a2844;border-color:#34507e;color:#bcd3ff}
+  .small{opacity:.65;font-size:.9rem}
+  .hint{opacity:.7;font-size:.9rem;padding:0 12px 12px}
+
+  .bio{display:grid;grid-template-columns:72px 1fr;gap:14px;align-items:center;padding:12px 14px}
+  .bio img{width:72px;height:72px;border-radius:14px;border:1px solid var(--line);object-fit:cover}
+  .bio .name{font-weight:800}
+  .bio .role{opacity:.75}
+
+  .toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);
+         background:#1b2438;border:1px solid #3b4f78;border-radius:10px;color:#e3ecff;
+         padding:10px 14px;box-shadow:var(--shadow);font-size:.95rem;z-index:9999;display:none}
+  .toast.show{display:block}
+
+  .story-panel{
+    margin-top:14px; padding:12px; background: rgba(0,0,0,.38); border: 1px solid var(--line);
+    border-radius: 14px; box-shadow: var(--shadow); backdrop-filter: blur(2px);
+    display: grid; grid-template-columns: var(--story-img) 1fr; gap: 10px 14px; }
+  .story-head{ display: contents; }
+  #storyImg{ grid-column: 1; grid-row: 1 / span 2; width: var(--story-img); height: var(--story-img);
+    object-fit: cover; border-radius: 10px; border: 1px solid var(--line);}
+  #storyTitle{ grid-column: 2; grid-row: 1; font-weight:700; }
+  #storyBody{ grid-column: 2; grid-row: 2; color:var(--ink); opacity:.92; line-height:1.45; font-size:.95rem; }
+  #storyBody p{ margin: 0 0 10px }
+
+  @media (max-width:1024px){
+    .grid{grid-template-columns:1fr}
+    .list{max-height:360px}
+    .story-panel{ display:block; }
+    #storyImg{ width:80px; height:80px; margin-bottom:8px; }
+    .header-logo{ height:120px; }
   }
 
-  /* Overlay: normal for readability; during intro we expose 75% of background (opacity .25) */
-  .bg-overlay{
-    position:fixed; inset:0;
-    background:linear-gradient(180deg, rgba(6,10,20,.72), rgba(6,10,20,.78));
-    transition:opacity .35s ease;
-    pointer-events:none;
-    opacity:1;
-  }
-  .bg-overlay.intro{ opacity:.25; } /* 75% visible background during welcome */
-
-  .wrap{ position:relative; z-index:1; padding:24px; max-width:1200px; margin:0 auto; }
-
-  header{ display:flex; align-items:center; gap:16px; margin-bottom:10px; }
-  .thumb{width:94px;height:94px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
-  .thumb img{width:100%;height:100%;object-fit:cover}
-  h1{font-size:32px;line-height:1.15;margin:0}
-  .sub{color:var(--muted);font-size:14px;margin-top:4px}
-
-  .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
-  .btn{
-    background:#101a2d;border:1px solid var(--line); color:var(--ink);
-    padding:10px 14px; border-radius:12px; cursor:pointer; user-select:none;
-    display:inline-flex; align-items:center; gap:10px; box-shadow:var(--shadow);
-  }
-  .btn[disabled]{opacity:.5; cursor:not-allowed}
-  .pill{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:#0e1628; display:inline-flex; align-items:center;gap:8px}
-  .onair-dot{width:12px;height:12px;border-radius:50%; background:#384a63; box-shadow:0 0 0 rgba(243,58,58,0)}
-  .onair.on .onair-dot{ background:#ff3b3b; box-shadow:0 0 16px rgba(255,59,59,.9) }
-
-  .player{ display:grid; grid-template-columns:1fr 380px; gap:22px; margin-top:16px; }
-  @media (max-width: 1000px){ .player{ grid-template-columns:1fr; } }
-
-  .panel{
-    background:rgba(14,22,40,.72); border:1px solid var(--line); border-radius:16px;
-    backdrop-filter: blur(6px); box-shadow:var(--shadow);
-  }
-  .panel .head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
-  .panel .body{padding:14px;}
-
-  .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .row.sep{border-top:1px dashed var(--line); padding-top:12px; margin-top:12px;}
-
-  .scrub{display:grid; grid-template-columns:46px 1fr 60px; align-items:center; gap:10px; margin:6px 0 12px}
-  input[type="range"]{ width:100% }
-
-  .track{ display:grid; grid-template-columns:170px 1fr; gap:16px; align-items:flex-start; }
-  @media (max-width: 640px){ .track{ grid-template-columns:1fr; } }
-  .art{width:170px;height:170px;border-radius:14px;overflow:hidden;background:#0e1628;border:1px solid var(--line)}
-  .art img{width:100%;height:100%;object-fit:cover}
-  .info h3{margin:0 0 6px 0}
-  .muted{color:var(--muted)}
-
-  .playlist .item{
-    padding:10px 12px; border-top:1px solid rgba(255,255,255,.04); cursor:pointer;
-  }
-  .playlist .item:hover{background:rgba(255,255,255,.04)}
-  .playlist .item.active{background:rgba(168, 200, 255, .09)}
-  .tiny{font-size:12px;color:var(--muted)}
-  .right{ text-align:right }
-
-  .toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
-    background:#111a2e; border:1px solid var(--line); padding:10px 14px; border-radius:12px; display:none; z-index:99 }
-  .toast.show{ display:block }
-
-  .badge{font-size:12px;color:var(--muted)}
+  /* Overlays */
+  .overlay{position:fixed;inset:0;z-index:9999;display:none;place-items:center;
+           background:radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.35), rgba(0,0,0,.75)), rgba(0,0,0,.7);}
+  .frame{border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);}
 </style>
 </head>
 <body>
-<div class="bg-overlay" id="bgOverlay"></div>
-
+<div class="bg" aria-hidden="true"></div>
 <div class="wrap">
   <header>
-    <div class="thumb"><img src="Media/Frasier.png" alt=""></div>
+    <img class="header-logo" src="Media/frasier.png" alt="Frasier logo">
     <div>
       <h1>KZAK • Frasier-Style Fun Radio without the talking</h1>
-      <div class="sub"><span id="tcount">0</span> Song Playlist • <span class="badge">ON AIR lamp</span> • Breaks every 2 songs • Share deep links</div>
+      <div class="sub">113 Song Playlist • ON AIR lamp • Breaks every 2 songs • Share deep links</div>
+    </div>
+    <div class="spacer"></div>
+    <button id="returnToLobby" class="lobby-btn" aria-label="Return to Lobby" title="Return to Lobby">
+      <svg class="lobby-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 4l1.41 1.41L8.83 10H20v2H8.83l4.58 4.59L12 18l-8-8 8-8z"/>
+      </svg>
+      <span class="lobby-label">Return to Lobby</span>
+    </button>
+    <div id="onAir" class="onair" aria-live="polite" style="margin-left:8px">
+      <span id="onLamp" class="lamp"></span>
+      <span class="txt">ON&nbsp;AIR</span>
     </div>
   </header>
 
-  <div class="toolbar">
-    <button id="toLobby" class="btn" aria-label="Return to Lobby">⬅︎ Return to Lobby</button>
-
-    <div id="onAir" class="pill onair" aria-label="On Air">
-      <span class="onair-dot"></span><strong>ON AIR</strong>
-    </div>
-
-    <button id="startBtn" class="btn" aria-label="Start Station">▶︎ Start Station</button>
-    <button id="pauseBtn" class="btn" aria-label="Pause Station" disabled>⏸ Pause Station</button>
-
-    <div class="btn" id="loopBtn" aria-label="Loop">⟲ Loop</div>
-    <div class="btn" id="shuffleBtn" aria-label="Shuffle">🔀 Shuffle</div>
-
-    <div class="btn" id="muteBtn" aria-label="Mute">🔇 Mute</div>
-    <div class="btn" id="breaksBtn" aria-label="Breaks">🛎 Breaks: On</div>
-
-    <button id="shareBtn" class="btn" aria-label="Share">🔗 Share</button>
-  </div>
-
-  <div class="player">
+  <div class="grid">
+    <!-- Player -->
     <section class="panel">
       <div class="head">
-        <div class="row">
-          <button id="prevBtn" class="btn" aria-label="Previous Track">⟸ Prev</button>
-          <button id="nextBtn" class="btn" aria-label="Next Track">Next ⟹</button>
+        <div class="controls">
+          <button id="btnPrev">◀︎ Prev</button>
+          <button id="btnPlay">▶︎ Start Station</button>
+          <button id="btnNext">Next ▶︎</button>
+          <button id="btnLoop" class="btn ghost" title="Loop current track">⟲ Loop</button>
+          <button id="btnShuffle" class="btn ghost" title="Shuffle playlist">🔀 Shuffle</button>
+          <button id="btnMute" class="btn ghost" title="Mute audio">🔇 Mute</button>
+          <button id="btnBreaks" class="btn ghost" title="Toggle breaks">🎙 Breaks: On</button>
         </div>
-        <div class="row">
-          <div>Vol</div>
-          <input id="vol" type="range" min="0" max="1" step="0.01" value="0.86" style="width:160px" />
-        </div>
+        <div class="spacer"></div>
+        <div class="kv"><span>Vol</span><input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" /></div>
       </div>
-
       <div class="body">
-        <div class="scrub">
-          <div id="elapsed">0:00</div>
-          <input id="seek" type="range" min="0" max="1000" value="0" step="1" />
-          <div id="remaining">-0:00</div>
+        <div class="bar">
+          <span class="time" id="elapsed">0:00</span>
+          <input id="seek" type="range" min="0" max="100" value="0" />
+          <span class="time" id="remaining">-0:00</span>
         </div>
-
-        <div class="row tiny">
-          <div>TRACK <span id="tpos">0</span> / <span id="tmax">0</span></div>
-          <div class="right" style="margin-left:auto">Status: <span id="meta">Stopped</span></div>
+        <div class="trackmeta">
+          <div id="title">Station ID • KZAK</div>
+          <span>—</span>
+          <span id="meta">Not playing</span>
+          <span class="spacer"></span>
+          <span>TRACK <span id="tpos">1</span> / <span id="ttotal">0</span></span>
         </div>
+        <div style="margin-top:12px"><button id="btnShare" class="btn small">Share</button></div>
 
-        <div class="row sep track">
-          <div class="art"><img id="art" src="Media/default.jpg" alt=""></div>
-          <div class="info">
-            <h3 id="title">—</h3>
-            <div class="muted" id="story">Under Construction: a special write-up about this specific music creation and its meaning or influence it had on the creators and the artwork shown will follow shortly.</div>
+        <!-- Story panel -->
+        <section id="storyPanel" aria-live="polite" class="story-panel" hidden>
+          <div class="story-head">
+            <img id="storyImg" alt="" />
+            <div class="story-title" id="storyTitle"></div>
           </div>
-        </div>
+          <div id="storyBody" class="story-body"></div>
+        </section>
 
-        <div class="tiny muted" style="margin-top:8px">Tip: The ON AIR pill lights only when music plays. The welcome message plays before the station boots.</div>
+        <audio id="audio" crossorigin="anonymous" preload="auto"></audio>
       </div>
     </section>
 
-    <aside class="panel playlist" id="plist" aria-label="Playlist">
-      <div class="head">
-        <div><strong>Playlist</strong></div>
-        <div class="tiny right"><span id="countRight"></span></div>
-      </div>
-      <div class="body" id="plistBody"></div>
+    <!-- Playlist -->
+    <aside class="panel">
+      <div class="head"><strong>Playlist</strong></div>
+      <div id="list" class="list"></div>
+      <div class="hint">Use headphones • Filenames are case-sensitive • Share copies a deep link</div>
     </aside>
+  </div>
+
+  <!-- Footer -->
+  <section class="panel" style="margin-top:16px">
+    <div class="bio"><img src="Media/ZachArt.jpeg" alt=""><div><div class="name">zdjimas</div><div class="role">Concept, curation, engineering</div></div></div>
+    <div class="bio" style="border-top:1px solid var(--line)"><img src="Media/CJMURPHY.png" alt=""><div><div class="name">cjmurphy</div><div class="role">Composition, arrangement, sound design</div></div></div>
+  </section>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- EXIT pre-roll overlay -->
+<div id="exitOverlay" class="overlay" aria-hidden="true">
+  <video id="exitVideo" playsinline preload="auto" style="max-width:min(100vw,1200px);max-height:100vh;width:100%;border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000;">
+    <source src="Media/FrasierExit.mp4" type="video/mp4" />
+  </video>
+  <div class="overlay-ui" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:1rem 1.25rem;pointer-events:none;">
+    <div style="color:#e6e9ef;opacity:.85;text-shadow:0 2px 14px rgba(0,0,0,.7);">Leaving the Radio Room…</div>
+    <button id="skipExit" class="btn" style="pointer-events:auto;">Skip</button>
   </div>
 </div>
 
-<!-- Media elements -->
-<audio id="audio" preload="none" crossorigin="anonymous"></audio>
-<audio id="introAudio" preload="auto" src="Media/KZAK-Welcome.mp3"></audio>
-
-<!-- Exit pre-roll video that plays before returning to lobby -->
-<video id="exitVideo" preload="auto" playsinline style="display:none" src="room-radio-listen/radio-room-entry.mp4"></video>
-
-<div class="toast" id="toast"></div>
+<!-- WELCOME overlay (always shows on entry) -->
+<div id="welcomeOverlay" class="overlay" aria-hidden="true" style="display:grid">
+  <div class="frame" style="padding:32px; background:rgba(0,0,0,.6);">
+    <div style="text-align:center; color:#e6e9ef; margin-bottom:16px; font-size:1.15rem; font-weight:700;">
+      Welcome to the KZAK On-Air Studio
+    </div>
+    <div style="text-align:center; color:#e6e9ef; opacity:.9; margin-bottom:18px;">
+      We’ll play a short welcome message. You can skip it if you like.
+    </div>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button id="btnPlayWelcome" class="btn">▶︎ Play Welcome</button>
+      <button id="btnSkipWelcome" class="btn">Skip</button>
+    </div>
+  </div>
+</div>
+<!-- Welcome VO lives outside the playlist and never lights ON AIR -->
+<audio id="welcomeAudio" preload="auto" src="Media/KZAK-Welcome.mp3" crossorigin="anonymous"></audio>
 
 <script>
-/* =========================================================================
-   DATA CONSTANTS — paste your file list and optional metadata here
-   ========================================================================= */
+/* ======================
+   Config & helpers
+   ====================== */
+const LOAD_TIMEOUT_MS = 8000;
+const DEFAULT_STORY_IMG = "Media/default.jpg";
+const DEFAULT_STORY_TEXT = `Under Construction: a special writeup about this specific music creation and its meaning or influence it had on the creators and the artwork shown will follow shortly.`;
+const pathToUrl = p => encodeURI(p).replace(/#/g,'%23');
+const fmt = s => { if (!isFinite(s)) return '0:00'; const m=(s/60)|0, sec=(s%60)|0; return m+':'+(sec<10?'0':'')+sec; };
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const showToast = msg => { const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(showToast._t); showToast._t=setTimeout(()=> el.classList.remove('show'),3000); };
+function paragraphsFrom(text){ if(!text) return ""; return text.split(/\n\s*\n/g).map(s=>s.trim()).filter(Boolean).map(s=>`<p>${s.replace(/\n/g,'<br>')}</p>`).join(""); }
 
-/** 1) MUSIC FILES (from GitHub GUI tree)
- *    Paste exact paths here (case-sensitive). Example:
- *    'Media/Song One.mp3', 'Media/Another Song.mp3', ...
- */
-const AUDIO_LIST = [
-  // TODO: Paste your full list here (examples below)
-  'Media/01 Vicarious (Remix) 1.mp3',
-  'Media/The Embracing Circle - extract from Illumination Theory Dream Theater 2.mp3',
-  'Media/The Embracing Circle - extract from Illumination Theory Dream Theater 3.mp3'
+/* DOM */
+const audio=document.getElementById('audio'); const btnPrev=document.getElementById('btnPrev'); const btnPlay=document.getElementById('btnPlay');
+const btnNext=document.getElementById('btnNext'); const btnLoop=document.getElementById('btnLoop'); const btnShuffle=document.getElementById('btnShuffle');
+const btnMute=document.getElementById('btnMute'); const btnShare=document.getElementById('btnShare'); const vol=document.getElementById('vol');
+const seek=document.getElementById('seek'); const title=document.getElementById('title'); const meta=document.getElementById('meta');
+const list=document.getElementById('list'); const onAir=document.getElementById('onAir'); const tpos=document.getElementById('tpos'); const ttotal=document.getElementById('ttotal');
+const storyPanel=document.getElementById('storyPanel'); const storyImg=document.getElementById('storyImg'); const storyTitle=document.getElementById('storyTitle'); const storyBody=document.getElementById('storyBody');
+const btnBreaks=document.getElementById('btnBreaks');
+
+/* ======================
+   PLAYLIST (from Media/)
+   ====================== */
+const PLAYLIST = [
+  { title: "Degrees (Cover)3 (Spanish guitar quartet )", file: "Media/Degrees (Cover)3 (Spanish guitar quartet ).mp3" },
+  { title: "Lateralus Rising", file: "Media/Lateralus Rising.mp3" },
+  { title: "01 Vicarious (Remix) 1", file: "Media/01 Vicarious (Remix) 1.mp3" },
+  { title: "01. Sheep (cover)5", file: "Media/01. Sheep (cover)5.mp3" },
+  { title: "01. The Grudge (Remastered)", file: "Media/01. The Grudge (Remastered).mp3" },
+  { title: "03. Dogs (Cover) X2 tripper", file: "Media/03. Dogs (Cover) X2 tripper.mp3" },
+  { title: "03. Dogs (Remix)", file: "Media/03. Dogs (Remix).mp3" },
+  { title: "05. Pigs (Three Different Ones) (Techno Tran)", file: "Media/05. Pigs (Three Different Ones) (Techno Tran).mp3" },
+  { title: "06 Another Brick In The Wall p2 2 (Cover ZZ) v2", file: "Media/06 Another Brick In The Wall p2 2 (Cover ZZ) v2.mp3" },
+  { title: "07 Goodbye Blue Sky (cover zz) 2", file: "Media/07 Goodbye Blue Sky (cover zz) 2.mp3" },
+  { title: "08 4 Degrees (Cover)2", file: "Media/08 4 Degrees (Cover)2.mp3" },
+  { title: "08 4 Degrees (Cover)v1", file: "Media/08 4 Degrees (Cover)v1.mp3" },
+  { title: "08 Rosetta Stoned (Cover) take 1", file: "Media/08 Rosetta Stoned (Cover) take 1.mp3" },
+  { title: "10 Right In Two (Remastered) (Cover) (1)", file: "Media/10 Right In Two (Remastered) (Cover) (1).mp3" },
+  { title: "10 Right In Two (Remastered) (Cover)", file: "Media/10 Right In Two (Remastered) (Cover).mp3" },
+  { title: "10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix)", file: "Media/10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix).mp3" },
+  { title: "10. Shine On You Crazy Diamond (Parts 6-9) (cover)", file: "Media/10. Shine On You Crazy Diamond (Parts 6-9) (cover).mp3" },
+  { title: "11. Pushit (Cover) v2", file: "Media/11. Pushit (Cover) v2.mp3" },
+  { title: "11. Reflection (Cover) V2", file: "Media/11. Reflection (Cover) V2.mp3" },
+  { title: "14 - Any Colour You Like (Live 1972)", file: "Media/14 - Any Colour You Like (Live 1972).mp3" },
+  { title: "1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix)", file: "Media/1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix).mp3" },
+  { title: "46 & 3", file: "Media/46 & 3.mp3" },
+  { title: "A Classical Aspect of X ", file: "Media/A Classical Aspect of X .mp3" },
+  { title: "A Demo in Time of Dying", file: "Media/A Demo in Time of Dying.mp3" },
+  { title: "A Demo of Poor Tom", file: "Media/A Demo of Poor Tom.mp3" },
+  { title: "A Madman Plays Seville", file: "Media/A Madman Plays Seville.mp3" },
+  { title: "A Modern Lord of the Rings", file: "Media/A Modern Lord of the Rings.mp3" },
+  { title: "A Spec of a Blue Dot", file: "Media/A Spec of a Blue Dot.mp3" },
+  { title: "All that glitters is gold Acoustic Blend", file: "Media/All that glitters is gold Acoustic Blend.mp3" },
+  { title: "All that glitters is gold remains", file: "Media/All that glitters is gold remains.mp3" },
+  { title: "All that glitters is gold", file: "Media/All that glitters is gold.mp3" },
+  { title: "Another Dogs Cover - Really?", file: "Media/Another Dogs Cover - Really?.mp3" },
+  { title: "As I Am (Instrumental Demo 2003) (cover zz2)", file: "Media/As I Am (Instrumental Demo 2003) (cover zz2).mp3" },
+  { title: "Ballad of a Bleak Future", file: "Media/Ballad of a Bleak Future.mp3" },
+  { title: "Barn Jam Friends", file: "Media/Barn Jam Friends.mp3" },
+  { title: "Bend the clock - 70s Barn Jam Edition", file: "Media/Bend the clock - 70s Barn Jam Edition.mp3" },
+  { title: "Beyond My Understanding", file: "Media/Beyond My Understanding.mp3" },
+  { title: "Bolotone Desert Trip Edition", file: "Media/Bolotone Desert Trip Edition.mp3" },
+  { title: "Bolotone Metal Edition (Remastered)", file: "Media/Bolotone Metal Edition (Remastered).mp3" },
+  { title: "Bolotone's Intro", file: "Media/Bolotone's Intro.mp3" },
+  { title: "Breathe - (an AI pink floyd cover)", file: "Media/Breathe - (an AI pink floyd cover).mp3" },
+  { title: "Continuum - an Octavarium Remix and Cover", file: "Media/Continuum - an Octavarium Remix and Cover.mp3" },
+  { title: "Cover Of Wings For Marie (Part 1) v1", file: "Media/Cover Of Wings For Marie (Part 1) v1.mp3" },
+  { title: "Cover Wings For Marie (Part 1) (Spanish acoustic ) (1)", file: "Media/Cover Wings For Marie (Part 1) (Spanish acoustic ) (1).mp3" },
+  { title: "Cover of Tool - 7empest 1", file: "Media/Cover of Tool - 7empest 1.mp3" },
+  { title: "Cover of Tool - 7empest 2", file: "Media/Cover of Tool - 7empest 2.mp3" },
+  { title: "Cover of Wings For Marie (Part 1) v2", file: "Media/Cover of Wings For Marie (Part 1) v2.mp3" },
+  { title: "Cover. The Grudge (v2)", file: "Media/Cover. The Grudge (v2).mp3" },
+  { title: "Covering my Eyes", file: "Media/Covering my Eyes.mp3" },
+  { title: "Culling Voices Gathered in Flocks", file: "Media/Culling Voices Gathered in Flocks.mp3" },
+  { title: "Culling Voices Gathering Alone", file: "Media/Culling Voices Gathering Alone.mp3" },
+  { title: "Degrees (Cover)3 (Spanish guitar quartet)", file: "Media/Degrees (Cover)3 (Spanish guitar quartet).mp3" },
+  { title: "Dogs (Remix)", file: "Media/Dogs (Remix).mp3" },
+  { title: "Dogs Cover 2 Funky", file: "Media/Dogs Cover 2 Funky.mp3" },
+  { title: "Fear Inoculum (Cover) v1", file: "Media/Fear Inoculum (Cover) v1.mp3" },
+  { title: "Fear Inoculum - Hip Beat Remix", file: "Media/Fear Inoculum - Hip Beat Remix.mp3" },
+  { title: "Fear Inoculum - Intro remix", file: "Media/Fear Inoculum - Intro remix.mp3" },
+  { title: "Flood an AI Tool Cover", file: "Media/Flood an AI Tool Cover.mp3" },
+  { title: "Friends in FrontierLand", file: "Media/Friends in FrontierLand.mp3" },
+  { title: "Hiding the Pot (1)", file: "Media/Hiding the Pot (1).mp3" },
+  { title: "Home Again.", file: "Media/Home Again..mp3" },
+  { title: "Labyrinths of Coral Caves ", file: "Media/Labyrinths of Coral Caves .mp3" },
+  { title: "Leaving You", file: "Media/Leaving You.mp3" },
+  { title: "More Guitars at Luna Park", file: "Media/More Guitars at Luna Park.mp3" },
+  { title: "My Broken Illusion (1)", file: "Media/My Broken Illusion (1).mp3" },
+  { title: "My Own Pieces of Eight", file: "Media/My Own Pieces of Eight.mp3" },
+  { title: "New Beginnings", file: "Media/New Beginnings.mp3" },
+  { title: "Octavarium en Quartet", file: "Media/Octavarium en Quartet.mp3" },
+  { title: "Orchestra for Wings For Marie (Cover) take 7", file: "Media/Orchestra for Wings For Marie (Cover) take 7.mp3" },
+  { title: "Our Waiting for Sleep, an instrumental", file: "Media/Our Waiting for Sleep, an instrumental.mp3" },
+  { title: "Pigs three different ones Solo (Cover)2b", file: "Media/Pigs three different ones Solo (Cover)2b.mp3" },
+  { title: "Rain Song Replayed", file: "Media/Rain Song Replayed.mp3" },
+  { title: "Rosetta must be Stoned", file: "Media/Rosetta must be Stoned.mp3" },
+  { title: "Running from Waiting Worms", file: "Media/Running from Waiting Worms.mp3" },
+  { title: "S2N an AI Cover of Dream Theater (Remix)", file: "Media/S2N an AI Cover of Dream Theater (Remix).mp3" },
+  { title: "Schism (Cover)v1", file: "Media/Schism (Cover)v1.mp3" },
+  { title: "Shine On (Cover) 5 (Remastered)", file: "Media/Shine On (Cover) 5 (Remastered).mp3" },
+  { title: "Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z))", file: "Media/Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)).mp3" },
+  { title: "Surfacing Tensions", file: "Media/Surfacing Tensions.mp3" },
+  { title: "Surrounded by Friends", file: "Media/Surrounded by Friends.mp3" },
+  { title: "TechnoTrance The Pot V1", file: "Media/TechnoTrance The Pot V1.mp3" },
+  { title: "TechnoTrance The Pot V2", file: "Media/TechnoTrance The Pot V2.mp3" },
+  { title: "The Modern Count of Tuscany (Remastered)", file: "Media/The Modern Count of Tuscany (Remastered).mp3" },
+  { title: "The Canelo-Crawford Event Round 1", file: "Media/The Canelo-Crawford Event Round 1.mp3" },
+  { title: "The Canelo-Crawford Event", file: "Media/The Canelo-Crawford Event.mp3" },
+  { title: "The Greatest Debate Ever", file: "Media/The Greatest Debate Ever.mp3" },
+  { title: "The Madman Plays in Cancun", file: "Media/The Madman Plays in Cancun.mp3" },
+  { title: "The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix)", file: "Media/The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix).mp3" },
+  { title: "The Recovering Barstool Warrior", file: "Media/The Recovering Barstool Warrior.mp3" },
+  { title: "The Spirit Carries On (Live Rehearsal 2) (Remix)", file: "Media/The Spirit Carries On (Live Rehearsal 2) (Remix).mp3" },
+  { title: "The Strangest of Days", file: "Media/The Strangest of Days.mp3" },
+  { title: "The X Aspect Symphony Remix", file: "Media/The X Aspect Symphony Remix.mp3" },
+  { title: "The X Aspect shortened", file: "Media/The X Aspect shortened.mp3" },
+  { title: "TheHumblingRiver = a Cover", file: "Media/TheHumblingRiver = a Cover.mp3" },
+  { title: "Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ)", file: "Media/Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ).mp3" },
+  { title: "Trippin like Hell", file: "Media/Trippin like Hell.mp3" },
+  { title: "When Pigs and Sheep Mate IV.", file: "Media/When Pigs and Sheep Mate IV..mp3" },
+  { title: "Wings For Marie (Part 1) (Techno Trance Remix) v2", file: "Media/Wings For Marie (Part 1) (Techno Trance Remix) v2.mp3" },
+  { title: "X11 10,000 Days Live (Cover ZZ) (Remastered)", file: "Media/X11 10,000 Days Live (Cover ZZ) (Remastered).mp3" },
+  { title: "ozzy osbourne diary of a madman rare live (Remix)", file: "Media/ozzy osbourne diary of a madman rare live (Remix).mp3" },
+  { title: "“The Embracing Circle” - cover take 3", file: "Media/“The Embracing Circle” - cover take 3.mp3" },
+  { title: "“The Embracing Circle” - extrat from Illumination Theory, Dream Theater-2", file: "Media/“The Embracing Circle” - extrat from Illumination Theory, Dream Theater-2.mp3" },
+  { title: "“The Embracing Circle” - extrat from Illumination Theory, Dream Theater-3", file: "Media/“The Embracing Circle” - extrat from Illumination Theory, Dream Theater-3.mp3" },
+  { title: "“The Embracing Circle” - extrat from Illumination Theory, Dream Theater", file: "Media/“The Embracing Circle” - extrat from Illumination Theory, Dream Theater.mp3" },
+  { title: "_Degrees (Cover)3 (Spanish guitar quartet ) (1)", file: "Media/_Degrees (Cover)3 (Spanish guitar quartet ) (1).mp3" }
 ];
+ttotal.textContent = PLAYLIST.length;
 
-/** 2) PER-TRACK METADATA (optional)
- *    Keyed by the exact file path in AUDIO_LIST.
- *    If missing, the UI derives a friendly title from the filename and uses defaults.
- */
-const TRACK_META = {
-  // Example:
-  // 'Media/01 Vicarious (Remix) 1.mp3': {
-  //   title: 'Vicarious (Remix) — Take 1',
-  //   art: 'Media/VicariousArt.jpg',
-  //   story: 'Why this version matters…'
-  // }
-};
-
-/** 3) Station ID breaks — play every 2 songs when enabled */
+/* ======================
+   Station ID / Breaks
+   ====================== */
 const BREAKS = [
-  'Media/Snappy1.mp3','Media/Snappy2.mp3','Media/Snappy3.mp3','Media/Snappy4.mp3',
-  'Media/Snappy5.mp3','Media/Snappy6.mp3','Media/Snappy7.mp3','Media/Snappy8.mp3',
-  'Media/Snappy9.mp3','Media/Snappy10.mp3'
+  "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
+  "MediaBreaks/AmyYourelisteningtoK-ZACHt.mp3",
+  "MediaBreaks/en-US-Journey-D-K_ZACH___where_the_f.wav",
+  "MediaBreaks/en-US-Journey-DYouaretunedintoK-Z-A-Kb.mp3",
+  "MediaBreaks/en-US-News-NThisisK-Z-A-Kbringingyou.mp3",
+  "MediaBreaks/Snappy1.mp3",
+  "MediaBreaks/Snappy2.mp3",
+  "MediaBreaks/Snappy3.mp3",
+  "MediaBreaks/Snappy4.mp3",
+  "MediaBreaks/snappy5.mp3",  // lowercase s
+  "MediaBreaks/Snappy6.mp3",
+  "MediaBreaks/Snappy7.mp3",
+  "MediaBreaks/Snappy8.mp3",
+  "MediaBreaks/Snappy9.mp3",
+  "MediaBreaks/Snappy10.mp3"
 ];
+const BREAKS_CFG = { enabled:true, mode:"everyN", n:2, prob:0.33 };
 
-/** Defaults */
-const DEFAULT_ART = 'Media/default.jpg';
-const DEFAULT_STORY = 'Under Construction: a special write-up about this specific music creation and its meaning or influence it had on the creators and the artwork shown will follow shortly.';
-</script>
+/* ======================
+   State
+   ====================== */
+let idx=0,isBreak=false,isLoading=false,isShuffling=false,loadTimer=null;
+let userScrubbing=false; let tracksSinceBreak=0;
+const breakAudio=new Audio(); breakAudio.crossOrigin='anonymous';
 
-<script>
-/* =========================================================================
-   CORE HELPERS (UNCLE3)
-   ========================================================================= */
-const $ = s => document.querySelector(s);
-function fmt(t){ t|=0; const m=(t/60)|0, s=(t%60)|0; return m+':'+(s<10?'0':'')+s; }
-function showToast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1800); }
+/* UI helpers */
+function setOnAir(on){ onAir.classList.toggle('active',on); }
+function updateBreaksButton(){ btnBreaks.textContent = `🎙 Breaks: ${BREAKS_CFG.enabled ? 'On' : 'Off'}`; btnBreaks.classList.toggle('onair', BREAKS_CFG.enabled); }
+function pickBreakNow(){
+  if(!BREAKS_CFG.enabled||audio.loop||BREAKS.length===0) return false;
+  if(BREAKS_CFG.mode==="everyN"){ tracksSinceBreak++; if(tracksSinceBreak>=BREAKS_CFG.n){ tracksSinceBreak=0; return true; } return false; }
+  if(BREAKS_CFG.mode==="betweenAll") return true;
+  if(BREAKS_CFG.mode==="random") return Math.random() < BREAKS_CFG.prob;
+  return false;
+}
+function currentMedia(){ return isBreak?breakAudio:audio; }
 
-/* Encode each path segment; preserve "/" — baseline behavior */
-function pathToUrl(p){
-  return p.split('/').map(seg => encodeURIComponent(seg)).join('/');
+/* Story panel */
+function renderStoryFor(i){
+  const item=PLAYLIST[i];
+  if(!item){ storyPanel.hidden=true; return; }
+  storyTitle.textContent=item.title||"";
+  storyImg.src=pathToUrl(item.img||DEFAULT_STORY_IMG);
+  storyImg.alt=item.alt||(item.img?(item.title||"Artwork"):"Default artwork");
+  storyBody.innerHTML=paragraphsFrom(item.story||DEFAULT_STORY_TEXT);
+  storyPanel.hidden=false;
 }
 
-/* Derive a human-friendly title from filename if no metadata title is provided */
-function titleFromFilename(fp){
-  try{
-    const base = fp.split('/').pop() || fp;
-    const noExt = base.replace(/\.[a-z0-9]+$/i,'');
-    return decodeURIComponent(noExt).replace(/[_]+/g,' ').trim();
-  }catch{
-    return fp;
-  }
-}
-
-/* Retrieve metadata for a given file (with fallbacks) */
-function metaFor(fp){
-  const m = TRACK_META[fp] || {};
-  return {
-    title: m.title || titleFromFilename(fp),
-    art:   m.art   || DEFAULT_ART,
-    story: (m.story && String(m.story).trim()) || DEFAULT_STORY
-  };
-}
-</script>
-
-<script>
-/* =========================================================================
-   PLAYER STATE (UNCLE3)
-   ========================================================================= */
-const audio = $('#audio');
-const intro = $('#introAudio');
-const onAir = $('#onAir');
-const startBtn = $('#startBtn');
-const pauseBtn = $('#pauseBtn');
-const nextBtn = $('#nextBtn');
-const prevBtn = $('#prevBtn');
-const muteBtn = $('#muteBtn');
-const loopBtn = $('#loopBtn');
-const shuffleBtn = $('#shuffleBtn');
-const breaksBtn = $('#breaksBtn');
-const shareBtn = $('#shareBtn');
-const toLobby = $('#toLobby');
-
-const vol = $('#vol'), seek = $('#seek');
-const title = $('#title'), meta = $('#meta');
-const tpos = $('#tpos'), tmax = $('#tmax'), tcount = $('#tcount');
-const art = $('#art'), story = $('#story');
-const plistBody = $('#plistBody'), countRight = $('#countRight');
-const bgOverlay = $('#bgOverlay');
-
-let idx = 0, isShuffle=false, isLoop=false, isMuted=false, isPlaying=false, isLoading=false, allowBreaks=true;
-let songCounter = 0, welcomePlayed = false;
-
-/* Init counts */
-tmax.textContent = AUDIO_LIST.length;
-tcount.textContent = AUDIO_LIST.length;
-countRight.textContent = AUDIO_LIST.length + ' items';
-
-/* Build playlist UI */
-function buildList(){
-  plistBody.innerHTML = '';
-  AUDIO_LIST.forEach((fp, i) => {
-    const info = metaFor(fp);
-    const div = document.createElement('div');
-    div.className='item';
-    div.setAttribute('data-i', i);
-    div.innerHTML = `<div><strong>${String(i+1).padStart(3,'0')}</strong> ${info.title}</div><div class="tiny">${fp}</div>`;
-    div.addEventListener('click', ()=> load(i, true));
-    plistBody.appendChild(div);
+/* Playlist UI */
+function renderList(){
+  list.innerHTML='';
+  PLAYLIST.forEach((t,i)=>{
+    const row=document.createElement('div');
+    row.className='track';
+    row.innerHTML=`<span class="idx">${String(i+1).padStart(2,'0')}</span>
+                   <div><div>${t.title}</div><div class="small">${t.file.replace(/^Media\//,'')}</div></div>`;
+    row.onclick=()=>{ cancelBreakIfAny(); load(i,true); };
+    list.appendChild(row);
   });
 }
-buildList();
+function markActive(){ [...list.children].forEach((el,i)=>el.querySelector('.idx').classList.toggle('now',i===idx)); }
 
-function markActive(){
-  [...plistBody.children].forEach(n => n.classList.toggle('active', Number(n.getAttribute('data-i'))===idx));
-}
+/* Core playback */
+function clearLoadTimer(){ if(loadTimer){clearTimeout(loadTimer);loadTimer=null;} }
 
-/* Welcome flow — background 75% visible during intro */
-async function playWelcomeThenStart(){
-  try{
-    bgOverlay.classList.add('intro'); // expose background
-    intro.currentTime = 0;
-    await intro.play();
-    intro.addEventListener('ended', async () => {
-      bgOverlay.classList.remove('intro');
-      welcomePlayed = true;
-      await load(idx, false);
-      play();
-    }, { once:true });
-  }catch(e){
-    showToast('Tap Start Station to begin');
-  }
-}
-</script>
+function load(i,autoplay=false){
+  isLoading=true; clearLoadTimer();
+  idx=(i+PLAYLIST.length)%PLAYLIST.length;
+  const tr=PLAYLIST[idx];
+  const src=pathToUrl(tr.file);
 
-<script>
-/* =========================================================================
-   LOAD / PLAYBACK (UNCLE3)
-   ========================================================================= */
-let seekTick=null;
-function clearSeekTick(){ if(seekTick) cancelAnimationFrame(seekTick), seekTick=null; }
-
-async function load(i, autoplay=false){
-  isLoading = true;
-  idx = (i + AUDIO_LIST.length) % AUDIO_LIST.length;
-
-  const fp = AUDIO_LIST[idx];
-  const info = metaFor(fp);
-
-  title.textContent = info.title;
-  meta.textContent = 'Queued';
-  tpos.textContent = idx + 1;
+  audio.src=src;
+  title.textContent=tr.title;
+  meta.textContent='Queued';
+  tpos.textContent=idx+1;
   markActive();
 
-  art.src = info.art;
-  story.textContent = info.story;
+  const u=new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u);
 
-  seek.value = 0; $('#elapsed').textContent = '0:00'; $('#remaining').textContent = '-0:00';
+  // reset scrubber/times
+  seek.value=0; document.getElementById('elapsed').textContent='0:00'; document.getElementById('remaining').textContent='-0:00';
 
-  const u = new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u);
+  loadTimer=setTimeout(()=>{
+    console.warn('Load timeout for', tr.file);
+    showToast('Skipping: could not load “' + tr.title + '”');
+    isLoading=false; next();
+  }, LOAD_TIMEOUT_MS);
 
-  // plain set (no extra resolver logic)
-  audio.src = pathToUrl(fp);
-
-  // Use metadata event to mark ready
-  const onReady = () => {
-    audio.removeEventListener('loadedmetadata', onReady);
-    isLoading = false;
-    meta.textContent = 'Ready';
-    if (autoplay) play();
+  const onReady=()=>{
+    clearLoadTimer();
+    isLoading=false;
+    renderStoryFor(idx);
+    if(autoplay) play();
   };
-  audio.addEventListener('loadedmetadata', onReady, { once:true });
 
-  // Also handle immediate error (e.g., missing file)
-  audio.addEventListener('error', () => { isLoading=false; meta.textContent='Load error'; }, { once:true });
+  if(audio.readyState>=2) onReady(); else { audio.onloadedmetadata=onReady; }
 }
 
 function play(){
-  if(isLoading) return;
-  audio.play().then(()=>{
-    isPlaying = true;
-    onAir.classList.add('on');
-    startBtn.disabled = true;
-    pauseBtn.disabled = false;
-    meta.textContent = 'Playing';
-
-    clearSeekTick();
-    (function tick(){
-      const d = (audio.duration||0)|0, ct = (audio.currentTime||0)|0;
-      if (d>0){
-        $('#elapsed').textContent = fmt(ct);
-        $('#remaining').textContent = '-' + fmt(Math.max(d-ct,0));
-        seek.value = d ? Math.round((ct/d)*1000) : 0;
-      }
-      if(isPlaying) seekTick = requestAnimationFrame(tick);
-    })();
-  }).catch(()=>{
-    showToast('Playback blocked — tap Start Station');
+  if(isBreak){ cancelBreakIfAny(); next(); return; }
+  audio.play().catch((err)=>{
+    console.error('Play error for', PLAYLIST[idx]?.file, err);
+    showToast('Playback error — skipping');
+    next();
   });
 }
+function pause(){ currentMedia().pause(); }
+function next(){ load(idx+1,true); }
+function prev(){ load(idx-1,true); }
 
-function pause(){
-  audio.pause();
-  isPlaying=false;
-  onAir.classList.remove('on');
-  startBtn.disabled=false;
-  pauseBtn.disabled=true;
-  meta.textContent='Paused';
-}
-
-function next(){
-  // Station ID break every 2 songs (when enabled)
-  if (allowBreaks && (++songCounter % 2 === 0)) {
-    const pick = BREAKS[Math.floor(Math.random()*BREAKS.length)];
-    audio.src = pathToUrl(pick);
-    meta.textContent = 'Station ID break';
-    audio.onended = ()=> { audio.onended=null; load(idx + (isShuffle? (Math.random()*AUDIO_LIST.length|0)+1 : 1), true); };
-    audio.play().catch(()=>{ load(idx + 1, true); });
-    return;
+/* Break handling */
+function cancelBreakIfAny(){
+  if(isBreak){
+    try { breakAudio.pause(); } catch {}
+    isBreak=false;
   }
-  const step = isShuffle ? ((Math.random()*AUDIO_LIST.length)|0)+1 : 1;
-  load(idx + step, true);
 }
-function prev(){ load(idx - 1, true); }
+async function playBreakThenNext(){
+  if(audio.loop){ next(); return; }
+  isBreak=true;
+  const prevTitle=title.textContent, prevMeta=meta.textContent;
 
-/* events */
-audio.addEventListener('ended', ()=>{
-  onAir.classList.remove('on');
-  isPlaying=false;
-  if (isLoop) { audio.currentTime=0; play(); return; }
-  next();
-});
-audio.addEventListener('play', ()=> onAir.classList.add('on'));
-audio.addEventListener('pause', ()=> onAir.classList.remove('on'));
+  breakAudio.volume=audio.volume; breakAudio.muted=audio.muted;
+  const file=pick(BREAKS);
+  title.textContent="Station ID • KZAK";
+  meta.textContent=file.replace(/^MediaBreaks\//,'');
+  breakAudio.src=pathToUrl(file);
 
-/* controls */
-startBtn.addEventListener('click', async ()=>{
-  if(!welcomePlayed){ await playWelcomeThenStart(); return; }
-  if(!isPlaying) play();
-});
-pauseBtn.addEventListener('click', pause);
-nextBtn.addEventListener('click', next);
-prevBtn.addEventListener('click', prev);
+  const goNext=()=>{ title.textContent=prevTitle; meta.textContent=prevMeta; isBreak=false; next(); };
+  breakAudio.onerror=goNext; breakAudio.onended=goNext;
 
-vol.addEventListener('input', ()=> audio.volume = Number(vol.value));
-muteBtn.addEventListener('click', ()=>{
-  const m = !(audio.muted); audio.muted=m;
-  muteBtn.textContent = m ? '🔈 Unmute' : '🔇 Mute';
-});
-loopBtn.addEventListener('click', ()=>{
-  isLoop = !isLoop;
-  loopBtn.textContent = isLoop ? '⟲ Loop: On' : '⟲ Loop';
-});
-shuffleBtn.addEventListener('click', ()=>{
-  isShuffle = !isShuffle;
-  shuffleBtn.textContent = isShuffle ? '🔀 Shuffle: On' : '🔀 Shuffle';
-});
-breaksBtn.addEventListener('click', ()=>{
-  allowBreaks = !allowBreaks;
-  breaksBtn.textContent = allowBreaks ? '🛎 Breaks: On' : '🛎 Breaks: Off';
-});
+  try{ await breakAudio.play(); }catch{ goNext(); }
+}
 
-seek.addEventListener('input', ()=>{
-  if(!audio.duration) return;
-  const t = (Number(seek.value)/1000) * audio.duration;
-  audio.currentTime = t;
-});
+/* Controls */
+btnPlay.onclick = ()=>{ if(isBreak){ cancelBreakIfAny(); next(); return; } const el=currentMedia(); el.paused?el.play().catch(()=>{}):el.pause(); };
+btnPrev.onclick = ()=>{ cancelBreakIfAny(); prev(); };
+btnNext.onclick = ()=>{ cancelBreakIfAny(); next(); };
+btnLoop.onclick = ()=>{ audio.loop=!audio.loop; btnLoop.classList.toggle('onair', audio.loop); };
 
-shareBtn.addEventListener('click', async ()=>{
-  const u = new URL(location.href);
-  u.searchParams.set('t', idx);
-  const link = u.toString();
+btnShuffle.onclick = ()=>{
+  if(isShuffling||isLoading) return;
+  isShuffling=true;
+  const cur=PLAYLIST[idx];
+  for(let i=PLAYLIST.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [PLAYLIST[i],PLAYLIST[j]]=[PLAYLIST[j],PLAYLIST[i]]; }
+  const newIdx=PLAYLIST.findIndex(t=>t===cur);
+  if(newIdx!==-1){ [PLAYLIST[newIdx], PLAYLIST[idx]] = [PLAYLIST[idx], PLAYLIST[newIdx]]; }
+  renderList(); markActive(); renderStoryFor(idx);
+  isShuffling=false;
+};
+
+btnMute.onclick = ()=>{ const m=!currentMedia().muted; audio.muted=m; breakAudio.muted=m; btnMute.classList.toggle('onair', m); };
+vol.oninput = e => { audio.volume=+e.target.value; breakAudio.volume=+e.target.value; };
+
+seek.oninput = ()=>{ userScrubbing=true; };
+seek.onchange = e => { if(!isFinite(audio.duration)) { userScrubbing=false; return; } audio.currentTime = audio.duration*(+e.target.value/100); userScrubbing=false; };
+
+btnShare.onclick = async ()=>{
+  const tr=PLAYLIST[idx];
+  const url=new URL(location.href); url.searchParams.set('t', idx);
+  const shareData={ title:'Listen with me — KZAK', text: tr.title, url: url.toString() };
   try{
-    await navigator.clipboard.writeText(link);
-    showToast('Link copied to clipboard');
+    if(navigator.share) await navigator.share(shareData);
+    else throw 0;
   }catch{
-    prompt('Copy link:', link);
+    try{ await navigator.clipboard.writeText(url.toString()); alert('Link copied to clipboard!'); }
+    catch{ location.href = `mailto:?subject=${encodeURIComponent('Listen — '+tr.title)}&body=${encodeURIComponent(url.toString())}`; }
   }
-});
+};
 
-/* Exit pre-roll and return to lobby (same-tab navigation) */
-toLobby.addEventListener('click', async ()=>{
-  try{
-    const v = $('#exitVideo');
-    v.currentTime = 0;
-    v.style.display='block';
-    await v.play();
-    v.addEventListener('ended', ()=>{
-      // Replace with your lobby path if different:
-      location.href = '../index.html';
-    }, { once:true });
-  }catch(e){
-    location.href = '../index.html';
+/* Breaks toggle (default ON) */
+btnBreaks.onclick = ()=>{
+  BREAKS_CFG.enabled = !BREAKS_CFG.enabled;
+  updateBreaksButton();
+  if(isBreak && !BREAKS_CFG.enabled){ cancelBreakIfAny(); next(); }
+};
+updateBreaksButton();
+
+/* Main audio events */
+audio.addEventListener('play',  ()=>{ setOnAir(true);  btnPlay.textContent='⏸︎ Pause Station';  meta.textContent='Playing'; });
+audio.addEventListener('pause', ()=>{ if(!isBreak){ setOnAir(false); btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; } });
+audio.addEventListener('error', ()=>{ const tr=PLAYLIST[idx]; showToast('Skipping: could not load “'+(tr?.title||'Track')+'”'); clearLoadTimer(); isLoading=false; next(); });
+audio.addEventListener('ended', ()=>{ setOnAir(false); meta.textContent='Finished'; if(pickBreakNow()) playBreakThenNext(); else next(); });
+audio.addEventListener('timeupdate', ()=>{ if(!userScrubbing && isFinite(audio.duration)){ seek.value=(audio.currentTime/audio.duration)*100; document.getElementById('elapsed').textContent=fmt(audio.currentTime); document.getElementById('remaining').textContent='-'+fmt(Math.max(0,(audio.duration-audio.currentTime))); } });
+
+/* Reflect ON AIR during breaks too */
+breakAudio.addEventListener('play', ()=> setOnAir(true));
+breakAudio.addEventListener('pause',()=> setOnAir(false));
+
+/* Init: only render the list; do NOT load first track yet */
+(function init(){ renderList(); })();
+</script>
+
+<!-- Exit video logic -->
+<script>
+(function(){
+  const audio = document.getElementById('audio');
+  const returnBtn = document.getElementById('returnToLobby');
+  const exitOverlay = document.getElementById('exitOverlay');
+  const exitVideo = document.getElementById('exitVideo');
+  const skipExit = document.getElementById('skipExit');
+  const LOBBY_URL = '../index.html';
+  const TIMEOUT_MS = 30000;
+
+  function goLobby(){ window.location.href = LOBBY_URL; }
+
+  async function playExitThenReturn(){
+    try{ if (audio && !audio.paused) audio.pause(); }catch(e){}
+    exitOverlay.style.display = 'grid';
+    exitOverlay.setAttribute('aria-hidden','false');
+    try{ exitVideo.currentTime = 0; }catch(e){}
+
+    const cleanup = ()=>{
+      exitOverlay.style.display = 'none';
+      exitOverlay.setAttribute('aria-hidden','true');
+      try{ exitVideo.pause(); }catch(e){}
+      document.removeEventListener('keydown', onKey);
+      exitVideo.removeEventListener('ended', onEnded);
+      exitVideo.removeEventListener('error', onError);
+    };
+    const onEnded = ()=>{ cleanup(); goLobby(); };
+    const onError = ()=>{ cleanup(); goLobby(); };
+    const onKey = (e)=>{ if (e.key === 'Escape'){ e.preventDefault(); cleanup(); goLobby(); } };
+
+    document.addEventListener('keydown', onKey);
+    exitVideo.addEventListener('ended', onEnded, {once:true});
+    exitVideo.addEventListener('error', onError, {once:true});
+
+    try{
+      await exitVideo.play();
+      setTimeout(()=>{ if (!exitVideo.paused && !exitVideo.ended){ cleanup(); goLobby(); } }, TIMEOUT_MS);
+    }catch(e){
+      cleanup(); goLobby();
+    }
   }
-});
 
-/* Deep link ?t= */
-(function bootFromQuery(){
-  const p = new URL(location).searchParams;
-  const t = Number(p.get('t'));
-  if(Number.isFinite(t) && t>=0 && t<AUDIO_LIST.length){ idx = t|0; }
-  load(idx, false);
+  if (returnBtn){
+    returnBtn.addEventListener('click', (e)=>{ e.preventDefault(); playExitThenReturn(); });
+  }
+  if (skipExit){
+    skipExit.addEventListener('click', (e)=>{ e.preventDefault(); goLobby(); });
+  }
 })();
+</script>
 
-/* Keyboard accessibility */
-window.addEventListener('keydown', (e)=>{
-  if (['INPUT','TEXTAREA','SELECT','BUTTON'].includes(document.activeElement.tagName)) return;
-  if (e.code==='Space'){ e.preventDefault(); isPlaying? pause(): play(); }
-  if (e.code==='ArrowRight'){ audio.currentTime = Math.min((audio.currentTime||0)+5, audio.duration||1); }
-  if (e.code==='ArrowLeft'){ audio.currentTime = Math.max((audio.currentTime||0)-5, 0); }
-  if (e.key==='k'||e.key==='K'){ isPlaying? pause(): play(); }
-  if (e.key==='j'||e.key==='J'){ audio.currentTime = Math.max((audio.currentTime||0)-10, 0); }
-  if (e.key==='l'||e.key==='L'){ audio.currentTime = Math.min((audio.currentTime||0)+10, audio.duration||1); }
-});
+<!-- Welcome audio logic (separate from playlist; no ON AIR) -->
+<script>
+(function(){
+  const welcomeOverlay = document.getElementById('welcomeOverlay');
+  const welcomeAudio   = document.getElementById('welcomeAudio');
+  const btnPlayWelcome = document.getElementById('btnPlayWelcome');
+  const btnSkipWelcome = document.getElementById('btnSkipWelcome');
+
+  let bootstrapped = false;
+  function bootstrapPlayer(){
+    if (bootstrapped) return;
+    bootstrapped = true;
+    const p = parseInt(new URL(location.href).searchParams.get('t'), 10);
+    const startIdx = Number.isFinite(p) ? Math.max(0, Math.min(PLAYLIST.length-1, p)) : 0;
+    ttotal.textContent = PLAYLIST.length;
+    load(startIdx, /*autoplay=*/false);  // load first track paused
+  }
+  function hideWelcome(){
+    welcomeOverlay.style.display='none';
+    welcomeOverlay.setAttribute('aria-hidden','true');
+    try{ welcomeAudio.pause(); }catch(e){}
+  }
+
+  // Always show overlay on entry; do NOT attempt autoplay (predictable cross-browser)
+  window.addEventListener('load', ()=>{
+    welcomeOverlay.style.display = 'grid';
+    welcomeOverlay.setAttribute('aria-hidden','false');
+  });
+
+  btnPlayWelcome.addEventListener('click', async ()=>{
+    try{ welcomeAudio.currentTime = 0; await welcomeAudio.play(); }catch(e){}
+  });
+
+  welcomeAudio.addEventListener('ended', ()=>{
+    hideWelcome();
+    bootstrapPlayer();
+  });
+
+  btnSkipWelcome.addEventListener('click', ()=>{
+    hideWelcome();
+    bootstrapPlayer();
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape' && welcomeOverlay.getAttribute('aria-hidden') === 'false'){
+      hideWelcome();
+      bootstrapPlayer();
+    }
+  });
+})();
 </script>
 </body>
 </html>
