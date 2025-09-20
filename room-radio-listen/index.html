@@ -269,6 +269,7 @@ const list=document.getElementById('list'); const onAir=document.getElementById(
 const storyPanel=document.getElementById('storyPanel'); const storyImg=document.getElementById('storyImg'); const storyTitle=document.getElementById('storyTitle'); const storyBody=document.getElementById('storyBody');
 
 /* ===== PLAYLIST (full, with one expanded entry) ===== */
+/* ===== PLAYLIST (generated from your Media/ listing) ===== */
 const PLAYLIST = [
   { title: "Degrees (Cover)3 (Spanish guitar quartet )", file: "Media/Degrees (Cover)3 (Spanish guitar quartet ).mp3" },
   { title: "Lateralus Rising", file: "Media/Lateralus Rising.mp3" },
@@ -292,10 +293,11 @@ const PLAYLIST = [
   { title: "14 - Any Colour You Like (Live 1972)", file: "Media/14 - Any Colour You Like (Live 1972).mp3" },
   { title: "1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix)", file: "Media/1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix).mp3" },
   { title: "46 & 3", file: "Media/46 & 3.mp3" },
-  { title: "A Classical Aspect of X", file: "Media/A Classical Aspect of X .mp3" },
+  { title: "A Classical Aspect of X ", file: "Media/A Classical Aspect of X .mp3" },
   { title: "A Demo in Time of Dying", file: "Media/A Demo in Time of Dying.mp3" },
   { title: "A Demo of Poor Tom", file: "Media/A Demo of Poor Tom.mp3" },
   { title: "A Madman Plays Seville", file: "Media/A Madman Plays Seville.mp3" },
+  { title: "A Modern Lord of the Rings", file: "Media/A Modern Lord of the Rings.mp3" },
   { title: "A Spec of a Blue Dot", file: "Media/A Spec of a Blue Dot.mp3" },
   { title: "All that glitters is gold Acoustic Blend", file: "Media/All that glitters is gold Acoustic Blend.mp3" },
   { title: "All that glitters is gold remains", file: "Media/All that glitters is gold remains.mp3" },
@@ -330,10 +332,11 @@ const PLAYLIST = [
   { title: "Friends in FrontierLand", file: "Media/Friends in FrontierLand.mp3" },
   { title: "Hiding the Pot (1)", file: "Media/Hiding the Pot (1).mp3" },
   { title: "Home Again.", file: "Media/Home Again..mp3" },
-  { title: "Labyrinths of Coral Caves", file: "Media/Labyrinths of Coral Caves .mp3" },
+  { title: "Labyrinths of Coral Caves ", file: "Media/Labyrinths of Coral Caves .mp3" },
   { title: "Leaving You", file: "Media/Leaving You.mp3" },
   { title: "More Guitars at Luna Park", file: "Media/More Guitars at Luna Park.mp3" },
   { title: "My Broken Illusion (1)", file: "Media/My Broken Illusion (1).mp3" },
+  { title: "My Own Pieces of Eight", file: "Media/My Own Pieces of Eight.mp3" },
   { title: "New Beginnings", file: "Media/New Beginnings.mp3" },
   { title: "Octavarium en Quartet", file: "Media/Octavarium en Quartet.mp3" },
   { title: "Orchestra for Wings For Marie (Cover) take 7", file: "Media/Orchestra for Wings For Marie (Cover) take 7.mp3" },
@@ -353,15 +356,7 @@ const PLAYLIST = [
   { title: "The Modern Count of Tuscany (Remastered)", file: "Media/The Modern Count of Tuscany (Remastered).mp3" },
   { title: "The Canelo-Crawford Event Round 1", file: "Media/The Canelo-Crawford Event Round 1.mp3" },
   { title: "The Canelo-Crawford Event", file: "Media/The Canelo-Crawford Event.mp3" },
-  {
-    title: "The Greatest Debate Ever",
-    file: "Media/The Greatest Debate Ever.mp3",
-    img: "Media/GreatDebate.png",
-    alt: "Default artwork for The Greatest Debate Ever",
-    story: `This is a creative piece I made from a powerful favorite song of mine
-from the album Six Degrees of Inner Turbulence, which goes into the deep
-dark places of mental health and wellness.`
-  },
+  { title: "The Greatest Debate Ever", file: "Media/The Greatest Debate Ever.mp3" },
   { title: "The Madman Plays in Cancun", file: "Media/The Madman Plays in Cancun.mp3" },
   { title: "The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix)", file: "Media/The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix).mp3" },
   { title: "The Recovering Barstool Warrior", file: "Media/The Recovering Barstool Warrior.mp3" },
@@ -379,8 +374,10 @@ dark places of mental health and wellness.`
   { title: "“The Embracing Circle” - cover take 3", file: "Media/“The Embracing Circle” - cover take 3.mp3" },
   { title: "“The Embracing Circle” - extrat from Illumination Theory, Dream Theater-2", file: "Media/“The Embracing Circle” - extrat from Illumination Theory, Dream Theater-2.mp3" },
   { title: "“The Embracing Circle” - extrat from Illumination Theory, Dream Theater-3", file: "Media/“The Embracing Circle” - extrat from Illumination Theory, Dream Theater-3.mp3" },
-  { title: "“The Embracing Circle” - extrat from Illumination Theory, Dream Theater", file: "Media/“The Embracing Circle” - extrat from Illumination Theory, Dream Theater.mp3" }
+  { title: "“The Embracing Circle” - extrat from Illumination Theory, Dream Theater", file: "Media/“The Embracing Circle” - extrat from Illumination Theory, Dream Theater.mp3" },
+  { title: "_Degrees (Cover)3 (Spanish guitar quartet ) (1)", file: "Media/_Degrees (Cover)3 (Spanish guitar quartet ) (1).mp3" }
 ];
+
 ttotal.textContent = PLAYLIST.length;
 
 /* ===== Station IDs ===== */
