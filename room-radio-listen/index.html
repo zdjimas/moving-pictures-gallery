@@ -1,4 +1,4 @@
- <!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -8,6 +8,7 @@
   :root{
     --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
     --card:#151a29; --line:#22324d; --shadow:0 18px 50px rgba(0,0,0,.45);
+    --story-img: 180px; /* artwork size (adjust 160–240px) */
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -95,24 +96,41 @@
          padding:10px 14px;box-shadow:var(--shadow);font-size:.95rem;z-index:9999;display:none}
   .toast.show{display:block}
 
-  /* NEW: Story panel styles */
+  /* Story panel — grid layout (art left, title+text right) */
   .story-panel{
-    margin-top:14px; padding:12px 12px 14px;
-    background: rgba(0,0,0,.38); border: 1px solid var(--line);
-    border-radius: 14px; box-shadow: var(--shadow);
-    max-height: 28vh; overflow: auto; backdrop-filter: blur(2px)
+    margin-top:14px;
+    padding:12px;
+    background: rgba(0,0,0,.38);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(2px);
+
+    display: grid;
+    grid-template-columns: var(--story-img) 1fr;
+    grid-auto-rows: min-content;
+    align-items: start;
+    gap: 10px 14px;
   }
-  .story-head{ display:flex; gap:12px; align-items:center; margin-bottom:8px }
-  .story-head img{
-    width:64px; height:64px; object-fit:cover; border-radius:10px; border:1px solid var(--line)
+  .story-head{ display: contents; }
+  #storyImg{
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    width: var(--story-img);
+    height: var(--story-img);
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid var(--line);
   }
-  .story-title{ font-weight:600; font-size:1rem; color:var(--ink) }
-  .story-body{ color:var(--ink); opacity:.92; line-height:1.45; font-size:.95rem; white-space:normal }
-  .story-body p{ margin: 0 0 10px }
+  #storyTitle{ grid-column: 2; grid-row: 1; font-weight:700; }
+  #storyBody{  grid-column: 2; grid-row: 2; color:var(--ink); opacity:.92; line-height:1.45; font-size:.95rem; }
+  #storyBody p{ margin: 0 0 10px }
 
   @media (max-width:1024px){
     .grid{grid-template-columns:1fr}
     .list{max-height:360px}
+    .story-panel{ display:block; }
+    #storyImg{ width:80px; height:80px; margin-bottom:8px; }
   }
 </style>
 </head>
@@ -126,13 +144,7 @@
         <div class="sub">Larger controls • ON AIR lamp • Station ID every 3 songs • Share deep links</div>
       </div>
       <div class="spacer"></div>
-
-      <!-- Prominent Return to Lobby button (same tab) -->
-      <a href="../index.html"
-         id="btnLobby"
-         class="btn lobby"
-         aria-label="Return to Museum Lobby">← Lobby</a>
-
+      <a href="../index.html" id="btnLobby" class="btn lobby" aria-label="Return to Museum Lobby">← Lobby</a>
       <div id="onAir" class="onair" aria-live="polite" style="margin-left:8px">
         <span id="onLamp" class="lamp"></span>
         <span class="txt">ON&nbsp;AIR</span>
@@ -140,7 +152,7 @@
     </header>
 
     <div class="grid">
-      <!-- Left: Player -->
+      <!-- Player -->
       <section class="panel">
         <div class="head">
           <div class="controls">
@@ -152,19 +164,14 @@
             <button id="btnMute" class="btn ghost">🔇 Mute</button>
           </div>
           <div class="spacer"></div>
-          <div class="kv">
-            <span>Vol</span>
-            <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" />
-          </div>
+          <div class="kv"><span>Vol</span><input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" /></div>
         </div>
-
         <div class="body">
           <div class="bar">
             <span class="time" id="elapsed">0:00</span>
             <input id="seek" type="range" min="0" max="100" value="0" />
             <span class="time" id="remaining">-0:00</span>
           </div>
-
           <div class="trackmeta">
             <div id="title">Station ID • KZAK</div>
             <span>—</span>
@@ -172,12 +179,9 @@
             <span class="spacer"></span>
             <span>TRACK <span id="tpos">1</span> / <span id="ttotal">0</span></span>
           </div>
+          <div style="margin-top:12px"><button id="btnShare" class="btn small">Share</button></div>
 
-          <div style="margin-top:12px">
-            <button id="btnShare" class="btn small">Share</button>
-          </div>
-
-          <!-- NEW: Story panel (updates per track) -->
+          <!-- Story panel -->
           <section id="storyPanel" aria-live="polite" class="story-panel" hidden>
             <div class="story-head">
               <img id="storyImg" alt="" />
@@ -190,94 +194,43 @@
         </div>
       </section>
 
-      <!-- Right: Playlist -->
+      <!-- Playlist -->
       <aside class="panel">
         <div class="head"><strong>Playlist</strong></div>
         <div id="list" class="list"></div>
-        <div class="hint">
-          Use headphones • Filenames are case-sensitive • Share copies a deep link to the current track
-        </div>
+        <div class="hint">Use headphones • Filenames are case-sensitive • Share copies a deep link</div>
       </aside>
     </div>
 
-    <!-- Footer bios -->
+    <!-- Footer -->
     <section class="panel" style="margin-top:16px">
-      <div class="bio">
-        <img src="Media/ZachArt.jpeg" alt="">
-        <div>
-          <div class="name">zdjimas</div>
-          <div class="role">Concept, curation, engineering</div>
-        </div>
-      </div>
-      <div class="bio" style="border-top:1px solid var(--line)">
-        <img src="Media/CJMURPHY.png" alt="">
-        <div>
-          <div class="name">cjmurphy</div>
-          <div class="role">Composition, arrangement, sound design</div>
-        </div>
-      </div>
+      <div class="bio"><img src="Media/ZachArt.jpeg" alt=""><div><div class="name">zdjimas</div><div class="role">Concept, curation, engineering</div></div></div>
+      <div class="bio" style="border-top:1px solid var(--line)"><img src="Media/CJMURPHY.png" alt=""><div><div class="name">cjmurphy</div><div class="role">Composition, arrangement, sound design</div></div></div>
     </section>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script>
-/* ===== Config ===== */
-const LOAD_TIMEOUT_MS = 8000; // fall-forward if a track doesn’t load
+/* ===== Config & helpers ===== */
+const LOAD_TIMEOUT_MS = 8000;
 const DEFAULT_STORY_IMG = "Media/default.jpg";
 const DEFAULT_STORY_TEXT = `Under Construction: a special writeup about this specific music creation and its meaning or influence it had on the creators and the artwork shown will follow shortly.`;
-
-// Keep spaces/() and escape #
 const pathToUrl = p => encodeURI(p).replace(/#/g,'%23');
-
-/* ===== Helpers ===== */
 const fmt = s => { if (!isFinite(s)) return '0:00'; const m=(s/60)|0, sec=(s%60)|0; return m+':'+(sec<10?'0':'')+sec; };
 const pick = arr => arr[Math.floor(Math.random()*arr.length)];
-const showToast = msg => {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(()=> el.classList.remove('show'), 3000);
-};
-
-// NEW: simple paragraph formatter (blank line → new paragraph)
-function paragraphsFrom(text){
-  if(!text) return "";
-  return text
-    .split(/\n\s*\n/g)
-    .map(s => s.trim())
-    .filter(Boolean)
-    .map(s => `<p>${s.replace(/\n/g,'<br>')}</p>`)
-    .join("");
-}
+const showToast = msg => { const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(showToast._t); showToast._t=setTimeout(()=> el.classList.remove('show'),3000); };
+function paragraphsFrom(text){ if(!text) return ""; return text.split(/\n\s*\n/g).map(s=>s.trim()).filter(Boolean).map(s=>`<p>${s.replace(/\n/g,'<br>')}</p>`).join(""); }
 
 /* ===== DOM ===== */
-const audio = document.getElementById('audio');
-const btnPrev = document.getElementById('btnPrev');
-const btnPlay = document.getElementById('btnPlay');
-const btnNext = document.getElementById('btnNext');
-const btnLoop = document.getElementById('btnLoop');
-const btnShuffle = document.getElementById('btnShuffle');
-const btnMute = document.getElementById('btnMute');
-const btnShare = document.getElementById('btnShare');
-const vol = document.getElementById('vol');
-const seek = document.getElementById('seek');
-const title = document.getElementById('title');
-const meta = document.getElementById('meta');
-const list = document.getElementById('list');
-const onAir = document.getElementById('onAir');
-const onLamp = document.getElementById('onLamp');
-const tpos = document.getElementById('tpos');
-const ttotal = document.getElementById('ttotal');
+const audio=document.getElementById('audio'); const btnPrev=document.getElementById('btnPrev'); const btnPlay=document.getElementById('btnPlay');
+const btnNext=document.getElementById('btnNext'); const btnLoop=document.getElementById('btnLoop'); const btnShuffle=document.getElementById('btnShuffle');
+const btnMute=document.getElementById('btnMute'); const btnShare=document.getElementById('btnShare'); const vol=document.getElementById('vol');
+const seek=document.getElementById('seek'); const title=document.getElementById('title'); const meta=document.getElementById('meta');
+const list=document.getElementById('list'); const onAir=document.getElementById('onAir'); const tpos=document.getElementById('tpos'); const ttotal=document.getElementById('ttotal');
+const storyPanel=document.getElementById('storyPanel'); const storyImg=document.getElementById('storyImg'); const storyTitle=document.getElementById('storyTitle'); const storyBody=document.getElementById('storyBody');
 
-/* NEW: Story DOM refs */
-const storyPanel = document.getElementById('storyPanel');
-const storyImg   = document.getElementById('storyImg');
-const storyTitle = document.getElementById('storyTitle');
-const storyBody  = document.getElementById('storyBody');
-
-/* ===== PLAYLIST (your 111 items; unchanged) ===== */
+/* ===== PLAYLIST (full, with one expanded entry) ===== */
 const PLAYLIST = [
   { title: "Degrees (Cover)3 (Spanish guitar quartet )", file: "Media/Degrees (Cover)3 (Spanish guitar quartet ).mp3" },
   { title: "Lateralus Rising", file: "Media/Lateralus Rising.mp3" },
@@ -362,14 +315,15 @@ const PLAYLIST = [
   { title: "The Modern Count of Tuscany (Remastered)", file: "Media/The Modern Count of Tuscany (Remastered).mp3" },
   { title: "The Canelo-Crawford Event Round 1", file: "Media/The Canelo-Crawford Event Round 1.mp3" },
   { title: "The Canelo-Crawford Event", file: "Media/The Canelo-Crawford Event.mp3" },
-  { 
-  title: "The Greatest Debate Ever",
-  file: "Media/The Greatest Debate Ever.mp3",
-  img: "Media/GreatDebate.png",   // later replace with custom artwork file
-  alt: "Default artwork for The Greatest Debate Ever",
-  story: `This is  a creative piece I made from a powerful favorite song of mine from the album six degrees of inner turbulance which goes into the deep dark places of mental health and wellness.
-}
-
+  {
+    title: "The Greatest Debate Ever",
+    file: "Media/The Greatest Debate Ever.mp3",
+    img: "Media/GreatDebate.png",
+    alt: "Default artwork for The Greatest Debate Ever",
+    story: `This is a creative piece I made from a powerful favorite song of mine
+from the album Six Degrees of Inner Turbulence, which goes into the deep
+dark places of mental health and wellness.`
+  },
   { title: "The Madman Plays in Cancun", file: "Media/The Madman Plays in Cancun.mp3" },
   { title: "The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix)", file: "Media/The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix).mp3" },
   { title: "The Recovering Barstool Warrior", file: "Media/The Recovering Barstool Warrior.mp3" },
@@ -389,10 +343,9 @@ const PLAYLIST = [
   { title: "“The Embracing Circle” - extrat from Illumination Theory, Dream Theater-3", file: "Media/“The Embracing Circle” - extrat from Illumination Theory, Dream Theater-3.mp3" },
   { title: "“The Embracing Circle” - extrat from Illumination Theory, Dream Theater", file: "Media/“The Embracing Circle” - extrat from Illumination Theory, Dream Theater.mp3" }
 ];
-
 ttotal.textContent = PLAYLIST.length;
 
-/* ===== Station IDs (separate folder) ===== */
+/* ===== Station IDs ===== */
 const BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
   "MediaBreaks/AmyYouarelisteningtoK-ZACHt.mp3",
@@ -403,47 +356,29 @@ const BREAKS = [
 const BREAKS_CFG = { enabled:true, mode:"everyN", n:3, prob:0.33 };
 
 /* ===== State ===== */
-let idx = 0;
-let userScrubbing = false;
-let isBreak = false;
-let tracksSinceBreak = 0;
-let isLoading = false;    // guard async races (load/shuffle/ended)
-let isShuffling = false;  // avoid re-entrancy
-let loadTimer = null;     // timeout guard per track
-
-/* Separate audio element just for breaks */
-const breakAudio = new Audio();
-breakAudio.crossOrigin = 'anonymous';
+let idx=0,isBreak=false,isLoading=false,isShuffling=false,loadTimer=null; let userScrubbing=false; let tracksSinceBreak=0;
+const breakAudio=new Audio(); breakAudio.crossOrigin='anonymous';
 
 /* ===== UI helpers ===== */
-function setOnAir(on){ onAir.classList.toggle('active', on); }
+function setOnAir(on){ onAir.classList.toggle('active',on); }
 function pickBreakNow(){
-  if (!BREAKS_CFG.enabled || audio.loop || BREAKS.length===0) return false;
-  if (BREAKS_CFG.mode==="everyN"){ tracksSinceBreak++; if (tracksSinceBreak>=BREAKS_CFG.n){ tracksSinceBreak=0; return true; } return false; }
-  if (BREAKS_CFG.mode==="betweenAll") return true;
-  if (BREAKS_CFG.mode==="random") return Math.random() < BREAKS_CFG.prob;
+  if(!BREAKS_CFG.enabled||audio.loop||BREAKS.length===0) return false;
+  if(BREAKS_CFG.mode==="everyN"){ tracksSinceBreak++; if(tracksSinceBreak>=BREAKS_CFG.n){ tracksSinceBreak=0; return true; } return false; }
+  if(BREAKS_CFG.mode==="betweenAll") return true;
+  if(BREAKS_CFG.mode==="random") return Math.random() < BREAKS_CFG.prob;
   return false;
 }
-function currentMedia(){ return isBreak ? breakAudio : audio; }
+function currentMedia(){ return isBreak?breakAudio:audio; }
 
-/* ===== NEW: Story rendering (defaults if fields are missing) ===== */
-function renderStoryFor(index){
-  const item = PLAYLIST[index];
-  if (!item){ storyPanel.hidden = true; return; }
-
-  // Title
-  storyTitle.textContent = item.title || '';
-
-  // Image (custom or default)
-  const imgPath = item.img ? item.img : DEFAULT_STORY_IMG;
-  storyImg.src = pathToUrl(imgPath);
-  storyImg.alt = item.alt || (item.img ? (item.title || "Artwork") : "Default artwork");
-
-  // Story (custom or default)
-  const storyText = item.story ? item.story : DEFAULT_STORY_TEXT;
-  storyBody.innerHTML = paragraphsFrom(storyText);
-
-  storyPanel.hidden = false;
+/* ===== Story rendering ===== */
+function renderStoryFor(i){
+  const item=PLAYLIST[i];
+  if(!item){ storyPanel.hidden=true; return; }
+  storyTitle.textContent=item.title||"";
+  storyImg.src=pathToUrl(item.img||DEFAULT_STORY_IMG);
+  storyImg.alt=item.alt||(item.img?(item.title||"Artwork"):"Default artwork");
+  storyBody.innerHTML=paragraphsFrom(item.story||DEFAULT_STORY_TEXT);
+  storyPanel.hidden=false;
 }
 
 /* ===== Playlist UI ===== */
@@ -454,63 +389,55 @@ function renderList(){
     row.className='track';
     row.innerHTML=`<span class="idx">${String(i+1).padStart(2,'0')}</span>
                    <div><div>${t.title}</div><div class="small">${t.file.replace(/^Media\//,'')}</div></div>`;
-    row.onclick=()=>{ cancelBreakIfAny(); load(i, /*autoplay=*/true); };
+    row.onclick=()=>{ cancelBreakIfAny(); load(i,true); };
     list.appendChild(row);
   });
 }
-function markActive(){
-  [...list.children].forEach((el,i)=>el.querySelector('.idx').classList.toggle('now', i===idx));
-}
+function markActive(){ [...list.children].forEach((el,i)=>el.querySelector('.idx').classList.toggle('now',i===idx)); }
 
 /* ===== Core playback with robust error/timeout handling ===== */
-function clearLoadTimer(){ if (loadTimer){ clearTimeout(loadTimer); loadTimer = null; } }
+function clearLoadTimer(){ if(loadTimer){clearTimeout(loadTimer);loadTimer=null;} }
 
-function load(i, autoplay=false){
-  isLoading = true;
-  clearLoadTimer();
+function load(i,autoplay=false){
+  isLoading=true; clearLoadTimer();
 
-  idx = (i+PLAYLIST.length)%PLAYLIST.length;
-  const tr = PLAYLIST[idx];
-  const src = pathToUrl(tr.file);
+  idx=(i+PLAYLIST.length)%PLAYLIST.length;
+  const tr=PLAYLIST[idx];
+  const src=pathToUrl(tr.file);
 
-  audio.src = src;
-  title.textContent = tr.title;
-  meta.textContent = 'Queued';
-  tpos.textContent = idx+1;
+  audio.src=src;
+  title.textContent=tr.title;
+  meta.textContent='Queued';
+  tpos.textContent=idx+1;
   markActive();
 
   const u=new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u);
 
   // reset scrubber
-  seek.value = 0;
-  document.getElementById('elapsed').textContent = '0:00';
-  document.getElementById('remaining').textContent = '-0:00';
+  seek.value=0;
+  document.getElementById('elapsed').textContent='0:00';
+  document.getElementById('remaining').textContent='-0:00';
 
-  // Start timer: if we don't get metadata in time, skip
-  loadTimer = setTimeout(()=>{
+  // fall-forward timeout
+  loadTimer=setTimeout(()=>{
     console.warn('Load timeout for', tr.file);
     showToast('Skipping: could not load “' + tr.title + '”');
-    isLoading = false;
-    next(); // fail-forward
+    isLoading=false;
+    next();
   }, LOAD_TIMEOUT_MS);
 
-  const onReady = () => {
+  const onReady=()=>{
     clearLoadTimer();
-    isLoading = false;
-    // UPDATE story as soon as track is ready (so default or custom shows immediately)
+    isLoading=false;
     renderStoryFor(idx);
-    if (autoplay) play();
+    if(autoplay) play();
   };
 
-  if (audio.readyState >= 2) onReady();
-  else {
-    audio.onloadedmetadata = onReady;
-    audio.oncanplay = ()=>{ /* keep waiting for metadata or timeout */ };
-  }
+  if(audio.readyState>=2) onReady(); else { audio.onloadedmetadata=onReady; }
 }
 
 function play(){
-  if (isBreak) { cancelBreakIfAny(); next(); return; }
+  if(isBreak){ cancelBreakIfAny(); next(); return; }
   audio.play().catch((err)=>{
     console.error('Play error for', PLAYLIST[idx]?.file, err);
     showToast('Playback error — skipping');
@@ -518,55 +445,51 @@ function play(){
   });
 }
 function pause(){ currentMedia().pause(); }
-function next(){ load(idx+1, /*autoplay=*/true); }
-function prev(){ load(idx-1, /*autoplay=*/true); }
+function next(){ load(idx+1,true); }
+function prev(){ load(idx-1,true); }
 
 /* ===== Break handling ===== */
 function cancelBreakIfAny(){
-  if (isBreak){
+  if(isBreak){
     try { breakAudio.pause(); } catch {}
     isBreak=false;
   }
 }
 async function playBreakThenNext(){
-  if (audio.loop) { next(); return; } // skip breaks under Loop
-  isBreak = true;
+  if(audio.loop){ next(); return; }
+  isBreak=true;
   const prevTitle=title.textContent, prevMeta=meta.textContent;
 
-  breakAudio.volume = audio.volume;
-  breakAudio.muted  = audio.muted;
-  const file = pick(BREAKS);
-  title.textContent = "Station ID • KZAK";
-  meta.textContent = file.replace(/^MediaBreaks\//,'');
-  breakAudio.src = pathToUrl(file);
+  breakAudio.volume=audio.volume;
+  breakAudio.muted=audio.muted;
+  const file=pick(BREAKS);
+  title.textContent="Station ID • KZAK";
+  meta.textContent=file.replace(/^MediaBreaks\//,'');
+  breakAudio.src=pathToUrl(file);
 
-  // DO NOT touch the story panel during breaks; it should continue showing the current song’s story
+  const goNext=()=>{ title.textContent=prevTitle; meta.textContent=prevMeta; isBreak=false; next(); };
+  breakAudio.onerror=()=>goNext();
+  breakAudio.onended=goNext;
 
-  const goNext = () => { title.textContent=prevTitle; meta.textContent=prevMeta; isBreak=false; next(); };
-  breakAudio.onerror = (e)=>{ console.error('Break load error', file, e); goNext(); };
-  breakAudio.onended = goNext;
-
-  try{ await breakAudio.play(); }catch(err){ console.error('Break play error', err); goNext(); }
+  try{ await breakAudio.play(); }catch{ goNext(); }
 }
 
 /* ===== Controls ===== */
-btnPlay.onclick = ()=>{ if (isBreak){ cancelBreakIfAny(); next(); return; } const el=currentMedia(); el.paused?el.play().catch(()=>{}):el.pause(); };
+btnPlay.onclick = ()=>{ if(isBreak){ cancelBreakIfAny(); next(); return; } const el=currentMedia(); el.paused?el.play().catch(()=>{}):el.pause(); };
 btnPrev.onclick = ()=>{ cancelBreakIfAny(); prev(); };
 btnNext.onclick = ()=>{ cancelBreakIfAny(); next(); };
 btnLoop.onclick = ()=>{ audio.loop=!audio.loop; btnLoop.classList.toggle('onair', audio.loop); };
 
 // Safe shuffle: pin current track; avoid mid-load races; don't interrupt break
 btnShuffle.onclick = ()=>{
-  if (isShuffling || isLoading) return;
-  isShuffling = true;
-  const cur = PLAYLIST[idx];
+  if(isShuffling||isLoading) return;
+  isShuffling=true;
+  const cur=PLAYLIST[idx];
   for(let i=PLAYLIST.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [PLAYLIST[i],PLAYLIST[j]]=[PLAYLIST[j],PLAYLIST[i]]; }
-  const newIdx = PLAYLIST.findIndex(t => t === cur);
-  if (newIdx !== -1){ [PLAYLIST[newIdx], PLAYLIST[idx]] = [PLAYLIST[idx], PLAYLIST[newIdx]]; }
-  renderList(); markActive();
-  // Ensure the story panel keeps showing the current track’s notes even after shuffle
-  renderStoryFor(idx);
-  isShuffling = false;
+  const newIdx=PLAYLIST.findIndex(t=>t===cur);
+  if(newIdx!==-1){ [PLAYLIST[newIdx], PLAYLIST[idx]] = [PLAYLIST[idx], PLAYLIST[newIdx]]; }
+  renderList(); markActive(); renderStoryFor(idx);
+  isShuffling=false;
 };
 
 btnMute.onclick = ()=>{ const m=!currentMedia().muted; audio.muted=m; breakAudio.muted=m; btnMute.classList.toggle('onair', m); };
@@ -576,9 +499,9 @@ seek.oninput = ()=>{ userScrubbing=true; };
 seek.onchange = e => { if(!isFinite(audio.duration)) { userScrubbing=false; return; } audio.currentTime = audio.duration*(+e.target.value/100); userScrubbing=false; };
 
 btnShare.onclick = async ()=>{
-  const tr = PLAYLIST[idx];
-  const url = new URL(location.href); url.searchParams.set('t', idx);
-  const shareData = { title:'Listen with me — KZAK', text: tr.title, url: url.toString() };
+  const tr=PLAYLIST[idx];
+  const url=new URL(location.href); url.searchParams.set('t', idx);
+  const shareData={ title:'Listen with me — KZAK', text: tr.title, url: url.toString() };
   try{
     if(navigator.share) await navigator.share(shareData);
     else throw 0;
@@ -590,31 +513,10 @@ btnShare.onclick = async ()=>{
 
 /* ===== Main audio events ===== */
 audio.addEventListener('play',  ()=>{ setOnAir(true);  btnPlay.textContent='⏸︎ Pause';  meta.textContent='Playing'; });
-audio.addEventListener('pause', ()=>{ if (!isBreak){ setOnAir(false); btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; } });
-
-// If a track errors (404, decode error), skip it instead of hanging on "Queued"
-audio.addEventListener('error', (e)=>{
-  const tr = PLAYLIST[idx];
-  console.error('Audio load error:', tr?.file, e);
-  showToast('Skipping: could not load “' + (tr?.title||'Track') + '”');
-  clearLoadTimer();
-  isLoading = false;
-  next();
-});
-
-audio.addEventListener('ended', ()=>{
-  setOnAir(false);
-  meta.textContent='Finished';
-  if (pickBreakNow()) playBreakThenNext(); else next();
-});
-
-audio.addEventListener('timeupdate', ()=>{
-  if(!userScrubbing && isFinite(audio.duration)){
-    seek.value=(audio.currentTime/audio.duration)*100;
-    document.getElementById('elapsed').textContent = fmt(audio.currentTime);
-    document.getElementById('remaining').textContent = '-' + fmt(Math.max(0,(audio.duration - audio.currentTime)));
-  }
-});
+audio.addEventListener('pause', ()=>{ if(!isBreak){ setOnAir(false); btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; } });
+audio.addEventListener('error', ()=>{ const tr=PLAYLIST[idx]; showToast('Skipping: could not load “'+(tr?.title||'Track')+'”'); clearLoadTimer(); isLoading=false; next(); });
+audio.addEventListener('ended', ()=>{ setOnAir(false); meta.textContent='Finished'; if(pickBreakNow()) playBreakThenNext(); else next(); });
+audio.addEventListener('timeupdate', ()=>{ if(!userScrubbing && isFinite(audio.duration)){ seek.value=(audio.currentTime/audio.duration)*100; document.getElementById('elapsed').textContent=fmt(audio.currentTime); document.getElementById('remaining').textContent='-'+fmt(Math.max(0,(audio.duration-audio.currentTime))); } });
 
 /* Reflect ON AIR during breaks too */
 breakAudio.addEventListener('play', ()=> setOnAir(true));
@@ -623,10 +525,10 @@ breakAudio.addEventListener('pause',()=> setOnAir(false));
 /* ===== Init ===== */
 (function init(){
   renderList();
-  const p = parseInt(new URL(location.href).searchParams.get('t'),10);
-  const startIdx = Number.isFinite(p) ? Math.max(0, Math.min(PLAYLIST.length-1, p)) : 0;
-  ttotal.textContent = PLAYLIST.length;
-  load(startIdx, /*autoplay=*/false);
+  const p=parseInt(new URL(location.href).searchParams.get('t'),10);
+  const startIdx=Number.isFinite(p)?Math.max(0,Math.min(PLAYLIST.length-1,p)):0;
+  ttotal.textContent=PLAYLIST.length;
+  load(startIdx,false);
 })();
 </script>
 </body>
