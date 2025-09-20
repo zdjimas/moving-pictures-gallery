@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KZAK • Filename Resolver Test (v2)</title>
+<title>KZAK • Filename Resolver Test (no quotes)</title>
 <meta name="color-scheme" content="dark light">
 <style>
-  :root{ --ink:#e6e9ef; --muted:#9aa4b2; --line:#22324d; --card:#0f1626; }
+  :root{ --ink:#e6e9ef; --muted:#9aa4b2; --line:#22324d; }
   html,body{height:100%;margin:0}
   body{
     font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
@@ -36,8 +36,8 @@
 <body>
 <div class="overlay"></div>
 <div class="wrap">
-  <h1>KZAK • Filename Resolver Test (v2)</h1>
-  <div class="sub">Objective: verify playback of three complex filenames via hardened resolver (no intro audio)</div>
+  <h1>KZAK • Filename Resolver Test (no quotes)</h1>
+  <div class="sub">Testing the three renamed files (only the surrounding quotes removed from filenames)</div>
 
   <section class="panel">
     <div class="head">
@@ -77,16 +77,16 @@
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
 
 <script>
-/* ----------------------- Test Data: the three problematic filenames ----------------------- */
+/* ----------------------- Test Data: filenames with quotes removed ----------------------- */
 const PLAYLIST = [
-  { title: "“The Embracing Circle” – cover take 3",
-    file: 'Media/“The Embracing Circle” – cover take 3.mp3' },
+  { title: "The Embracing Circle – cover take 3",
+    file: 'Media/The Embracing Circle – cover take 3.mp3' },
 
-  { title: "“The Embracing Circle” – extract from Illumination Theory, Dream Theater-2",
-    file: 'Media/“The Embracing Circle” – extract from Illumination Theory, Dream Theater-2.mp3' },
+  { title: "The Embracing Circle – extract from Illumination Theory, Dream Theater-2",
+    file: 'Media/The Embracing Circle – extract from Illumination Theory, Dream Theater-2.mp3' },
 
-  { title: "“The Embracing Circle” – extract from Illumination Theory, Dream Theater-3",
-    file: 'Media/“The Embracing Circle” – extract from Illumination Theory, Dream Theater-3.mp3' }
+  { title: "The Embracing Circle – extract from Illumination Theory, Dream Theater-3",
+    file: 'Media/The Embracing Circle – extract from Illumination Theory, Dream Theater-3.mp3' }
 ];
 
 /* ----------------------- UI wiring ----------------------- */
@@ -128,7 +128,7 @@ function log(...args){
   logEl.scrollTop = logEl.scrollHeight;
 }
 
-/* ----------------------- Strong Resolver (v2) ----------------------- */
+/* ----------------------- Strong Resolver (kept for safety) ----------------------- */
 window.__resolverDebug = true;
 
 /* Normalize aggressively: strip diacritics and bidi/invisible controls; fold punctuation. */
@@ -226,11 +226,11 @@ async function headOk(url){
 /* Resolve with fast-fail HEAD checks and detailed logging */
 async function resolveAudioSrc(audioEl, filePath, timeoutMs=6000){
   const variants = filenameVariants(filePath).map(encodePath);
-  if (window.__resolverDebug) log('[Resolver] Variants for', filePath, '→', variants);
+  log('[Resolver] Variants for', filePath, '→', variants);
 
   for (const url of variants){
     const ok = await headOk(url);
-    if (!ok){ if (window.__resolverDebug) log('  ✗ HEAD 404 →', url); continue; }
+    if (!ok){ log('  ✗ HEAD 404 →', url); continue; }
 
     const triedUrl=url;
     const p = new Promise((resolve,reject)=>{
@@ -249,10 +249,10 @@ async function resolveAudioSrc(audioEl, filePath, timeoutMs=6000){
 
     try{
       const good=await p;
-      if (window.__resolverDebug) log('  ✓ RESOLVED →', good);
+      log('  ✓ RESOLVED →', good);
       return good;
     }catch{
-      if (window.__resolverDebug) log('  ✗ AUDIO error →', triedUrl);
+      log('  ✗ AUDIO error →', triedUrl);
     }
   }
   throw new Error('All variants failed');
