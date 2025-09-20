@@ -19,7 +19,7 @@
     background:#0b1020 url("Media/RadioMusicListening.jpg") center/cover no-repeat fixed;
     position:relative;
   }
-  /* Lighten the background vs. prior greyed look */
+  /* Lighter overlay than old grey look */
   body::before{
     content:""; position:fixed; inset:0; z-index:-1;
     background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.65));
@@ -45,7 +45,7 @@
   }
   h1{ margin:0; font-size:clamp(20px, 3.2vw, 34px); letter-spacing:.2px; }
 
-  /* Lobby button (bigger arrow) */
+  /* Return to Lobby (bigger arrow) */
   .lobby-btn{
     display: inline-flex; align-items: center; gap: .6rem;
     padding: .7rem 1rem; border-radius: 999px;
@@ -169,6 +169,9 @@
   }
   #skipExit:hover{ background: rgba(20,20,20,.7); }
 
+  /* Hover preview visual cue (optional) */
+  .previewing { box-shadow: 0 0 18px rgba(166, 227, 161, .45) !important; }
+
   /* Utilities */
   .spacer{ flex:1; }
 </style>
@@ -249,6 +252,18 @@
         <!-- Hidden audio -->
         <audio id="audio" preload="metadata" crossorigin="anonymous"></audio>
 
+        <!-- Hover Sound toggle -->
+        <div class="row" style="margin-top:6px;">
+          <label class="pill" title="Enable/disable hover preview">
+            <input id="hoverSoundToggle" type="checkbox" checked style="margin-right:.5rem;">
+            Hover Sound
+          </label>
+          <small style="color:var(--muted);">Hover/press the logo or artwork to hear Frasier jokes (pauses station, resumes on exit).</small>
+        </div>
+
+        <!-- Hidden hover preview audio (Frasier jokes) -->
+        <audio id="hoverPreview" preload="auto" loop src="Media/FrasierSnappyComebacks.mp3"></audio>
+
       </div>
     </main>
 
@@ -293,10 +308,9 @@
     story: 'Under Construction… stories and artwork are being added for each track.'
   };
 
-  const BREAKS_DIR = 'MediaBreaks/'; // random station IDs every 3rd track
-  // If you have specific break files, list them; else we’ll scan a short known-names set.
+  const BREAKS_DIR = 'MediaBreaks/';
   const BREAK_FILES = [
-    'ID1.mp3','ID2.mp3','ID3.mp3','ID4.mp3' // replace with your actual break filenames if you wish
+    'ID1.mp3','ID2.mp3','ID3.mp3','ID4.mp3' // replace with actual break file names if needed
   ];
 
   const LOBBY_URL = '../index.html'; // adjust if lobby path differs
@@ -318,7 +332,6 @@
   ];
   // << END of PASTE area >>
 
-  /* If a global PLAYLIST exists (e.g., you kept it elsewhere in this file), respect it */
   if (window.PLAYLIST && Array.isArray(window.PLAYLIST) && window.PLAYLIST.length) {
     PLAYLIST = window.PLAYLIST;
   }
@@ -352,6 +365,11 @@
   const exitVideo = $('#exitVideo');
   const skipExit = $('#skipExit');
   const returnBtn = $('#returnToLobby');
+
+  // Hover preview
+  const hoverToggle = $('#hoverSoundToggle');
+  const previewAudio = $('#hoverPreview');
+  const logoEl = $('.logo');
 
   /* =========================
      State
@@ -426,10 +444,9 @@
   ========================== */
   function play(){
     audio.play().then(()=>{
-      playBtn.textContent = 'Pause Station';   // label locked per UNCLE2
+      playBtn.textContent = 'Pause Station';   // label fixed by design
       onAir.classList.add('on');
     }).catch(()=>{
-      // If failed (autoplay rules), keep label as Start Station
       playBtn.textContent = 'Start Station';
       onAir.classList.remove('on');
     });
@@ -507,15 +524,14 @@
   audio.addEventListener('ended', ()=>{
     if (isPlayingBreak){
       isPlayingBreak = false;
-      onAir.classList.remove('on'); // will be turned back on when song resumes
-      // resume to next song after break
+      onAir.classList.remove('on'); // will toggle on when song resumes
       advanceTrack(true);
       return;
     }
     // finished a song
     breakCounter++;
     if (!isLoop && (breakCounter >= 3) && !audio.muted){
-      // play a random station ID break (obeys mute/volume; skip if loop)
+      // play a random station ID break (skip if loop; obey mute/volume)
       const pick = BREAK_FILES[Math.floor(Math.random()*BREAK_FILES.length)];
       if (pick){
         isPlayingBreak = true;
@@ -568,15 +584,116 @@
   });
 
   /* =========================
+     Hover Preview (Frasier jokes)
+     - Pauses station on hover/press of logo or artwork
+     - Plays looped preview, then resumes station on exit
+  ========================== */
+  const targets = [storyImg, logoEl].filter(Boolean);
+  let wasPlaying = false;
+  let hoverActive = false;
+  let hoverIntentTimer = null;
+  const HOVER_DELAY_MS = 120;
+
+  function canPreview(){
+    return hoverToggle ? hoverToggle.checked : true;
+  }
+
+  async function startPreview(target){
+    if (hoverActive || !canPreview()) return;
+    hoverActive = true;
+    target && target.classList && target.classList.add('previewing');
+
+    try { wasPlaying = !audio.paused; } catch { wasPlaying = false; }
+    try { if (wasPlaying) pause(); } catch {} // uses pause() to keep UI consistent
+    try {
+      previewAudio.currentTime = 0;
+      await previewAudio.play();
+    } catch(e){
+      stopPreview(target); // if blocked, bail cleanly
+    }
+  }
+
+  function stopPreview(target){
+    if (!hoverActive) return;
+    hoverActive = false;
+    try { previewAudio.pause(); } catch {}
+    target && target.classList && target.classList.remove('previewing');
+
+    if (wasPlaying){
+      audio.play().then(()=> onAir.classList.add('on'))
+                  .catch(()=> {/* leave UI paused if resume fails */});
+    }
+  }
+
+  function bindTarget(el){
+    if (!el) return;
+
+    // Desktop hover with small intent delay
+    el.addEventListener('mouseenter', ()=>{
+      clearTimeout(hoverIntentTimer);
+      hoverIntentTimer = setTimeout(()=> startPreview(el), HOVER_DELAY_MS);
+    });
+    el.addEventListener('mouseleave', ()=>{
+      clearTimeout(hoverIntentTimer);
+      stopPreview(el);
+    });
+
+    // Mobile press-and-hold
+    el.addEventListener('touchstart', ()=>{
+      clearTimeout(hoverIntentTimer);
+      hoverIntentTimer = setTimeout(()=> startPreview(el), HOVER_DELAY_MS);
+    }, {passive:true});
+    el.addEventListener('touchend', ()=>{
+      clearTimeout(hoverIntentTimer);
+      stopPreview(el);
+    }, {passive:true});
+    el.addEventListener('touchcancel', ()=>{
+      clearTimeout(hoverIntentTimer);
+      stopPreview(el);
+    }, {passive:true});
+
+    // Keyboard accessibility
+    el.setAttribute('tabindex','0');
+    el.addEventListener('focus', ()=>{
+      clearTimeout(hoverIntentTimer);
+      hoverIntentTimer = setTimeout(()=> startPreview(el), HOVER_DELAY_MS);
+    });
+    el.addEventListener('blur', ()=>{
+      clearTimeout(hoverIntentTimer);
+      stopPreview(el);
+    });
+    el.addEventListener('keydown', (e)=>{
+      if (e.code === 'Space' || e.code === 'Enter'){
+        e.preventDefault();
+        if (hoverActive) stopPreview(el); else startPreview(el);
+      }
+    });
+  }
+  targets.forEach(bindTarget);
+
+  // Safety: if station play/pause occurs during preview, reconcile states
+  audio.addEventListener('play', ()=>{
+    if (hoverActive) { try { previewAudio.pause(); } catch{} }
+    onAir.classList.add('on');
+  });
+  audio.addEventListener('pause', ()=>{
+    if (!hoverActive) onAir.classList.remove('on');
+  });
+
+  /* =========================
      Exit pre-roll -> lobby
   ========================== */
   function goLobby(){ window.location.href = LOBBY_URL; }
 
   async function playExitThenReturn(){
     try { if (!audio.paused) pause(); } catch(e){}
+    // Also stop hover preview if active
+    try { if (hoverActive) { previewAudio.pause(); hoverActive=false; } } catch(e){}
+
     exitOverlay.classList.add('show');
     exitOverlay.setAttribute('aria-hidden','false');
     try { exitVideo.currentTime = 0; } catch(e){}
+
     const cleanup = ()=>{
       exitOverlay.classList.remove('show');
       exitOverlay.setAttribute('aria-hidden','true');
@@ -614,7 +731,6 @@
   audio.volume = Number(vol.value);
   buildList();
   load(index, false);
-
 })();
 </script>
 </body>
