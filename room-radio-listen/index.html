@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -9,6 +9,9 @@
     --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
     --card:#151a29; --line:#22324d; --shadow:0 18px 50px rgba(0,0,0,.45);
     --story-img: 180px; /* artwork size (adjust 160–240px) */
+    /* NEW */
+    --logo-size: 180px;              /* Frasier logo size */
+    --lobby-arrow-size: 32px;        /* Return-to-Lobby arrow size */
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -26,8 +29,12 @@
 
   .wrap{position:relative;max-width:1200px;margin:0 auto;padding:22px 18px 80px}
 
-  header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .header-logo{height:52px;border-radius:8px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .header-logo{
+    height:var(--logo-size);           /* NEW: variable size */
+    width:auto;
+    border-radius:8px;
+  }
   h1{font-size:clamp(22px,3.4vw,36px);margin:0;line-height:1.15}
   .sub{opacity:.75;font-weight:500}
 
@@ -55,7 +62,7 @@
   .kv{display:flex;align-items:center;gap:10px;font-size:.95rem}
   .kv input[type="range"]{width:160px}
 
-  /* Prominent lobby button */
+  /* Legacy lobby button (kept in case you need it elsewhere) */
   .btn.lobby{
     background:var(--brand);
     color:#0a0e1a;
@@ -66,6 +73,16 @@
     box-shadow:0 8px 24px rgba(137,180,250,.25);
   }
   .btn.lobby:focus{outline:3px solid #cfe1ff; outline-offset:2px}
+
+  /* NEW: Bigger Return-to-Lobby arrow button */
+  .lobby-btn{
+    display:inline-flex; align-items:center; gap:.6rem; padding:.7rem 1rem;
+    border-radius:999px; border:1px solid var(--line); background:rgba(0,0,0,.35);
+    backdrop-filter:blur(6px); color:var(--ink); box-shadow:var(--shadow); font-weight:600;
+    transition:transform .1s ease, background .2s ease, border-color .2s ease;
+  }
+  .lobby-btn:hover{ transform:translateY(-1px); background:rgba(0,0,0,.45); }
+  .lobby-arrow{ width:var(--lobby-arrow-size); height:var(--lobby-arrow-size); fill:currentColor; }
 
   .trackmeta{margin-top:10px;display:flex;align-items:center;gap:10px}
   #title{font-weight:700}
@@ -131,6 +148,7 @@
     .list{max-height:360px}
     .story-panel{ display:block; }
     #storyImg{ width:80px; height:80px; margin-bottom:8px; }
+    .header-logo{ height:120px; } /* smaller logo on narrow screens */
   }
 </style>
 </head>
@@ -138,13 +156,21 @@
   <div class="bg" aria-hidden="true"></div>
   <div class="wrap">
     <header>
-      <img class="header-logo" src="Media/frasier.png" alt="">
+      <img class="header-logo" src="Media/frasier.png" alt="Frasier logo">
       <div>
         <h1>KZAK • Frasier-Style Fun Radio without the talking</h1>
         <div class="sub">113 Song Playlist • ON AIR lamp • Station ID every 3 songs • Share deep links</div>
       </div>
       <div class="spacer"></div>
-      <a href="../index.html" id="btnLobby" class="btn lobby" aria-label="Return to Museum Lobby">← Lobby</a>
+
+      <!-- NEW: Bigger Return-to-Lobby button with arrow -->
+      <button id="returnToLobby" class="lobby-btn" aria-label="Return to Lobby" title="Return to Lobby">
+        <svg class="lobby-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 4l1.41 1.41L8.83 10H20v2H8.83l4.58 4.59L12 18l-8-8 8-8z"/>
+        </svg>
+        <span class="lobby-label">Return to Lobby</span>
+      </button>
+
       <div id="onAir" class="onair" aria-live="polite" style="margin-left:8px">
         <span id="onLamp" class="lamp"></span>
         <span class="txt">ON&nbsp;AIR</span>
@@ -210,6 +236,18 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- NEW: Exit pre-roll overlay -->
+  <div id="exitOverlay" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;display:none;place-items:center;background:
+  radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.35), rgba(0,0,0,.75)), rgba(0,0,0,.7);">
+    <video id="exitVideo" playsinline preload="auto" style="max-width:min(100vw,1200px);max-height:100vh;width:100%;border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000;">
+      <source src="Media/FrasierExit.mp4" type="video/mp4" />
+    </video>
+    <div class="overlay-ui" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:1rem 1.25rem;pointer-events:none;">
+      <div style="color:#e6e9ef;opacity:.85;text-shadow:0 2px 14px rgba(0,0,0,.7);">Leaving the Radio Room…</div>
+      <button id="skipExit" class="btn" style="pointer-events:auto;">Skip</button>
+    </div>
+  </div>
 
 <script>
 /* ===== Config & helpers ===== */
@@ -512,7 +550,7 @@ btnShare.onclick = async ()=>{
 };
 
 /* ===== Main audio events ===== */
-audio.addEventListener('play',  ()=>{ setOnAir(true);  btnPlay.textContent='⏸︎ Pause';  meta.textContent='Playing'; });
+audio.addEventListener('play',  ()=>{ setOnAir(true);  btnPlay.textContent='⏸︎ Pause Station';  meta.textContent='Playing'; }); /* label fixed */
 audio.addEventListener('pause', ()=>{ if(!isBreak){ setOnAir(false); btnPlay.textContent='▶︎ Start Station'; meta.textContent='Paused'; } });
 audio.addEventListener('error', ()=>{ const tr=PLAYLIST[idx]; showToast('Skipping: could not load “'+(tr?.title||'Track')+'”'); clearLoadTimer(); isLoading=false; next(); });
 audio.addEventListener('ended', ()=>{ setOnAir(false); meta.textContent='Finished'; if(pickBreakNow()) playBreakThenNext(); else next(); });
@@ -529,6 +567,58 @@ breakAudio.addEventListener('pause',()=> setOnAir(false));
   const startIdx=Number.isFinite(p)?Math.max(0,Math.min(PLAYLIST.length-1,p)):0;
   ttotal.textContent=PLAYLIST.length;
   load(startIdx,false);
+})();
+</script>
+
+<!-- NEW: JS to pause audio, play exit video, then go to lobby -->
+<script>
+(function(){
+  const audio = document.getElementById('audio');
+  const returnBtn = document.getElementById('returnToLobby');
+  const exitOverlay = document.getElementById('exitOverlay');
+  const exitVideo = document.getElementById('exitVideo');
+  const skipExit = document.getElementById('skipExit');
+  const LOBBY_URL = '../index.html';           // adjust if needed
+  const TIMEOUT_MS = 30000;
+
+  function goLobby(){ window.location.href = LOBBY_URL; }
+
+  async function playExitThenReturn(){
+    try{ if (audio && !audio.paused) audio.pause(); }catch(e){}
+    exitOverlay.style.display = 'grid';
+    exitOverlay.setAttribute('aria-hidden','false');
+    try{ exitVideo.currentTime = 0; }catch(e){}
+
+    const cleanup = ()=>{
+      exitOverlay.style.display = 'none';
+      exitOverlay.setAttribute('aria-hidden','true');
+      try{ exitVideo.pause(); }catch(e){}
+      document.removeEventListener('keydown', onKey);
+      exitVideo.removeEventListener('ended', onEnded);
+      exitVideo.removeEventListener('error', onError);
+    };
+    const onEnded = ()=>{ cleanup(); goLobby(); };
+    const onError = ()=>{ cleanup(); goLobby(); };
+    const onKey = (e)=>{ if (e.key === 'Escape'){ e.preventDefault(); cleanup(); goLobby(); } };
+
+    document.addEventListener('keydown', onKey);
+    exitVideo.addEventListener('ended', onEnded, {once:true});
+    exitVideo.addEventListener('error', onError, {once:true});
+
+    try{
+      await exitVideo.play();
+      setTimeout(()=>{ if (!exitVideo.paused && !exitVideo.ended){ cleanup(); goLobby(); } }, TIMEOUT_MS);
+    }catch(e){
+      cleanup(); goLobby();
+    }
+  }
+
+  if (returnBtn){
+    returnBtn.addEventListener('click', (e)=>{ e.preventDefault(); playExitThenReturn(); });
+  }
+  if (skipExit){
+    skipExit.addEventListener('click', (e)=>{ e.preventDefault(); goLobby(); });
+  }
 })();
 </script>
 </body>
