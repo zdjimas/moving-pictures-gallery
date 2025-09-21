@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>KZAK • Frasier-Style Fun Radio without the talking (UNCLE4 — Visual Blocks)</title>
+<title>KZAK • Frasier-Style Fun Radio without the talking (UNCLE5 — Final Handoff)</title>
 <meta name="color-scheme" content="dark light">
+<!-- UNCLE5 • final handoff -->
 <style>
   :root{
     --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
@@ -25,7 +26,7 @@
   }
   .overlay.show{ display:grid; }
 
-  /* Lighter welcome overlay so background is almost fully visible (≈75–80% bg visible) */
+  /* Lighter welcome overlay so background is ~75–80% visible */
   #welcomeOverlay.overlay{
     background:
       radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.10), rgba(0,0,0,.20)),
@@ -201,7 +202,7 @@
 
 <script>
 /* ============================================================
-   VISUAL-BLOCKS PLAYLIST
+   VISUAL-BLOCKS PLAYLIST (UNCLE5)
    Each entry is a vertical, spaced object with defaults.
    Edit a block directly in GitHub: file, img, alt, story.
    ============================================================ */
@@ -1110,7 +1111,7 @@ function buildList(){
     div.className='item';
     div.setAttribute('data-i', i);
     div.innerHTML = `<div><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}</div><div class="tiny">${tr.file}</div>`;
-    div.addEventListener('click', ()=> load(i, true));
+    div.addEventListener('click', ()=> load(i, true)); // autoplay on click
     plistBody.appendChild(div);
   });
 }
@@ -1123,8 +1124,10 @@ function markActive(){
 /* Concurrency helpers */
 function stopIntro(){
   if (!isIntro) return;
-  intro.pause();
-  intro.currentTime = 0;
+  try{
+    intro.pause();
+    intro.currentTime = 0;
+  }catch(e){}
   isIntro = false;
   startBtn.disabled = false;
   nextBtn.disabled = false;
@@ -1152,7 +1155,7 @@ async function playWelcomeThenStart(){
     intro.addEventListener('ended', async () => {
       stopIntro();
       hideWelcome();
-      await load(idx, false); // ready to play after
+      await load(idx, true); // ✅ auto-start first track after intro
     }, { once:true });
   }catch(e){
     // Autoplay blocked or user agent quirks; just enable manual start
@@ -1160,15 +1163,23 @@ async function playWelcomeThenStart(){
   }
 }
 $('#playWelcome').addEventListener('click', ()=> playWelcomeThenStart());
-$('#skipWelcome').addEventListener('click', ()=> { stopIntro(); hideWelcome(); load(idx,false); });
+$('#skipWelcome').addEventListener('click', ()=> { // ✅ Skip and start immediately
+  stopIntro();
+  hideWelcome();
+  load(idx, true);
+});
 
 /* Load & Playback */
 let seekTick=null;
 function clearSeekTick(){ if(seekTick) cancelAnimationFrame(seekTick), seekTick=null; }
 
 async function load(i, autoplay=false){
-  // Never let intro overlap a track
+  // Never let intro/exit overlap a track
   stopIntro();
+  stopExitVideo();
+
+  // If the welcome overlay is still visible (e.g., user clicks playlist), hide it so clicks "work"
+  if (welcomeOverlay.classList.contains('show')) hideWelcome();
 
   isLoading = true;
   idx = (i + PLAYLIST.length) % PLAYLIST.length;
@@ -1179,32 +1190,34 @@ async function load(i, autoplay=false){
   tpos.textContent = idx + 1;
   markActive();
 
+  // artwork & story with safe defaults
   art.src = tr.img || DEFAULT_IMG;
   art.alt = tr.alt || (tr.title + ' — artwork');
   story.textContent = tr.story || DEFAULT_STORY;
 
+  // reset scrubber
   seek.value = 0; $('#elapsed').textContent = '0:00'; $('#remaining').textContent = '-0:00';
 
+  // deep link
   const u = new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u);
+
+  // safer path handling for odd filenames
   audio.src = pathToUrl(tr.file);
 
   const onReady = () => {
     audio.removeEventListener('loadedmetadata', onReady);
     isLoading = false; meta.textContent = 'Ready';
-    if (autoplay) play();
+    if (autoplay) play(); // ✅ only start once metadata is ready
   };
   audio.addEventListener('loadedmetadata', onReady, { once:true });
   audio.addEventListener('error', ()=>{ isLoading=false; meta.textContent='Load error'; }, { once:true });
 }
 
 function play(){
-  // If intro is in progress, stop it first so no overlap
   if (isIntro){ stopIntro(); }
-
-  // Stop exit video sound if any
   stopExitVideo();
 
-  if(isLoading) return;
+  if(isLoading) return; // play will be called by onReady if autoplay
   audio.play().then(()=>{
     isPlaying = true; onAir.classList.add('on');
     startBtn.disabled = true; pauseBtn.disabled = false; meta.textContent = 'Playing';
@@ -1239,12 +1252,9 @@ audio.addEventListener('play', ()=> onAir.classList.add('on'));
 audio.addEventListener('pause', ()=> onAir.classList.remove('on'));
 
 startBtn.addEventListener('click', async ()=>{
-  if (isIntro){
-    // If user hits Start while intro is playing, stop intro and start track safely
-    stopIntro();
-  }
-  if (welcomeOverlay.classList.contains('show')) { hideWelcome(); await load(idx,false); }
-  if(!isPlaying) play();
+  if (isIntro) stopIntro();
+  if (welcomeOverlay.classList.contains('show')) hideWelcome();
+  await load(idx, true); // ✅ always load with autoplay from Start
 });
 pauseBtn.addEventListener('click', pause);
 nextBtn.addEventListener('click', next);
