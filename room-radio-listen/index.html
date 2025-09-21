@@ -190,6 +190,7 @@
     <div class="btn" id="shuffleBtn" aria-label="Shuffle">🔀 Shuffle</div>
 
     <div class="btn" id="muteBtn" aria-label="Mute">🔇 Mute</div>
+    <div class="btn" id="breaksBtn" aria-label="Station Breaks">📻 Station Breaks: On</div>
     <button id="shareBtn" class="btn" aria-label="Share Station">🔗 Share</button>
     <button id="shareTrackBtn" class="btn" aria-label="Share Current Track">📤 Share Track</button>
   </div>
@@ -271,6 +272,7 @@
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
 <audio id="introAudio" preload="auto" src="Media/KZAK-Welcome.mp3"></audio>
 <video id="exitVideo" preload="auto" playsinline style="display:none" src="room-radio-listen/radio-room-entry.mp4"></video>
+<audio id="breakAudio" preload="auto" src="Media/KZAK-StationBreak.mp3"></audio>
 
 <div class="toast" id="toast"></div>
 
@@ -1175,9 +1177,10 @@ function fmt(t){ t|=0; const m=(t/60)|0, s=(t%60)|0; return m+':'+(s<10?'0':'')+
 function showToast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1800); }
 function pathToUrl(p){ return p.split('/').map(seg => encodeURIComponent(seg)).join('/'); }
 
-const audio = $('#audio'), intro = $('#introAudio'), exitVid = $('#exitVideo');
+const audio = $('#audio'), intro = $('#introAudio'), exitVid = $('#exitVideo'), breakAudio = $('#breakAudio');
 const onAir=$('#onAir'), startBtn=$('#startBtn'), pauseBtn=$('#pauseBtn');
 const nextBtn=$('#nextBtn'), prevBtn=$('#prevBtn'), muteBtn=$('#muteBtn'), loopBtn=$('#loopBtn'), shuffleBtn=$('#shuffleBtn'), shareBtn=$('#shareBtn'), toLobby=$('#toLobby');
+const breaksBtn=$('#breaksBtn');
 const shareTrackBtn = $('#shareTrackBtn');
 const vol=$('#vol'), seek=$('#seek');
 const titleEl=$('#title'), meta=$('#meta'), tpos=$('#tpos'), tmax=$('#tmax'), tcount=$('#tcount');
@@ -1187,6 +1190,7 @@ const welcomeOverlay=$('#welcomeOverlay'), exitOverlay=$('#exitOverlay');
 
 let idx=0, isShuffle=false, isLoop=false, isMuted=false, isPlaying=false, isLoading=false;
 let isIntro=false;
+let breaksEnabled=true, breakEvery=2, playCountSinceBreak=0, isBreakPlaying=false;
 
 tmax && (tmax.textContent = PLAYLIST.length);
 tcount && (tcount.textContent = PLAYLIST.length);
@@ -1226,6 +1230,27 @@ function stopIntro(){
 function stopExitVideo(){ try{ exitVid.pause(); exitVid.currentTime=0; exitVid.style.display='none'; }catch(e){} }
 function hideWelcome(){ welcomeOverlay?.classList.remove('show'); }
 
+function stopBreak(){
+  try{ breakAudio.pause(); breakAudio.currentTime = 0; }catch(e){}
+  isBreakPlaying=false;
+}
+async function playStationBreakThen(fnAfter){
+  if(!breaksEnabled){ fnAfter&&fnAfter(); return; }
+  if(!breakAudio || !breakAudio.src){ fnAfter&&fnAfter(); return; }
+  // Concurrency: stop music/intro/exit
+  try{ audio.pause(); }catch(e){}; stopIntro(); stopExitVideo();
+  isBreakPlaying=true; onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; meta&&(meta.textContent='Station break');
+  try{
+    breakAudio.currentTime = 0;
+    await breakAudio.play();
+    breakAudio.addEventListener('ended', ()=>{ isBreakPlaying=false; fnAfter&&fnAfter(); }, { once:true });
+  }catch(e){
+    // Autoplay blocked or file missing—just continue
+    isBreakPlaying=false; fnAfter&&fnAfter();
+  }
+}
+
+
 /* Welcome flow */
 async function playWelcomeThenStart(){
   try{
@@ -1262,6 +1287,7 @@ function refreshTimeLabels(){
 }
 
 async function load(i, autoplay=false){
+  stopBreak();
   stopIntro(); stopExitVideo(); if (welcomeOverlay?.classList.contains('show')) hideWelcome();
   isLoading=true; idx=(i+PLAYLIST.length)%PLAYLIST.length; const tr=PLAYLIST[idx];
 
@@ -1294,11 +1320,20 @@ function play(){
     startTick();
   }).catch(()=>{ showToast('Playback blocked — tap Start Station'); });
 }
-function pause(){ audio.pause(); isPlaying=false; onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; meta&&(meta.textContent='Paused'); }
-function next(){ const step=isShuffle?((Math.random()*PLAYLIST.length)|0)+1:1; load(idx+step, true); }
-function prev(){ load(idx-1, true); }
+function pause(){ if(isBreakPlaying){ try{ breakAudio.pause(); }catch(e){}; isBreakPlaying=false; } else { audio.pause(); isPlaying=false; onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; meta&&(meta.textContent='Paused'); } }
+function next(){ const step=isShuffle?((Math.random()*PLAYLIST.length)|0)+1:1; stopBreak(); load(idx+step, true); }
+function prev(){ stopBreak(); load(idx-1, true); }
 
-audio.addEventListener('ended', ()=>{ onAir.classList.remove('on'); isPlaying=false; if(isLoop){ audio.currentTime=0; play(); return; } next(); });
+audio.addEventListener('ended', ()=>{
+  onAir.classList.remove('on'); isPlaying=false;
+  if(isLoop){ audio.currentTime=0; play(); return; }
+  playCountSinceBreak++;
+  if (breaksEnabled && (playCountSinceBreak % breakEvery === 0)){
+    playStationBreakThen(()=> next());
+  } else {
+    next();
+  }
+});
 audio.addEventListener('play', ()=>{ onAir.classList.add('on'); startBtn.disabled=true; pauseBtn.disabled=false; });
 audio.addEventListener('pause', ()=>{ onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; });
 audio.addEventListener('timeupdate', ()=>{ if(!isScrubbing) refreshTimeLabels(); });
@@ -1339,6 +1374,12 @@ seek?.addEventListener('touchend',   ()=>{ isScrubbing=false; if(isPlaying) star
 
 seek?.addEventListener('input', onInput);
 seek?.addEventListener('change', onChange);
+
+breaksBtn?.addEventListener('click', ()=>{
+  breaksEnabled = !breaksEnabled;
+  breaksBtn.textContent = breaksEnabled ? '📻 Station Breaks: On' : '📻 Station Breaks: Off';
+});
+
 
 // Share helpers
 function trackUrl(i){ const u=new URL(location.href); u.searchParams.set('t', i); return u.toString(); }
