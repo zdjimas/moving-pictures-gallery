@@ -887,7 +887,7 @@ const PLAYLIST = [
 
   {
     title: "The Embracing Circle Cover- Take One",
-    file:  "Media/The Embracing Circle  Cover-  Take One.mp3",
+    file:  "Media/The Embracing Circle Cover- Take One.mp3",
     img:   DEFAULT_IMG,
     alt:   "The Embracing Circle Cover- Take One — default artwork",
     story: DEFAULT_STORY
@@ -1233,5 +1233,78 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 /* Deep link boot */
 (function(){const p=new URL(location).searchParams; const t=Number(p.get('t')); if(Number.isFinite(t)&&t>=0&&t<PLAYLIST.length){idx=t|0}})();
 </script>
+
+<!-- Auto-skip patch (UNCLE6) : skips missing/unplayable tracks after 5s -->
+<script>
+(function(){
+  // Preserve original loader if present
+  var originalLoad = window.load;
+  var pendingAutoSkip = null;
+
+  function clearAutoSkip(){
+    if (pendingAutoSkip){ clearTimeout(pendingAutoSkip); pendingAutoSkip = null; }
+  }
+  function showMessage(msg){
+    try {
+      if (typeof window.showToast === "function") { window.showToast(msg); }
+      else if (typeof window.meta !== "undefined" && window.meta && window.meta.textContent !== undefined) {
+        try { window.meta.textContent = msg; } catch(e){}
+      } else { console.warn(msg); }
+    } catch(e){ console.warn(msg); }
+  }
+  function autoSkip(msg, delayMs){
+    clearAutoSkip();
+    var ms = (typeof delayMs === "number" ? delayMs : 5000);
+    showMessage(msg + " — skipping in " + Math.round(ms/1000) + "s");
+    pendingAutoSkip = setTimeout(function(){
+      try{
+        if (window.isShuffle && typeof window.nextShuffled === "function"){
+          // shuffle path
+          if (typeof originalLoad === "function") originalLoad(window.nextShuffled(), true);
+          else if (typeof window.load === "function") window.load(window.nextShuffled(), true);
+        } else if (typeof window.idx !== "undefined"){
+          var nextIndex = (window.idx + 1);
+          if (typeof originalLoad === "function") originalLoad(nextIndex, true);
+          else if (typeof window.load === "function") window.load(nextIndex, true);
+        }
+      }catch(e){ console.error("AutoSkip failed:", e); }
+    }, ms);
+  }
+
+  // Wrap load() to clear any pending skip when switching tracks
+  if (typeof originalLoad === "function"){
+    window.load = function(i, autoplay){
+      clearAutoSkip();
+      return originalLoad.apply(this, arguments);
+    };
+  }
+
+  // Attach to <audio> once DOM is ready
+  function hookAudio(){
+    var audio = document.querySelector("audio");
+    if (!audio) return;
+    audio.addEventListener("error", function(){
+      autoSkip("Load error (file not found)", 5000);
+    });
+    audio.addEventListener("stalled", function(){
+      autoSkip("Network stalled", 5000);
+    });
+    audio.addEventListener("abort", function(){
+      autoSkip("Playback aborted", 5000);
+    });
+    // If metadata eventually loads, cancel the pending skip
+    ["loadedmetadata","canplay","playing"].forEach(function(ev){
+      audio.addEventListener(ev, clearAutoSkip);
+    });
+  }
+
+  if (document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", hookAudio, { once:true });
+  } else {
+    hookAudio();
+  }
+})();
+</script>
+
 </body>
 </html>
