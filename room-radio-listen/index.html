@@ -174,13 +174,13 @@ let BREAKS=[
   "MediaBreaks/Snappy7.mp3",
   "MediaBreaks/Snappy8.mp3",
   "MediaBreaks/Snappy9.mp3",
-  "MediaBreaks/Snappy11.mp3",
-  "MediaBreaks/Snappy12.mp3",
-  "MediaBreaks/Snappy13.mp3",
-  "MediaBreaks/Snappy14.mp3",
-  "MediaBreaks/Snappy15.mp3",
-  "MediaBreaks/Snappy16.mp3",
-  "MediaBreaks/Snappy10.mp3"
+  "MediaBreaks/Snappy10.mp3",
+"MediaBreaks/Snappy11.mp3",
+"MediaBreaks/Snappy12.mp3",
+"MediaBreaks/Snappy13.mp3",
+"MediaBreaks/Snappy14.mp3",
+"MediaBreaks/Snappy15.mp3",
+"MediaBreaks/Snappy16.mp3"
 ];
 let breakEvery=2;
 
@@ -1055,6 +1055,7 @@ async function discoverBreaks(){
       pats.push(`${d}/KZAK-ID-${i}.${e}`,`${d}/KZAK ID ${i}.${e}`);
       pats.push(`${d}/StationBreak-${i}.${e}`,`${d}/Station Break ${i}.${e}`);
       pats.push(`${d}/RadioID-${i}.${e}`,`${d}/Radio ID ${i}.${e}`);
+      pats.push(`${d}/Snappy${i}.${e}`, `${d}/snappy${i}.${e}`);
     }}
   }
   for(const d of BREAK_DIRS){for(const e of exts){pats.push(`${d}/KZAK-StationBreak.${e}`,`${d}/StationBreak.${e}`,`${d}/ID.${e}`)}}
@@ -1109,7 +1110,11 @@ function prev(){stopBreak(); if(isShuffle){load(prevShuffled(),true)}else{load(i
 audio.addEventListener('timeupdate',()=>{if(!isScrubbing)refreshTimeLabels()});
 audio.addEventListener('ended',()=>{ $('#onAir').classList.remove('on'); isPlaying=False=false; if($('#loopBtn').textContent.includes('On')){audio.currentTime=0; play(); return} playCountSinceBreak++; if(breaksEnabled && (playCountSinceBreak%breakEvery===0)){ playStationBreakThen(()=>next()) } else { next() } });
 
-$('#startBtn').addEventListener('click',async()=>{ if($('#welcomeOverlay').classList.contains('show')){ hideWelcome(); await load(idx,true); return } if(!isPlaying){ if(!audio.src){ await load(idx,true) } else { play() } } });
+document.querySelector('#startBtn').addEventListener('click', async () => {
+  if (document.querySelector('#welcomeOverlay').classList.contains('show')){ hideWelcome(); await load(idx,true); return }
+  if (typeof isBreakPlaying !== 'undefined' && isBreakPlaying) { try { breakAudio.pause(); } catch(e) {} isBreakPlaying = false; }
+  if (!isPlaying){ if(!audio.src){ await load(idx,true) } else { play() } }
+});
 $('#pauseBtn').addEventListener('click',pause);
 $('#nextBtn').addEventListener('click',next);
 $('#prevBtn').addEventListener('click',prev);
@@ -1136,9 +1141,23 @@ async function shareCurrentTrack(i=null){const k=(i==null)?idx:i; const u=new UR
 $('#shareTrackBtn').addEventListener('click',()=>shareCurrentTrack());
 
 /* Station breaks */
-async function playStationBreakThen(fnAfter){ if(!breaksEnabled){fnAfter&&fnAfter();return} await discoverBreaks(); const pick=pickBreak(); if(!pick){showToast('No station breaks found in MediaBreak/MediaBreaks'); fnAfter&&fnAfter(); return} try{audio.pause()}catch(e){} stopIntro(); stopExitVideo(); breakAudio.src=pathToUrl(pick); isBreakPlaying=True=true; $('#onAir').classList.remove('on'); $('#startBtn').disabled=false; $('#pauseBtn').disabled=true; $('#meta').textContent='Station break'; try{await breakAudio.play(); breakAudio.addEventListener('ended',()=>{isBreakPlaying=False=false; fnAfter&&fnAfter()},{once:true})}catch(e){isBreakPlaying=False=false; fnAfter&&fnAfter()}}
+async function playStationBreakThen(fnAfter){ if(!breaksEnabled){fnAfter&&fnAfter();return} await discoverBreaks(); const pick=pickBreak(); if(!pick){showToast('No station breaks found in MediaBreak/MediaBreaks'); fnAfter&&fnAfter(); return} try{audio.pause()}catch(e){} isPlaying=False=false; stopIntro(); stopExitVideo(); breakAudio.src=pathToUrl(pick); isBreakPlaying=True=true; $('#onAir').classList.remove('on'); $('#startBtn').disabled=false; $('#pauseBtn').disabled=true; $('#meta').textContent='Station break'; try{await breakAudio.play(); breakAudio.addEventListener('ended',()=>{isBreakPlaying=False=false; fnAfter&&fnAfter()},{once:true})}catch(e){isBreakPlaying=False=false; fnAfter&&fnAfter()}}
 $('#breaksBtn').addEventListener('click',()=>{breaksEnabled=!breaksEnabled; $('#breaksBtn').textContent=breaksEnabled?'📻 Station Breaks: On':'📻 Station Breaks: Off'});
-$('#breakTestBtn').addEventListener('click',()=>{playStationBreakThen(()=>{})});
+document.querySelector('#breakTestBtn').addEventListener('click',()=>{
+  const wasPlaying = typeof isPlaying !== 'undefined' ? isPlaying : false;
+  playStationBreakThen(()=>{
+    if (wasPlaying) {
+      // resume the current track seamlessly
+      try { play(); } catch(e) { /* no-op */ }
+    } else {
+      // leave paused but ensure UI is consistent
+      document.querySelector('#meta').textContent = 'Paused';
+      document.querySelector('#startBtn').disabled = false;
+      document.querySelector('#pauseBtn').disabled = true;
+      document.querySelector('#onAir').classList.remove('on');
+    }
+  });
+});
 
 /* Exit */
 $('#toLobby').addEventListener('click',async()=>{try{audio.pause();isPlaying=False=false;$('#onAir').classList.remove('on');stopIntro(); const v=$('#exitVideo'); v.currentTime=0; v.style.display='block'; v.play(); v.addEventListener('ended',()=>{location.href='../index.html'},{once:true})}catch(e){location.href='../index.html'}});
