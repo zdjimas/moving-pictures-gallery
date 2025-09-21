@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>KZAK • Frasier-Style Fun Radio without the talking (UNCLE5)</title>
+<title>KZAK • Frasier-Style Fun Radio without the talking (UNCLE5 — Stable)</title>
 <meta name="color-scheme" content="dark light">
 <style>
   :root{ --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
@@ -16,7 +16,7 @@
   }
   .wrap{ position:relative; z-index:1; padding:24px; max-width:1200px; margin:0 auto; }
   header{ display:flex; align-items:center; gap:16px; margin-bottom:10px; }
-  .thumb{width:94px;height:94px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .thumb{width:120px;height:72px;border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
   .thumb img{width:100%;height:100%;object-fit:cover}
   h1{font-size:32px;line-height:1.15;margin:0;text-shadow:0 2px 10px rgba(0,0,0,.45);}
   .sub{color:var(--muted);font-size:14px;margin-top:4px}
@@ -28,12 +28,12 @@
   .onair.on .onair-dot{ background:#ff3b3b; box-shadow:0 0 16px rgba(255,59,59,.9) }
   .player{ display:grid; grid-template-columns:1fr 380px; gap:22px; margin-top:16px; }
   @media (max-width: 1000px){ .player{ grid-template-columns:1fr; } }
-  .panel{ background:rgba(14,22,40,.78); border:1px solid var(--line); border-radius:16px; backdrop-filter: blur(6px); box-shadow:var(--shadow); }
+  .panel{ background:rgba(14,22,40,.80); border:1px solid var(--line); border-radius:16px; backdrop-filter: blur(6px); box-shadow:var(--shadow); }
   .panel .head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
   .panel .body{padding:14px;}
   .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .row.sep{border-top:1px dashed var(--line); padding-top:12px; margin-top:12px;}
-  .scrub{display:grid; grid-template-columns:60px 1fr 60px; align-items:center; gap:10px; margin:6px 0 12px}
+  .scrub{display:grid; grid-template-columns:52px 1fr 56px; align-items:center; gap:10px; margin:6px 0 12px}
   input[type="range"]{ width:100% }
   .track{ display:grid; grid-template-columns:170px 1fr; gap:16px; align-items:flex-start; }
   @media (max-width: 640px){ .track{ grid-template-columns:1fr; } }
@@ -41,7 +41,7 @@
   .art img{width:100%;height:100%;object-fit:cover}
   .info h3{margin:0 0 6px 0}
   .muted{color:var(--muted)}
-  .playlist .body{ max-height: 470px; overflow:auto; } /* ~8 items visible */
+  .playlist .body{ max-height: 472px; overflow:auto; }
   .playlist .item{ padding:10px 12px; border-top:1px solid rgba(255,255,255,.04); cursor:pointer; display:flex; justify-content:space-between; gap:10px; }
   .playlist .item:hover{background:rgba(255,255,255,.04)}
   .playlist .item.active{background:rgba(168, 200, 255, .09)}
@@ -49,7 +49,7 @@
   .right{ text-align:right }
   .toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:#111a2e; border:1px solid var(--line); padding:10px 14px; border-radius:12px; display:none; z-index:99 }
   .toast.show{ display:block }
-  /* Welcome overlay */
+  /* Welcome */
   .overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center;
     background: radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.10), rgba(0,0,0,.20)), rgba(0,0,0,.20);
   }
@@ -74,7 +74,7 @@
 
 <div class="wrap">
   <header>
-    <div class="thumb"><img src="Media/frasier.png" alt=""></div>
+    <div class="thumb"><img src="Media/frasier.png" alt="Frasier image"></div>
     <div>
       <h1>KZAK • Frasier-Style Fun Radio without the talking</h1>
       <div class="sub"><span id="tcount">0</span> Song Playlist • <span class="tiny">ON AIR lamp • Deep-link sharing</span></div>
@@ -164,8 +164,10 @@
 /* ========= CONFIG ========= */
 const DEFAULT_IMG   = "Media/default.jpg";
 const DEFAULT_STORY = "Under Construction: a special write-up about this specific music creation and its meaning or influence it had on the creators and the artwork shown will follow shortly.";
+
 const BREAK_DIR     = "MediaBreak";  // folder with ID mp3s
 let   BREAKS        = [];            // optional explicit list, e.g. ["MediaBreak/KZAK-ID-1.mp3", ...]
+let   breakEvery    = 2;             // play a break after every N completed tracks
 
 /* ========= PLAYLIST =========
    Paste your full visual-blocks playlist into PLAYLIST below.
@@ -210,20 +212,17 @@ async function firstReachable(urls){
 }
 
 /* ===== Station Breaks discovery & random pick ===== */
-
 async function discoverBreaks(){
   if (BREAKS.length) return BREAKS;
   const pats=[];
   for (let i=1;i<=24;i++){
-    const n = i;
-    pats.push(`${BREAK_DIR}/ID-${n}.mp3`, `${BREAK_DIR}/ID ${n}.mp3`);
-    pats.push(`${BREAK_DIR}/Break-${n}.mp3`, `${BREAK_DIR}/Break ${n}.mp3`);
-    pats.push(`${BREAK_DIR}/KZAK-${n}.mp3`, `${BREAK_DIR}/KZAK ${n}.mp3`);
-    pats.push(`${BREAK_DIR}/KZAK-ID-${n}.mp3`, `${BREAK_DIR}/KZAK ID ${n}.mp3`);
-    pats.push(`${BREAK_DIR}/StationBreak-${n}.mp3`, `${BREAK_DIR}/Station Break ${n}.mp3`);
-    pats.push(`${BREAK_DIR}/RadioID-${n}.mp3`, `${BREAK_DIR}/Radio ID ${n}.mp3`);
+    pats.push(`${BREAK_DIR}/ID-${i}.mp3`, `${BREAK_DIR}/ID ${i}.mp3`);
+    pats.push(`${BREAK_DIR}/Break-${i}.mp3`, `${BREAK_DIR}/Break ${i}.mp3`);
+    pats.push(`${BREAK_DIR}/KZAK-${i}.mp3`, `${BREAK_DIR}/KZAK ${i}.mp3`);
+    pats.push(`${BREAK_DIR}/KZAK-ID-${i}.mp3`, `${BREAK_DIR}/KZAK ID ${i}.mp3`);
+    pats.push(`${BREAK_DIR}/StationBreak-${i}.mp3`, `${BREAK_DIR}/Station Break ${i}.mp3`);
+    pats.push(`${BREAK_DIR}/RadioID-${i}.mp3`, `${BREAK_DIR}/Radio ID ${i}.mp3`);
   }
-  // single common filenames
   pats.push(`${BREAK_DIR}/KZAK-StationBreak.mp3`, `${BREAK_DIR}/StationBreak.mp3`, `${BREAK_DIR}/ID.mp3`);
   const found=[];
   for (const p of pats){
@@ -232,16 +231,6 @@ async function discoverBreaks(){
     if (found.length>=24) break;
   }
   if (found.length) BREAKS = found;
-  return BREAKS;
-}
-
-  const found=[];
-  for (const p of patterns){
-    const ok=await firstReachable([p]);
-    if (ok) found.push(ok);
-    if (found.length>=16) break;
-  }
-  if (found.length) BREAKS=found;
   return BREAKS;
 }
 let lastBreakIdx=-1;
@@ -257,8 +246,7 @@ const audio=$('#audio'), intro=$('#introAudio'), exitVid=$('#exitVideo'), breakA
 const onAir=$('#onAir');
 const startBtn=$('#startBtn'), pauseBtn=$('#pauseBtn');
 const nextBtn=$('#nextBtn'), prevBtn=$('#prevBtn'), muteBtn=$('#muteBtn'), loopBtn=$('#loopBtn'), shuffleBtn=$('#shuffleBtn'), shareBtn=$('#shareBtn'), shareTrackBtn=$('#shareTrackBtn'), toLobby=$('#toLobby');
-const breaksBtn=$('#breaksBtn');
-const breakTestBtn=$('#breakTestBtn');
+const breaksBtn=$('#breaksBtn'), breakTestBtn=$('#breakTestBtn');
 
 const vol=$('#vol'), seek=$('#seek');
 const titleEl=$('#title'), meta=$('#meta');
@@ -267,8 +255,9 @@ const art=$('#art'), story=$('#story');
 const plistBody=$('#plistBody'), countRight=$('#countRight');
 const welcomeOverlay=$('#welcomeOverlay');
 
-let idx=0, isShuffle=false, isLoop=false, isMuted=false, isPlaying=false, isLoading=false; let shuffleOrder=[], shufflePos=0;
-let isIntro=false, breaksEnabled=true, breakEvery=2, playCountSinceBreak=0, isBreakPlaying=false;
+let idx=0, isShuffle=false, isLoop=false, isMuted=false, isPlaying=false, isLoading=false;
+let shuffleOrder=[], shufflePos=0;
+let isIntro=false, breaksEnabled=true, playCountSinceBreak=0, isBreakPlaying=false;
 
 tmax.textContent=PLAYLIST.length; tcount.textContent=PLAYLIST.length; countRight.textContent=PLAYLIST.length+' items';
 
@@ -288,7 +277,7 @@ buildList();
 function markActive(){ [...plistBody.children].forEach(n=> n.classList.toggle('active', Number(n.getAttribute('data-i'))===idx)); }
 
 /* Concurrency helpers */
-function stopIntro(){ if(!isIntro) return; intro.pause(); intro.currentTime=0; isIntro=false; startBtn.disabled=false; nextBtn.disabled=false; prevBtn.disabled=false; }
+function stopIntro(){ if(!isIntro) return; try{ intro.pause(); intro.currentTime=0; }catch(e){} isIntro=false; startBtn.disabled=false; nextBtn.disabled=false; prevBtn.disabled=false; }
 function stopExitVideo(){ try{ exitVid.pause(); exitVid.currentTime=0; exitVid.style.display='none'; }catch(e){} }
 function stopBreak(){ try{ breakAudio.pause(); breakAudio.currentTime=0; }catch(e){} isBreakPlaying=false; }
 
@@ -296,14 +285,40 @@ function stopBreak(){ try{ breakAudio.pause(); breakAudio.currentTime=0; }catch(
 function hideWelcome(){ welcomeOverlay?.classList.remove('show'); }
 async function playWelcomeThenStart(){
   try{
-    audio.pause(); stopExitVideo();
+    try{ audio.pause(); }catch(e){}; stopExitVideo(); stopBreak();
     isIntro=true; startBtn.disabled=true; nextBtn.disabled=true; prevBtn.disabled=true;
     intro.currentTime=0; await intro.play();
-    intro.addEventListener('ended', async ()=>{ stopIntro(); hideWelcome(); await load(idx,false); }, {once:true});
-  }catch(e){ stopIntro(); }
+    intro.addEventListener('ended', async ()=>{ stopIntro(); hideWelcome(); await load(idx,true); }, {once:true});
+  }catch(e){ // missing file or autoplay blocked
+    stopIntro(); hideWelcome(); await load(idx,true);
+  }
 }
 $('#playWelcome').addEventListener('click', ()=> playWelcomeThenStart());
-$('#skipWelcome').addEventListener('click', ()=> { stopIntro(); hideWelcome(); load(idx,false); });
+$('#skipWelcome').addEventListener('click', ()=> { stopIntro(); hideWelcome(); load(idx,true); });
+
+/* Shuffle helpers (Fisher–Yates) */
+function makeShuffleOrder(anchorIdx=null){
+  const n = PLAYLIST.length;
+  const arr = Array.from({length:n}, (_,i)=>i);
+  for(let i=n-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [arr[i],arr[j]] = [arr[j],arr[i]]; }
+  if (anchorIdx!=null){
+    const k = arr.indexOf(anchorIdx);
+    if (k>-1){ shuffleOrder = arr; shufflePos = k; }
+    else { shuffleOrder = [anchorIdx, ...arr.filter(x=>x!==anchorIdx)]; shufflePos = 0; }
+  }else{
+    shuffleOrder = arr; shufflePos = shuffleOrder.indexOf(idx); if (shufflePos<0) shufflePos = 0;
+  }
+}
+function nextShuffled(){
+  if (!shuffleOrder.length) makeShuffleOrder(idx);
+  shufflePos++; if (shufflePos >= shuffleOrder.length){ makeShuffleOrder(idx); shufflePos++; if (shufflePos >= shuffleOrder.length) shufflePos = 0; }
+  return shuffleOrder[shufflePos];
+}
+function prevShuffled(){
+  if (!shuffleOrder.length) makeShuffleOrder(idx);
+  shufflePos--; if (shufflePos < 0){ makeShuffleOrder(idx); shufflePos = shuffleOrder.length-2; if (shufflePos < 0) shufflePos = 0; }
+  return shuffleOrder[shufflePos];
+}
 
 /* Load & Playback */
 let seekTick=null, isScrubbing=false;
@@ -317,9 +332,7 @@ function refreshTimeLabels(){
   if(rm) rm.textContent=d>0?('-'+fmt(Math.max(d-ct,0)|0)):'-0:00';
   if (d>0 && seek) { seek.value = Math.round((ct/d)*1000); }
 }
-
 async function load(i, autoplay=false){
-  if (isShuffle && shuffleOrder.length){ const k = shuffleOrder.indexOf((i+PLAYLIST.length)%PLAYLIST.length); if (k>-1) shufflePos=k; }
   stopIntro(); stopExitVideo(); stopBreak();
   isLoading=true;
   idx=(i+PLAYLIST.length)%PLAYLIST.length;
@@ -332,11 +345,10 @@ async function load(i, autoplay=false){
 
   (async()=>{
     const audioUrl=await firstReachable(audioCandidates(tr));
-    firstReachable(imageCandidates(tr)).then(imgOk=>{ art.src=imgOk||DEFAULT_IMG; });
+    firstReachable(imageCandidates(tr)).then(imgOk=>{ if (imgOk) art.src=imgOk; });
     if(!audioUrl){ isLoading=false; meta.textContent='Load error (file not found)'; showToast('Audio not found. Check filename & case in /Media'); return; }
     audio.src=pathToUrl(audioUrl); audio.load();
-    const onReady=()=>{ isLoading=false; meta.textContent='Ready'; refreshTimeLabels(); tryAutoplay(); };
-    function tryAutoplay(){ if(!autoplay) return; audio.play().catch(()=>{ const once=()=>{ audio.removeEventListener('canplay', once); play(); }; audio.addEventListener('canplay', once, {once:true}); }); }
+    const onReady=()=>{ isLoading=false; meta.textContent='Ready'; refreshTimeLabels(); if (autoplay) play(); };
     audio.addEventListener('loadedmetadata', onReady, {once:true});
     audio.addEventListener('error', ()=>{ isLoading=false; meta.textContent='Load error'; }, {once:true});
   })();
@@ -354,8 +366,7 @@ function startTick(){
   })();
 }
 function play(){
-  if(isIntro) stopIntro();
-  stopExitVideo(); if(isLoading) return;
+  if(isIntro) stopIntro(); stopExitVideo(); if(isLoading) return;
   audio.play().then(()=>{ isPlaying=true; onAir.classList.add('on'); startBtn.disabled=true; pauseBtn.disabled=false; meta.textContent='Playing'; startTick(); }).catch(()=>{ showToast('Playback blocked — tap Start Station'); });
 }
 function pause(){
@@ -379,7 +390,10 @@ audio.addEventListener('play', ()=> onAir.classList.add('on'));
 audio.addEventListener('pause', ()=> onAir.classList.remove('on'));
 audio.addEventListener('timeupdate', ()=>{ if(!isScrubbing) refreshTimeLabels(); });
 
-startBtn.addEventListener('click', async ()=>{ if(isIntro) stopIntro(); if(welcomeOverlay.classList.contains('show')){ hideWelcome(); await load(idx,false); } if(!isPlaying) play(); });
+startBtn.addEventListener('click', async ()=>{
+  if (welcomeOverlay.classList.contains('show')){ hideWelcome(); await load(idx,true); return; }
+  if(!isPlaying){ if(!audio.src){ await load(idx,true); } else { play(); } }
+});
 pauseBtn.addEventListener('click', pause);
 nextBtn.addEventListener('click', next);
 prevBtn.addEventListener('click', prev);
@@ -387,11 +401,7 @@ prevBtn.addEventListener('click', prev);
 vol.addEventListener('input', ()=> audio.volume=Number(vol.value));
 muteBtn.addEventListener('click', ()=>{ const m=!audio.muted; audio.muted=m; muteBtn.textContent = m ? '🔈 Unmute' : '🔇 Mute'; });
 loopBtn.addEventListener('click', ()=>{ isLoop=!isLoop; loopBtn.textContent = isLoop ? '⟲ Loop: On' : '⟲ Loop'; });
-shuffleBtn.addEventListener('click', ()=>{ 
-  isShuffle=!isShuffle; 
-  if (isShuffle){ makeShuffleOrder(idx); } 
-  shuffleBtn.textContent = isShuffle ? '🔀 Shuffle: On' : '🔀 Shuffle'; 
-});
+shuffleBtn.addEventListener('click', ()=>{ isShuffle=!isShuffle; if (isShuffle){ makeShuffleOrder(idx); } shuffleBtn.textContent = isShuffle ? '🔀 Shuffle: On' : '🔀 Shuffle'; });
 
 /* scrubbing */
 function setFromSeek(v){ if(!audio.duration) return; const t=(Number(v)/1000)*audio.duration; audio.currentTime=t; }
@@ -425,8 +435,7 @@ async function playStationBreakThen(fnAfter){
   if(!breaksEnabled){ fnAfter&&fnAfter(); return; }
   await discoverBreaks();
   const pick=pickBreak();
-  if(!pick){ showToast('No station breaks found in /MediaBreak (try names like KZAK-ID-1.mp3)'); fnAfter&&fnAfter(); return; }
-  showToast('Station break ▶ ' + pick.split('/').pop());
+  if(!pick){ showToast('No station breaks found in /MediaBreak (e.g., KZAK-ID-1.mp3)'); fnAfter&&fnAfter(); return; }
   try{ audio.pause(); }catch(e){}; stopIntro(); stopExitVideo();
   breakAudio.src=pathToUrl(pick);
   isBreakPlaying=true; onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; meta.textContent='Station break';
@@ -436,7 +445,7 @@ async function playStationBreakThen(fnAfter){
   }catch(e){ isBreakPlaying=false; fnAfter&&fnAfter(); }
 }
 breaksBtn.addEventListener('click', ()=>{ breaksEnabled=!breaksEnabled; breaksBtn.textContent=breaksEnabled?'📻 Station Breaks: On':'📻 Station Breaks: Off'; });
-breakTestBtn?.addEventListener('click', ()=>{ playStationBreakThen(()=>{}); });
+breakTestBtn.addEventListener('click', ()=>{ playStationBreakThen(()=>{}); });
 
 /* Exit */
 toLobby.addEventListener('click', async ()=>{
@@ -446,54 +455,12 @@ toLobby.addEventListener('click', async ()=>{
 });
 
 /* Deep link boot */
-(function bootFromQuery(){ const p=new URL(location).searchParams; const t=Number(p.get('t')); if(Number.isFinite(t) && t>=0 && t<PLAYLIST.length){ idx=t|0; } if(isShuffle){ makeShuffleOrder(idx); } })();
-
-/* ===== Shuffle helpers (Fisher–Yates) ===== */
-function makeShuffleOrder(anchorIdx=null){
-  const n = PLAYLIST.length;
-  const arr = Array.from({length:n}, (_,i)=>i);
-  // Fisher–Yates
-  for(let i=n-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]] = [arr[j],arr[i]];
-  }
-  if (anchorIdx!=null){
-    const k = arr.indexOf(anchorIdx);
-    if (k>-1){
-      shuffleOrder = arr;
-      shufflePos = k;
-    }else{
-      shuffleOrder = [anchorIdx, ...arr.filter(x=>x!==anchorIdx)];
-      shufflePos = 0;
-    }
-  }else{
-    shuffleOrder = arr;
-    shufflePos = shuffleOrder.indexOf(idx);
-    if (shufflePos<0) shufflePos = 0;
-  }
-}
-function nextShuffled(){
-  if (!shuffleOrder.length) makeShuffleOrder(idx);
-  shufflePos++;
-  if (shufflePos >= shuffleOrder.length){
-    // re-shuffle when exhausted, anchor on current idx to avoid immediate repeat
-    makeShuffleOrder(idx);
-    shufflePos++;
-    if (shufflePos >= shuffleOrder.length) shufflePos = 0;
-  }
-  return shuffleOrder[shufflePos];
-}
-function prevShuffled(){
-  if (!shuffleOrder.length) makeShuffleOrder(idx);
-  shufflePos--;
-  if (shufflePos < 0){
-    makeShuffleOrder(idx);
-    shufflePos = shuffleOrder.length - 2; // step to previous excluding current
-    if (shufflePos < 0) shufflePos = 0;
-  }
-  return shuffleOrder[shufflePos];
-}
-
+(function bootFromQuery(){
+  const p=new URL(location).searchParams;
+  const t=Number(p.get('t'));
+  if(Number.isFinite(t) && t>=0 && t<PLAYLIST.length){ idx=t|0; }
+  // show welcome; user will Play Welcome or Skip or hit Start
+})();
 </script>
 </body>
 </html>
