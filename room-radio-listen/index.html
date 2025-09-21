@@ -90,6 +90,7 @@
     <div class="btn" id="shuffleBtn" aria-label="Shuffle">🔀 Shuffle</div>
     <div class="btn" id="muteBtn" aria-label="Mute">🔇 Mute</div>
     <div class="btn" id="breaksBtn" aria-label="Station Breaks">📻 Station Breaks: On</div>
+    <div class="btn" id="breakTestBtn" aria-label="Test Break">🧪 Test Break</div>
     <button id="shareBtn" class="btn" aria-label="Share Station">🔗 Share</button>
     <button id="shareTrackBtn" class="btn" aria-label="Share Current Track">📤 Share Track</button>
   </div>
@@ -209,12 +210,31 @@ async function firstReachable(urls){
 }
 
 /* ===== Station Breaks discovery & random pick ===== */
+
 async function discoverBreaks(){
   if (BREAKS.length) return BREAKS;
-  const patterns=[];
-  for (let i=1;i<=16;i++){
-    patterns.push(`${BREAK_DIR}/ID-${i}.mp3`, `${BREAK_DIR}/Break-${i}.mp3`, `${BREAK_DIR}/KZAK-${i}.mp3`, `${BREAK_DIR}/KZAK-ID-${i}.mp3`);
+  const pats=[];
+  for (let i=1;i<=24;i++){
+    const n = i;
+    pats.push(`${BREAK_DIR}/ID-${n}.mp3`, `${BREAK_DIR}/ID ${n}.mp3`);
+    pats.push(`${BREAK_DIR}/Break-${n}.mp3`, `${BREAK_DIR}/Break ${n}.mp3`);
+    pats.push(`${BREAK_DIR}/KZAK-${n}.mp3`, `${BREAK_DIR}/KZAK ${n}.mp3`);
+    pats.push(`${BREAK_DIR}/KZAK-ID-${n}.mp3`, `${BREAK_DIR}/KZAK ID ${n}.mp3`);
+    pats.push(`${BREAK_DIR}/StationBreak-${n}.mp3`, `${BREAK_DIR}/Station Break ${n}.mp3`);
+    pats.push(`${BREAK_DIR}/RadioID-${n}.mp3`, `${BREAK_DIR}/Radio ID ${n}.mp3`);
   }
+  // single common filenames
+  pats.push(`${BREAK_DIR}/KZAK-StationBreak.mp3`, `${BREAK_DIR}/StationBreak.mp3`, `${BREAK_DIR}/ID.mp3`);
+  const found=[];
+  for (const p of pats){
+    const ok=await firstReachable([p]);
+    if (ok) found.push(ok);
+    if (found.length>=24) break;
+  }
+  if (found.length) BREAKS = found;
+  return BREAKS;
+}
+
   const found=[];
   for (const p of patterns){
     const ok=await firstReachable([p]);
@@ -238,6 +258,7 @@ const onAir=$('#onAir');
 const startBtn=$('#startBtn'), pauseBtn=$('#pauseBtn');
 const nextBtn=$('#nextBtn'), prevBtn=$('#prevBtn'), muteBtn=$('#muteBtn'), loopBtn=$('#loopBtn'), shuffleBtn=$('#shuffleBtn'), shareBtn=$('#shareBtn'), shareTrackBtn=$('#shareTrackBtn'), toLobby=$('#toLobby');
 const breaksBtn=$('#breaksBtn');
+const breakTestBtn=$('#breakTestBtn');
 
 const vol=$('#vol'), seek=$('#seek');
 const titleEl=$('#title'), meta=$('#meta');
@@ -287,7 +308,15 @@ $('#skipWelcome').addEventListener('click', ()=> { stopIntro(); hideWelcome(); l
 /* Load & Playback */
 let seekTick=null, isScrubbing=false;
 function clearSeekTick(){ if(seekTick) cancelAnimationFrame(seekTick), seekTick=null; }
-function refreshTimeLabels(){ const d=(audio.duration||0)|0, ct=(audio.currentTime||0)|0; const el=$('#elapsed'), rm=$('#remaining'); if(el) el.textContent=fmt(ct); if(rm) rm.textContent=d>0?('-'+fmt(Math.max(d-ct,0))):'-0:00'; }
+function refreshTimeLabels(){
+  let d = Number.isFinite(audio.duration) ? audio.duration : 0;
+  let ct = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+  d = d>0 ? d : 0; ct = ct>0 ? ct : 0;
+  const el=$('#elapsed'), rm=$('#remaining');
+  if(el) el.textContent=fmt(ct|0);
+  if(rm) rm.textContent=d>0?('-'+fmt(Math.max(d-ct,0)|0)):'-0:00';
+  if (d>0 && seek) { seek.value = Math.round((ct/d)*1000); }
+}
 
 async function load(i, autoplay=false){
   stopIntro(); stopExitVideo(); stopBreak();
@@ -363,6 +392,9 @@ shuffleBtn.addEventListener('click', ()=>{ isShuffle=!isShuffle; shuffleBtn.text
 function setFromSeek(v){ if(!audio.duration) return; const t=(Number(v)/1000)*audio.duration; audio.currentTime=t; }
 seek.addEventListener('pointerdown', ()=>{ isScrubbing=true; });
 seek.addEventListener('pointerup', ()=>{ isScrubbing=false; refreshTimeLabels(); });
+seek.addEventListener('pointercancel', ()=>{ isScrubbing=false; refreshTimeLabels(); });
+seek.addEventListener('mouseleave', ()=>{ if(isScrubbing){ isScrubbing=false; refreshTimeLabels(); } });
+seek.addEventListener('touchend', ()=>{ isScrubbing=false; refreshTimeLabels(); }, {passive:true});
 seek.addEventListener('input', (e)=>{ if(!audio.duration) return; setFromSeek(e.target.value); refreshTimeLabels(); });
 seek.addEventListener('change', (e)=>{ if(!audio.duration) return; setFromSeek(e.target.value); refreshTimeLabels(); });
 
@@ -388,7 +420,8 @@ async function playStationBreakThen(fnAfter){
   if(!breaksEnabled){ fnAfter&&fnAfter(); return; }
   await discoverBreaks();
   const pick=pickBreak();
-  if(!pick){ showToast('No station break files found in /MediaBreak'); fnAfter&&fnAfter(); return; }
+  if(!pick){ showToast('No station breaks found in /MediaBreak (try names like KZAK-ID-1.mp3)'); fnAfter&&fnAfter(); return; }
+  showToast('Station break ▶ ' + pick.split('/').pop());
   try{ audio.pause(); }catch(e){}; stopIntro(); stopExitVideo();
   breakAudio.src=pathToUrl(pick);
   isBreakPlaying=true; onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; meta.textContent='Station break';
@@ -398,6 +431,7 @@ async function playStationBreakThen(fnAfter){
   }catch(e){ isBreakPlaying=false; fnAfter&&fnAfter(); }
 }
 breaksBtn.addEventListener('click', ()=>{ breaksEnabled=!breaksEnabled; breaksBtn.textContent=breaksEnabled?'📻 Station Breaks: On':'📻 Station Breaks: Off'; });
+breakTestBtn?.addEventListener('click', ()=>{ playStationBreakThen(()=>{}); });
 
 /* Exit */
 toLobby.addEventListener('click', async ()=>{
