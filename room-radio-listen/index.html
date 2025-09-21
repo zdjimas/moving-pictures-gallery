@@ -3,167 +3,72 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>KZAK • Frasier-Style Fun Radio without the talking (UNCLE5 — Unified)</title>
+<title>KZAK • Frasier-Style Fun Radio without the talking (UNCLE5)</title>
 <meta name="color-scheme" content="dark light">
 <style>
-  :root{
-    --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
-    --card:#151a29; --line:#22324d; --shadow:0 18px 50px rgba(0,0,0,.45);
-  }
+  :root{ --ink:#e6e9ef; --muted:#9aa4b2; --brand:#89b4fa; --accent:#a6e3a1; --danger:#f38ba8;
+         --card:#121a2a; --line:#22324d; --shadow:0 18px 50px rgba(0,0,0,.45); }
   html,body{height:100%;margin:0}
   body{
     color:var(--ink);
     background:#0b1220 url('Media/RadioMusicListening.jpg') center/cover fixed no-repeat;
-    position:relative;
     font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
   }
-  /* Global background dimmer behind content */
-  body::before{
-    content:""; position:fixed; inset:0;
-    background:
-      radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.28), rgba(0,0,0,.55)),
-      rgba(0,0,0,.42);
-    z-index:0;
-  }
-  .wrap, .overlay, .panel{ position:relative; z-index:1; }
-
-  /* Global overlay style */
-  .overlay{
-    position:fixed; inset:0; z-index:9999; display:none; place-items:center;
-    background:radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.35), rgba(0,0,0,.75)), rgba(0,0,0,.7);
-  }
-  .overlay.show{ display:grid; }
-
-  /* Lowered, high-contrast DJ welcome overlay */
-  #welcomeOverlay.overlay{
-    background:
-      radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.25), rgba(0,0,0,.55)),
-      rgba(0,0,0,.45) !important;
-    place-items: start center !important;
-    backdrop-filter: blur(2px);
-  }
-  #welcomeOverlay .frame{ margin-top:22vh; }
-
-  .wrap{ padding:24px; max-width:1200px; margin:0 auto; }
+  .wrap{ position:relative; z-index:1; padding:24px; max-width:1200px; margin:0 auto; }
   header{ display:flex; align-items:center; gap:16px; margin-bottom:10px; }
-  .thumb{ width:220px; aspect-ratio:16/9; border-radius:18px; overflow:hidden; box-shadow:var(--shadow) }
-  .thumb img{ width:100%; height:100%; object-fit:contain; background:#0e1628 }
+  .thumb{width:94px;height:94px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .thumb img{width:100%;height:100%;object-fit:cover}
   h1{font-size:32px;line-height:1.15;margin:0;text-shadow:0 2px 10px rgba(0,0,0,.45);}
   .sub{color:var(--muted);font-size:14px;margin-top:4px}
-
   .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
-  .btn{
-    background:#101a2d;border:1px solid var(--line); color:var(--ink);
-    padding:10px 14px; border-radius:12px; cursor:pointer; user-select:none;
-    display:inline-flex; align-items:center; gap:10px; box-shadow:var(--shadow);
-  }
+  .btn{background:#101a2d;border:1px solid var(--line); color:var(--ink); padding:10px 14px; border-radius:12px; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:8px; box-shadow:var(--shadow)}
   .btn[disabled]{opacity:.5; cursor:not-allowed}
   .pill{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:#0e1628; display:inline-flex; align-items:center;gap:8px}
   .onair-dot{width:12px;height:12px;border-radius:50%; background:#384a63; box-shadow:0 0 0 rgba(243,58,58,0)}
   .onair.on .onair-dot{ background:#ff3b3b; box-shadow:0 0 16px rgba(255,59,59,.9) }
-
   .player{ display:grid; grid-template-columns:1fr 380px; gap:22px; margin-top:16px; }
   @media (max-width: 1000px){ .player{ grid-template-columns:1fr; } }
-
-  .panel{
-    background:rgba(14,22,40,.92); border:1px solid rgba(255,255,255,.06); border-radius:16px;
-    backdrop-filter: blur(8px); box-shadow:0 18px 50px rgba(0,0,0,.6); position:relative;
-  }
-  .panel::after{content:""; position:absolute; inset:0; border-radius:inherit;
-    background:linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.18)); pointer-events:none;}
+  .panel{ background:rgba(14,22,40,.78); border:1px solid var(--line); border-radius:16px; backdrop-filter: blur(6px); box-shadow:var(--shadow); }
   .panel .head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
   .panel .body{padding:14px;}
-
   .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .row.sep{border-top:1px dashed var(--line); padding-top:12px; margin-top:12px;}
-
-  .scrub{display:grid; grid-template-columns:46px 1fr 60px; align-items:center; gap:10px; margin:6px 0 12px}
+  .scrub{display:grid; grid-template-columns:60px 1fr 60px; align-items:center; gap:10px; margin:6px 0 12px}
   input[type="range"]{ width:100% }
-
   .track{ display:grid; grid-template-columns:170px 1fr; gap:16px; align-items:flex-start; }
   @media (max-width: 640px){ .track{ grid-template-columns:1fr; } }
   .art{width:170px;height:170px;border-radius:14px;overflow:hidden;background:#0e1628;border:1px solid var(--line)}
   .art img{width:100%;height:100%;object-fit:cover}
   .info h3{margin:0 0 6px 0}
   .muted{color:var(--muted)}
-
-  .playlist .item{ padding:10px 12px; border-top:1px solid rgba(255,255,255,.04); cursor:pointer; }
+  .playlist .body{ max-height: 470px; overflow:auto; } /* ~8 items visible */
+  .playlist .item{ padding:10px 12px; border-top:1px solid rgba(255,255,255,.04); cursor:pointer; display:flex; justify-content:space-between; gap:10px; }
   .playlist .item:hover{background:rgba(255,255,255,.04)}
   .playlist .item.active{background:rgba(168, 200, 255, .09)}
   .tiny{font-size:12px;color:var(--muted)}
   .right{ text-align:right }
-  .playlist .body{ max-height:480px; overflow:auto; } /* ~8 rows */
-
-  .toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
-    background:#111a2e; border:1px solid var(--line); padding:10px 14px; border-radius:12px; display:none; z-index:99 }
+  .toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:#111a2e; border:1px solid var(--line); padding:10px 14px; border-radius:12px; display:none; z-index:99 }
   .toast.show{ display:block }
-
-  /* Welcome / Exit frames */
-  .frame{
-    max-width:720px; margin:0 16px; border-radius:16px; padding:18px;
-    background:rgba(0,0,0,.60); border:1px solid var(--line); color:var(--ink);
-    box-shadow:var(--shadow);
+  /* Welcome overlay */
+  .overlay{ position:fixed; inset:0; z-index:9999; display:none; place-items:center;
+    background: radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.10), rgba(0,0,0,.20)), rgba(0,0,0,.20);
   }
-  .frame h2{margin:0 0 10px 0}
-  .frame p{margin:0 0 10px 0}
-  .frame .row{justify-content:flex-end}
-
-  /* DJ Welcome styles */
-  .dj-display{ font-family: Impact, Haettenschweiler, "Arial Narrow Bold", system-ui, -apple-system, Segoe UI, Roboto, sans-serif; letter-spacing:.5px; }
-  .dj-sans{ font-family: "Trebuchet MS", "Gill Sans", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; }
-  .neon{ 
-    color:#ffeb7a; 
-    text-shadow: 0 0 2px rgba(255,235,122,.8),
-                 0 0 6px rgba(255,235,122,.7),
-                 0 0 14px rgba(255,160,64,.55),
-                 0 0 22px rgba(255,120,64,.35);
-    -webkit-text-stroke: 0.25px rgba(0,0,0,.35);
-  }
-  .dj-frame{
-    position: relative;
-    background: linear-gradient(180deg, rgba(10,14,24,.9), rgba(10,14,24,.78));
-    border-radius: 18px;
-    border: 2px solid #2a3d66;
-    box-shadow: 0 20px 60px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.03);
-  }
-  .dj-frame:before{
-    content:"";
-    position:absolute; inset:-2px;
-    border-radius:20px;
-    padding:2px;
-    background: conic-gradient(from 120deg, #7dd3fc, #a78bfa, #f472b6, #fbbf24, #7dd3fc);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude;
-    filter: blur(6px) saturate(120%);
-    animation: borderSpin 6s linear infinite;
-    opacity:.55;
-  }
-  @keyframes borderSpin{ to{ transform: rotate(360deg); } }
-
-  .dj-title{ font-size: 30px; margin:0 0 6px 0; }
-  .dj-sub{ color:#c7d2fe; opacity:.95; margin:0 0 14px 0; }
+  .overlay.show{ display:grid; }
+  .frame{ max-width:720px; margin:0 16px; border-radius:16px; padding:18px; background:rgba(0,0,0,.60); border:1px solid var(--line); color:var(--ink); box-shadow:var(--shadow); }
+  .dj-title{ font-size: 28px; margin:0 0 6px 0; color:#ffeb7a; text-shadow:0 0 10px rgba(255,200,80,.6), 0 0 18px rgba(255,120,64,.3); }
 </style>
 </head>
 <body>
 
 <!-- WELCOME OVERLAY -->
 <div id="welcomeOverlay" class="overlay show" aria-modal="true" role="dialog">
-  <div class="frame dj-frame">
-    <h2 class="dj-title dj-display neon">🎙️ Welcome to KZAK <span class="eq"><span></span><span></span><span></span><span></span></span></h2>
-    <p class="dj-sans dj-sub">Step into the booth: a quick intro plays first, or jump straight to the set. Your controls light up when the studio is <strong>ON AIR</strong>.</p>
-    <div class="row">
-      <button id="playWelcome" class="btn dj-primary">▶︎ Play Welcome</button>
-      <button id="skipWelcome" class="btn dj-secondary">Skip</button>
-    </div>
-  </div>
-</div>
-
-<!-- EXIT OVERLAY -->
-<div id="exitOverlay" class="overlay" aria-modal="true" role="dialog">
   <div class="frame">
-    <h2>Leaving the Room…</h2>
-    <p>Enjoy the quick pre-roll and we will take you back to the lobby.</p>
+    <h2 class="dj-title">🎙️ Welcome to KZAK</h2>
+    <p>Quick intro first, or jump straight in. Controls light up when the studio is <strong>ON AIR</strong>.</p>
+    <div class="row" style="justify-content:flex-end">
+      <button id="playWelcome" class="btn">▶︎ Play Welcome</button>
+      <button id="skipWelcome" class="btn">Skip</button>
+    </div>
   </div>
 </div>
 
@@ -178,17 +83,11 @@
 
   <div class="toolbar">
     <button id="toLobby" class="btn" aria-label="Return to Lobby">⬅︎ Return to Lobby</button>
-
-    <div id="onAir" class="pill onair" aria-label="On Air">
-      <span class="onair-dot"></span><strong>ON AIR</strong>
-    </div>
-
+    <div id="onAir" class="pill onair" aria-label="On Air"><span class="onair-dot"></span><strong>ON AIR</strong></div>
     <button id="startBtn" class="btn" aria-label="Start Station">▶︎ Start Station</button>
     <button id="pauseBtn" class="btn" aria-label="Pause Station" disabled>⏸ Pause Station</button>
-
     <div class="btn" id="loopBtn" aria-label="Loop">⟲ Loop</div>
     <div class="btn" id="shuffleBtn" aria-label="Shuffle">🔀 Shuffle</div>
-
     <div class="btn" id="muteBtn" aria-label="Mute">🔇 Mute</div>
     <div class="btn" id="breaksBtn" aria-label="Station Breaks">📻 Station Breaks: On</div>
     <button id="shareBtn" class="btn" aria-label="Share Station">🔗 Share</button>
@@ -207,19 +106,16 @@
           <input id="vol" type="range" min="0" max="1" step="0.01" value="0.86" style="width:160px" />
         </div>
       </div>
-
       <div class="body">
         <div class="scrub">
           <div id="elapsed">0:00</div>
           <input id="seek" type="range" min="0" max="1000" value="0" step="1" />
           <div id="remaining">-0:00</div>
         </div>
-
         <div class="row tiny">
           <div>TRACK <span id="tpos">0</span> / <span id="tmax">0</span></div>
           <div class="right" style="margin-left:auto">Status: <span id="meta">Stopped</span></div>
         </div>
-
         <div class="row sep track">
           <div class="art"><img id="art" src="Media/default.jpg" alt=""></div>
           <div class="info">
@@ -227,7 +123,6 @@
             <div class="muted" id="story">Under Construction: a special write-up about this specific music creation and its meaning or influence it had on the creators and the artwork shown will follow shortly.</div>
           </div>
         </div>
-
         <div class="tiny muted" style="margin-top:8px">Tip: The ON AIR pill lights only when music plays.</div>
       </div>
     </section>
@@ -243,1084 +138,200 @@
 
   <!-- Footer -->
   <section class="panel" style="margin-top:16px">
-    <div class="bio" style="display:flex;align-items:center;gap:12px;padding:12px">
-      <img src="Media/ZachArt.jpeg" alt="" style="width:56px;height:56px;border-radius:10px;object-fit:cover;border:1px solid var(--line)">
-      <div><div class="name" style="font-weight:600">zdjimas</div><div class="role tiny">Concept, curation, engineering</div></div>
-    </div>
-    <div class="bio" style="display:flex;align-items:center;gap:12px;padding:12px;border-top:1px solid var(--line)">
-      <img src="Media/CJMURPHY.png" alt="" style="width:56px;height:56px;border-radius:10px;object-fit:cover;border:1px solid var(--line)">
-      <div><div class="name" style="font-weight:600">cjmurphy</div><div class="role tiny">Composition, arrangement, sound design</div></div>
+    <div class="body" style="display:flex;gap:16px;align-items:center">
+      <div style="display:flex;align-items:center;gap:10px;border-right:1px solid var(--line);padding-right:12px">
+        <img src="Media/ZachArt.jpeg" style="width:44px;height:44px;border-radius:10px;object-fit:cover" alt="">
+        <div><div style="font-weight:600">zdjimas</div><div class="tiny">Concept, curation, engineering</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="Media/CJMURPHY.png" style="width:44px;height:44px;border-radius:10px;object-fit:cover" alt="">
+        <div><div style="font-weight:600">cjmurphy</div><div class="tiny">Composition, arrangement, sound design</div></div>
+      </div>
     </div>
   </section>
-</div>
-
-<!-- Share sheet (fallback when Web Share is unavailable) -->
-<div id="shareSheet" style="display:none; position:fixed; inset:auto 16px 16px auto; z-index:9999;">
-  <div style="background:#0b1220cc;border:1px solid var(--line);padding:12px;border-radius:12px;box-shadow:var(--shadow);min-width:260px">
-    <div style="font-weight:600;margin-bottom:8px">Share this track</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <a id="shareMail"   class="btn" href="#" target="_blank">✉️ Email</a>
-      <a id="shareFacebook" class="btn" href="#" target="_blank">📘 Facebook</a>
-      <a id="shareTwitter"  class="btn" href="#" target="_blank">𝕏  X / Twitter</a>
-      <button id="shareCopy" class="btn">📋 Copy link</button>
-      <button id="shareClose" class="btn dj-secondary">Close</button>
-    </div>
-  </div>
 </div>
 
 <!-- Media elements -->
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
 <audio id="introAudio" preload="auto" src="Media/KZAK-Welcome.mp3"></audio>
 <video id="exitVideo" preload="auto" playsinline style="display:none" src="room-radio-listen/radio-room-entry.mp4"></video>
-<audio id="breakAudio" preload="auto" src="Media/KZAK-StationBreak.mp3"></audio>
+<audio id="breakAudio" preload="auto"></audio>
 
 <div class="toast" id="toast"></div>
 
 <script>
-/* ============================================================
-   VISUAL-BLOCKS PLAYLIST
-   ============================================================ */
-const DEFAULT_IMG    = "Media/default.jpg";
-const DEFAULT_STORY  = "Under Construction: a special write-up about this specific music creation and its meaning or influence it had on the creators and the artwork shown will follow shortly.";
+/* ========= CONFIG ========= */
+const DEFAULT_IMG   = "Media/default.jpg";
+const DEFAULT_STORY = "Under Construction: a special write-up about this specific music creation and its meaning or influence it had on the creators and the artwork shown will follow shortly.";
+const BREAK_DIR     = "MediaBreak";  // folder with ID mp3s
+let   BREAKS        = [];            // optional explicit list, e.g. ["MediaBreak/KZAK-ID-1.mp3", ...]
 
-/* --------- BEGIN: ONE CLEAR BLOCK PER SONG (separated by blank lines) --------- */
+/* ========= PLAYLIST =========
+   Paste your full visual-blocks playlist into PLAYLIST below.
+   Keep one object per track with: { title, file, img, alt, story }
+*/
 const PLAYLIST = [
-
-  
-
-  {
-    title: "Lateralus Rising",
-    file:  "Media/LateralusRising.mp3",
-    img:   "Media/Lateralus.jpeg",
-    alt:   "Lateralus Rising — default artwork",
-    story: "This song represents strong beats and rythms and is part of a most excellent set of melodies within the album of the same name.",
-  },
-
-  {
-    title: "01 Vicarious (Remix) 1",
-    file:  "Media/01 Vicarious (Remix) 1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "01 Vicarious (Remix) 1 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "01. Sheep (cover)5",
-    file:  "Media/01. Sheep (cover)5.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "01. Sheep (cover)5 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "01. The Grudge (Remastered)",
-    file:  "Media/01. The Grudge (Remastered).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "01. The Grudge (Remastered) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "03. Dogs (Cover) X2 tripper",
-    file:  "Media/03. Dogs (Cover) X2 tripper.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "03. Dogs (Cover) X2 tripper — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "03. Dogs (Remix)",
-    file:  "Media/03. Dogs (Remix).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "03. Dogs (Remix) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "05. Pigs (Three Different Ones) (Techno Tran)",
-    file:  "Media/05. Pigs (Three Different Ones) (Techno Tran).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "05. Pigs (Three Different Ones) (Techno Tran) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "06 Another Brick In The Wall p2 2 (Cover ZZ) v2",
-    file:  "Media/06 Another Brick In The Wall p2 2 (Cover ZZ) v2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "06 Another Brick In The Wall p2 2 (Cover ZZ) v2 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "07 Goodbye Blue Sky (cover zz) 2",
-    file:  "Media/07 Goodbye Blue Sky (cover zz) 2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "07 Goodbye Blue Sky (cover zz) 2 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "08 4 Degrees (Cover)2",
-    file:  "Media/08 4 Degrees (Cover)2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "08 4 Degrees (Cover)2 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "08 4 Degrees (Cover)v1",
-    file:  "Media/08 4 Degrees (Cover)v1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "08 4 Degrees (Cover)v1 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "08 Rosetta Stoned (Cover) take 1",
-    file:  "Media/08 Rosetta Stoned (Cover) take 1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "08 Rosetta Stoned (Cover) take 1 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "10 Right In Two (Remastered) (Cover) (1)",
-    file:  "Media/10 Right In Two (Remastered) (Cover) (1).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "10 Right In Two (Remastered) (Cover) (1) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "10 Right In Two (Remastered) (Cover)",
-    file:  "Media/10 Right In Two (Remastered) (Cover).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "10 Right In Two (Remastered) (Cover) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix)",
-    file:  "Media/10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "10. Shine On You Crazy Diamond (Parts 6-9) (cover)",
-    file:  "Media/10. Shine On You Crazy Diamond (Parts 6-9) (cover).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "10. Shine On You Crazy Diamond (Parts 6-9) (cover) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "11. Pushit (Cover) v2",
-    file:  "Media/11. Pushit (Cover) v2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "11. Pushit (Cover) v2 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "11. Reflection (Cover) V2",
-    file:  "Media/11. Reflection (Cover) V2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "11. Reflection (Cover) V2 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "14 - Any Colour You Like (Live 1972)",
-    file:  "Media/14 - Any Colour You Like (Live 1972).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "14 - Any Colour You Like (Live 1972) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix)",
-    file:  "Media/1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "46 & 3",
-    file:  "Media/46 & 3.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "46 & 3 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "A Classical Aspect of X ",
-    file:  "Media/A Classical Aspect of X .mp3",
-    img:   DEFAULT_IMG,
-    alt:   "A Classical Aspect of X  — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "A Demo in Time of Dying",
-    file:  "Media/A Demo in Time of Dying.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "A Demo in Time of Dying — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "A Demo of Poor Tom",
-    file:  "Media/A Demo of Poor Tom.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "A Demo of Poor Tom — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "A Madman Plays Seville",
-    file:  "Media/A Madman Plays Seville.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "A Madman Plays Seville — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "A Modern Lord of the Rings",
-    file:  "Media/A Modern Lord of the Rings.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "A Modern Lord of the Rings — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "A Spec of a Blue Dot",
-    file:  "Media/A Spec of a Blue Dot.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "A Spec of a Blue Dot — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "All that glitters is gold Acoustic Blend",
-    file:  "Media/All that glitters is gold Acoustic Blend.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "All that glitters is gold Acoustic Blend — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "All that glitters is gold remains",
-    file:  "Media/All that glitters is gold remains.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "All that glitters is gold remains — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "All that glitters is gold",
-    file:  "Media/All that glitters is gold.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "All that glitters is gold — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Another Dogs Cover - Really?",
-    file:  "Media/Another Dogs Cover - Really?.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Another Dogs Cover - Really? — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "As I Am (Instrumental Demo 2003) (cover zz2)",
-    file:  "Media/As I Am (Instrumental Demo 2003) (cover zz2).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "As I Am (Instrumental Demo 2003) (cover zz2) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Ballad of a Bleak Future",
-    file:  "Media/Ballad of a Bleak Future.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Ballad of a Bleak Future — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Barn Jam Friends",
-    file:  "Media/Barn Jam Friends.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Barn Jam Friends — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Bend the clock - 70s Barn Jam Edition",
-    file:  "Media/Bend the clock - 70s Barn Jam Edition.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Bend the clock - 70s Barn Jam Edition — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Beyond My Understanding",
-    file:  "Media/Beyond My Understanding.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Beyond My Understanding — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Bolotone Desert Trip Edition",
-    file:  "Media/Bolotone Desert Trip Edition.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Bolotone Desert Trip Edition — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Bolotone Metal Edition (Remastered)",
-    file:  "Media/Bolotone Metal Edition (Remastered).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Bolotone Metal Edition (Remastered) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Bolotone's Intro",
-    file:  "Media/Bolotone's Intro.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Bolotone's Intro — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Breathe - (an AI pink floyd cover)",
-    file:  "Media/Breathe - (an AI pink floyd cover).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Breathe - (an AI pink floyd cover) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Continuum - an Octavarium Remix and Cover",
-    file:  "Media/Continuum - an Octavarium Remix and Cover.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Continuum - an Octavarium Remix and Cover — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Cover Of Wings For Marie (Part 1) v1",
-    file:  "Media/Cover Of Wings For Marie (Part 1) v1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Cover Of Wings For Marie (Part 1) v1 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Cover Wings For Marie (Part 1) (Spanish acoustic ) (1)",
-    file:  "Media/Cover Wings For Marie (Part 1) (Spanish acoustic ) (1).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Cover Wings For Marie (Part 1) (Spanish acoustic ) (1) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Cover of Tool - 7empest 1",
-    file:  "Media/Cover of Tool - 7empest 1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Cover of Tool - 7empest 1 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Cover of Tool - 7empest 2",
-    file:  "Media/Cover of Tool - 7empest 2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Cover of Tool - 7empest 2 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Cover of Wings For Marie (Part 1) v2",
-    file:  "Media/Cover of Wings For Marie (Part 1) v2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Cover of Wings For Marie (Part 1) v2 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Cover. The Grudge (v2)",
-    file:  "Media/Cover. The Grudge (v2).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Cover. The Grudge (v2) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Covering my Eyes",
-    file:  "Media/Covering my Eyes.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Covering my Eyes — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Culling Voices Gathered in Flocks",
-    file:  "Media/Culling Voices Gathered in Flocks.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Culling Voices Gathered in Flocks — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Culling Voices Gathering Alone",
-    file:  "Media/Culling Voices Gathering Alone.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Culling Voices Gathering Alone — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Degrees (Cover)3 (Spanish guitar quartet)",
-    file:  "Media/Degrees (Cover)3 (Spanish guitar quartet).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Degrees (Cover)3 (Spanish guitar quartet) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Degrees as Spanish guitar quartet",
-    file:  "Media/Degrees as Spanish guitar quartet.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Degrees as Spanish guitar quartet — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Dogs (Remix)",
-    file:  "Media/Dogs (Remix).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Dogs (Remix) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Dogs Cover 2 Funky",
-    file:  "Media/Dogs Cover 2 Funky.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Dogs Cover 2 Funky — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Fear Inoculum (Cover) v1",
-    file:  "Media/Fear Inoculum (Cover) v1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Fear Inoculum (Cover) v1 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Fear Inoculum - Hip Beat Remix",
-    file:  "Media/Fear Inoculum - Hip Beat Remix.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Fear Inoculum - Hip Beat Remix — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Fear Inoculum - Intro remix",
-    file:  "Media/Fear Inoculum - Intro remix.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Fear Inoculum - Intro remix — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Flood an AI Tool Cover",
-    file:  "Media/Flood an AI Tool Cover.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Flood an AI Tool Cover — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Friends in FrontierLand",
-    file:  "Media/Friends in FrontierLand.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Friends in FrontierLand — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Hiding the Pot (1)",
-    file:  "Media/Hiding the Pot (1).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Hiding the Pot (1) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Home Again..",
-    file:  "Media/Home Again..mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Home Again.. — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Labyrinths of Coral Caves ",
-    file:  "Media/Labyrinths of Coral Caves .mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Labyrinths of Coral Caves  — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Leaving You",
-    file:  "Media/Leaving You.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Leaving You — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "More Guitars at Luna Park",
-    file:  "Media/More Guitars at Luna Park.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "More Guitars at Luna Park — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "My Broken Illusion (1)",
-    file:  "Media/My Broken Illusion (1).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "My Broken Illusion (1) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "My Own Pieces of Eight",
-    file:  "Media/My Own Pieces of Eight.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "My Own Pieces of Eight — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "New Beginnings",
-    file:  "Media/New Beginnings.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "New Beginnings — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Octavarium en Quartet",
-    file:  "Media/Octavarium en Quartet.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Octavarium en Quartet — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Orchestra for Wings For Marie (Cover) take 7",
-    file:  "Media/Orchestra for Wings For Marie (Cover) take 7.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Orchestra for Wings For Marie (Cover) take 7 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Our Waiting for Sleep, an instrumental",
-    file:  "Media/Our Waiting for Sleep, an instrumental.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Our Waiting for Sleep, an instrumental — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Pigs three different ones Solo (Cover)2b",
-    file:  "Media/Pigs three different ones Solo (Cover)2b.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Pigs three different ones Solo (Cover)2b — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Rain Song Replayed",
-    file:  "Media/Rain Song Replayed.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Rain Song Replayed — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Rosetta must be Stoned",
-    file:  "Media/Rosetta must be Stoned.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Rosetta must be Stoned — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Running from Waiting Worms",
-    file:  "Media/Running from Waiting Worms.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Running from Waiting Worms — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "S2N an AI Cover of Dream Theater (Remix)",
-    file:  "Media/S2N an AI Cover of Dream Theater (Remix).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "S2N an AI Cover of Dream Theater (Remix) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Schism (Cover)v1",
-    file:  "Media/Schism (Cover)v1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Schism (Cover)v1 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Shine On (Cover) 5 (Remastered)",
-    file:  "Media/Shine On (Cover) 5 (Remastered).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Shine On (Cover) 5 (Remastered) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z))",
-    file:  "Media/Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Surfacing Tensions",
-    file:  "Media/Surfacing Tensions.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Surfacing Tensions — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Surrounded by Friends",
-    file:  "Media/Surrounded by Friends.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Surrounded by Friends — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "TechnoTrance The Pot V1",
-    file:  "Media/TechnoTrance The Pot V1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "TechnoTrance The Pot V1 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "TechnoTrance The Pot V2",
-    file:  "Media/TechnoTrance The Pot V2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "TechnoTrance The Pot V2 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Modern Count of Tuscany (Remastered)",
-    file:  "Media/The Modern Count of Tuscany (Remastered).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Modern Count of Tuscany (Remastered) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Canelo-Crawford Event Round 1",
-    file:  "Media/The Canelo-Crawford Event Round 1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Canelo-Crawford Event Round 1 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Canelo-Crawford Event",
-    file:  "Media/The Canelo-Crawford Event.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Canelo-Crawford Event — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Embracing Circle Cover- Take One",
-    file:  "Media/The Embracing Circle Cover- Take One.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Embracing Circle Cover- Take One — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Embracing Circle Cover - Take Four",
-    file:  "Media/The Embracing Circle Cover - Take Four.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Embracing Circle Cover - Take Four — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Embracing Circle Cover - Take Two",
-    file:  "Media/The Embracing Circle Cover - Take Two.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Embracing Circle Cover - Take Two — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Embracing Circle Cover - Take Five",
-    file:  "Media/The Embracing Circle Cover - Take Five.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Embracing Circle Cover - Take Five — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Embracing Circle Cover - Take Three",
-    file:  "Media/The Embracing Circle Cover - Take Three.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Embracing Circle Cover - Take Three — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Greatest Debate Ever",
-    file:  "Media/The Greatest Debate Ever.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Greatest Debate Ever — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Madman Plays in Cancun",
-    file:  "Media/The Madman Plays in Cancun.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Madman Plays in Cancun — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix)",
-    file:  "Media/The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Recovering Barstool Warrior",
-    file:  "Media/The Recovering Barstool Warrior.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Recovering Barstool Warrior — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Spirit Carries On (Live Rehearsal 2) (Remix)",
-    file:  "Media/The Spirit Carries On (Live Rehearsal 2) (Remix).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Spirit Carries On (Live Rehearsal 2) (Remix) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The Strangest of Days",
-    file:  "Media/The Strangest of Days.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Strangest of Days — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The X Aspect Symphony Remix",
-    file:  "Media/The X Aspect Symphony Remix.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The X Aspect Symphony Remix — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "The X Aspect shortened",
-    file:  "Media/The X Aspect shortened.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The X Aspect shortened — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "TheHumblingRiver = a Cover",
-    file:  "Media/TheHumblingRiver = a Cover.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "TheHumblingRiver = a Cover — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ)",
-    file:  "Media/Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Trippin like Hell",
-    file:  "Media/Trippin like Hell.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Trippin like Hell — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "When Pigs and Sheep Mate IV..",
-    file:  "Media/When Pigs and Sheep Mate IV..mp3",
-    img:   DEFAULT_IMG,
-    alt:   "When Pigs and Sheep Mate IV.. — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "Wings For Marie (Part 1) (Techno Trance Remix) v2",
-    file:  "Media/Wings For Marie (Part 1) (Techno Trance Remix) v2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Wings For Marie (Part 1) (Techno Trance Remix) v2 — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "X11 10,000 Days Live (Cover ZZ) (Remastered)",
-    file:  "Media/X11 10,000 Days Live (Cover ZZ) (Remastered).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "X11 10,000 Days Live (Cover ZZ) (Remastered) — default artwork",
-    story: DEFAULT_STORY
-  },
-
-  {
-    title: "ozzy osbourne diary of a madman rare live (Remix)",
-    file:  "Media/ozzy osbourne diary of a madman rare live (Remix).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "ozzy osbourne diary of a madman rare live (Remix) — default artwork",
-    story: DEFAULT_STORY
-  }
-
+  { title:"Lateralus Rising", file:"Media/LateralusRising.mp3", img:"Media/Lateralus.jpeg", alt:"Lateralus Rising artwork", story:"—" },
+  { title:"01 Vicarious (Remix) 1", file:"Media/01 Vicarious (Remix) 1.mp3", img:DEFAULT_IMG, alt:"Vicarious artwork", story:DEFAULT_STORY },
+  { title:"01. Sheep (cover)5", file:"Media/01. Sheep (cover)5.mp3", img:DEFAULT_IMG, alt:"Sheep cover", story:DEFAULT_STORY },
+  { title:"03. Dogs (Cover) X2 tripper", file:"Media/03. Dogs (Cover) X2 tripper.mp3", img:DEFAULT_IMG, alt:"Dogs cover", story:DEFAULT_STORY },
+  { title:"The X Aspect shortened", file:"Media/The X Aspect shortened.mp3", img:DEFAULT_IMG, alt:"X Aspect", story:DEFAULT_STORY }
 ];
-/* --------- END: ONE CLEAR BLOCK PER SONG --------- */
+/* =========================== */
 
-// ---- Smart asset recovery helpers ----
-function insertSpacesFromTitleFallback(title){
-  const spaced = title.replace(/([a-z])([A-Z])/g, '$1 $2').trim();
-  return spaced;
-}
+function $(s){ return document.querySelector(s); }
+function fmt(t){ t|=0; const m=(t/60)|0, s=(t%60)|0; return m+':'+(s<10?'0':'')+s; }
+function showToast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1800); }
+function pathToUrl(p){ return p.split('/').map(seg => encodeURIComponent(seg)).join('/'); }
+
+/* smart helpers for asset fallback */
+function insertSpacesFromTitleFallback(title){ return title.replace(/([a-z])([A-Z])/g, '$1 $2').trim(); }
 function audioCandidates(tr){
-  const candidates = [tr.file];
-  if (!/\s/.test(tr.file) && /\s/.test(tr.title)){
-    candidates.push('Media/' + tr.title + '.mp3');
-  }
-  if (!/\s/.test(tr.file) && !/\s/.test(tr.title)){
-    const spaced = insertSpacesFromTitleFallback(tr.title);
-    if (/\s/.test(spaced)) candidates.push('Media/' + spaced + '.mp3');
-  }
+  const candidates=[tr.file];
+  if (!/\\s/.test(tr.file) && /\\s/.test(tr.title)) candidates.push('Media/'+tr.title+'.mp3');
+  if (!/\\s/.test(tr.file) && !/\\s/.test(tr.title)){ const spaced=insertSpacesFromTitleFallback(tr.title); if (/\\s/.test(spaced)) candidates.push('Media/'+spaced+'.mp3'); }
   return candidates;
 }
 function imageCandidates(tr){
-  const c = [tr.img || DEFAULT_IMG];
-  const maybeNames = [];
-  maybeNames.push(tr.title + '.jpg', tr.title + '.jpeg', tr.title + '.png');
-  const spaced = insertSpacesFromTitleFallback(tr.title);
-  if (/\s/.test(spaced)) maybeNames.push(spaced + '.jpg', spaced + '.jpeg', spaced + '.png');
-  for (const n of maybeNames){ c.push('Media/' + n); }
+  const c=[tr.img||DEFAULT_IMG];
+  const names=[tr.title+'.jpg', tr.title+'.jpeg', tr.title+'.png'];
+  const spaced=insertSpacesFromTitleFallback(tr.title);
+  if (/\\s/.test(spaced)) names.push(spaced+'.jpg', spaced+'.jpeg', spaced+'.png');
+  for (const n of names) c.push('Media/'+n);
   c.push(DEFAULT_IMG);
   return c;
 }
 async function firstReachable(urls){
   for (const u of urls){
-    try{
-      const res = await fetch(u.split('/').map(seg => encodeURIComponent(seg)).join('/'), { cache: 'no-store', method: 'GET' });
-      if (res.ok) return u;
-    }catch(e){}
+    try{ const res=await fetch(pathToUrl(u), {cache:'no-store', method:'GET'}); if(res.ok) return u; }catch(e){}
   }
   return null;
 }
-</script>
 
-<script>
-/* ============================================================
-   PLAYER + CONCURRENCY SAFEGUARDS
-   ============================================================ */
-const $ = s => document.querySelector(s);
-function fmt(t){ t|=0; const m=(t/60)|0, s=(t%60)|0; return m+':'+(s<10?'0':'')+s; }
-function showToast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1800); }
-function pathToUrl(p){ return p.split('/').map(seg => encodeURIComponent(seg)).join('/'); }
+/* ===== Station Breaks discovery & random pick ===== */
+async function discoverBreaks(){
+  if (BREAKS.length) return BREAKS;
+  const patterns=[];
+  for (let i=1;i<=16;i++){
+    patterns.push(`${BREAK_DIR}/ID-${i}.mp3`, `${BREAK_DIR}/Break-${i}.mp3`, `${BREAK_DIR}/KZAK-${i}.mp3`, `${BREAK_DIR}/KZAK-ID-${i}.mp3`);
+  }
+  const found=[];
+  for (const p of patterns){
+    const ok=await firstReachable([p]);
+    if (ok) found.push(ok);
+    if (found.length>=16) break;
+  }
+  if (found.length) BREAKS=found;
+  return BREAKS;
+}
+let lastBreakIdx=-1;
+function pickBreak(){
+  if(!BREAKS.length) return null;
+  if(BREAKS.length===1) return BREAKS[0];
+  let i; do{ i=(Math.random()*BREAKS.length)|0; }while(i===lastBreakIdx);
+  lastBreakIdx=i; return BREAKS[i];
+}
 
-const audio = $('#audio'), intro = $('#introAudio'), exitVid = $('#exitVideo'), breakAudio = $('#breakAudio');
-const onAir=$('#onAir'), startBtn=$('#startBtn'), pauseBtn=$('#pauseBtn');
-const nextBtn=$('#nextBtn'), prevBtn=$('#prevBtn'), muteBtn=$('#muteBtn'), loopBtn=$('#loopBtn'), shuffleBtn=$('#shuffleBtn'), shareBtn=$('#shareBtn'), toLobby=$('#toLobby');
+/* ===== Player wiring ===== */
+const audio=$('#audio'), intro=$('#introAudio'), exitVid=$('#exitVideo'), breakAudio=$('#breakAudio');
+const onAir=$('#onAir');
+const startBtn=$('#startBtn'), pauseBtn=$('#pauseBtn');
+const nextBtn=$('#nextBtn'), prevBtn=$('#prevBtn'), muteBtn=$('#muteBtn'), loopBtn=$('#loopBtn'), shuffleBtn=$('#shuffleBtn'), shareBtn=$('#shareBtn'), shareTrackBtn=$('#shareTrackBtn'), toLobby=$('#toLobby');
 const breaksBtn=$('#breaksBtn');
-const shareTrackBtn = $('#shareTrackBtn');
+
 const vol=$('#vol'), seek=$('#seek');
-const titleEl=$('#title'), meta=$('#meta'), tpos=$('#tpos'), tmax=$('#tmax'), tcount=$('#tcount');
+const titleEl=$('#title'), meta=$('#meta');
+const tpos=$('#tpos'), tmax=$('#tmax'), tcount=$('#tcount');
 const art=$('#art'), story=$('#story');
 const plistBody=$('#plistBody'), countRight=$('#countRight');
-const welcomeOverlay=$('#welcomeOverlay'), exitOverlay=$('#exitOverlay');
+const welcomeOverlay=$('#welcomeOverlay');
 
 let idx=0, isShuffle=false, isLoop=false, isMuted=false, isPlaying=false, isLoading=false;
-let isIntro=false;
-let breaksEnabled=true, breakEvery=2, playCountSinceBreak=0, isBreakPlaying=false;
+let isIntro=false, breaksEnabled=true, breakEvery=2, playCountSinceBreak=0, isBreakPlaying=false;
 
-tmax && (tmax.textContent = PLAYLIST.length);
-tcount && (tcount.textContent = PLAYLIST.length);
-countRight && (countRight.textContent = PLAYLIST.length + ' items');
+tmax.textContent=PLAYLIST.length; tcount.textContent=PLAYLIST.length; countRight.textContent=PLAYLIST.length+' items';
 
 /* Build playlist UI */
 function buildList(){
-  if (!plistBody) return;
   plistBody.innerHTML='';
   PLAYLIST.forEach((tr,i)=>{
     const div=document.createElement('div');
     div.className='item'; div.setAttribute('data-i', i);
-    div.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}</span><a href="#" class="tiny" data-share="${i}">Share</a></div><div class="tiny">${tr.file}</div>`;
-    div.addEventListener('click', (ev)=>{ if(ev.target.closest('a[data-share]')) return; load(i, true); });
+    div.innerHTML=`<div><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}<div class="tiny">${tr.file}</div></div><a class="tiny" href="javascript:void(0)" data-share="${i}">Share</a>`;
+    div.addEventListener('click', (e)=>{ if(e.target && e.target.getAttribute('data-share')) return; load(i, true); });
+    div.querySelector('[data-share]')?.addEventListener('click', (e)=>{ e.stopPropagation(); shareCurrentTrack(i); });
     plistBody.appendChild(div);
   });
 }
 buildList();
-(function capPlaylist(){
-  const body = document.getElementById('plistBody');
-  if (!body || !body.firstElementChild) return;
-  const itemH = body.firstElementChild.getBoundingClientRect().height || 60;
-  body.style.maxHeight = (itemH * 8) + 'px';
-  body.style.overflowY = 'auto';
-})();
-function markActive(){
-  [...(plistBody?.children||[])].forEach(n => n.classList.toggle('active', Number(n.getAttribute('data-i'))===idx));
-}
+function markActive(){ [...plistBody.children].forEach(n=> n.classList.toggle('active', Number(n.getAttribute('data-i'))===idx)); }
 
 /* Concurrency helpers */
-function stopIntro(){
-  if (!isIntro) return;
-  try{ intro.pause(); intro.currentTime=0; }catch(e){}
-  isIntro=false;
-  startBtn.disabled=false; nextBtn.disabled=false; prevBtn.disabled=false;
-}
+function stopIntro(){ if(!isIntro) return; intro.pause(); intro.currentTime=0; isIntro=false; startBtn.disabled=false; nextBtn.disabled=false; prevBtn.disabled=false; }
 function stopExitVideo(){ try{ exitVid.pause(); exitVid.currentTime=0; exitVid.style.display='none'; }catch(e){} }
-function hideWelcome(){ welcomeOverlay?.classList.remove('show'); }
-
-function stopBreak(){
-  try{ breakAudio.pause(); breakAudio.currentTime = 0; }catch(e){}
-  isBreakPlaying=false;
-}
-async function playStationBreakThen(fnAfter){
-  if(!breaksEnabled){ fnAfter&&fnAfter(); return; }
-  if(!breakAudio || !breakAudio.src){ fnAfter&&fnAfter(); return; }
-  // Concurrency: stop music/intro/exit
-  try{ audio.pause(); }catch(e){}; stopIntro(); stopExitVideo();
-  isBreakPlaying=true; onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; meta&&(meta.textContent='Station break');
-  try{
-    breakAudio.currentTime = 0;
-    await breakAudio.play();
-    breakAudio.addEventListener('ended', ()=>{ isBreakPlaying=false; fnAfter&&fnAfter(); }, { once:true });
-  }catch(e){
-    // Autoplay blocked or file missing—just continue
-    isBreakPlaying=false; fnAfter&&fnAfter();
-  }
-}
-
+function stopBreak(){ try{ breakAudio.pause(); breakAudio.currentTime=0; }catch(e){} isBreakPlaying=false; }
 
 /* Welcome flow */
+function hideWelcome(){ welcomeOverlay?.classList.remove('show'); }
 async function playWelcomeThenStart(){
   try{
     audio.pause(); stopExitVideo();
     isIntro=true; startBtn.disabled=true; nextBtn.disabled=true; prevBtn.disabled=true;
     intro.currentTime=0; await intro.play();
-    intro.addEventListener('ended', ()=>{ stopIntro(); hideWelcome(); load(idx, true); }, { once:true });
+    intro.addEventListener('ended', async ()=>{ stopIntro(); hideWelcome(); await load(idx,false); }, {once:true});
   }catch(e){ stopIntro(); }
 }
-document.getElementById('playWelcome')?.addEventListener('click', ()=> playWelcomeThenStart());
-document.getElementById('skipWelcome')?.addEventListener('click', ()=>{ stopIntro(); hideWelcome(); load(idx, true); });
+$('#playWelcome').addEventListener('click', ()=> playWelcomeThenStart());
+$('#skipWelcome').addEventListener('click', ()=> { stopIntro(); hideWelcome(); load(idx,false); });
 
 /* Load & Playback */
-let seekTick=null; function clearSeekTick(){ if(seekTick) cancelAnimationFrame(seekTick), seekTick=null; }
+let seekTick=null, isScrubbing=false;
+function clearSeekTick(){ if(seekTick) cancelAnimationFrame(seekTick), seekTick=null; }
+function refreshTimeLabels(){ const d=(audio.duration||0)|0, ct=(audio.currentTime||0)|0; const el=$('#elapsed'), rm=$('#remaining'); if(el) el.textContent=fmt(ct); if(rm) rm.textContent=d>0?('-'+fmt(Math.max(d-ct,0))):'-0:00'; }
+
+async function load(i, autoplay=false){
+  stopIntro(); stopExitVideo(); stopBreak();
+  isLoading=true;
+  idx=(i+PLAYLIST.length)%PLAYLIST.length;
+  const tr=PLAYLIST[idx];
+  titleEl.textContent=tr.title; meta.textContent='Queued'; tpos.textContent=idx+1; markActive();
+  art.src=tr.img||DEFAULT_IMG; art.alt=tr.alt||`${tr.title} — artwork`; story.textContent=tr.story||DEFAULT_STORY;
+  seek.value=0; $('#elapsed').textContent='0:00'; $('#remaining').textContent='-0:00';
+
+  try{ const u=new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u); }catch(e){}
+
+  (async()=>{
+    const audioUrl=await firstReachable(audioCandidates(tr));
+    firstReachable(imageCandidates(tr)).then(imgOk=>{ art.src=imgOk||DEFAULT_IMG; });
+    if(!audioUrl){ isLoading=false; meta.textContent='Load error (file not found)'; showToast('Audio not found. Check filename & case in /Media'); return; }
+    audio.src=pathToUrl(audioUrl); audio.load();
+    const onReady=()=>{ isLoading=false; meta.textContent='Ready'; refreshTimeLabels(); tryAutoplay(); };
+    function tryAutoplay(){ if(!autoplay) return; audio.play().catch(()=>{ const once=()=>{ audio.removeEventListener('canplay', once); play(); }; audio.addEventListener('canplay', once, {once:true}); }); }
+    audio.addEventListener('loadedmetadata', onReady, {once:true});
+    audio.addEventListener('error', ()=>{ isLoading=false; meta.textContent='Load error'; }, {once:true});
+  })();
+}
 function startTick(){
   clearSeekTick();
   (function tick(){
     const d=(audio.duration||0)|0, ct=(audio.currentTime||0)|0;
     if(d>0){
-      const el=document.getElementById('elapsed'); const rm=document.getElementById('remaining');
-      if(el) el.textContent = fmt(ct);
-      if(rm) rm.textContent = '-' + fmt(Math.max(d-ct,0));
-      if(seek) seek.value = d ? Math.round((ct/d)*1000) : 0;
+      $('#elapsed').textContent=fmt(ct);
+      $('#remaining').textContent='-'+fmt(Math.max(d-ct,0));
+      seek.value = d ? Math.round((ct/d)*1000) : 0;
     }
     if(isPlaying) seekTick=requestAnimationFrame(tick);
   })();
 }
-
-function refreshTimeLabels(){
-  const d=(audio.duration||0)|0, ct=(audio.currentTime||0)|0;
-  const el=document.getElementById('elapsed'); const rm=document.getElementById('remaining');
-  if(el) el.textContent = fmt(ct);
-  if(rm) rm.textContent = d>0 ? ('-'+fmt(Math.max(d-ct,0))) : '-0:00';
-}
-
-async function load(i, autoplay=false){
-  stopBreak();
-  stopIntro(); stopExitVideo(); if (welcomeOverlay?.classList.contains('show')) hideWelcome();
-  isLoading=true; idx=(i+PLAYLIST.length)%PLAYLIST.length; const tr=PLAYLIST[idx];
-
-  titleEl && (titleEl.textContent=tr.title); meta && (meta.textContent='Queued'); tpos && (tpos.textContent=idx+1); markActive();
-  if (art){ art.src=tr.img||DEFAULT_IMG; art.alt=tr.alt||(tr.title+' — artwork'); }
-  if (story){ story.textContent=tr.story||DEFAULT_STORY; }
-  if (seek){ seek.value=0; document.getElementById('elapsed').textContent='0:00'; document.getElementById('remaining').textContent='-0:00'; }
-  try{ const u=new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u); }catch(e){}
-
-  (async ()=>{
-    const audioUrl = await firstReachable(audioCandidates(tr));
-    firstReachable(imageCandidates(tr)).then(imgOk => { if (imgOk && art) art.src=imgOk; else if (art) art.src=DEFAULT_IMG; });
-
-    if (!audioUrl){ isLoading=false; meta&&(meta.textContent='Load error (file not found)'); showToast('Audio not found. Check filename & case in /Media'); return; }
-
-    audio.src = pathToUrl(audioUrl); audio.load();
-
-    const tryAutoplay=()=>{ if(!autoplay) return; audio.play().catch(()=>{ const once=()=>{ audio.removeEventListener('canplay', once); play(); }; audio.addEventListener('canplay', once, { once:true }); }); };
-    const onReady=()=>{ isLoading=false; meta&&(meta.textContent='Ready'); refreshTimeLabels(); tryAutoplay(); };
-    audio.addEventListener('loadedmetadata', onReady, { once:true });
-    audio.addEventListener('error', ()=>{ isLoading=false; meta&&(meta.textContent='Load error'); }, { once:true });
-    if(autoplay) setTimeout(()=>{ if(isLoading){ isLoading=false; meta&&(meta.textContent='Ready'); } tryAutoplay(); }, 1200);
-  })();
-}
-
 function play(){
-  if(isIntro) stopIntro(); stopExitVideo(); if(isLoading) return;
-  audio.play().then(()=>{
-    isPlaying=true; onAir.classList.add('on'); startBtn.disabled=true; pauseBtn.disabled=false; meta&&(meta.textContent='Playing');
-    startTick();
-  }).catch(()=>{ showToast('Playback blocked — tap Start Station'); });
+  if(isIntro) stopIntro();
+  stopExitVideo(); if(isLoading) return;
+  audio.play().then(()=>{ isPlaying=true; onAir.classList.add('on'); startBtn.disabled=true; pauseBtn.disabled=false; meta.textContent='Playing'; startTick(); }).catch(()=>{ showToast('Playback blocked — tap Start Station'); });
 }
-function pause(){ if(isBreakPlaying){ try{ breakAudio.pause(); }catch(e){}; isBreakPlaying=false; } else { audio.pause(); isPlaying=false; onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; meta&&(meta.textContent='Paused'); } }
+function pause(){
+  if(isBreakPlaying){ try{ breakAudio.pause(); }catch(e){} isBreakPlaying=false; return; }
+  audio.pause(); isPlaying=false; onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; meta.textContent='Paused';
+}
 function next(){ const step=isShuffle?((Math.random()*PLAYLIST.length)|0)+1:1; stopBreak(); load(idx+step, true); }
 function prev(){ stopBreak(); load(idx-1, true); }
 
@@ -1328,100 +339,75 @@ audio.addEventListener('ended', ()=>{
   onAir.classList.remove('on'); isPlaying=false;
   if(isLoop){ audio.currentTime=0; play(); return; }
   playCountSinceBreak++;
-  if (breaksEnabled && (playCountSinceBreak % breakEvery === 0)){
+  if(breaksEnabled && (playCountSinceBreak % breakEvery === 0)){
     playStationBreakThen(()=> next());
-  } else {
+  }else{
     next();
   }
 });
-audio.addEventListener('play', ()=>{ onAir.classList.add('on'); startBtn.disabled=true; pauseBtn.disabled=false; });
-audio.addEventListener('pause', ()=>{ onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; });
+audio.addEventListener('play', ()=> onAir.classList.add('on'));
+audio.addEventListener('pause', ()=> onAir.classList.remove('on'));
 audio.addEventListener('timeupdate', ()=>{ if(!isScrubbing) refreshTimeLabels(); });
 
-startBtn.addEventListener('click', async ()=>{
-  if (isIntro) stopIntro();
-  if (welcomeOverlay?.classList.contains('show')) hideWelcome();
-
-  if (!isLoading && audio.currentSrc && audio.duration && !Number.isNaN(audio.duration)) { play(); return; }
-  if (isLoading){ const once=()=>{ audio.removeEventListener('canplay', once); play(); }; audio.addEventListener('canplay', once, { once:true }); return; }
-  await load(idx, true);
-});
+startBtn.addEventListener('click', async ()=>{ if(isIntro) stopIntro(); if(welcomeOverlay.classList.contains('show')){ hideWelcome(); await load(idx,false); } if(!isPlaying) play(); });
 pauseBtn.addEventListener('click', pause);
 nextBtn.addEventListener('click', next);
 prevBtn.addEventListener('click', prev);
 
-vol.addEventListener('input', ()=> audio.volume = Number(vol.value));
-muteBtn.addEventListener('click', ()=>{ const m=!(audio.muted); audio.muted=m; muteBtn.textContent = m ? '🔈 Unmute' : '🔇 Mute'; });
+vol.addEventListener('input', ()=> audio.volume=Number(vol.value));
+muteBtn.addEventListener('click', ()=>{ const m=!audio.muted; audio.muted=m; muteBtn.textContent = m ? '🔈 Unmute' : '🔇 Mute'; });
 loopBtn.addEventListener('click', ()=>{ isLoop=!isLoop; loopBtn.textContent = isLoop ? '⟲ Loop: On' : '⟲ Loop'; });
 shuffleBtn.addEventListener('click', ()=>{ isShuffle=!isShuffle; shuffleBtn.textContent = isShuffle ? '🔀 Shuffle: On' : '🔀 Shuffle'; });
 
-// Robust scrubbing
-let isScrubbing=false;
-function setFromSeek(val){
-  if(!audio.duration || Number.isNaN(audio.duration)) return;
-  const t=(Number(val)/1000)*audio.duration;
-  audio.currentTime = Math.max(0, Math.min(t, audio.duration));
+/* scrubbing */
+function setFromSeek(v){ if(!audio.duration) return; const t=(Number(v)/1000)*audio.duration; audio.currentTime=t; }
+seek.addEventListener('pointerdown', ()=>{ isScrubbing=true; });
+seek.addEventListener('pointerup', ()=>{ isScrubbing=false; refreshTimeLabels(); });
+seek.addEventListener('input', (e)=>{ if(!audio.duration) return; setFromSeek(e.target.value); refreshTimeLabels(); });
+seek.addEventListener('change', (e)=>{ if(!audio.duration) return; setFromSeek(e.target.value); refreshTimeLabels(); });
+
+/* share */
+async function shareStation(){
+  const u=new URL(location.href); u.searchParams.set('t', idx);
+  const link=u.toString();
+  if(navigator.share){ try{ await navigator.share({title:'KZAK station', text:'Listen with me', url:link}); return; }catch(e){} }
+  try{ await navigator.clipboard.writeText(link); showToast('Station link copied'); }catch{ prompt('Copy link:', link); }
 }
-const onInput = (e)=>{ if(!audio.duration) return; setFromSeek(e.target.value); refreshTimeLabels(); };
-const onChange= (e)=>{ if(!audio.duration) return; setFromSeek(e.target.value); if(isPlaying) startTick(); };
-
-seek?.addEventListener('pointerdown', ()=>{ isScrubbing=true; clearSeekTick(); });
-seek?.addEventListener('pointerup',   ()=>{ isScrubbing=false; if(isPlaying) startTick(); });
-seek?.addEventListener('mousedown', ()=>{ isScrubbing=true; clearSeekTick(); });
-window.addEventListener('mouseup',   ()=>{ if(isScrubbing){ isScrubbing=false; if(isPlaying) startTick(); }});
-seek?.addEventListener('touchstart', ()=>{ isScrubbing=true; clearSeekTick(); }, {passive:true});
-seek?.addEventListener('touchend',   ()=>{ isScrubbing=false; if(isPlaying) startTick(); }, {passive:true});
-
-seek?.addEventListener('input', onInput);
-seek?.addEventListener('change', onChange);
-
-breaksBtn?.addEventListener('click', ()=>{
-  breaksEnabled = !breaksEnabled;
-  breaksBtn.textContent = breaksEnabled ? '📻 Station Breaks: On' : '📻 Station Breaks: Off';
-});
-
-
-// Share helpers
-function trackUrl(i){ const u=new URL(location.href); u.searchParams.set('t', i); return u.toString(); }
-function shareViaWeb(title, url){ if(navigator.share){ return navigator.share({ title, url }).catch(()=>{}); } return Promise.reject(); }
-function openShareSheet(title, url){
-  const sheet=document.getElementById('shareSheet');
-  const mail=document.getElementById('shareMail');
-  const fb=document.getElementById('shareFacebook');
-  const tw=document.getElementById('shareTwitter');
-  const cp=document.getElementById('shareCopy');
-  const close=document.getElementById('shareClose');
-  const encTitle=encodeURIComponent(title), encUrl=encodeURIComponent(url);
-  mail.href=`mailto:?subject=${encTitle}&body=${encUrl}`;
-  fb.href=`https://www.facebook.com/sharer/sharer.php?u=${encUrl}`;
-  tw.href=`https://twitter.com/intent/tweet?url=${encUrl}&text=${encTitle}`;
-  cp.onclick=async()=>{ try{ await navigator.clipboard.writeText(url); showToast('Track link copied'); }catch{ prompt('Copy link:', url); } };
-  close.onclick=()=>{ sheet.style.display='none'; };
-  sheet.style.display='block';
+shareBtn.addEventListener('click', shareStation);
+async function shareCurrentTrack(which=null){
+  const i = (which==null)? idx : which;
+  const u=new URL(location.href); u.searchParams.set('t', i);
+  const link=u.toString(); const tr=PLAYLIST[i];
+  if(navigator.share){ try{ await navigator.share({title: tr.title, text:'Check this track on KZAK', url:link}); return; }catch(e){} }
+  try{ await navigator.clipboard.writeText(link); showToast('Track link copied'); }catch{ prompt('Copy link:', link); }
 }
-async function shareTrack(i){ const tr=PLAYLIST[i]; if(!tr) return; const url=trackUrl(i); const title=`KZAK • ${tr.title}`; try{ await shareViaWeb(title,url); }catch{ openShareSheet(title,url); } }
-shareTrackBtn?.addEventListener('click', ()=> shareTrack(idx));
-plistBody?.addEventListener('click', (e)=>{ const a=e.target.closest('a[data-share]'); if(!a) return; e.preventDefault(); e.stopPropagation(); const i=Number(a.getAttribute('data-share'))||0; shareTrack(i); });
+shareTrackBtn.addEventListener('click', ()=> shareCurrentTrack());
 
-shareBtn.addEventListener('click', async ()=>{
-  const u = new URL(location.href);
-  u.searchParams.set('t', idx);
-  const link = u.toString();
+/* Station breaks core */
+async function playStationBreakThen(fnAfter){
+  if(!breaksEnabled){ fnAfter&&fnAfter(); return; }
+  await discoverBreaks();
+  const pick=pickBreak();
+  if(!pick){ showToast('No station break files found in /MediaBreak'); fnAfter&&fnAfter(); return; }
+  try{ audio.pause(); }catch(e){}; stopIntro(); stopExitVideo();
+  breakAudio.src=pathToUrl(pick);
+  isBreakPlaying=true; onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; meta.textContent='Station break';
   try{
-    await navigator.clipboard.writeText(link);
-    showToast('Link copied to clipboard');
-  }catch{
-    prompt('Copy link:', link);
-  }
+    await breakAudio.play();
+    breakAudio.addEventListener('ended', ()=>{ isBreakPlaying=false; fnAfter&&fnAfter(); }, {once:true});
+  }catch(e){ isBreakPlaying=false; fnAfter&&fnAfter(); }
+}
+breaksBtn.addEventListener('click', ()=>{ breaksEnabled=!breaksEnabled; breaksBtn.textContent=breaksEnabled?'📻 Station Breaks: On':'📻 Station Breaks: Off'; });
+
+/* Exit */
+toLobby.addEventListener('click', async ()=>{
+  try{ audio.pause(); isPlaying=false; onAir.classList.remove('on'); stopIntro();
+    const v=$('#exitVideo'); v.currentTime=0; v.style.display='block'; v.play(); v.addEventListener('ended', ()=>{ location.href='../index.html'; }, {once:true});
+  }catch(e){ location.href='../index.html'; }
 });
 
-toLobby.addEventListener('click', async ()=>{ try{ audio.pause(); isPlaying=false; onAir.classList.remove('on'); stopIntro();
-  const v=document.getElementById('exitVideo'); document.getElementById('exitOverlay').classList.add('show'); v.currentTime=0; v.style.display='block'; await v.play();
-  v.addEventListener('ended', ()=>{ location.href='../index.html'; }, { once:true });
-}catch(e){ location.href='../index.html'; } });
-
-/* Deep link ?t= */
-(function bootFromQuery(){ const p=new URL(location).searchParams; const t=Number(p.get('t')); if(Number.isFinite(t)&&t>=0&&t<PLAYLIST.length) idx=t|0; })();
+/* Deep link boot */
+(function bootFromQuery(){ const p=new URL(location).searchParams; const t=Number(p.get('t')); if(Number.isFinite(t) && t>=0 && t<PLAYLIST.length){ idx=t|0; } })();
 </script>
 </body>
 </html>
