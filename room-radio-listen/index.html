@@ -197,7 +197,8 @@
     <div class="btn" id="shuffleBtn" aria-label="Shuffle">🔀 Shuffle</div>
 
     <div class="btn" id="muteBtn" aria-label="Mute">🔇 Mute</div>
-    <button id="shareBtn" class="btn" aria-label="Share">🔗 Share</button>
+    <button id="shareBtn" class="btn" aria-label="Share Station">🔗 Share</button>
+    <button id="shareTrackBtn" class="btn" aria-label="Share Current Track">📤 Share Track</button>
   </div>
 
   <div class="player">
@@ -245,7 +246,21 @@
       <div class="body" id="plistBody"></div>
     </aside>
   </div>
+
+<!-- Share sheet (fallback when Web Share is unavailable) -->
+<div id="shareSheet" style="display:none; position:fixed; inset:auto 16px 16px auto; z-index:9999;">
+  <div style="background:#0b1220cc;border:1px solid var(--line);padding:12px;border-radius:12px;box-shadow:var(--shadow);min-width:260px">
+    <div style="font-weight:600;margin-bottom:8px">Share this track</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <a id="shareMail"   class="btn" href="#" target="_blank">✉️ Email</a>
+      <a id="shareFacebook" class="btn" href="#" target="_blank">📘 Facebook</a>
+      <a id="shareTwitter"  class="btn" href="#" target="_blank">𝕏  X / Twitter</a>
+      <button id="shareCopy" class="btn">📋 Copy link</button>
+      <button id="shareClose" class="btn dj-secondary">Close</button>
+    </div>
+  </div>
 </div>
+
 
 <!-- Media elements -->
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
@@ -260,16 +275,853 @@
    ============================================================ */
 const DEFAULT_IMG    = "Media/default.jpg";
 const DEFAULT_STORY  = "Under Construction: a special write-up about this specific music creation and its meaning or influence it had on the creators and the artwork shown will follow shortly.";
+
 const PLAYLIST = [
+
+  
+
   {
     title: "Lateralus Rising",
     file:  "Media/LateralusRising.mp3",
     img:   "Media/Lateralus.jpeg",
-    alt:   "Lateralus Rising — artwork",
-    story: "This song represents strong beats and rhythms and is part of a most excellent set within the album of the same name."
+    alt:   "Lateralus Rising — default artwork",
+    story: "This song represents strong beats and rythms and is part of a most excellent set of melodies within the album of the same name.",
+  },
+
+  {
+    title: "01 Vicarious (Remix) 1",
+    file:  "Media/01 Vicarious (Remix) 1.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "01 Vicarious (Remix) 1 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "01. Sheep (cover)5",
+    file:  "Media/01. Sheep (cover)5.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "01. Sheep (cover)5 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "01. The Grudge (Remastered)",
+    file:  "Media/01. The Grudge (Remastered).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "01. The Grudge (Remastered) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "03. Dogs (Cover) X2 tripper",
+    file:  "Media/03. Dogs (Cover) X2 tripper.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "03. Dogs (Cover) X2 tripper — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "03. Dogs (Remix)",
+    file:  "Media/03. Dogs (Remix).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "03. Dogs (Remix) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "05. Pigs (Three Different Ones) (Techno Tran)",
+    file:  "Media/05. Pigs (Three Different Ones) (Techno Tran).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "05. Pigs (Three Different Ones) (Techno Tran) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "06 Another Brick In The Wall p2 2 (Cover ZZ) v2",
+    file:  "Media/06 Another Brick In The Wall p2 2 (Cover ZZ) v2.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "06 Another Brick In The Wall p2 2 (Cover ZZ) v2 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "07 Goodbye Blue Sky (cover zz) 2",
+    file:  "Media/07 Goodbye Blue Sky (cover zz) 2.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "07 Goodbye Blue Sky (cover zz) 2 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "08 4 Degrees (Cover)2",
+    file:  "Media/08 4 Degrees (Cover)2.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "08 4 Degrees (Cover)2 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "08 4 Degrees (Cover)v1",
+    file:  "Media/08 4 Degrees (Cover)v1.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "08 4 Degrees (Cover)v1 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "08 Rosetta Stoned (Cover) take 1",
+    file:  "Media/08 Rosetta Stoned (Cover) take 1.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "08 Rosetta Stoned (Cover) take 1 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "10 Right In Two (Remastered) (Cover) (1)",
+    file:  "Media/10 Right In Two (Remastered) (Cover) (1).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "10 Right In Two (Remastered) (Cover) (1) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "10 Right In Two (Remastered) (Cover)",
+    file:  "Media/10 Right In Two (Remastered) (Cover).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "10 Right In Two (Remastered) (Cover) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix)",
+    file:  "Media/10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "10. Shine On You Crazy Diamond (Parts 6-9) (cover)",
+    file:  "Media/10. Shine On You Crazy Diamond (Parts 6-9) (cover).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "10. Shine On You Crazy Diamond (Parts 6-9) (cover) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "11. Pushit (Cover) v2",
+    file:  "Media/11. Pushit (Cover) v2.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "11. Pushit (Cover) v2 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "11. Reflection (Cover) V2",
+    file:  "Media/11. Reflection (Cover) V2.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "11. Reflection (Cover) V2 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "14 - Any Colour You Like (Live 1972)",
+    file:  "Media/14 - Any Colour You Like (Live 1972).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "14 - Any Colour You Like (Live 1972) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix)",
+    file:  "Media/1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "46 & 3",
+    file:  "Media/46 & 3.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "46 & 3 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "A Classical Aspect of X ",
+    file:  "Media/A Classical Aspect of X .mp3",
+    img:   DEFAULT_IMG,
+    alt:   "A Classical Aspect of X  — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "A Demo in Time of Dying",
+    file:  "Media/A Demo in Time of Dying.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "A Demo in Time of Dying — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "A Demo of Poor Tom",
+    file:  "Media/A Demo of Poor Tom.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "A Demo of Poor Tom — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "A Madman Plays Seville",
+    file:  "Media/A Madman Plays Seville.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "A Madman Plays Seville — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "A Modern Lord of the Rings",
+    file:  "Media/A Modern Lord of the Rings.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "A Modern Lord of the Rings — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "A Spec of a Blue Dot",
+    file:  "Media/A Spec of a Blue Dot.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "A Spec of a Blue Dot — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "All that glitters is gold Acoustic Blend",
+    file:  "Media/All that glitters is gold Acoustic Blend.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "All that glitters is gold Acoustic Blend — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "All that glitters is gold remains",
+    file:  "Media/All that glitters is gold remains.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "All that glitters is gold remains — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "All that glitters is gold",
+    file:  "Media/All that glitters is gold.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "All that glitters is gold — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Another Dogs Cover - Really?",
+    file:  "Media/Another Dogs Cover - Really?.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Another Dogs Cover - Really? — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "As I Am (Instrumental Demo 2003) (cover zz2)",
+    file:  "Media/As I Am (Instrumental Demo 2003) (cover zz2).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "As I Am (Instrumental Demo 2003) (cover zz2) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Ballad of a Bleak Future",
+    file:  "Media/Ballad of a Bleak Future.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Ballad of a Bleak Future — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Barn Jam Friends",
+    file:  "Media/Barn Jam Friends.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Barn Jam Friends — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Bend the clock - 70s Barn Jam Edition",
+    file:  "Media/Bend the clock - 70s Barn Jam Edition.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Bend the clock - 70s Barn Jam Edition — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Beyond My Understanding",
+    file:  "Media/Beyond My Understanding.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Beyond My Understanding — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Bolotone Desert Trip Edition",
+    file:  "Media/Bolotone Desert Trip Edition.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Bolotone Desert Trip Edition — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Bolotone Metal Edition (Remastered)",
+    file:  "Media/Bolotone Metal Edition (Remastered).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Bolotone Metal Edition (Remastered) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Bolotone's Intro",
+    file:  "Media/Bolotone's Intro.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Bolotone's Intro — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Breathe - (an AI pink floyd cover)",
+    file:  "Media/Breathe - (an AI pink floyd cover).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Breathe - (an AI pink floyd cover) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Continuum - an Octavarium Remix and Cover",
+    file:  "Media/Continuum - an Octavarium Remix and Cover.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Continuum - an Octavarium Remix and Cover — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Cover Of Wings For Marie (Part 1) v1",
+    file:  "Media/Cover Of Wings For Marie (Part 1) v1.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Cover Of Wings For Marie (Part 1) v1 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Cover Wings For Marie (Part 1) (Spanish acoustic ) (1)",
+    file:  "Media/Cover Wings For Marie (Part 1) (Spanish acoustic ) (1).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Cover Wings For Marie (Part 1) (Spanish acoustic ) (1) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Cover of Tool - 7empest 1",
+    file:  "Media/Cover of Tool - 7empest 1.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Cover of Tool - 7empest 1 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Cover of Tool - 7empest 2",
+    file:  "Media/Cover of Tool - 7empest 2.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Cover of Tool - 7empest 2 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Cover of Wings For Marie (Part 1) v2",
+    file:  "Media/Cover of Wings For Marie (Part 1) v2.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Cover of Wings For Marie (Part 1) v2 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Cover. The Grudge (v2)",
+    file:  "Media/Cover. The Grudge (v2).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Cover. The Grudge (v2) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Covering my Eyes",
+    file:  "Media/Covering my Eyes.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Covering my Eyes — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Culling Voices Gathered in Flocks",
+    file:  "Media/Culling Voices Gathered in Flocks.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Culling Voices Gathered in Flocks — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Culling Voices Gathering Alone",
+    file:  "Media/Culling Voices Gathering Alone.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Culling Voices Gathering Alone — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Degrees (Cover)3 (Spanish guitar quartet)",
+    file:  "Media/Degrees (Cover)3 (Spanish guitar quartet).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Degrees (Cover)3 (Spanish guitar quartet) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Degrees as Spanish guitar quartet",
+    file:  "Media/Degrees as Spanish guitar quartet.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Degrees as Spanish guitar quartet — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Dogs (Remix)",
+    file:  "Media/Dogs (Remix).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Dogs (Remix) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Dogs Cover 2 Funky",
+    file:  "Media/Dogs Cover 2 Funky.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Dogs Cover 2 Funky — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Fear Inoculum (Cover) v1",
+    file:  "Media/Fear Inoculum (Cover) v1.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Fear Inoculum (Cover) v1 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Fear Inoculum - Hip Beat Remix",
+    file:  "Media/Fear Inoculum - Hip Beat Remix.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Fear Inoculum - Hip Beat Remix — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Fear Inoculum - Intro remix",
+    file:  "Media/Fear Inoculum - Intro remix.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Fear Inoculum - Intro remix — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Flood an AI Tool Cover",
+    file:  "Media/Flood an AI Tool Cover.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Flood an AI Tool Cover — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Friends in FrontierLand",
+    file:  "Media/Friends in FrontierLand.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Friends in FrontierLand — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Hiding the Pot (1)",
+    file:  "Media/Hiding the Pot (1).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Hiding the Pot (1) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Home Again..",
+    file:  "Media/Home Again..mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Home Again.. — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Labyrinths of Coral Caves ",
+    file:  "Media/Labyrinths of Coral Caves .mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Labyrinths of Coral Caves  — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Leaving You",
+    file:  "Media/Leaving You.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Leaving You — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "More Guitars at Luna Park",
+    file:  "Media/More Guitars at Luna Park.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "More Guitars at Luna Park — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "My Broken Illusion (1)",
+    file:  "Media/My Broken Illusion (1).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "My Broken Illusion (1) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "My Own Pieces of Eight",
+    file:  "Media/My Own Pieces of Eight.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "My Own Pieces of Eight — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "New Beginnings",
+    file:  "Media/New Beginnings.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "New Beginnings — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Octavarium en Quartet",
+    file:  "Media/Octavarium en Quartet.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Octavarium en Quartet — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Orchestra for Wings For Marie (Cover) take 7",
+    file:  "Media/Orchestra for Wings For Marie (Cover) take 7.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Orchestra for Wings For Marie (Cover) take 7 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Our Waiting for Sleep, an instrumental",
+    file:  "Media/Our Waiting for Sleep, an instrumental.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Our Waiting for Sleep, an instrumental — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Pigs three different ones Solo (Cover)2b",
+    file:  "Media/Pigs three different ones Solo (Cover)2b.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Pigs three different ones Solo (Cover)2b — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Rain Song Replayed",
+    file:  "Media/Rain Song Replayed.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Rain Song Replayed — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Rosetta must be Stoned",
+    file:  "Media/Rosetta must be Stoned.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Rosetta must be Stoned — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Running from Waiting Worms",
+    file:  "Media/Running from Waiting Worms.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Running from Waiting Worms — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "S2N an AI Cover of Dream Theater (Remix)",
+    file:  "Media/S2N an AI Cover of Dream Theater (Remix).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "S2N an AI Cover of Dream Theater (Remix) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Schism (Cover)v1",
+    file:  "Media/Schism (Cover)v1.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Schism (Cover)v1 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Shine On (Cover) 5 (Remastered)",
+    file:  "Media/Shine On (Cover) 5 (Remastered).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Shine On (Cover) 5 (Remastered) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z))",
+    file:  "Media/Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Surfacing Tensions",
+    file:  "Media/Surfacing Tensions.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Surfacing Tensions — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Surrounded by Friends",
+    file:  "Media/Surrounded by Friends.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Surrounded by Friends — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "TechnoTrance The Pot V1",
+    file:  "Media/TechnoTrance The Pot V1.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "TechnoTrance The Pot V1 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "TechnoTrance The Pot V2",
+    file:  "Media/TechnoTrance The Pot V2.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "TechnoTrance The Pot V2 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Modern Count of Tuscany (Remastered)",
+    file:  "Media/The Modern Count of Tuscany (Remastered).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Modern Count of Tuscany (Remastered) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Canelo-Crawford Event Round 1",
+    file:  "Media/The Canelo-Crawford Event Round 1.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Canelo-Crawford Event Round 1 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Canelo-Crawford Event",
+    file:  "Media/The Canelo-Crawford Event.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Canelo-Crawford Event — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Embracing Circle Cover- Take One",
+    file:  "Media/The Embracing Circle Cover- Take One.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Embracing Circle Cover- Take One — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Embracing Circle Cover - Take Four",
+    file:  "Media/The Embracing Circle Cover - Take Four.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Embracing Circle Cover - Take Four — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Embracing Circle Cover - Take Two",
+    file:  "Media/The Embracing Circle Cover - Take Two.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Embracing Circle Cover - Take Two — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Embracing Circle Cover - Take Five",
+    file:  "Media/The Embracing Circle Cover - Take Five.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Embracing Circle Cover - Take Five — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Embracing Circle Cover - Take Three",
+    file:  "Media/The Embracing Circle Cover - Take Three.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Embracing Circle Cover - Take Three — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Greatest Debate Ever",
+    file:  "Media/The Greatest Debate Ever.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Greatest Debate Ever — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Madman Plays in Cancun",
+    file:  "Media/The Madman Plays in Cancun.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Madman Plays in Cancun — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix)",
+    file:  "Media/The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Recovering Barstool Warrior",
+    file:  "Media/The Recovering Barstool Warrior.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Recovering Barstool Warrior — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Spirit Carries On (Live Rehearsal 2) (Remix)",
+    file:  "Media/The Spirit Carries On (Live Rehearsal 2) (Remix).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Spirit Carries On (Live Rehearsal 2) (Remix) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The Strangest of Days",
+    file:  "Media/The Strangest of Days.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The Strangest of Days — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The X Aspect Symphony Remix",
+    file:  "Media/The X Aspect Symphony Remix.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The X Aspect Symphony Remix — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "The X Aspect shortened",
+    file:  "Media/The X Aspect shortened.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "The X Aspect shortened — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "TheHumblingRiver = a Cover",
+    file:  "Media/TheHumblingRiver = a Cover.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "TheHumblingRiver = a Cover — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ)",
+    file:  "Media/Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Trippin like Hell",
+    file:  "Media/Trippin like Hell.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Trippin like Hell — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "When Pigs and Sheep Mate IV..",
+    file:  "Media/When Pigs and Sheep Mate IV..mp3",
+    img:   DEFAULT_IMG,
+    alt:   "When Pigs and Sheep Mate IV.. — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "Wings For Marie (Part 1) (Techno Trance Remix) v2",
+    file:  "Media/Wings For Marie (Part 1) (Techno Trance Remix) v2.mp3",
+    img:   DEFAULT_IMG,
+    alt:   "Wings For Marie (Part 1) (Techno Trance Remix) v2 — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "X11 10,000 Days Live (Cover ZZ) (Remastered)",
+    file:  "Media/X11 10,000 Days Live (Cover ZZ) (Remastered).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "X11 10,000 Days Live (Cover ZZ) (Remastered) — default artwork",
+    story: DEFAULT_STORY
+  },
+
+  {
+    title: "ozzy osbourne diary of a madman rare live (Remix)",
+    file:  "Media/ozzy osbourne diary of a madman rare live (Remix).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "ozzy osbourne diary of a madman rare live (Remix) — default artwork",
+    story: DEFAULT_STORY
   }
-  // Add the rest of your blocks here
+
 ];
+
 
 // ---- Smart asset recovery helpers ----
 function insertSpacesFromTitleFallback(title){
@@ -340,7 +1192,7 @@ function buildList(){
   PLAYLIST.forEach((tr,i)=>{
     const div=document.createElement('div');
     div.className='item'; div.setAttribute('data-i', i);
-    div.innerHTML = `<div><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}</div><div class="tiny">${tr.file}</div>`;
+    div.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}</span><a href="#" class="tiny" data-share="${i}">Share</a></div><div class="tiny">${tr.file}</div>`;
     div.addEventListener('click', ()=> load(i, true));
     plistBody.appendChild(div);
   });
@@ -446,6 +1298,58 @@ toLobby.addEventListener('click', async ()=>{ try{ audio.pause(); isPlaying=fals
   const v=document.getElementById('exitVideo'); document.getElementById('exitOverlay').classList.add('show'); v.currentTime=0; v.style.display='block'; await v.play();
   v.addEventListener('ended', ()=>{ location.href='../index.html'; }, { once:true });
 }catch(e){ location.href='../index.html'; } });
+
+
+/* --------- Sharing helpers --------- */
+function trackUrl(i){
+  const u = new URL(location.href); u.searchParams.set('t', i); return u.toString();
+}
+function shareViaWeb(title, url){
+  if (navigator.share){
+    return navigator.share({ title, url }).catch(()=>{});
+  }
+  return Promise.reject();
+}
+function openShareSheet(title, url){
+  const sheet = document.getElementById('shareSheet');
+  const mail = document.getElementById('shareMail');
+  const fb   = document.getElementById('shareFacebook');
+  const tw   = document.getElementById('shareTwitter');
+  const cp   = document.getElementById('shareCopy');
+  const close= document.getElementById('shareClose');
+
+  const encTitle = encodeURIComponent(title);
+  const encUrl   = encodeURIComponent(url);
+  mail.href = `mailto:?subject=${encTitle}&body=${encUrl}`;
+  fb.href   = `https://www.facebook.com/sharer/sharer.php?u=${encUrl}`;
+  tw.href   = `https://twitter.com/intent/tweet?url=${encUrl}&text=${encTitle}`;
+
+  cp.onclick = async ()=>{
+    try{ await navigator.clipboard.writeText(url); showToast('Track link copied'); }catch{ prompt('Copy link:', url); }
+  };
+  close.onclick = ()=>{ sheet.style.display='none'; };
+  sheet.style.display='block';
+}
+async function shareTrack(i){
+  const tr = PLAYLIST[i]; if(!tr) return;
+  const url = trackUrl(i);
+  const title = `KZAK • ${tr.title}`;
+  try{
+    await shareViaWeb(title, url);
+  }catch{
+    openShareSheet(title, url);
+  }
+}
+document.getElementById('shareTrackBtn')?.addEventListener('click', ()=> shareTrack(idx));
+// Delegate clicks for per-item 'Share'
+plistBody?.addEventListener('click', (e)=>{
+  const a = e.target.closest('a[data-share]');
+  if(!a) return;
+  e.preventDefault(); e.stopPropagation();
+  const i = Number(a.getAttribute('data-share'))||0;
+  shareTrack(i);
+});
+
 
 /* Deep link ?t= */
 (function bootFromQuery(){ const p=new URL(location).searchParams; const t=Number(p.get('t')); if(Number.isFinite(t)&&t>=0&&t<PLAYLIST.length) idx=t|0; })();
