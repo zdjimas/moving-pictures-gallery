@@ -80,6 +80,8 @@
     padding:10px 12px; border-top:1px solid rgba(255,255,255,.04); cursor:pointer;
   }
   .playlist .item:hover{background:rgba(255,255,255,.04)}
+  .playlist .body{max-height:480px; overflow:auto;}
+  .player{align-items:start;}
   .playlist .item.active{background:rgba(168, 200, 255, .09)}
   .tiny{font-size:12px;color:var(--muted)}
   .right{ text-align:right }
@@ -1116,6 +1118,15 @@ function buildList(){
 }
 buildList();
 
+
+// After building, cap playlist viewport to exactly 8 items if possible
+(function capPlaylist(){{
+  const body = document.getElementById('plistBody');
+  if (!body || !body.firstElementChild) return;
+  const itemH = body.firstElementChild.getBoundingClientRect().height || 60;
+  body.style.maxHeight = (itemH * 8) + 'px';
+  body.style.overflowY = 'auto';
+}})();
 function markActive(){
   [...plistBody.children].forEach(n => n.classList.toggle('active', Number(n.getAttribute('data-i'))===idx));
 }
