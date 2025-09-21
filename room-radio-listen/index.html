@@ -1098,7 +1098,7 @@ const plistBody = $('#plistBody'), countRight = $('#countRight');
 const welcomeOverlay = $('#welcomeOverlay'), exitOverlay = $('#exitOverlay');
 
 let idx = 0, isShuffle=false, isLoop=false, isMuted=false, isPlaying=false, isLoading=false;
-let isIntro=false;
+let isIntro=false, pausedByUser=false;
 
 tmax.textContent = PLAYLIST.length;
 tcount.textContent = PLAYLIST.length;
@@ -1201,7 +1201,8 @@ function load(i, autoplay=false){
 
   const tryAutoplay = () => {
     if (!autoplay) return;
-    audio.play().then(()=>{}).catch(()=>{
+    audio.play().then(()=>{
+    pausedByUser = false;}).catch(()=>{
       const once = () => { audio.removeEventListener('canplay', once); play(); };
       audio.addEventListener('canplay', once, { once:true });
     });
@@ -1221,6 +1222,7 @@ function play(){
   stopExitVideo();
   if(isLoading) return;
   audio.play().then(()=>{
+    pausedByUser = false;
     isPlaying = true; onAir.classList.add('on');
     startBtn.disabled = true; pauseBtn.disabled = false; meta.textContent = 'Playing';
     clearSeekTick();
@@ -1236,7 +1238,7 @@ function play(){
   }).catch(()=>{ showToast('Playback blocked — tap Start Station'); });
 }
 function pause(){
-  audio.pause(); isPlaying=false; onAir.classList.remove('on');
+  audio.pause(); isPlaying=false; pausedByUser=true; onAir.classList.remove('on');
   startBtn.disabled=false; pauseBtn.disabled=true; meta.textContent='Paused';
 }
 function next(){
@@ -1250,12 +1252,27 @@ audio.addEventListener('ended', ()=>{
   if (isLoop) { audio.currentTime=0; play(); return; }
   next();
 });
-audio.addEventListener('play', ()=> onAir.classList.add('on'));
-audio.addEventListener('pause', ()=> onAir.classList.remove('on'));
+audio.addEventListener('play', ()=> { onAir.classList.add('on'); startBtn.disabled = true; pauseBtn.disabled=false; pausedByUser=false; });
+audio.addEventListener('pause', ()=> { onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; });
 
 startBtn.addEventListener('click', async ()=>{
   if (isIntro) stopIntro();
   if (welcomeOverlay.classList.contains('show')) hideWelcome();
+
+  // If a track is already loaded, try to resume from current position
+  if (!isLoading && audio.currentSrc && audio.duration && !Number.isNaN(audio.duration)) {
+    play();
+    return;
+  }
+
+  // If loading is in progress, play as soon as we can
+  if (isLoading){
+    const once = () => { audio.removeEventListener('canplay', once); play(); };
+    audio.addEventListener('canplay', once, { once:true });
+    return;
+  }
+
+  // Otherwise load current index and autoplay
   load(idx, true);
 });
 pauseBtn.addEventListener('click', pause);
