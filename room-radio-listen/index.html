@@ -87,7 +87,7 @@ input[type=range]{width:100%}
     <div class="btn" id="shuffleBtn">🔀 Shuffle</div>
     <div class="btn" id="muteBtn">🔇 Mute</div>
     <div class="btn" id="breaksBtn">📻 Station Breaks: On</div>
-    <div class="btn" id="breakTestBtn">🧪 Force Break</div>
+    <div class="btn" id="breakTestBtn">🧪 Test Break</div>
     <button id="shareBtn" class="btn">🔗 Share</button>
     <button id="shareTrackBtn" class="btn">📤 Share Track</button>
   </div>
@@ -1160,7 +1160,49 @@ document.querySelector('#breakTestBtn').addEventListener('click',()=>{
 });
 
 /* Exit */
-$('#toLobby').addEventListener('click',async()=>{try{audio.pause();isPlaying=False=false;$('#onAir').classList.remove('on');stopIntro(); const v=$('#exitVideo'); v.currentTime=0; v.style.display='block'; v.play(); v.addEventListener('ended',()=>{location.href='../index.html'},{once:true})}catch(e){location.href='../index.html'}});
+
+document.querySelector('#toLobby').addEventListener('click', async () => {
+  // Compute a robust parent index.html target.
+  const href = location.href;
+  let target;
+  if (/\/room-radio-listen\//.test(href)) {
+    // Trim everything from /room-radio-listen/ onward.
+    target = href.replace(/\/room-radio-listen\/.*/,'/index.html');
+  } else {
+    // Fallback to parent index.html relative to current file.
+    target = new URL('../index.html', href).href;
+  }
+
+  try {
+    // Cleanly stop any media
+    try { audio.pause(); } catch(e) {}
+    isPlaying = false;
+    document.querySelector('#onAir').classList.remove('on');
+    stopIntro && stopIntro();
+    if (typeof isBreakPlaying !== 'undefined' && isBreakPlaying) { try { breakAudio.pause(); } catch(e) {} isBreakPlaying = false; }
+
+    // Attempt optional exit pre-roll if available and playable; navigate on end or on error/timeout
+    const v = document.querySelector('#exitVideo');
+    if (v && v.src) {
+      v.currentTime = 0;
+      v.style.display = 'block';
+      // If browser blocks autoplay, just navigate after a short grace period
+      const safety = setTimeout(() => { location.href = target; }, 2000);
+      try {
+        await v.play();
+        v.addEventListener('ended', () => { clearTimeout(safety); location.href = target; }, { once: true });
+      } catch (e) {
+        clearTimeout(safety);
+        location.href = target;
+      }
+    } else {
+      location.href = target;
+    }
+  } catch (e) {
+    location.href = target;
+  }
+});
+
 
 /* Boot from query */
 (function(){const p=new URL(location).searchParams; const t=Number(p.get('t')); if(Number.isFinite(t)&&t>=0&&t<PLAYLIST.length){idx=t|0}})();
