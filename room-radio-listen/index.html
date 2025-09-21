@@ -49,6 +49,12 @@ input[type=range]{width:100%}
 .overlay.show{display:grid}
 .frame{max-width:720px;margin:0 16px;border-radius:16px;padding:18px;background:rgba(0,0,0,.60);border:1px solid var(--line);box-shadow:var(--shadow)}
 .dj-title{font-size:28px;margin:0 0 6px 0;color:#ffeb7a;text-shadow:0 0 10px rgba(255,200,80,.6),0 0 18px rgba(255,120,64,.3)}
+
+  /* Footer bios */
+  .bio{display:flex;align-items:center;gap:10px;padding:12px 14px}
+  .bio img{width:44px;height:44px;border-radius:10px;object-fit:cover}
+  .bio .name{font-weight:600}
+  .bio .role{color:var(--muted);font-size:12px}
 </style>
 </head>
 <body>
@@ -127,6 +133,18 @@ input[type=range]{width:100%}
       <div class="body" id="plistBody"></div>
     </aside>
   </div>
+
+  <!-- Footer -->
+  <section class="panel" style="margin-top:16px">
+    <div class="bio">
+      <img src="Media/ZachArt.jpeg" alt="">
+      <div><div class="name">zdjimas</div><div class="role">Concept, curation, engineering</div></div>
+    </div>
+    <div class="bio" style="border-top:1px solid var(--line)">
+      <img src="Media/CJMURPHY.png" alt="">
+      <div><div class="name">cjmurphy</div><div class="role">Composition, arrangement, sound design</div></div>
+    </div>
+  </section>
 </div>
 
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
