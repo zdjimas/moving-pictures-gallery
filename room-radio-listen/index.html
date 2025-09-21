@@ -1,4 +1,4 @@
- <!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -26,13 +26,14 @@
   }
   .overlay.show{ display:grid; }
 
-  /* Lighter welcome overlay so background is ~75–80% visible */
+  /* Lighter, lower welcome overlay so background is ~75–80% visible and text does not clash */
   #welcomeOverlay.overlay{
     background:
       radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,.10), rgba(0,0,0,.20)),
       rgba(0,0,0,.20) !important;
+    place-items: start center !important;
   }
-  #welcomeOverlay .frame{ background: rgba(0,0,0,.22) !important; }
+  #welcomeOverlay .frame{ background: rgba(0,0,0,.22) !important; margin-top: 22vh; }
 
   .wrap{ position:relative; z-index:1; padding:24px; max-width:1200px; margin:0 auto; }
   header{ display:flex; align-items:center; gap:16px; margin-bottom:10px; }
@@ -210,7 +211,6 @@
 const DEFAULT_IMG    = "Media/default.jpg";
 const DEFAULT_STORY  = "Under Construction: a special write-up about this specific music creation and its meaning or influence it had on the creators and the artwork shown will follow shortly.";
 
-/* --------- BEGIN: ONE CLEAR BLOCK PER SONG (separated by blank lines) --------- */
 const PLAYLIST = [
 
   {
@@ -944,9 +944,9 @@ const PLAYLIST = [
   {
     title: "The Greatest Debate Ever",
     file:  "Media/The Greatest Debate Ever.mp3",
-    img:   "Media/GreatDebate.png",
+    img:   DEFAULT_IMG,
     alt:   "The Greatest Debate Ever — default artwork",
-    story: "This is a cool recreation of melodies from the album six degrees of inner turbulance which was inspiring for me in my recovery process and healing work I did as an older adult.  My mental health was somthing I never really thought about when I was younger but man, not dealing with the past can take you to some dark places."
+    story: DEFAULT_STORY
   },
 
   {
@@ -1062,7 +1062,6 @@ const PLAYLIST = [
   }
 
 ];
-/* --------- END: ONE CLEAR BLOCK PER SONG --------- */
 </script>
 
 <script>
@@ -1124,10 +1123,7 @@ function markActive(){
 /* Concurrency helpers */
 function stopIntro(){
   if (!isIntro) return;
-  try{
-    intro.pause();
-    intro.currentTime = 0;
-  }catch(e){}
+  try{ intro.pause(); intro.currentTime = 0; }catch(e){}
   isIntro = false;
   startBtn.disabled = false;
   nextBtn.disabled = false;
@@ -1141,7 +1137,6 @@ function stopExitVideo(){
 function hideWelcome(){ welcomeOverlay.classList.remove('show'); }
 async function playWelcomeThenStart(){
   try{
-    // Ensure nothing else is playing
     audio.pause();
     stopExitVideo();
 
@@ -1155,30 +1150,22 @@ async function playWelcomeThenStart(){
     intro.addEventListener('ended', async () => {
       stopIntro();
       hideWelcome();
-      await load(idx, true); // ✅ auto-start first track after intro
+      load(idx, true);
     }, { once:true });
   }catch(e){
-    // Autoplay blocked or user agent quirks; just enable manual start
     stopIntro();
   }
 }
 $('#playWelcome').addEventListener('click', ()=> playWelcomeThenStart());
-$('#skipWelcome').addEventListener('click', ()=> { // ✅ Skip and start immediately
-  stopIntro();
-  hideWelcome();
-  load(idx, true);
-});
+$('#skipWelcome').addEventListener('click', ()=> { stopIntro(); hideWelcome(); load(idx, true); });
 
 /* Load & Playback */
 let seekTick=null;
 function clearSeekTick(){ if(seekTick) cancelAnimationFrame(seekTick), seekTick=null; }
 
-async function load(i, autoplay=false){
-  // Never let intro/exit overlap a track
+function load(i, autoplay=false){
   stopIntro();
   stopExitVideo();
-
-  // If the welcome overlay is still visible (e.g., user clicks playlist), hide it so clicks "work"
   if (welcomeOverlay.classList.contains('show')) hideWelcome();
 
   isLoading = true;
@@ -1190,34 +1177,38 @@ async function load(i, autoplay=false){
   tpos.textContent = idx + 1;
   markActive();
 
-  // artwork & story with safe defaults
   art.src = tr.img || DEFAULT_IMG;
   art.alt = tr.alt || (tr.title + ' — artwork');
   story.textContent = tr.story || DEFAULT_STORY;
 
-  // reset scrubber
   seek.value = 0; $('#elapsed').textContent = '0:00'; $('#remaining').textContent = '-0:00';
 
-  // deep link
   const u = new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u);
 
-  // safer path handling for odd filenames
   audio.src = pathToUrl(tr.file);
+  audio.load();
 
-  const onReady = () => {
-    audio.removeEventListener('loadedmetadata', onReady);
-    isLoading = false; meta.textContent = 'Ready';
-    if (autoplay) play(); // ✅ only start once metadata is ready
+  const tryAutoplay = () => {
+    if (!autoplay) return;
+    audio.play().then(()=>{}).catch(()=>{
+      const once = () => { audio.removeEventListener('canplay', once); play(); };
+      audio.addEventListener('canplay', once, { once:true });
+    });
   };
+
+  const onReady = () => { isLoading = false; meta.textContent = 'Ready'; tryAutoplay(); };
   audio.addEventListener('loadedmetadata', onReady, { once:true });
   audio.addEventListener('error', ()=>{ isLoading=false; meta.textContent='Load error'; }, { once:true });
+
+  if (autoplay){
+    setTimeout(()=>{ if (isLoading){ isLoading=false; meta.textContent='Ready'; } tryAutoplay(); }, 1200);
+  }
 }
 
 function play(){
-  if (isIntro){ stopIntro(); }
+  if (isIntro) stopIntro();
   stopExitVideo();
-
-  if(isLoading) return; // play will be called by onReady if autoplay
+  if(isLoading) return;
   audio.play().then(()=>{
     isPlaying = true; onAir.classList.add('on');
     startBtn.disabled = true; pauseBtn.disabled = false; meta.textContent = 'Playing';
@@ -1225,8 +1216,8 @@ function play(){
     (function tick(){
       const d = (audio.duration||0)|0, ct = (audio.currentTime||0)|0;
       if (d>0){
-        $('#elapsed').textContent = fmt(ct);
-        $('#remaining').textContent = '-' + fmt(Math.max(d-ct,0));
+        document.getElementById('elapsed').textContent = fmt(ct);
+        document.getElementById('remaining').textContent = '-' + fmt(Math.max(d-ct,0));
         seek.value = d ? Math.round((ct/d)*1000) : 0;
       }
       if(isPlaying) seekTick = requestAnimationFrame(tick);
@@ -1254,7 +1245,7 @@ audio.addEventListener('pause', ()=> onAir.classList.remove('on'));
 startBtn.addEventListener('click', async ()=>{
   if (isIntro) stopIntro();
   if (welcomeOverlay.classList.contains('show')) hideWelcome();
-  await load(idx, true); // ✅ always load with autoplay from Start
+  load(idx, true);
 });
 pauseBtn.addEventListener('click', pause);
 nextBtn.addEventListener('click', next);
@@ -1282,23 +1273,19 @@ shareBtn.addEventListener('click', async ()=>{
   const u = new URL(location.href);
   u.searchParams.set('t', idx);
   const link = u.toString();
-  try{
-    await navigator.clipboard.writeText(link);
-    showToast('Link copied to clipboard');
-  }catch{
-    prompt('Copy link:', link);
-  }
+  try{ await navigator.clipboard.writeText(link); showToast('Link copied to clipboard'); }
+  catch{ prompt('Copy link:', link); }
 });
 
-/* Exit pre-roll and return to lobby — also prevents overlap */
+/* Exit pre-roll and return to lobby */
 toLobby.addEventListener('click', async ()=>{
   try{
     audio.pause();
     isPlaying=false; onAir.classList.remove('on');
     stopIntro();
 
-    const v = $('#exitVideo');
-    $('#exitOverlay').classList.add('show');
+    const v = document.getElementById('exitVideo');
+    document.getElementById('exitOverlay').classList.add('show');
     v.currentTime = 0; v.style.display='block';
     await v.play();
     v.addEventListener('ended', ()=>{ location.href = '../index.html'; }, { once:true });
@@ -1312,7 +1299,6 @@ toLobby.addEventListener('click', async ()=>{
   const p = new URL(location).searchParams;
   const t = Number(p.get('t'));
   if(Number.isFinite(t) && t>=0 && t<PLAYLIST.length){ idx = t|0; }
-  // Show welcome; user will play or skip
 })();
 </script>
 </body>
