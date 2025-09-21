@@ -149,7 +149,7 @@ input[type=range]{width:100%}
 
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
 <audio id="introAudio" preload="auto" src="Media/KZAK-Welcome.mp3"></audio>
-<video id="exitVideo" preload="auto" playsinline style="display:none" src="room-radio-listen/radio-room-entry.mp4"></video>
+<video id="exitVideo" preload="auto" playsinline style="display:none" src="Media/FrasierExit.mp4"></video>
 <audio id="breakAudio" preload="auto"></audio>
 
 <div class="toast" id="toast"></div>
@@ -1183,7 +1183,9 @@ document.querySelector('#toLobby').addEventListener('click', async () => {
 
     // Attempt optional exit pre-roll if available and playable; navigate on end or on error/timeout
     const v = document.querySelector('#exitVideo');
-    if (v && v.src) {
+    if (v) {
+      if (!v.src) { v.src = 'Media/FrasierExit.mp4'; }
+
       v.currentTime = 0;
       v.style.display = 'block';
       // If browser blocks autoplay, just navigate after a short grace period
