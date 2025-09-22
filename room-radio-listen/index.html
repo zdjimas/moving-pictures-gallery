@@ -198,32 +198,6 @@ let BREAKS=[
   "MediaBreaks/Snappy16.mp3"
 ];
 let breakEvery=2;
-// === Balanced randomization for station breaks (Snappy vs. other IDs) ===
-try{
-  function __shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
-  function buildBreakQueue(files, snappyRe=/snappy\d*/i, ratio={snappy:1, ident:1}){
-    const snappy = __shuffle(files.filter(f=>snappyRe.test(f)));
-    const ident  = __shuffle(files.filter(f=>!snappyRe.test(f)));
-    const out=[];
-    while(snappy.length || ident.length){
-      for(let k=0;k<ratio.snappy && snappy.length;k++) out.push(snappy.shift());
-      for(let k=0;k<ratio.ident  && ident.length; k++) out.push(ident.shift());
-      if(!snappy.length){ const refill = files.filter(f=>snappyRe.test(f)); if(refill.length) snappy.push(...__shuffle(refill)); }
-      if(!ident.length){ const refill = files.filter(f=>!snappyRe.test(f)); if(refill.length) ident.push(...__shuffle(refill)); }
-      if(out.length > Math.max(8, files.length*4)) break;
-    }
-    return out;
-  }
-  let __breakQueue = null;
-  async function nextBalancedBreak(){
-    try{
-      if(!Array.isArray(BREAKS) || !BREAKS.length){ return null; }
-      if(!__breakQueue || !__breakQueue.length){ __breakQueue = buildBreakQueue(BREAKS); }
-      return __breakQueue.shift();
-    }catch(e){ console.warn('[KZAK] nextBalancedBreak error', e); return (BREAKS && BREAKS[0]) || null; }
-  }
-}catch(e){ console.warn('[KZAK] balanced breaks init error', e); }
-
 
 /* ===== Playlist (short sample — replace with your full list) ===== */
 
@@ -1139,16 +1113,62 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-let lastBreakIdx=-1; async function pickBreak(){ 
+
+let lastBreakIdx=-1;
+
+// Build two rotating queues: Snappy vs Ident (non-snappy)
+let __snappyList = [];
+let __identList  = [];
+let __snappyIdx = 0, __identIdx = 0;
+function initBreakQueues(){
+  try{
+    const files = Array.isArray(BREAKS)? BREAKS.slice() : [];
+    __snappyList = files.filter(f=>/snappy\d*/i.test(f));
+    __identList  = files.filter(f=>!/snappy\d*/i.test(f));
+    // Shuffle
+    for(let i=__snappyList.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [__snappyList[i],__snappyList[j]]=[__snappyList[j],__snappyList[i]]; }
+    for(let i=__identList.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [__identList[i],__identList[j]]=[__identList[j],__identList[i]]; }
+    __snappyIdx = 0; __identIdx = 0;
+  }catch(e){ console.warn('[KZAK] initBreakQueues error', e); }
+}
+initBreakQueues();
+
+// Alternate 1:1; if one bucket is empty, pull from the other
+let __useSnappyNext = true;
+function pickBreak(){
   try{
     if(!Array.isArray(BREAKS) || !BREAKS.length) return null;
-    const b = await nextBalancedBreak();
-    return b || BREAKS[0];
+    if(!__snappyList.length && !__identList.length) initBreakQueues();
+
+    let pick = null;
+    if(__snappyList.length && __identList.length){
+      if(__useSnappyNext){
+        pick = __snappyList[__snappyIdx++ % __snappyList.length];
+      } else {
+        pick = __identList[__identIdx++ % __identList.length];
+      }
+      __useSnappyNext = !__useSnappyNext;
+    } else if(__snappyList.length){
+      pick = __snappyList[__snappyIdx++ % __snappyList.length];
+    } else if(__identList.length){
+      pick = __identList[__identIdx++ % __identList.length];
+    } else {
+      pick = BREAKS[0];
+    }
+
+    // Avoid exact same file as last time if possible
+    if(pick === lastBreakIdx && BREAKS.length > 1){
+      if(/snappy\d*/i.test(pick) && __snappyList.length>1) pick = __snappyList[__snappyIdx++ % __snappyList.length];
+      else if(__identList.length>1) pick = __identList[__identIdx++ % __identList.length];
+    }
+    lastBreakIdx = pick;
+    return pick;
   }catch(e){
     console.warn('[KZAK] pickBreak error', e);
     return (BREAKS && BREAKS[0]) || null;
   }
 }
+while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
@@ -1196,7 +1216,7 @@ async function load(i,autoplay=false){
   try{const u=new URL(location);u.searchParams.set('t',idx);history.replaceState({},'',u)}catch(e){}
   (async()=>{
     const a=await firstReachable(audioCandidates(tr));
-    firstReachable(imageCandidates(tr)).then(ok=>{if(ok)art.src=ok});
+    firstReachable(imageCandidates(tr)).then(ok=>{ if(ok) art.src = pathToUrl(ok); else if (typeof setArtworkFor==='function'){ try{ setArtworkFor(tr); }catch(e){} } });
     if(!a){isLoading=false; meta.textContent='Load error (file not found)'; showToast('Audio not found. Check filename & case in /Media'); return}
     audio.src=pathToUrl(a); audio.load();
     const onReady=()=>{isLoading=false; meta.textContent='Ready'; refreshTimeLabels(); if(autoplay) play()};
@@ -1251,7 +1271,7 @@ shareTrackBtn.addEventListener('click',()=>shareCurrentTrack());
 /* Station breaks */
 async function playStationBreakThen(fnAfter){
   await discoverBreaks();
-  const pick = await pickBreak();
+  const pick = pickBreak();
   if(!pick){showToast('No station breaks found'); fnAfter&&fnAfter(); return}
   try{audio.pause()}catch(e){} isPlaying=false;
   try{intro.pause()}catch(e){}
