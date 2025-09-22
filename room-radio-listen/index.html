@@ -102,7 +102,7 @@ input[type=range]{width:100%}
     <div class="btn" id="shuffleBtn">🔀 Shuffle</div>
     <div class="btn" id="muteBtn">🔇 Mute</div>
     <div class="btn" id="breaksBtn">📻 Station Breaks: On</div>
-    <div class="btn" id="breakTestBtn">🧪 Force Break</div>
+    <div class="btn" id="breakTestBtn">🧪 Test Break</div>
     <button id="shareBtn" class="btn">🔗 Share</button>
     <button id="shareTrackBtn" class="btn">📤 Share Track</button>
   </div>
@@ -203,44 +203,7 @@ let breakEvery=2;
 
 const PLAYLIST = [
 
-  {
-  title: "My Last Rose of Summer",
-  file: "Media/My Last Rose of Summer .mp3",
-  image: "Media/RoseSummerMine.jpeg",
-  alt: "Cover art for My Last Rose of Summer",
-  story: "Under Construction: a brief write-up about this track."
-},
-{
-  title: "Your Last Rose of Summer",
-  file: "Media/Your Last Rose of Summer .mp3",
-  image: "Media/RoseSummerYours.jpeg",
-  alt: "Cover art for Your Last Rose of Summer",
-  story: "Under Construction: a brief write-up about this track."
-},
-{
-  title: "My Suite Madam Bleu (Take 2)",
-  file: "Media/My Suite Madam Bleu take 2.mp3",
-  image: "Media/Bleu2.jpeg",
-  alt: "Cover art for Suite Madam Bleu — Take 2",
-  story: "Under Construction."
-},
-{
-  title: "My Suite Madame Bleu (Take 3)",
-  file: "Media/My Suite Madame Bleu Take 3.mp3",
-  image: "Media/Bleu3.jpeg",
-  alt: "Cover art for Suite Madame Bleu — Take 3",
-  story: "Under Construction."
-},
-
-
-{
-  title: "My America?",
-  file: "Media/My America?.mp3", // requires robust path encoding
-  image: "Media/MyAmerica.jpeg",
-  alt: "Cover art for My America?",
-  story: "Under Construction."
-},
-
+  
 
   {
     title: "Lateralus Rising",
@@ -1271,74 +1234,71 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 (function(){const p=new URL(location).searchParams; const t=Number(p.get('t')); if(Number.isFinite(t)&&t>=0&&t<PLAYLIST.length){idx=t|0}})();
 </script>
 
-<!-- Auto-skip patch (UNCLE6) : skips missing/unplayable tracks after 5s -->
+<!-- Resilient artwork loader patch (UNCLE6) -->
 <script>
 (function(){
-  // Preserve original loader if present
-  var originalLoad = window.load;
-  var pendingAutoSkip = null;
-
-  function clearAutoSkip(){
-    if (pendingAutoSkip){ clearTimeout(pendingAutoSkip); pendingAutoSkip = null; }
-  }
-  function showMessage(msg){
-    try {
-      if (typeof window.showToast === "function") { window.showToast(msg); }
-      else if (typeof window.meta !== "undefined" && window.meta && window.meta.textContent !== undefined) {
-        try { window.meta.textContent = msg; } catch(e){}
-      } else { console.warn(msg); }
-    } catch(e){ console.warn(msg); }
-  }
-  function autoSkip(msg, delayMs){
-    clearAutoSkip();
-    var ms = (typeof delayMs === "number" ? delayMs : 5000);
-    showMessage(msg + " — skipping in " + Math.round(ms/1000) + "s");
-    pendingAutoSkip = setTimeout(function(){
-      try{
-        if (window.isShuffle && typeof window.nextShuffled === "function"){
-          // shuffle path
-          if (typeof originalLoad === "function") originalLoad(window.nextShuffled(), true);
-          else if (typeof window.load === "function") window.load(window.nextShuffled(), true);
-        } else if (typeof window.idx !== "undefined"){
-          var nextIndex = (window.idx + 1);
-          if (typeof originalLoad === "function") originalLoad(nextIndex, true);
-          else if (typeof window.load === "function") window.load(nextIndex, true);
+  function setArtworkFor(item){
+    try{
+      var imgEl = document.getElementById('artwork')
+                || document.querySelector('.now .cover img')
+                || document.querySelector('.now img')
+                || document.querySelector('img#currentArt')
+                || document.querySelector('.artwork img');
+      var DEFAULT_IMAGE = 'Media/default.jpg';
+      function path(u){ try{ return (window.pathToUrl? window.pathToUrl(u): u); }catch(e){ return u; } }
+      function altExt(p){
+        if(!p) return null;
+        var pl = p.toLowerCase();
+        if(pl.endsWith('.jpeg')) return p.slice(0,-5)+'.jpg';
+        if(pl.endsWith('.jpg'))  return p.slice(0,-4)+'.jpeg';
+        return null;
+      }
+      var primary   = item && item.image ? String(item.image).trim() : null;
+      var secondary = altExt(primary);
+      function trySrc(list){
+        if(!imgEl) return;
+        var src = list.shift();
+        if(!src){
+          imgEl.src = path(DEFAULT_IMAGE);
+          console.warn('[KZAK] Artwork fallback → default.jpg for', item && item.title);
+          return;
         }
-      }catch(e){ console.error("AutoSkip failed:", e); }
-    }, ms);
+        var test = new Image();
+        test.onload  = function(){ imgEl.src = test.src; };
+        test.onerror = function(){ trySrc(list); };
+        var url = path(src);
+        console.debug('[KZAK] Trying artwork:', url);
+        test.src = url;
+      }
+      trySrc([primary, secondary, DEFAULT_IMAGE].filter(Boolean));
+      if (imgEl && item && item.alt){ imgEl.alt = item.alt; }
+    }catch(e){ console.warn('[KZAK] setArtworkFor error', e); }
   }
+  window.setArtworkFor = setArtworkFor;
 
-  // Wrap load() to clear any pending skip when switching tracks
-  if (typeof originalLoad === "function"){
+  var _load = window.load;
+  if (typeof _load === 'function'){
     window.load = function(i, autoplay){
-      clearAutoSkip();
-      return originalLoad.apply(this, arguments);
+      var r = _load.apply(this, arguments);
+      try{ setTimeout(function(){ if (window.PLAYLIST && typeof window.idx !== 'undefined') setArtworkFor(window.PLAYLIST[window.idx]); }, 0); }catch(e){}
+      return r;
     };
   }
 
-  // Attach to <audio> once DOM is ready
-  function hookAudio(){
-    var audio = document.querySelector("audio");
-    if (!audio) return;
-    audio.addEventListener("error", function(){
-      autoSkip("Load error (file not found)", 5000);
+  function attach(){
+    var audio = document.querySelector('audio');
+    if(!audio) return;
+    ['loadedmetadata','playing','canplay'].forEach(function(ev){
+      audio.addEventListener(ev, function(){
+        try{ if (window.PLAYLIST && typeof window.idx !== 'undefined') setArtworkFor(window.PLAYLIST[window.idx]); }catch(e){}
+      });
     });
-    audio.addEventListener("stalled", function(){
-      autoSkip("Network stalled", 5000);
-    });
-    audio.addEventListener("abort", function(){
-      autoSkip("Playback aborted", 5000);
-    });
-    // If metadata eventually loads, cancel the pending skip
-    ["loadedmetadata","canplay","playing"].forEach(function(ev){
-      audio.addEventListener(ev, clearAutoSkip);
-    });
+    try{ if (window.PLAYLIST && typeof window.idx !== 'undefined') setArtworkFor(window.PLAYLIST[window.idx]); }catch(e){}
   }
-
-  if (document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", hookAudio, { once:true });
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', attach, {once:true});
   } else {
-    hookAudio();
+    attach();
   }
 })();
 </script>
