@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>KZAK • Frasier-Style Fun Radio without the talking (UNCLE6 candidate)</title>
+<title>[UNCLE6 rebuild r3] KZAK • Frasier-Style Fun Radio without the talking (UNCLE6 candidate)</title>
 <meta name="color-scheme" content="dark light">
 <style>
 :root{--ink:#e6e9ef;--muted:#9aa4b2;--brand:#89b4fa;--line:#22324d;--shadow:0 18px 50px rgba(0,0,0,.45)}
@@ -1114,7 +1114,7 @@ async function discoverBreaks(){
   if(found.length) BREAKS=found; return BREAKS;
 }
 let lastBreakIdx=-1;
-let __useSnappyNext = true; // toggle to alternate 1:1 between Snappy and non-Snappy
+let __useSnappyNext = true; // alternate Snappy / non-Snappy
 function pickBreak(){
   try{
     if(!Array.isArray(BREAKS) || !BREAKS.length) return null;
@@ -1129,8 +1129,7 @@ function pickBreak(){
       if(!arr.length) return null;
       let i = arr[Math.floor(Math.random()*arr.length)];
       if (arr.length>1 && i === lastBreakIdx){
-        let j;
-        do { j = arr[Math.floor(Math.random()*arr.length)]; } while (j===i);
+        let j; do { j = arr[Math.floor(Math.random()*arr.length)]; } while (j===i);
         i = j;
       }
       return i;
@@ -1139,10 +1138,7 @@ function pickBreak(){
     if (snappyIdx.length && identIdx.length){
       chosenIndex = __useSnappyNext ? pickFrom(snappyIdx) : pickFrom(identIdx);
       __useSnappyNext = !__useSnappyNext;
-      if (chosenIndex == null){
-        const all = snappyIdx.concat(identIdx);
-        chosenIndex = pickFrom(all);
-      }
+      if (chosenIndex == null){ const all = snappyIdx.concat(identIdx); chosenIndex = pickFrom(all); }
     } else {
       const all = snappyIdx.length ? snappyIdx : identIdx;
       chosenIndex = pickFrom(all);
@@ -1339,6 +1335,91 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 
 /* Deep link boot */
 (function(){const p=new URL(location).searchParams; const t=Number(p.get('t')); if(Number.isFinite(t)&&t>=0&&t<PLAYLIST.length){idx=t|0}})();
+</script>
+
+
+<script>
+// ===== Optional Media Session (CarPlay) integration =====
+const ENABLE_MEDIA_SESSION = true; // set to false to disable CarPlay/lock-screen controls
+(function(){
+  if (!ENABLE_MEDIA_SESSION || !('mediaSession' in navigator)) return;
+  try{
+    const A = document.getElementById('audio');
+    function currentTrack(){ return (window.PLAYLIST && typeof idx==='number') ? PLAYLIST[idx] : null; }
+
+    function updateMetadata(){
+      const tr = currentTrack(); if (!tr) return;
+      const title   = tr.title || 'Untitled';
+      const artist  = 'KZAK Radio';
+      const album   = 'Live Set';
+      const artURL  = (tr.image || tr.img) ? pathToUrl(tr.image || tr.img) : 'Media/default.jpg';
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title, artist, album,
+          artwork: [
+            { src: artURL, sizes: '96x96',   type: 'image/jpeg' },
+            { src: artURL, sizes: '128x128', type: 'image/jpeg' },
+            { src: artURL, sizes: '256x256', type: 'image/jpeg' },
+            { src: artURL, sizes: '512x512', type: 'image/jpeg' }
+          ]
+        });
+      } catch(_){}
+    }
+
+    function updatePositionState(){
+      if (!Number.isFinite(A.duration) || A.duration <= 0) return;
+      try {
+        navigator.mediaSession.setPositionState({
+          duration: A.duration,
+          playbackRate: A.playbackRate || 1,
+          position: A.currentTime || 0
+        });
+      } catch(_){}
+    }
+    function setPlayingState(p){
+      try{ navigator.mediaSession.playbackState = p ? 'playing' : 'paused'; }catch(_){}
+    }
+
+    const SEEK_STEP = 15;
+    navigator.mediaSession.setActionHandler('play',   ()=>{ if (A.paused) A.play().catch(()=>{}); });
+    navigator.mediaSession.setActionHandler('pause',  ()=>{ try{A.pause();}catch(_){}});
+    navigator.mediaSession.setActionHandler('stop',   ()=>{ try{A.pause(); A.currentTime=0;}catch(_){}});
+    navigator.mediaSession.setActionHandler('seekforward',  (e)=>{
+      const step=(e&&e.seekOffset)||SEEK_STEP;
+      if (Number.isFinite(A.duration)) { A.currentTime=Math.min((A.currentTime||0)+step,A.duration); updatePositionState(); }
+      else { try{ next(); }catch(_){ } }
+    });
+    navigator.mediaSession.setActionHandler('seekbackward', (e)=>{
+      const step=(e&&e.seekOffset)||SEEK_STEP;
+      if (Number.isFinite(A.duration)) { A.currentTime=Math.max((A.currentTime||0)-step,0); updatePositionState(); }
+      else { try{ prev(); }catch(_){ } }
+    });
+    navigator.mediaSession.setActionHandler('nexttrack', ()=>{ try{ next(); setTimeout(()=>{updateMetadata(); updatePositionState();},0); }catch(_){}});
+    navigator.mediaSession.setActionHandler('previoustrack', ()=>{ try{ prev(); setTimeout(()=>{updateMetadata(); updatePositionState();},0); }catch(_){}});
+    navigator.mediaSession.setActionHandler('seekto', (e)=>{
+      if (e && typeof e.seekTime==='number' && Number.isFinite(A.duration)) {
+        A.currentTime=Math.max(0, Math.min(e.seekTime, A.duration));
+        if (e.fastSeek && 'fastSeek' in A){ try{ A.fastSeek(A.currentTime); }catch(_){ } }
+        updatePositionState();
+      }
+    });
+
+    A.addEventListener('loadedmetadata', ()=>{ updateMetadata(); updatePositionState(); });
+    A.addEventListener('play', ()=>{ setPlayingState(true); updatePositionState(); });
+    A.addEventListener('pause',()=>{ setPlayingState(false); updatePositionState(); });
+    A.addEventListener('timeupdate', ()=>{ updatePositionState(); });
+
+    // Hook into your existing load() to refresh metadata on track change (no change to its behavior)
+    const _load = window.load;
+    if (typeof _load === 'function'){
+      window.load = function(i, autoplay){
+        const r = _load.apply(this, arguments);
+        try { updateMetadata(); updatePositionState(); } catch(_){}
+        return r;
+      };
+    }
+  }catch(e){ console.warn('[KZAK] MediaSession init error', e); }
+})();
 </script>
 
 <!-- Resilient artwork loader patch (UNCLE6) -->
