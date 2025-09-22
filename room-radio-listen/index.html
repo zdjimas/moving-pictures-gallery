@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>KZAK • Frasier-Style Fun Radio without the talking (UNCLE6 candidate)</title>
+<title>KZAK • Frasier-Style Fun Radio without the talking (UNCLE6 r2 cachebust)</title>
 <meta name="color-scheme" content="dark light">
 <style>
 :root{--ink:#e6e9ef;--muted:#9aa4b2;--brand:#89b4fa;--line:#22324d;--shadow:0 18px 50px rgba(0,0,0,.45)}
@@ -1088,7 +1088,7 @@ const PLAYLIST = [
 const $=s=>document.querySelector(s);
 function fmt(t){t|=0;const m=(t/60)|0,s=(t%60)|0;return m+':'+(s<10?'0':'')+s}
 function showToast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
-function pathToUrl(p){return p.split('/').map(seg=>encodeURIComponent(seg)).join('/')}
+function pathToUrl(p){const u=p.split('/').map(seg=>encodeURIComponent(seg)).join('/'); const v='v=UNCLE6r2'; return u+(u.includes('?')?'&'+v:'?'+v)}
 function insertSpacesFromTitleFallback(title){return title.replace(/([a-z])([A-Z])/g,'$1 $2').trim()}
 function audioCandidates(tr){const c=[tr.file];if(!/\s/.test(tr.file)&&/\s/.test(tr.title))c.push('Media/'+tr.title+'.mp3');if(!/\s/.test(tr.file)&&!/\s/.test(tr.title)){const s=insertSpacesFromTitleFallback(tr.title);if(/\s/.test(s))c.push('Media/'+s+'.mp3')}return c}
 function imageCandidates(tr){const c=[tr.img||DEFAULT_IMG];const n=[tr.title+'.jpg',tr.title+'.jpeg',tr.title+'.png'];const s=insertSpacesFromTitleFallback(tr.title);if(/\s/.test(s))n.push(s+'.jpg',s+'.jpeg',s+'.png');for(const x of n)c.push('Media/'+x);c.push(DEFAULT_IMG);return c}
@@ -1119,46 +1119,27 @@ function pickBreak(){
   try{
     if(!Array.isArray(BREAKS) || !BREAKS.length) return null;
     if(BREAKS.length===1) return BREAKS[0];
-
-    // Partition indices: Snappy vs. other IDs
-    const snappyIdx = [], identIdx = [];
-    for (let i=0;i<BREAKS.length;i++){
-      if (/snappy\d*/i.test(BREAKS[i])) snappyIdx.push(i);
-      else identIdx.push(i);
-    }
-
+    const snappyIdx=[], identIdx=[];
+    for(let i=0;i<BREAKS.length;i++){ (/snappy\d*/i.test(BREAKS[i])? snappyIdx: identIdx).push(i); }
     function pickFrom(arr){
       if(!arr.length) return null;
       let i = arr[Math.floor(Math.random()*arr.length)];
-      // avoid repeating same index immediate
-      if (arr.length>1 && i === lastBreakIdx){
-        let j;
-        do { j = arr[Math.floor(Math.random()*arr.length)]; } while (j===i);
-        i = j;
-      }
+      if(arr.length>1 && i===lastBreakIdx){ let j; do{ j=arr[Math.floor(Math.random()*arr.length)]; }while(j===i); i=j; }
       return i;
     }
-
-    let chosenIndex = null;
-    if (snappyIdx.length && identIdx.length){
-      chosenIndex = __useSnappyNext ? pickFrom(snappyIdx) : pickFrom(identIdx);
+    let chosen = null;
+    if(snappyIdx.length && identIdx.length){
+      chosen = __useSnappyNext ? pickFrom(snappyIdx) : pickFrom(identIdx);
       __useSnappyNext = !__useSnappyNext;
-      if (chosenIndex == null){
-        const all = snappyIdx.concat(identIdx);
-        chosenIndex = pickFrom(all);
-      }
+      if(chosen==null){ const all=snappyIdx.concat(identIdx); chosen=pickFrom(all); }
     } else {
       const all = snappyIdx.length ? snappyIdx : identIdx;
-      chosenIndex = pickFrom(all);
+      chosen = pickFrom(all);
     }
-
-    if (chosenIndex == null) chosenIndex = (lastBreakIdx+1)%BREAKS.length;
-    lastBreakIdx = chosenIndex;
-    return BREAKS[chosenIndex];
-  }catch(e){
-    console.warn('[KZAK] pickBreak error', e);
-    return BREAKS[0] || null;
-  }
+    if(chosen==null) chosen=(lastBreakIdx+1)%BREAKS.length;
+    lastBreakIdx = chosen;
+    return BREAKS[chosen];
+  }catch(e){ console.warn('[KZAK] pickBreak error', e); return BREAKS[0]||null; }
 }while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
@@ -1314,7 +1295,8 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 
 /* Deep link boot */
 (function(){const p=new URL(location).searchParams; const t=Number(p.get('t')); if(Number.isFinite(t)&&t>=0&&t<PLAYLIST.length){idx=t|0}})();
-</script>
+
+console.log('%cUNCLE6 r2 cachebust loaded','background:#0e1628;color:#89b4fa;padding:2px 6px;border-radius:6px');
 
 <!-- Resilient artwork loader patch (UNCLE6) -->
 <script>
