@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>[UNCLE6 rebuild r3] KZAK • Frasier-Style Fun Radio without the talking (UNCLE6 candidate)</title>
+<title>KZAK • Frasier-Style Fun Radio without the talking (UNCLE6 candidate)</title>
 <meta name="color-scheme" content="dark light">
 <style>
 :root{--ink:#e6e9ef;--muted:#9aa4b2;--brand:#89b4fa;--line:#22324d;--shadow:0 18px 50px rgba(0,0,0,.45)}
@@ -1113,44 +1113,7 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-let lastBreakIdx=-1;
-let __useSnappyNext = true; // alternate Snappy / non-Snappy
-function pickBreak(){
-  try{
-    if(!Array.isArray(BREAKS) || !BREAKS.length) return null;
-    if(BREAKS.length===1) return BREAKS[0];
-
-    const snappyIdx = [], identIdx = [];
-    for (let i=0;i<BREAKS.length;i++){
-      if (/snappy\d*/i.test(BREAKS[i])) snappyIdx.push(i);
-      else identIdx.push(i);
-    }
-    function pickFrom(arr){
-      if(!arr.length) return null;
-      let i = arr[Math.floor(Math.random()*arr.length)];
-      if (arr.length>1 && i === lastBreakIdx){
-        let j; do { j = arr[Math.floor(Math.random()*arr.length)]; } while (j===i);
-        i = j;
-      }
-      return i;
-    }
-    let chosenIndex = null;
-    if (snappyIdx.length && identIdx.length){
-      chosenIndex = __useSnappyNext ? pickFrom(snappyIdx) : pickFrom(identIdx);
-      __useSnappyNext = !__useSnappyNext;
-      if (chosenIndex == null){ const all = snappyIdx.concat(identIdx); chosenIndex = pickFrom(all); }
-    } else {
-      const all = snappyIdx.length ? snappyIdx : identIdx;
-      chosenIndex = pickFrom(all);
-    }
-    if (chosenIndex == null) chosenIndex = (lastBreakIdx+1)%BREAKS.length;
-    lastBreakIdx = chosenIndex;
-    return BREAKS[chosenIndex];
-  }catch(e){
-    console.warn('[KZAK] pickBreak error', e);
-    return BREAKS[0] || null;
-  }
-}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
+let lastBreakIdx=-1; function pickBreak(){if(!BREAKS.length)return null; if(BREAKS.length===1)return BREAKS[0]; let i; do{i=(Math.random()*BREAKS.length)|0}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
@@ -1182,7 +1145,7 @@ let shuffleOrder=[],shufflePos=0;
 tmax.textContent=PLAYLIST.length; tcount.textContent=PLAYLIST.length; countRight.textContent=PLAYLIST.length+' items';
 
 /* Playlist UI */
-function buildList(){plistBody.innerHTML=''; PLAYLIST.forEach((tr,i)=>{const d=document.createElement('div'); d.className='item'; d.setAttribute('data-i',i); d.innerHTML=`<div><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}<div class=\"tiny\">${tr.file}</div></div>`; d.addEventListener('click',()=>{ load(i,true) }); plistBody.appendChild(d)})}
+function buildList(){plistBody.innerHTML=''; PLAYLIST.forEach((tr,i)=>{const d=document.createElement('div'); d.className='item'; d.setAttribute('data-i',i); d.innerHTML=`<div><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}<div class="tiny">${tr.file}</div></div><a class="tiny" href="javascript:void(0)" data-share="${i}">Share</a>`; d.addEventListener('click',e=>{if(e.target&&e.target.getAttribute('data-share'))return; load(i,true)}); d.querySelector('[data-share]')?.addEventListener('click',e=>{e.stopPropagation(); shareCurrentTrack(i)}); plistBody.appendChild(d)})}
 function markActive(){[...plistBody.children].forEach(n=>n.classList.toggle('active',Number(n.getAttribute('data-i'))===idx))}
 buildList();
 
@@ -1208,13 +1171,12 @@ async function load(i,autoplay=false){
   clearAutoSkip();
   isLoading=true; idx=(i+PLAYLIST.length)%PLAYLIST.length; const tr=PLAYLIST[idx];
   titleEl.textContent=tr.title; meta.textContent='Queued'; tpos.textContent=idx+1; markActive();
-  art.src=pathToUrl((tr.image||tr.img)||DEFAULT_IMG); art.alt=tr.alt||tr.title; story.textContent=tr.story||DEFAULT_STORY;
-  if (typeof setArtworkFor === 'function') { try{ setArtworkFor(tr); }catch(e){} }
+  art.src=(tr.image||tr.img)||DEFAULT_IMG; art.alt=tr.alt||tr.title; story.textContent=tr.story||DEFAULT_STORY;
   seek.value=0; $('#elapsed').textContent='0:00'; $('#remaining').textContent='-0:00';
   try{const u=new URL(location);u.searchParams.set('t',idx);history.replaceState({},'',u)}catch(e){}
   (async()=>{
     const a=await firstReachable(audioCandidates(tr));
-    firstReachable(imageCandidates(tr)).then(ok=>{ if(ok) art.src = pathToUrl(ok); });
+    firstReachable(imageCandidates(tr)).then(ok=>{if(ok)art.src=ok});
     if(!a){ isLoading=false; autoSkip('Load error (file not found)', 5000); return }
     audio.src=pathToUrl(a); audio.load();
     const onReady=()=>{ clearAutoSkip(); isLoading=false; meta.textContent='Ready'; refreshTimeLabels(); if(autoplay) play()};
@@ -1337,91 +1299,6 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 (function(){const p=new URL(location).searchParams; const t=Number(p.get('t')); if(Number.isFinite(t)&&t>=0&&t<PLAYLIST.length){idx=t|0}})();
 </script>
 
-
-<script>
-// ===== Optional Media Session (CarPlay) integration =====
-const ENABLE_MEDIA_SESSION = true; // set to false to disable CarPlay/lock-screen controls
-(function(){
-  if (!ENABLE_MEDIA_SESSION || !('mediaSession' in navigator)) return;
-  try{
-    const A = document.getElementById('audio');
-    function currentTrack(){ return (window.PLAYLIST && typeof idx==='number') ? PLAYLIST[idx] : null; }
-
-    function updateMetadata(){
-      const tr = currentTrack(); if (!tr) return;
-      const title   = tr.title || 'Untitled';
-      const artist  = 'KZAK Radio';
-      const album   = 'Live Set';
-      const artURL  = (tr.image || tr.img) ? pathToUrl(tr.image || tr.img) : 'Media/default.jpg';
-      try {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title, artist, album,
-          artwork: [
-            { src: artURL, sizes: '96x96',   type: 'image/jpeg' },
-            { src: artURL, sizes: '128x128', type: 'image/jpeg' },
-            { src: artURL, sizes: '256x256', type: 'image/jpeg' },
-            { src: artURL, sizes: '512x512', type: 'image/jpeg' }
-          ]
-        });
-      } catch(_){}
-    }
-
-    function updatePositionState(){
-      if (!Number.isFinite(A.duration) || A.duration <= 0) return;
-      try {
-        navigator.mediaSession.setPositionState({
-          duration: A.duration,
-          playbackRate: A.playbackRate || 1,
-          position: A.currentTime || 0
-        });
-      } catch(_){}
-    }
-    function setPlayingState(p){
-      try{ navigator.mediaSession.playbackState = p ? 'playing' : 'paused'; }catch(_){}
-    }
-
-    const SEEK_STEP = 15;
-    navigator.mediaSession.setActionHandler('play',   ()=>{ if (A.paused) A.play().catch(()=>{}); });
-    navigator.mediaSession.setActionHandler('pause',  ()=>{ try{A.pause();}catch(_){}});
-    navigator.mediaSession.setActionHandler('stop',   ()=>{ try{A.pause(); A.currentTime=0;}catch(_){}});
-    navigator.mediaSession.setActionHandler('seekforward',  (e)=>{
-      const step=(e&&e.seekOffset)||SEEK_STEP;
-      if (Number.isFinite(A.duration)) { A.currentTime=Math.min((A.currentTime||0)+step,A.duration); updatePositionState(); }
-      else { try{ next(); }catch(_){ } }
-    });
-    navigator.mediaSession.setActionHandler('seekbackward', (e)=>{
-      const step=(e&&e.seekOffset)||SEEK_STEP;
-      if (Number.isFinite(A.duration)) { A.currentTime=Math.max((A.currentTime||0)-step,0); updatePositionState(); }
-      else { try{ prev(); }catch(_){ } }
-    });
-    navigator.mediaSession.setActionHandler('nexttrack', ()=>{ try{ next(); setTimeout(()=>{updateMetadata(); updatePositionState();},0); }catch(_){}});
-    navigator.mediaSession.setActionHandler('previoustrack', ()=>{ try{ prev(); setTimeout(()=>{updateMetadata(); updatePositionState();},0); }catch(_){}});
-    navigator.mediaSession.setActionHandler('seekto', (e)=>{
-      if (e && typeof e.seekTime==='number' && Number.isFinite(A.duration)) {
-        A.currentTime=Math.max(0, Math.min(e.seekTime, A.duration));
-        if (e.fastSeek && 'fastSeek' in A){ try{ A.fastSeek(A.currentTime); }catch(_){ } }
-        updatePositionState();
-      }
-    });
-
-    A.addEventListener('loadedmetadata', ()=>{ updateMetadata(); updatePositionState(); });
-    A.addEventListener('play', ()=>{ setPlayingState(true); updatePositionState(); });
-    A.addEventListener('pause',()=>{ setPlayingState(false); updatePositionState(); });
-    A.addEventListener('timeupdate', ()=>{ updatePositionState(); });
-
-    // Hook into your existing load() to refresh metadata on track change (no change to its behavior)
-    const _load = window.load;
-    if (typeof _load === 'function'){
-      window.load = function(i, autoplay){
-        const r = _load.apply(this, arguments);
-        try { updateMetadata(); updatePositionState(); } catch(_){}
-        return r;
-      };
-    }
-  }catch(e){ console.warn('[KZAK] MediaSession init error', e); }
-})();
-</script>
-
 <!-- Resilient artwork loader patch (UNCLE6) -->
 <script>
 (function(){
@@ -1488,6 +1365,198 @@ const ENABLE_MEDIA_SESSION = true; // set to false to disable CarPlay/lock-scree
   } else {
     attach();
   }
+})();
+</script>
+
+
+<!-- === APPEND-ONLY PATCH (UNCLE6 r4 append) === -->
+<script>
+(function(){
+  'use strict';
+  try{
+    // 0) Marker
+    console.log('%cUNCLE6 r4 append-only patch active','background:#0e1628;color:#89b4fa;padding:2px 6px;border-radius:6px');
+
+    // Wait for DOM to ensure original scripts ran
+    function ready(fn){ if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', fn, {once:true}); } else { fn(); } }
+
+    // 1) Balanced pickBreak override (keeps original globals intact)
+    ready(function(){
+      try{
+        const origPick = window.pickBreak;
+        let lastIndex = -1;
+        let useSnappyNext = true;
+        window.pickBreak = function(){
+          try{
+            const files = Array.isArray(window.BREAKS) ? window.BREAKS : [];
+            if(!files.length) return origPick ? origPick() : null;
+            if(files.length===1) return files[0];
+
+            const snappyIdx=[], identIdx=[];
+            for(let i=0;i<files.length;i++){
+              (/snappy\d*/i.test(files[i]) ? snappyIdx : identIdx).push(i);
+            }
+            function pickFrom(arr){
+              if(!arr.length) return null;
+              let cand = arr[Math.floor(Math.random()*arr.length)];
+              if(arr.length>1 && cand===lastIndex){
+                let j; do{ j=arr[Math.floor(Math.random()*arr.length)]; }while(j===cand);
+                cand = j;
+              }
+              return cand;
+            }
+
+            let chosen = null;
+            if(snappyIdx.length && identIdx.length){
+              chosen = useSnappyNext ? pickFrom(snappyIdx) : pickFrom(identIdx);
+              useSnappyNext = !useSnappyNext;
+              if(chosen==null){
+                const all = snappyIdx.concat(identIdx);
+                chosen = pickFrom(all);
+              }
+            }else{
+              const all = snappyIdx.length ? snappyIdx : identIdx;
+              chosen = pickFrom(all);
+            }
+            if(chosen==null) chosen = (lastIndex+1) % files.length;
+            lastIndex = chosen;
+            return files[chosen];
+          }catch(e){
+            console.warn('[KZAK] patched pickBreak error', e);
+            return origPick ? origPick() : (window.BREAKS && window.BREAKS[0]) || null;
+          }
+        };
+      }catch(e){ console.warn('[KZAK] pickBreak override init error', e); }
+    });
+
+    // 2) Artwork post-load enhancer (does not interfere with original load flow)
+    ready(function(){
+      try{
+        const _load = window.load;
+        if (typeof _load === 'function'){
+          window.load = function(i, autoplay){
+            const r = _load.apply(this, arguments);
+            try{
+              const tr = (window.PLAYLIST && typeof window.idx==='number') ? window.PLAYLIST[window.idx] : null;
+              if (tr){
+                const art = document.getElementById('art') || document.getElementById('artwork');
+                if (art && window.pathToUrl){
+                  const src = (tr.image||tr.img)||'Media/default.jpg';
+                  art.src = window.pathToUrl(src);
+                }
+                if (typeof window.setArtworkFor==='function'){
+                  setTimeout(()=>{ try{ window.setArtworkFor(tr); }catch(_){} }, 0);
+                }
+              }
+            }catch(e){ console.warn('[KZAK] post-load artwork patch error', e); }
+            return r;
+          };
+        }
+      }catch(e){ console.warn('[KZAK] load() enhancer init error', e); }
+    });
+
+    // 3) Remove per-row Share links quietly after playlist renders
+    ready(function(){
+      try{
+        const body = document.getElementById('plistBody');
+        if(!body) return;
+        // Run once now and again after a brief delay to catch rerenders
+        function stripShares(){
+          body.querySelectorAll('a[data-share]').forEach(a=>a.remove());
+          // Ensure clicking an item loads the track even if event delegation existed
+          body.querySelectorAll('.item').forEach(d=>{
+            if (!d._kzakClickBound){
+              d.addEventListener('click', ()=>{
+                const i = Number(d.getAttribute('data-i'));
+                if (Number.isFinite(i) && typeof window.load==='function') window.load(i, true);
+              });
+              d._kzakClickBound = true;
+            }
+          });
+        }
+        stripShares();
+        setTimeout(stripShares, 300);
+      }catch(e){ console.warn('[KZAK] strip share links error', e); }
+    });
+
+    // 4) Optional Media Session (CarPlay) behind a toggle
+    const ENABLE_MEDIA_SESSION = true; // flip to false to disable quickly
+    ready(function(){
+      if (!ENABLE_MEDIA_SESSION || !('mediaSession' in navigator)) return;
+      try{
+        const A = document.getElementById('audio');
+        function currentTrack(){ return (window.PLAYLIST && typeof window.idx==='number') ? window.PLAYLIST[window.idx] : null; }
+        function updateMetadata(){
+          const tr = currentTrack(); if (!tr) return;
+          const title = tr.title || 'Untitled';
+          const artist = 'KZAK Radio';
+          const album = 'Live Set';
+          const artURL = (tr.image || tr.img) ? (window.pathToUrl ? window.pathToUrl(tr.image||tr.img) : (tr.image||tr.img)) : 'Media/default.jpg';
+          try{
+            navigator.mediaSession.metadata = new MediaMetadata({
+              title, artist, album,
+              artwork: [
+                { src: artURL, sizes: '96x96',   type: 'image/jpeg' },
+                { src: artURL, sizes: '128x128', type: 'image/jpeg' },
+                { src: artURL, sizes: '256x256', type: 'image/jpeg' },
+                { src: artURL, sizes: '512x512', type: 'image/jpeg' }
+              ]
+            });
+          }catch(_){}
+        }
+        function updatePositionState(){
+          if (!Number.isFinite(A.duration) || A.duration <= 0) return;
+          try{
+            navigator.mediaSession.setPositionState({
+              duration: A.duration,
+              playbackRate: A.playbackRate || 1,
+              position: A.currentTime || 0
+            });
+          }catch(_){}
+        }
+        function setPlayingState(p){
+          try{ navigator.mediaSession.playbackState = p ? 'playing' : 'paused'; }catch(_){}
+        }
+        const SEEK_STEP = 15;
+        navigator.mediaSession.setActionHandler('play',   ()=>{ if (A.paused) A.play().catch(()=>{}); });
+        navigator.mediaSession.setActionHandler('pause',  ()=>{ try{A.pause();}catch(_){}});
+        navigator.mediaSession.setActionHandler('stop',   ()=>{ try{A.pause(); A.currentTime=0;}catch(_){}});
+        navigator.mediaSession.setActionHandler('seekforward',  (e)=>{
+          const step=(e&&e.seekOffset)||SEEK_STEP;
+          if (Number.isFinite(A.duration)) { A.currentTime=Math.min((A.currentTime||0)+step,A.duration); updatePositionState(); }
+          else { try{ next(); }catch(_){ } }
+        });
+        navigator.mediaSession.setActionHandler('seekbackward', (e)=>{
+          const step=(e&&e.seekOffset)||SEEK_STEP;
+          if (Number.isFinite(A.duration)) { A.currentTime=Math.max((A.currentTime||0)-step,0); updatePositionState(); }
+          else { try{ prev(); }catch(_){ } }
+        });
+        navigator.mediaSession.setActionHandler('nexttrack', ()=>{ try{ next(); setTimeout(()=>{updateMetadata(); updatePositionState();},0); }catch(_){}});
+        navigator.mediaSession.setActionHandler('previoustrack', ()=>{ try{ prev(); setTimeout(()=>{updateMetadata(); updatePositionState();},0); }catch(_){}});
+        navigator.mediaSession.setActionHandler('seekto', (e)=>{
+          if (e && typeof e.seekTime==='number' && Number.isFinite(A.duration)) {
+            A.currentTime=Math.max(0, Math.min(e.seekTime, A.duration));
+            if (e.fastSeek && 'fastSeek' in A){ try{ A.fastSeek(A.currentTime); }catch(_){ } }
+            updatePositionState();
+          }
+        });
+        A.addEventListener('loadedmetadata', ()=>{ updateMetadata(); updatePositionState(); });
+        A.addEventListener('play', ()=>{ setPlayingState(true); updatePositionState(); });
+        A.addEventListener('pause',()=>{ setPlayingState(false); updatePositionState(); });
+        A.addEventListener('timeupdate', ()=>{ updatePositionState(); });
+        // Also catch track changes
+        const _load = window.load;
+        if (typeof _load === 'function'){
+          window.load = function(i, autoplay){
+            const r = _load.apply(this, arguments);
+            try{ updateMetadata(); updatePositionState(); }catch(_){}
+            return r;
+          };
+        }
+      }catch(e){ console.warn('[KZAK] MediaSession patch error', e); }
+    });
+
+  }catch(e){ console.warn('[KZAK] append-only patch fatal', e); }
 })();
 </script>
 
