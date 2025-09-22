@@ -198,6 +198,28 @@ let BREAKS=[
   "MediaBreaks/Snappy16.mp3"
 ];
 let breakEvery=2;
+// === Balanced randomization for station breaks (Snappy vs. other IDs) ===
+// Treat file names matching /snappy\d*/i as "snappy", all others as "ident"
+function __shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+function buildBreakQueue(files, snappyRe=/snappy\d*/i, ratio={snappy:1, ident:1}){
+  const snappy = __shuffle(files.filter(f=>snappyRe.test(f)));
+  const ident  = __shuffle(files.filter(f=>!snappyRe.test(f)));
+  const out=[];
+  while(snappy.length || ident.length){
+    for(let k=0;k<ratio.snappy && snappy.length;k++) out.push(snappy.shift());
+    for(let k=0;k<ratio.ident  && ident.length; k++) out.push(ident.shift());
+    if(!snappy.length){ const refill = files.filter(f=>snappyRe.test(f)); if(refill.length) snappy.push(...__shuffle(refill)); }
+    if(!ident.length){ const refill = files.filter(f=>!snappyRe.test(f)); if(refill.length) ident.push(...__shuffle(refill)); }
+    if(out.length > files.length * 4) break;
+  }
+  return out;
+}
+let __breakQueue = buildBreakQueue(BREAKS);
+function nextBalancedBreak(){
+  if(!__breakQueue || !__breakQueue.length) __breakQueue = buildBreakQueue(BREAKS);
+  return __breakQueue.shift();
+}
+
 
 /* ===== Playlist (short sample — replace with your full list) ===== */
 
@@ -1091,7 +1113,7 @@ function showToast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('s
 function pathToUrl(p){return p.split('/').map(seg=>encodeURIComponent(seg)).join('/')}
 function insertSpacesFromTitleFallback(title){return title.replace(/([a-z])([A-Z])/g,'$1 $2').trim()}
 function audioCandidates(tr){const c=[tr.file];if(!/\s/.test(tr.file)&&/\s/.test(tr.title))c.push('Media/'+tr.title+'.mp3');if(!/\s/.test(tr.file)&&!/\s/.test(tr.title)){const s=insertSpacesFromTitleFallback(tr.title);if(/\s/.test(s))c.push('Media/'+s+'.mp3')}return c}
-function imageCandidates(tr){const base=(tr.image||tr.img)||null;const c=[base||DEFAULT_IMG];const n=[tr.title+'.jpg',tr.title+'.jpeg',tr.title+'.png'];const s=insertSpacesFromTitleFallback(tr.title);if(/\s/.test(s))n.push(s+'.jpg',s+'.jpeg',s+'.png');for(const x of n)c.push('Media/'+x);c.push(DEFAULT_IMG);return c}
+function imageCandidates(tr){const c=[tr.img||DEFAULT_IMG];const n=[tr.title+'.jpg',tr.title+'.jpeg',tr.title+'.png'];const s=insertSpacesFromTitleFallback(tr.title);if(/\s/.test(s))n.push(s+'.jpg',s+'.jpeg',s+'.png');for(const x of n)c.push('Media/'+x);c.push(DEFAULT_IMG);return c}
 async function firstReachable(urls){for(const u of urls){try{const r=await fetch(pathToUrl(u),{cache:'no-store',method:'GET'});if(r.ok)return u}catch(e){}}return null}
 
 /* ===== Break discovery ===== */
@@ -1113,7 +1135,7 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-let lastBreakIdx=-1; function pickBreak(){if(!BREAKS.length)return null; if(BREAKS.length===1)return BREAKS[0]; let i; do{i=(Math.random()*BREAKS.length)|0}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
+let lastBreakIdx=-1; function pickBreak(){ if(!BREAKS.length) return null; return nextBalancedBreak(); }while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
@@ -1126,20 +1148,6 @@ const plistBody=$('#plistBody'), countRight=$('#countRight'); const welcomeOverl
 const exitOverlay=$('#exitOverlay'), exitVideo=$('#exitVideo'), skipExit=$('#skipExit');
 
 let idx=0,isShuffle=false,isLoop=false,isPlaying=false,isLoading=false,isIntro=false,breaksEnabled=true,playCountSinceBreak=0,isBreakPlaying=false;
-
-// === Auto-skip & timeouts (UNCLE6) ===
-let pendingAutoSkip=null;
-function clearAutoSkip(){ if(pendingAutoSkip){ clearTimeout(pendingAutoSkip); pendingAutoSkip=null; } }
-function autoSkip(msg='Load error (file not found)', delayMs=5000){
-  clearAutoSkip();
-  meta.textContent = msg + ' — skipping in 5s';
-  try{ showToast(msg + ' — skipping'); }catch(e){}
-  pendingAutoSkip = setTimeout(()=>{
-    if(isShuffle){ load(nextShuffled(), true); }
-    else { load(idx+1, true); }
-  }, delayMs);
-}
-
 let shuffleOrder=[],shufflePos=0;
 
 tmax.textContent=PLAYLIST.length; tcount.textContent=PLAYLIST.length; countRight.textContent=PLAYLIST.length+' items';
@@ -1168,23 +1176,19 @@ let isScrubbing=false, rafId=null;
 function refreshTimeLabels(){let d=Number.isFinite(audio.duration)?audio.duration:0; let ct=Number.isFinite(audio.currentTime)?audio.currentTime:0; d=d>0?d:0; ct=ct>0?ct:0; $('#elapsed').textContent=fmt(ct|0); $('#remaining').textContent=d>0?('-'+fmt(Math.max(d-ct,0)|0)):'-0:00'; if(d>0&&seek){seek.value=Math.round((ct/d)*1000)}}
 async function load(i,autoplay=false){
   stopIntro(); stopBreak();
-  clearAutoSkip();
   isLoading=true; idx=(i+PLAYLIST.length)%PLAYLIST.length; const tr=PLAYLIST[idx];
   titleEl.textContent=tr.title; meta.textContent='Queued'; tpos.textContent=idx+1; markActive();
-  art.src=(tr.image||tr.img)||DEFAULT_IMG; art.alt=tr.alt||tr.title; story.textContent=tr.story||DEFAULT_STORY;
+  art.src=tr.img||DEFAULT_IMG; art.alt=tr.alt||tr.title; story.textContent=tr.story||DEFAULT_STORY;
   seek.value=0; $('#elapsed').textContent='0:00'; $('#remaining').textContent='-0:00';
   try{const u=new URL(location);u.searchParams.set('t',idx);history.replaceState({},'',u)}catch(e){}
   (async()=>{
     const a=await firstReachable(audioCandidates(tr));
     firstReachable(imageCandidates(tr)).then(ok=>{if(ok)art.src=ok});
-    if(!a){ isLoading=false; autoSkip('Load error (file not found)', 5000); return }
+    if(!a){isLoading=false; meta.textContent='Load error (file not found)'; showToast('Audio not found. Check filename & case in /Media'); return}
     audio.src=pathToUrl(a); audio.load();
-    const onReady=()=>{ clearAutoSkip(); isLoading=false; meta.textContent='Ready'; refreshTimeLabels(); if(autoplay) play()};
+    const onReady=()=>{isLoading=false; meta.textContent='Ready'; refreshTimeLabels(); if(autoplay) play()};
     audio.addEventListener('loadedmetadata',onReady,{once:true});
-    audio.addEventListener('error',()=>{ isLoading=false; autoSkip('Load error', 5000); },{once:true});
-    // 12s metadata timeout (covers silent stalls)
-    clearTimeout(audio._metaTimer);
-    audio._metaTimer = setTimeout(()=>{ autoSkip('Timeout waiting for media', 0); }, 12000);
+    audio.addEventListener('error',()=>{isLoading=false; meta.textContent='Load error'},{once:true});
   })();
 }
 function tick(){ if(!isPlaying||isScrubbing) return; refreshTimeLabels(); rafId=requestAnimationFrame(tick) }
@@ -1200,9 +1204,6 @@ audio.addEventListener('ended',()=>{
   playCountSinceBreak++; if(breaksEnabled && (playCountSinceBreak%breakEvery===0)){ playStationBreakThen(()=>next()) } else { next() }
 });
 audio.addEventListener('timeupdate',()=>{ if(!isScrubbing) refreshTimeLabels() });
-['loadedmetadata','canplay','playing','error','stalled','abort','ended'].forEach(ev=>{
-  audio.addEventListener(ev, ()=>{ try{ clearTimeout(audio._metaTimer); }catch(e){} }, {passive:true});
-});
 
 startBtn.addEventListener('click',async()=>{
   if(welcomeOverlay.classList.contains('show')){ hideWelcome(); await load(idx,true); return }
@@ -1255,14 +1256,6 @@ breakTestBtn.addEventListener('click',()=>{
   playStationBreakThen(()=>{ if(wasPlaying){ play(); } else { meta.textContent='Paused'; startBtn.disabled=false; pauseBtn.disabled=true; onAir.classList.remove('on'); } });
 });
 
-// Ensure station breaks never overlap the main audio
-breakAudio.addEventListener('play', ()=>{ try{ audio.pause(); }catch(e){} isBreakPlaying=true; });
-breakAudio.addEventListener('ended', ()=>{ isBreakPlaying=false; });
-breakAudio.addEventListener('error', ()=>{ isBreakPlaying=false; });
-
-audio.addEventListener('play', ()=>{ if(isBreakPlaying){ try{audio.pause();}catch(e){} } });
-
-
 /* Exit flow: show exit overlay, play video fully, then navigate */
 function computeLobbyURL(){
   try{
@@ -1304,7 +1297,7 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 (function(){
   function setArtworkFor(item){
     try{
-      var imgEl = document.getElementById('art') || document.getElementById('artwork')
+      var imgEl = document.getElementById('artwork')
                 || document.querySelector('.now .cover img')
                 || document.querySelector('.now img')
                 || document.querySelector('img#currentArt')
@@ -1318,7 +1311,7 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
         if(pl.endsWith('.jpg'))  return p.slice(0,-4)+'.jpeg';
         return null;
       }
-      var primary   = item && (item.image || item.img) ? String(item.image || item.img).trim() : null;
+      var primary   = item && item.image ? String(item.image).trim() : null;
       var secondary = altExt(primary);
       function trySrc(list){
         if(!imgEl) return;
