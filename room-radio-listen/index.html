@@ -198,6 +198,49 @@ let BREAKS=[
   "MediaBreaks/Snappy16.mp3"
 ];
 let breakEvery=2;
+// === Balanced station-break selection (synchronous, minimal) ===
+(function(){
+  function __shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  let __snappy=[], __ident=[], __si=0, __ii=0, __useSnappy=true, __lastPath=null;
+  function __initBreakQueues(){
+    try{
+      const files = Array.isArray(BREAKS)? BREAKS.slice():[];
+      __snappy = __shuffle(files.filter(f=>/snappy\d*/i.test(f)));
+      __ident  = __shuffle(files.filter(f=>!/snappy\d*/i.test(f)));
+      __si=0; __ii=0; __useSnappy=true;
+    }catch(e){ console.warn('[KZAK] initBreakQueues', e); }
+  }
+  // Expose a small picker used by pickBreak()
+  window.__pickBalancedBreak = function(){
+    if(!Array.isArray(BREAKS) || !BREAKS.length) return null;
+    if((!__snappy.length && !__ident.length) || (__si>=__snappy.length && __ii>=__ident.length)){
+      __initBreakQueues();
+    }
+    let path=null;
+    if(__snappy.length && __ident.length){
+      if(__useSnappy){ path = __snappy[(__si++) % __snappy.length]; }
+      else            { path = __ident[(__ii++) % __ident.length]; }
+      __useSnappy = !__useSnappy;
+    } else if(__snappy.length){
+      path = __snappy[(__si++) % __snappy.length];
+    } else if(__ident.length){
+      path = __ident[(__ii++) % __ident.length];
+    } else {
+      path = BREAKS[0];
+    }
+    // Avoid immediate repeat if possible
+    if(path === __lastPath){
+      if(/snappy\d*/i.test(path) && __ident.length){
+        path = __ident[(__ii++) % __ident.length];
+      } else if(__snappy.length){
+        path = __snappy[(__si++) % __snappy.length];
+      }
+    }
+    __lastPath = path;
+    return path;
+  };
+})();
+
 
 /* ===== Playlist (short sample — replace with your full list) ===== */
 
@@ -1113,62 +1156,7 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-
-let lastBreakIdx=-1;
-
-// Build two rotating queues: Snappy vs Ident (non-snappy)
-let __snappyList = [];
-let __identList  = [];
-let __snappyIdx = 0, __identIdx = 0;
-function initBreakQueues(){
-  try{
-    const files = Array.isArray(BREAKS)? BREAKS.slice() : [];
-    __snappyList = files.filter(f=>/snappy\d*/i.test(f));
-    __identList  = files.filter(f=>!/snappy\d*/i.test(f));
-    // Shuffle
-    for(let i=__snappyList.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [__snappyList[i],__snappyList[j]]=[__snappyList[j],__snappyList[i]]; }
-    for(let i=__identList.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [__identList[i],__identList[j]]=[__identList[j],__identList[i]]; }
-    __snappyIdx = 0; __identIdx = 0;
-  }catch(e){ console.warn('[KZAK] initBreakQueues error', e); }
-}
-initBreakQueues();
-
-// Alternate 1:1; if one bucket is empty, pull from the other
-let __useSnappyNext = true;
-function pickBreak(){
-  try{
-    if(!Array.isArray(BREAKS) || !BREAKS.length) return null;
-    if(!__snappyList.length && !__identList.length) initBreakQueues();
-
-    let pick = null;
-    if(__snappyList.length && __identList.length){
-      if(__useSnappyNext){
-        pick = __snappyList[__snappyIdx++ % __snappyList.length];
-      } else {
-        pick = __identList[__identIdx++ % __identList.length];
-      }
-      __useSnappyNext = !__useSnappyNext;
-    } else if(__snappyList.length){
-      pick = __snappyList[__snappyIdx++ % __snappyList.length];
-    } else if(__identList.length){
-      pick = __identList[__identIdx++ % __identList.length];
-    } else {
-      pick = BREAKS[0];
-    }
-
-    // Avoid exact same file as last time if possible
-    if(pick === lastBreakIdx && BREAKS.length > 1){
-      if(/snappy\d*/i.test(pick) && __snappyList.length>1) pick = __snappyList[__snappyIdx++ % __snappyList.length];
-      else if(__identList.length>1) pick = __identList[__identIdx++ % __identList.length];
-    }
-    lastBreakIdx = pick;
-    return pick;
-  }catch(e){
-    console.warn('[KZAK] pickBreak error', e);
-    return (BREAKS && BREAKS[0]) || null;
-  }
-}
-while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
+let lastBreakIdx=-1; function pickBreak(){ try{ return window.__pickBalancedBreak ? window.__pickBalancedBreak() : (BREAKS[0]||null); }catch(e){ return (BREAKS && BREAKS[0])||null; } }while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
@@ -1186,7 +1174,7 @@ let shuffleOrder=[],shufflePos=0;
 tmax.textContent=PLAYLIST.length; tcount.textContent=PLAYLIST.length; countRight.textContent=PLAYLIST.length+' items';
 
 /* Playlist UI */
-function buildList(){plistBody.innerHTML=''; PLAYLIST.forEach((tr,i)=>{const d=document.createElement('div'); d.className='item'; d.setAttribute('data-i',i); d.innerHTML=`<div><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}<div class="tiny">${tr.file}</div></div><a class="tiny" href="javascript:void(0)" data-share="${i}">Share</a>`; d.addEventListener('click',e=>{if(e.target&&e.target.getAttribute('data-share'))return; load(i,true)}); d.querySelector('[data-share]')?.addEventListener('click',e=>{e.stopPropagation(); shareCurrentTrack(i)}); plistBody.appendChild(d)})}
+function buildList(){plistBody.innerHTML=''; PLAYLIST.forEach((tr,i)=>{const d=document.createElement('div'); d.className='item'; d.setAttribute('data-i',i); d.innerHTML=`<div><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}<div class=\"tiny\">${tr.file}</div></div>`; d.addEventListener('click',()=>{ load(i,true) }); plistBody.appendChild(d)})}
 function markActive(){[...plistBody.children].forEach(n=>n.classList.toggle('active',Number(n.getAttribute('data-i'))===idx))}
 buildList();
 
