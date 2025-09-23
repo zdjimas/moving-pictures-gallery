@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>KZAK • Frasier-Style Fun Radio without the talking</title>
+<title>KZAK • Frasier-Style Fun Radio without the talking (UNCLE6 candidate)</title>
 <meta name="color-scheme" content="dark light">
 <style>
 :root{--ink:#e6e9ef;--muted:#9aa4b2;--brand:#89b4fa;--line:#22324d;--shadow:0 18px 50px rgba(0,0,0,.45)}
@@ -1655,57 +1655,76 @@ window.addEventListener('load', () => {
 })();
 </script>
 
-<!-- === SESSION UPTIME (append-only; UNCLE8-safe) === -->
+<!-- === ON AIR TIME display (append-only; UNCLE8-safe) === -->
 <style>
-  .pill.timer {
+  .pill.onairtime{
     display:inline-flex; align-items:center; gap:.6ch;
-    padding:8px 14px; border-radius:999px; border:1px solid var(--line, #22324d);
-    background:#122240; color:var(--ink, #e6e9ef); font-weight:800; letter-spacing:.02em;
-    box-shadow:var(--shadow, 0 18px 50px rgba(0,0,0,.45)); margin-left:8px;
+    padding:8px 14px; border-radius:999px;
+    border:1px solid var(--line, #22324d);
+    background:#0f2a45; color:var(--ink, #e6e9ef);
+    font-weight:800; letter-spacing:.02em; margin-left:8px;
+    box-shadow:var(--shadow, 0 18px 50px rgba(0,0,0,.45));
   }
-  .pill.timer .dot { width:10px; height:10px; border-radius:50%; background:#4f78ff; box-shadow:0 0 10px rgba(79,120,255,.7); }
-  .pill.timer .label { font-variant-numeric: tabular-nums; }
-  @media (max-width:700px){
-    .pill.timer { padding:6px 10px; font-weight:700; }
+  .pill.onairtime .label{opacity:.85; font-size:.95em}
+  .pill.onairtime .clock{font-variant-numeric:tabular-nums; font-size:1.05em}
+  @media (max-width: 720px){
+    .pill.onairtime{ padding:6px 10px; font-weight:700; }
   }
 </style>
 <script>
 (function(){
+  // Insert a visual display (not a button) next to the ON AIR pill.
   const onAir = document.getElementById('onAir');
-  if(!onAir) return;
-  const uptime = document.createElement('button');
-  uptime.type = 'button';
-  uptime.id = 'kzakUptime';
-  uptime.className = 'pill timer';
-  uptime.title = 'Session uptime (resets on page refresh)';
-  uptime.setAttribute('aria-label','Session uptime');
-  uptime.innerHTML = '<span class="dot" aria-hidden="true"></span><span class="label">00:00:00</span>';
-  onAir.insertAdjacentElement('afterend', uptime);
+  const toolbar = document.querySelector('.toolbar');
+  if(!toolbar) return;
+  const pill = document.createElement('div');
+  pill.id = 'onAirTime';
+  pill.className = 'pill onairtime';
+  pill.innerHTML = '<span class="label">ON AIR TIME</span> <strong class="clock">00:00:00</strong>';
+  if (onAir) onAir.insertAdjacentElement('afterend', pill);
+  else toolbar.insertBefore(pill, toolbar.firstChild);
 
-  const start = Date.now();
-  function pad(n){ return (n<10?'0':'') + n; }
+  const audio = document.getElementById('audio'); // main program audio
+  if(!audio) return;
+
+  let startedAt = null;     // timestamp when ON AIR turned on
+  let totalMs = 0;          // accumulated ON AIR time this page load
+  let timer = null;
+
+  function pad(n){ return (n<10? '0':'') + n; }
   function fmt(ms){
+    ms = Math.max(0, ms|0);
     let s = Math.floor(ms/1000);
-    const d = Math.floor(s/86400); s -= d*86400;
     const h = Math.floor(s/3600); s -= h*3600;
     const m = Math.floor(s/60); s -= m*60;
-    const core = pad(h) + ':' + pad(m) + ':' + pad(s);
-    return d>0 ? (d + 'd ' + core) : core;
+    return pad(h)+':'+pad(m)+':'+pad(s);
   }
-  function tick(){ uptime.querySelector('.label').textContent = fmt(Date.now()-start); }
-  tick();
-  window.__kzakUptimeTimer && clearInterval(window.__kzakUptimeTimer);
-  window.__kzakUptimeTimer = setInterval(tick, 1000);
+  function draw(){
+    const live = timer ? (Date.now() - (startedAt||Date.now())) : 0;
+    pill.querySelector('.clock').textContent = fmt(totalMs + live);
+  }
+  function begin(){
+    if (timer) return;
+    startedAt = Date.now();
+    timer = setInterval(draw, 1000);
+    draw();
+  }
+  function halt(){
+    if (!timer) return;
+    totalMs += Date.now() - (startedAt||Date.now());
+    clearInterval(timer); timer = null; startedAt = null;
+    draw();
+  }
 
-  // Click to copy uptime
-  uptime.addEventListener('click', async () => {
-    try {
-      const text = uptime.querySelector('.label').textContent;
-      await navigator.clipboard.writeText(text);
-      uptime.title = 'Copied: ' + text;
-      setTimeout(()=> uptime.title = 'Session uptime (resets on page refresh)', 1500);
-    } catch(_){}
+  // Count ON AIR time only while main audio is actually playing.
+  audio.addEventListener('playing', begin, {passive:true});
+  ['pause','ended','stalled','waiting','suspend','abort','error'].forEach(ev=>{
+    audio.addEventListener(ev, halt, {passive:true});
   });
+
+  // If the page loads while audio is already playing (edge case), start counting
+  if (!audio.paused && !audio.ended) begin();
+  draw();
 })();
 </script>
 </body>
