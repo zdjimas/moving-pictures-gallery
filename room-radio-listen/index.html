@@ -1562,3 +1562,45 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 
 </body>
 </html>
+
+<!-- === APPEND-ONLY RUNTIME PATCH (safe; after load) === -->
+<script>
+window.addEventListener('load', () => {
+  try {
+    console.log('%cKZAK UNCLE7: alternating sequential breaks patch (runtime)',
+                'background:#0b1220;color:#a6e3a1;padding:2px 6px;border-radius:6px');
+    if (!Array.isArray(window.BREAKS)) return;
+    const toAdd = [
+      "MediaBreaks/Radio-Id-One.mp3",
+      "MediaBreaks/Radio-Id-Two.mp3",
+      "MediaBreaks/Radio-Id-Three.mp3",
+      "MediaBreaks/Snappy17.mp3",
+      "MediaBreaks/Snappy18.mp3",
+      "MediaBreaks/Snappy19.mp3",
+      "MediaBreaks/Snappy20.mp3"
+    ];
+    for (const f of toAdd) { if (!window.BREAKS.includes(f)) window.BREAKS.push(f); }
+    try { window.breakEvery = 1; } catch (e) {}
+    const origPick = window.pickBreak;
+    if (typeof origPick !== 'function') return;
+    function buildBuckets() {
+      const files = window.BREAKS.slice(); const sn=[], id=[];
+      for (let i=0;i<files.length;i++){ const n=String(files[i]||''); if(/snappy/i.test(n)) sn.push(i); else id.push(i); }
+      return { files, snIdx:sn, idIdx:id };
+    }
+    let B = buildBuckets(); let ptr={sn:0,id:0}; let lastType='sn';
+    function nextFrom(type){ const arr=(type==='sn')?B.snIdx:B.idIdx; if(!arr.length) return null;
+      const j = (type==='sn') ? (ptr.sn % arr.length) : (ptr.id % arr.length);
+      if(type==='sn') ptr.sn=(j+1)%arr.length; else ptr.id=(j+1)%arr.length; return B.files[arr[j]]; }
+    window.pickBreak = function(){
+      try{
+        if(!Array.isArray(window.BREAKS) || B.files.length!==window.BREAKS.length){ B=buildBuckets(); ptr={sn:0,id:0}; lastType='sn'; }
+        const type = (lastType==='sn') ? 'id' : 'sn';
+        let f = nextFrom(type); if(!f) f = nextFrom(type==='sn' ? 'id' : 'sn');
+        if(!f) return origPick();
+        lastType = type; return f;
+      }catch(e){ return origPick(); }
+    };
+  } catch (e) {}
+});
+</script>
