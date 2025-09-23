@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>KZAK • Frasier-Style Fun Radio without the talking </title>
+<title>KZAK • Frasier-Style Fun Radio without the talking (UNCLE6 candidate)</title>
 <meta name="color-scheme" content="dark light">
 <style>
 :root{--ink:#e6e9ef;--muted:#9aa4b2;--brand:#89b4fa;--line:#22324d;--shadow:0 18px 50px rgba(0,0,0,.45)}
@@ -172,8 +172,7 @@ input[type=range]{width:100%}
 <script>
 /* ===== Config ===== */
 const DEFAULT_IMG="Media/default.jpg";
-
-const breakEvery = 1;const DEFAULT_STORY="Under Construction: a special write-up about this specific music creation…";
+const DEFAULT_STORY="Under Construction: a special write-up about this specific music creation…";
 const BREAK_DIRS=["MediaBreak","MediaBreaks"];
 let BREAKS=[
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
@@ -204,34 +203,33 @@ let breakEvery=2;
 
 const PLAYLIST = [
 
- {
+  {
   title: "My Last Rose of Summer",
-  file: "Media/My Last Rose of Summer.mp3",       // removed stray space
+  file: "Media/My Last Rose of Summer .mp3",
   image: "Media/RoseSummerMine.jpeg",
   alt: "Cover art for My Last Rose of Summer",
-  story: "A wonderful creation of an earlier recipe for this music being like a glass of fine wine. This song brings out many different feelings for me when I first hearing it."
+  story: "Under Construction: a brief write-up about this track."
 },
 {
   title: "Your Last Rose of Summer",
-  file: "Media/Your Last Rose of Summer.mp3",     // removed stray space
+  file: "Media/Your Last Rose of Summer .mp3",
   image: "Media/RoseSummerYours.jpeg",
   alt: "Cover art for Your Last Rose of Summer",
-  story: "Another creative remix of an obscure deep track from a band you may never expect would write this."
+  story: "Under Construction: a brief write-up about this track."
 },
 {
   title: "My Suite Madam Bleu (Take 2)",
-  file: "Media/My Suite Madam Bleu (Take 2).mp3", // ensure exact filename/case
+  file: "Media/My Suite Madam Bleu take 2.mp3",
   image: "Media/Bleu2.jpeg",
   alt: "Cover art for Suite Madam Bleu — Take 2",
-  story: "A creative interpretation of a well loved melody that I played over and over as an early teenager."
-},    // ← if this is the last object in the array, do NOT add a comma
-
+  story: "Under Construction."
+},
 {
   title: "My Suite Madame Bleu (Take 3)",
   file: "Media/My Suite Madame Bleu Take 3.mp3",
   image: "Media/Bleu3.jpeg",
   alt: "Cover art for Suite Madame Bleu — Take 3",
-  story: "A renegade like classic from the owners of the creators of the same name.  Their great early work as a band. It reminds me of how when I was growing up in the 70s, things in many ways are not so different."
+  story: "Under Construction."
 },
 
 {
@@ -239,7 +237,7 @@ const PLAYLIST = [
   file: "Media/My America?.mp3", // requires robust path encoding
   image: "Media/MyAmerica.jpeg",
   alt: "Cover art for My America?",
-  story: "A favorite song from an album I played till scrached when I was 13,  It speaks to the idolizing of women in the 70s through pagentry."
+  story: "Under Construction."
 },
 
 
@@ -248,15 +246,15 @@ const PLAYLIST = [
     file:  "Media/LateralusRising.mp3",
     img:   "Media/Lateralus.jpeg",
     alt:   "Lateralus Rising — default artwork",
-    story: "This song represents strong beats and rythms and is part of a most excellent set of melodies within the album of the same name."
+    story: "This song represents strong beats and rythms and is part of a most excellent set of melodies within the album of the same name.",
   },
 
   {
-    title: "Vicarious Remix take 1",
+    title: "01 Vicarious (Remix) 1",
     file:  "Media/01 Vicarious (Remix) 1.mp3",
-    img:   DEFAULT_IMG, "Media/vicarious.png",
+    img:   DEFAULT_IMG,
     alt:   "01 Vicarious (Remix) 1 — default artwork",
-    story: "This song represents imagry in the Moving Pictures exhibits for a song that speaks to the way we all vicariously live through the thoughts and imaginations of ourselves we get from the heros and beauty we see on television."
+    story: DEFAULT_STORY
   },
 
   {
@@ -1115,18 +1113,7 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-let lastBreakIdx=-1; function pickBreakSequential(){if(!BREAKS.length)return null; if(BREAKS.length===1)return BREAKS[0]; let i; do{i=(Math.random()*BREAKS.length)|0}
-
-function pickBreakSequential(){
-  const nextType = (lastBreakType === 'snappy') ? 'id' : 'snappy';
-  const pool = (BREAKS && BREAKS[nextType]) ? BREAKS[nextType] : [];
-  if (!pool || !pool.length) return null;
-  const i = breakPtr[nextType] % pool.length;
-  breakPtr[nextType] = (i + 1) % pool.length;
-  lastBreakType = nextType;
-  return { type: nextType, file: pool[i] };
-}
-while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
+let lastBreakIdx=-1; function pickBreak(){if(!BREAKS.length)return null; if(BREAKS.length===1)return BREAKS[0]; let i; do{i=(Math.random()*BREAKS.length)|0}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
@@ -1207,13 +1194,10 @@ function pause(){ audio.pause(); isPlaying=false; onAir.classList.remove('on'); 
 function next(){ stopBreak(); if(isShuffle){load(nextShuffled(),true)}else{load(idx+1,true)} }
 function prev(){ stopBreak(); if(isShuffle){load(prevShuffled(),true)}else{load(idx-1,true)} }
 
-audio.addEventListener('ended', () => {
-  const toggle = document.querySelector('#breaksToggle');
-  if (toggle && toggle.checked) {
-    playBreak(false);
-  } else {
-    next();
-  }
+audio.addEventListener('ended',()=>{
+  onAir.classList.remove('on'); isPlaying=false; if(rafId)cancelAnimationFrame(rafId);
+  if(loopBtn.textContent.includes('On')){ audio.currentTime=0; play(); return; }
+  playCountSinceBreak++; if(breaksEnabled && (playCountSinceBreak%breakEvery===0)){ playStationBreakThen(()=>next()) } else { next() }
 });
 audio.addEventListener('timeupdate',()=>{ if(!isScrubbing) refreshTimeLabels() });
 ['loadedmetadata','canplay','playing','error','stalled','abort','ended'].forEach(ev=>{
@@ -1253,7 +1237,7 @@ shareTrackBtn.addEventListener('click',()=>shareCurrentTrack());
 /* Station breaks */
 async function playStationBreakThen(fnAfter){
   await discoverBreaks();
-  const pick = pickBreakSequential();
+  const pick = pickBreak();
   if(!pick){showToast('No station breaks found'); fnAfter&&fnAfter(); return}
   try{audio.pause()}catch(e){} isPlaying=false;
   try{intro.pause()}catch(e){}
@@ -1578,3 +1562,66 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 
 </body>
 </html>
+
+<!-- === APPEND-ONLY PATCH (UNCLE7 alternating, sequential breaks) === -->
+<script>
+(function(){
+  try{
+    console.log('%cUNCLE7 alt/seq breaks patch active','background:#0e1628;color:#89b4fa;padding:2px 6px;border-radius:6px');
+
+    // Ensure cadence: play one break after every song (toggle still respected by original code)
+    try { window.breakEvery = 1; } catch(_) {}
+
+    // Build typed indices from current BREAKS (Snappy vs. ID)
+    function buildIndex(){
+      const files = Array.isArray(window.BREAKS) ? window.BREAKS.slice() : [];
+      const snappy = [], ident = [];
+      for (let i = 0; i < files.length; i++){
+        const f = String(files[i] || '');
+        if (/snappy/i.test(f)) snappy.push(i);
+        else ident.push(i);
+      }
+      return { files, snappy, ident };
+    }
+
+    let { files, snappy, ident } = buildIndex();
+    let ptr = { snappy: 0, id: 0 };
+    // Start as if the last break type was 'snappy' so the FIRST chosen type is 'id' (after track 1)
+    let lastType = 'snappy';
+
+    function nextFrom(type){
+      const arr = (type === 'snappy') ? snappy : ident;
+      if (!arr.length) return null;
+      const i = ptr[type] % arr.length;
+      ptr[type] = (i + 1) % arr.length;
+      return files[arr[i]];
+    }
+
+    const origPick = window.pickBreak;
+    window.pickBreak = function(){
+      try{
+        // If BREAKS changes (length), rebuild our indices and reset pointers
+        const currentLen = Array.isArray(window.BREAKS) ? window.BREAKS.length : 0;
+        if (currentLen !== files.length){
+          ({ files, snappy, ident } = buildIndex());
+          ptr = { snappy: 0, id: 0 };
+          lastType = 'snappy';
+        }
+
+        // Alternate types deterministically: id → snappy → id → ...
+        const type = (lastType === 'snappy') ? 'id' : 'snappy';
+        let file = nextFrom(type);
+
+        // Fallbacks if one bucket is empty
+        if (!file) file = nextFrom(type === 'snappy' ? 'id' : 'snappy');
+        if (!file) return origPick ? origPick() : (window.BREAKS && window.BREAKS[0]) || null;
+
+        lastType = type;
+        return file;
+      }catch(e){
+        return origPick ? origPick() : (window.BREAKS && window.BREAKS[0]) || null;
+      }
+    };
+  }catch(e){ /* no-op */ }
+})();
+</script>
