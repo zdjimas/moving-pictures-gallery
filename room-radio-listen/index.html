@@ -175,29 +175,36 @@ const DEFAULT_IMG="Media/default.jpg";
 const DEFAULT_STORY="Under Construction: a special write-up about this specific music creation…";
 const BREAK_DIRS=["MediaBreak","MediaBreaks"];
 let BREAKS=[
-  "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
-  "MediaBreaks/AmyYourelisteningtoK-ZACHt.mp3",
-  "MediaBreaks/en-US-Journey-D-K_ZACH___where_the_f.wav",
-  "MediaBreaks/en-US-Journey-DYouaretunedintoK-Z-A-Kb.mp3",
-  "MediaBreaks/en-US-News-NThisisK-Z-A-Kbringingyou.mp3",
-  "MediaBreaks/Snappy1.mp3",
-  "MediaBreaks/Snappy2.mp3",
-  "MediaBreaks/Snappy3.mp3",
-  "MediaBreaks/Snappy4.mp3",
-  "MediaBreaks/snappy5.mp3",
-  "MediaBreaks/Snappy6.mp3",
-  "MediaBreaks/Snappy7.mp3",
-  "MediaBreaks/Snappy8.mp3",
-  "MediaBreaks/Snappy9.mp3",
-  "MediaBreaks/Snappy10.mp3",
-  "MediaBreaks/Snappy11.mp3",
-  "MediaBreaks/Snappy12.mp3",
-  "MediaBreaks/Snappy13.mp3",
-  "MediaBreaks/Snappy14.mp3",
-  "MediaBreaks/Snappy15.mp3",
+  "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav"
+  "MediaBreaks/AmyYourelisteningtoK-ZACHt.mp3"
+  "MediaBreaks/en-US-Journey-D-K_ZACH___where_the_f.wav"
+  "MediaBreaks/en-US-Journey-DYouaretunedintoK-Z-A-Kb.mp3"
+  "MediaBreaks/en-US-News-NThisisK-Z-A-Kbringingyou.mp3"
+  "MediaBreaks/Snappy1.mp3"
+  "MediaBreaks/Snappy2.mp3"
+  "MediaBreaks/Snappy3.mp3"
+  "MediaBreaks/Snappy4.mp3"
+  "MediaBreaks/snappy5.mp3"
+  "MediaBreaks/Snappy6.mp3"
+  "MediaBreaks/Snappy7.mp3"
+  "MediaBreaks/Snappy8.mp3"
+  "MediaBreaks/Snappy9.mp3"
+  "MediaBreaks/Snappy10.mp3"
+  "MediaBreaks/Snappy11.mp3"
+  "MediaBreaks/Snappy12.mp3"
+  "MediaBreaks/Snappy13.mp3"
+  "MediaBreaks/Snappy14.mp3"
+  "MediaBreaks/Snappy15.mp3"
   "MediaBreaks/Snappy16.mp3"
+  "MediaBreaks/Radio-Id-One.mp3"
+  "MediaBreaks/Radio-Id-Two.mp3"
+  "MediaBreaks/Radio-Id-Three.mp3"
+  "MediaBreaks/Snappy17.mp3"
+  "MediaBreaks/Snappy18.mp3"
+  "MediaBreaks/Snappy19.mp3"
+  "MediaBreaks/Snappy20.mp3"
 ];
-let breakEvery=2;
+let breakEvery=1;
 
 /* ===== Playlist (short sample — replace with your full list) ===== */
 
@@ -1113,7 +1120,40 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-let lastBreakIdx=-1; function pickBreak(){if(!BREAKS.length)return null; if(BREAKS.length===1)return BREAKS[0]; let i; do{i=(Math.random()*BREAKS.length)|0}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
+let lastBreakIdx=-1; function pickBreak(){
+  // Alternating, sequential: ID after first song, then Snappy, then ID...
+  if(!Array.isArray(BREAKS) || !BREAKS.length) return null;
+  // Build indices once
+  if(!window.__kzakBreaks){
+    const files = BREAKS.slice();
+    const idIdx = [], snIdx = [];
+    for(let i=0;i<files.length;i++){
+      const f = String(files[i]||'');
+      if(/snappy/i.test(f)) snIdx.push(i); else idIdx.push(i);
+    }
+    window.__kzakBreaks = { files, idIdx, snIdx, ptr:{id:0,sn:0}, last:'sn' };
+  }
+  const S = window.__kzakBreaks;
+  // If BREAKS array changed length, rebuild
+  if (S.files.length !== BREAKS.length){
+    window.__kzakBreaks = null;
+    return pickBreak();
+  }
+  // Choose next type
+  const type = (S.last === 'sn') ? 'id' : 'sn';
+  const pool = (type==='id') ? S.idIdx : S.snIdx;
+  // Fallback if pool empty
+  if(!pool.length){
+    const other = (type==='id') ? S.snIdx : S.idIdx;
+    if(!other.length) return BREAKS[0] || null;
+    S.last = (type==='id') ? 'sn' : 'id';
+    const j = S.ptr[(S.last)] % other.length; S.ptr[(S.last)] = (j+1) % other.length;
+    return S.files[ other[j] ];
+  }
+  const i = S.ptr[type] % pool.length; S.ptr[type] = (i+1) % pool.length;
+  S.last = type;
+  return S.files[ pool[i] ];
+}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
@@ -1562,66 +1602,3 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 
 </body>
 </html>
-
-<!-- === APPEND-ONLY PATCH (UNCLE7 alternating, sequential breaks) === -->
-<script>
-(function(){
-  try{
-    console.log('%cUNCLE7 alt/seq breaks patch active','background:#0e1628;color:#89b4fa;padding:2px 6px;border-radius:6px');
-
-    // Ensure cadence: play one break after every song (toggle still respected by original code)
-    try { window.breakEvery = 1; } catch(_) {}
-
-    // Build typed indices from current BREAKS (Snappy vs. ID)
-    function buildIndex(){
-      const files = Array.isArray(window.BREAKS) ? window.BREAKS.slice() : [];
-      const snappy = [], ident = [];
-      for (let i = 0; i < files.length; i++){
-        const f = String(files[i] || '');
-        if (/snappy/i.test(f)) snappy.push(i);
-        else ident.push(i);
-      }
-      return { files, snappy, ident };
-    }
-
-    let { files, snappy, ident } = buildIndex();
-    let ptr = { snappy: 0, id: 0 };
-    // Start as if the last break type was 'snappy' so the FIRST chosen type is 'id' (after track 1)
-    let lastType = 'snappy';
-
-    function nextFrom(type){
-      const arr = (type === 'snappy') ? snappy : ident;
-      if (!arr.length) return null;
-      const i = ptr[type] % arr.length;
-      ptr[type] = (i + 1) % arr.length;
-      return files[arr[i]];
-    }
-
-    const origPick = window.pickBreak;
-    window.pickBreak = function(){
-      try{
-        // If BREAKS changes (length), rebuild our indices and reset pointers
-        const currentLen = Array.isArray(window.BREAKS) ? window.BREAKS.length : 0;
-        if (currentLen !== files.length){
-          ({ files, snappy, ident } = buildIndex());
-          ptr = { snappy: 0, id: 0 };
-          lastType = 'snappy';
-        }
-
-        // Alternate types deterministically: id → snappy → id → ...
-        const type = (lastType === 'snappy') ? 'id' : 'snappy';
-        let file = nextFrom(type);
-
-        // Fallbacks if one bucket is empty
-        if (!file) file = nextFrom(type === 'snappy' ? 'id' : 'snappy');
-        if (!file) return origPick ? origPick() : (window.BREAKS && window.BREAKS[0]) || null;
-
-        lastType = type;
-        return file;
-      }catch(e){
-        return origPick ? origPick() : (window.BREAKS && window.BREAKS[0]) || null;
-      }
-    };
-  }catch(e){ /* no-op */ }
-})();
-</script>
