@@ -175,33 +175,33 @@ const DEFAULT_IMG="Media/default.jpg";
 const DEFAULT_STORY="Under Construction: a special write-up about this specific music creation…";
 const BREAK_DIRS=["MediaBreak","MediaBreaks"];
 let BREAKS=[
-  "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav"
-  "MediaBreaks/AmyYourelisteningtoK-ZACHt.mp3"
-  "MediaBreaks/en-US-Journey-D-K_ZACH___where_the_f.wav"
-  "MediaBreaks/en-US-Journey-DYouaretunedintoK-Z-A-Kb.mp3"
-  "MediaBreaks/en-US-News-NThisisK-Z-A-Kbringingyou.mp3"
-  "MediaBreaks/Snappy1.mp3"
-  "MediaBreaks/Snappy2.mp3"
-  "MediaBreaks/Snappy3.mp3"
-  "MediaBreaks/Snappy4.mp3"
-  "MediaBreaks/snappy5.mp3"
-  "MediaBreaks/Snappy6.mp3"
-  "MediaBreaks/Snappy7.mp3"
-  "MediaBreaks/Snappy8.mp3"
-  "MediaBreaks/Snappy9.mp3"
-  "MediaBreaks/Snappy10.mp3"
-  "MediaBreaks/Snappy11.mp3"
-  "MediaBreaks/Snappy12.mp3"
-  "MediaBreaks/Snappy13.mp3"
-  "MediaBreaks/Snappy14.mp3"
-  "MediaBreaks/Snappy15.mp3"
-  "MediaBreaks/Snappy16.mp3"
-  "MediaBreaks/Radio-Id-One.mp3"
-  "MediaBreaks/Radio-Id-Two.mp3"
-  "MediaBreaks/Radio-Id-Three.mp3"
-  "MediaBreaks/Snappy17.mp3"
-  "MediaBreaks/Snappy18.mp3"
-  "MediaBreaks/Snappy19.mp3"
+  "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
+  "MediaBreaks/AmyYourelisteningtoK-ZACHt.mp3",
+  "MediaBreaks/en-US-Journey-D-K_ZACH___where_the_f.wav",
+  "MediaBreaks/en-US-Journey-DYouaretunedintoK-Z-A-Kb.mp3",
+  "MediaBreaks/en-US-News-NThisisK-Z-A-Kbringingyou.mp3",
+  "MediaBreaks/Snappy1.mp3",
+  "MediaBreaks/Snappy2.mp3",
+  "MediaBreaks/Snappy3.mp3",
+  "MediaBreaks/Snappy4.mp3",
+  "MediaBreaks/snappy5.mp3",
+  "MediaBreaks/Snappy6.mp3",
+  "MediaBreaks/Snappy7.mp3",
+  "MediaBreaks/Snappy8.mp3",
+  "MediaBreaks/Snappy9.mp3",
+  "MediaBreaks/Snappy10.mp3",
+  "MediaBreaks/Snappy11.mp3",
+  "MediaBreaks/Snappy12.mp3",
+  "MediaBreaks/Snappy13.mp3",
+  "MediaBreaks/Snappy14.mp3",
+  "MediaBreaks/Snappy15.mp3",
+  "MediaBreaks/Snappy16.mp3",
+  "MediaBreaks/Radio-Id-One.mp3",
+  "MediaBreaks/Radio-Id-Two.mp3",
+  "MediaBreaks/Radio-Id-Three.mp3",
+  "MediaBreaks/Snappy17.mp3",
+  "MediaBreaks/Snappy18.mp3",
+  "MediaBreaks/Snappy19.mp3",
   "MediaBreaks/Snappy20.mp3"
 ];
 let breakEvery=1;
@@ -1121,38 +1121,39 @@ async function discoverBreaks(){
   if(found.length) BREAKS=found; return BREAKS;
 }
 let lastBreakIdx=-1; function pickBreak(){
-  // Alternating, sequential: ID after first song, then Snappy, then ID...
+  // Deterministic: Radio ID after first song, then alternate Snappy ↔ ID; sequential within each bucket.
   if(!Array.isArray(BREAKS) || !BREAKS.length) return null;
-  // Build indices once
-  if(!window.__kzakBreaks){
-    const files = BREAKS.slice();
-    const idIdx = [], snIdx = [];
+
+  // Build or refresh caches when BREAKS changes
+  if(!window.__kzakSeq || window.__kzakSeq.len !== BREAKS.length){
+    const idIdx=[], snIdx=[], files=BREAKS.slice();
     for(let i=0;i<files.length;i++){
-      const f = String(files[i]||'');
+      const f=String(files[i]||'');
       if(/snappy/i.test(f)) snIdx.push(i); else idIdx.push(i);
     }
-    window.__kzakBreaks = { files, idIdx, snIdx, ptr:{id:0,sn:0}, last:'sn' };
+    window.__kzakSeq = { len: files.length, files, idIdx, snIdx, p:{id:0,sn:0}, last:'sn' };
   }
-  const S = window.__kzakBreaks;
-  // If BREAKS array changed length, rebuild
-  if (S.files.length !== BREAKS.length){
-    window.__kzakBreaks = null;
-    return pickBreak();
+  const S = window.__kzakSeq;
+
+  function nextFrom(kind){
+    const pool = (kind==='id') ? S.idIdx : S.snIdx;
+    if(!pool.length) return null;
+    const j = S.p[kind] % pool.length;
+    S.p[kind] = (j+1) % pool.length;
+    return S.files[ pool[j] ];
   }
-  // Choose next type
-  const type = (S.last === 'sn') ? 'id' : 'sn';
-  const pool = (type==='id') ? S.idIdx : S.snIdx;
-  // Fallback if pool empty
-  if(!pool.length){
-    const other = (type==='id') ? S.snIdx : S.idIdx;
-    if(!other.length) return BREAKS[0] || null;
-    S.last = (type==='id') ? 'sn' : 'id';
-    const j = S.ptr[(S.last)] % other.length; S.ptr[(S.last)] = (j+1) % other.length;
-    return S.files[ other[j] ];
+
+  const primary = (S.last==='sn') ? 'id' : 'sn';
+  let file = nextFrom(primary);
+  if(!file){
+    const alt = (primary==='id') ? 'sn' : 'id';
+    file = nextFrom(alt);
+    if(!file) return BREAKS[0] || null;
+    S.last = alt;
+    return file;
   }
-  const i = S.ptr[type] % pool.length; S.ptr[type] = (i+1) % pool.length;
-  S.last = type;
-  return S.files[ pool[i] ];
+  S.last = primary;
+  return file;
 }while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
