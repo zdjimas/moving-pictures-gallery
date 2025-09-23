@@ -195,16 +195,9 @@ let BREAKS=[
   "MediaBreaks/Snappy13.mp3",
   "MediaBreaks/Snappy14.mp3",
   "MediaBreaks/Snappy15.mp3",
-  "MediaBreaks/Snappy16.mp3",
-  "MediaBreaks/Radio-Id-One.mp3",
-  "MediaBreaks/Radio-Id-Two.mp3",
-  "MediaBreaks/Radio-Id-Three.mp3",
-  "MediaBreaks/Snappy17.mp3",
-  "MediaBreaks/Snappy18.mp3",
-  "MediaBreaks/Snappy19.mp3",
-  "MediaBreaks/Snappy20.mp3"
+  "MediaBreaks/Snappy16.mp3"
 ];
-let breakEvery=1;
+let breakEvery=2;
 
 /* ===== Playlist (short sample — replace with your full list) ===== */
 
@@ -1120,41 +1113,7 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-let lastBreakIdx=-1; function pickBreak(){
-  // Deterministic: Radio ID after first song, then alternate Snappy ↔ ID; sequential within each bucket.
-  if(!Array.isArray(BREAKS) || !BREAKS.length) return null;
-
-  // Build or refresh caches when BREAKS changes
-  if(!window.__kzakSeq || window.__kzakSeq.len !== BREAKS.length){
-    const idIdx=[], snIdx=[], files=BREAKS.slice();
-    for(let i=0;i<files.length;i++){
-      const f=String(files[i]||'');
-      if(/snappy/i.test(f)) snIdx.push(i); else idIdx.push(i);
-    }
-    window.__kzakSeq = { len: files.length, files, idIdx, snIdx, p:{id:0,sn:0}, last:'sn' };
-  }
-  const S = window.__kzakSeq;
-
-  function nextFrom(kind){
-    const pool = (kind==='id') ? S.idIdx : S.snIdx;
-    if(!pool.length) return null;
-    const j = S.p[kind] % pool.length;
-    S.p[kind] = (j+1) % pool.length;
-    return S.files[ pool[j] ];
-  }
-
-  const primary = (S.last==='sn') ? 'id' : 'sn';
-  let file = nextFrom(primary);
-  if(!file){
-    const alt = (primary==='id') ? 'sn' : 'id';
-    file = nextFrom(alt);
-    if(!file) return BREAKS[0] || null;
-    S.last = alt;
-    return file;
-  }
-  S.last = primary;
-  return file;
-}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
+let lastBreakIdx=-1; function pickBreak(){if(!BREAKS.length)return null; if(BREAKS.length===1)return BREAKS[0]; let i; do{i=(Math.random()*BREAKS.length)|0}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
