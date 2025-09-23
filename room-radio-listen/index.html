@@ -175,14 +175,14 @@ const DEFAULT_IMG="Media/default.jpg";
 const DEFAULT_STORY="Under Construction: a special write-up about this specific music creation…";
 const BREAK_DIRS=["MediaBreak","MediaBreaks"];
 let BREAKS=[
+  "MediaBreaks/Radio-Id-One.mp3",
+  "MediaBreaks/Radio-Id-Two.mp3",
+  "MediaBreaks/Radio-Id-Three.mp3",
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
   "MediaBreaks/AmyYourelisteningtoK-ZACHt.mp3",
   "MediaBreaks/en-US-Journey-D-K_ZACH___where_the_f.wav",
   "MediaBreaks/en-US-Journey-DYouaretunedintoK-Z-A-Kb.mp3",
   "MediaBreaks/en-US-News-NThisisK-Z-A-Kbringingyou.mp3",
-  "MediaBreaks/Radio-Id-One.mp3",
-  "MediaBreaks/Radio-Id-Two.mp3",
-  "MediaBreaks/Radio-Id-Three.mp3",
   "MediaBreaks/Snappy1.mp3",
   "MediaBreaks/Snappy2.mp3",
   "MediaBreaks/Snappy3.mp3",
@@ -199,13 +199,12 @@ let BREAKS=[
   "MediaBreaks/Snappy14.mp3",
   "MediaBreaks/Snappy15.mp3",
   "MediaBreaks/Snappy16.mp3",
-"MediaBreaks/Snappy17.mp3",
+  "MediaBreaks/Snappy17.mp3",
   "MediaBreaks/Snappy18.mp3",
-"MediaBreaks/Snappy19.mp3",
+  "MediaBreaks/Snappy19.mp3",
   "MediaBreaks/Snappy20.mp3"
-  
 ];
-let breakEvery=2;
+let breakEvery=1;
 
 /* ===== Playlist (short sample — replace with your full list) ===== */
 
@@ -1568,47 +1567,92 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 })();
 </script>
 
-</body>
-</html>
 
-<!-- === APPEND-ONLY RUNTIME PATCH (safe; after load) === -->
+<!-- === APPEND-ONLY RUNTIME PATCH: Alternating, Sequential Breaks (safe; runs after load) === -->
 <script>
 window.addEventListener('load', () => {
   try {
-    console.log('%cKZAK UNCLE7: alternating sequential breaks patch (runtime)',
-                'background:#0b1220;color:#a6e3a1;padding:2px 6px;border-radius:6px');
     if (!Array.isArray(window.BREAKS)) return;
-    const toAdd = [
-      "MediaBreaks/Radio-Id-One.mp3",
-      "MediaBreaks/Radio-Id-Two.mp3",
-      "MediaBreaks/Radio-Id-Three.mp3",
-      "MediaBreaks/Snappy17.mp3",
-      "MediaBreaks/Snappy18.mp3",
-      "MediaBreaks/Snappy19.mp3",
-      "MediaBreaks/Snappy20.mp3"
-    ];
-    for (const f of toAdd) { if (!window.BREAKS.includes(f)) window.BREAKS.push(f); }
     try { window.breakEvery = 1; } catch (e) {}
     const origPick = window.pickBreak;
     if (typeof origPick !== 'function') return;
+
     function buildBuckets() {
-      const files = window.BREAKS.slice(); const sn=[], id=[];
-      for (let i=0;i<files.length;i++){ const n=String(files[i]||''); if(/snappy/i.test(n)) sn.push(i); else id.push(i); }
-      return { files, snIdx:sn, idIdx:id };
+      const files = window.BREAKS.slice();
+      const sn = [], id = [];
+      for (let i = 0; i < files.length; i++) {
+        const name = String(files[i] || '');
+        if (/snappy/i.test(name)) sn.push(i); else id.push(i);
+      }
+      return { files, snIdx: sn, idIdx: id };
     }
-    let B = buildBuckets(); let ptr={sn:0,id:0}; let lastType='sn';
-    function nextFrom(type){ const arr=(type==='sn')?B.snIdx:B.idIdx; if(!arr.length) return null;
-      const j = (type==='sn') ? (ptr.sn % arr.length) : (ptr.id % arr.length);
-      if(type==='sn') ptr.sn=(j+1)%arr.length; else ptr.id=(j+1)%arr.length; return B.files[arr[j]]; }
-    window.pickBreak = function(){
-      try{
-        if(!Array.isArray(window.BREAKS) || B.files.length!==window.BREAKS.length){ B=buildBuckets(); ptr={sn:0,id:0}; lastType='sn'; }
-        const type = (lastType==='sn') ? 'id' : 'sn';
-        let f = nextFrom(type); if(!f) f = nextFrom(type==='sn' ? 'id' : 'sn');
-        if(!f) return origPick();
-        lastType = type; return f;
-      }catch(e){ return origPick(); }
+
+    let B = buildBuckets();
+    let ptr = { sn: 0, id: 0 };
+    let lastType = 'sn'; // first chosen becomes 'id' after track 1
+
+    function nextFrom(type) {
+      const arr = (type === 'sn') ? B.snIdx : B.idIdx;
+      if (!arr.length) return null;
+      const j = (type === 'sn') ? (ptr.sn % arr.length) : (ptr.id % arr.length);
+      if (type === 'sn') ptr.sn = (j + 1) % arr.length; else ptr.id = (j + 1) % arr.length;
+      return B.files[arr[j]];
+    }
+
+    window.pickBreak = function () {
+      try {
+        if (!Array.isArray(window.BREAKS) || B.files.length !== window.BREAKS.length) {
+          B = buildBuckets(); ptr = { sn: 0, id: 0 }; lastType = 'sn';
+        }
+        const type = (lastType === 'sn') ? 'id' : 'sn';
+        let f = nextFrom(type);
+        if (!f) f = nextFrom(type === 'sn' ? 'id' : 'sn');
+        if (!f) return origPick();
+        lastType = type;
+        return f;
+      } catch (e) {
+        return origPick();
+      }
     };
   } catch (e) {}
 });
 </script>
+
+<!-- === STATION BREAK LAMP (append-only) === -->
+<style>
+  .pill.break {
+    display:inline-flex; align-items:center; gap:.5ch;
+    padding:6px 12px; border-radius:999px; border:1px solid #7a4a00;
+    background:#3a2100; color:#ffd28a; font-weight:700; margin-left:8px;
+  }
+  .pill.break .dot {width:10px;height:10px;border-radius:50%;background:#996300}
+  .pill.break.on { background:#ffb000; color:#1a1a1a; box-shadow:0 0 14px #ffb000 }
+  .pill.break.on .dot { background:#742e00; box-shadow:0 0 10px #742e00 }
+</style>
+<script>
+(function(){
+  const onAir = document.getElementById('onAir');
+  const breakAudio = document.getElementById('breakAudio');
+  if (!onAir || !breakAudio) return;
+  const lamp = document.createElement('div');
+  lamp.id = 'breakLamp';
+  lamp.className = 'pill break';
+  lamp.innerHTML = '<span class="dot"></span><strong>STATION BREAK</strong>';
+  onAir.insertAdjacentElement('afterend', lamp);
+  function updateLamp(){
+    const onAirOn = onAir.classList.contains('on');
+    const breakActive = !breakAudio.paused && !breakAudio.ended;
+    lamp.classList.toggle('on', breakActive && !onAirOn);
+  }
+  ['playing','pause','ended','stalled','abort','error','timeupdate'].forEach(ev=>{
+    breakAudio.addEventListener(ev, updateLamp, {passive:true});
+  });
+  const audio = document.getElementById('audio');
+  if (audio){
+    ['playing','pause','ended'].forEach(ev=> audio.addEventListener(ev, updateLamp, {passive:true}) );
+  }
+  updateLamp();
+})();
+</script>
+</body>
+</html>
