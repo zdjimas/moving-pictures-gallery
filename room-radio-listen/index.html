@@ -172,7 +172,8 @@ input[type=range]{width:100%}
 <script>
 /* ===== Config ===== */
 const DEFAULT_IMG="Media/default.jpg";
-const DEFAULT_STORY="Under Construction: a special write-up about this specific music creation…";
+
+const breakEvery = 1;const DEFAULT_STORY="Under Construction: a special write-up about this specific music creation…";
 const BREAK_DIRS=["MediaBreak","MediaBreaks"];
 let BREAKS=[
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
@@ -205,28 +206,28 @@ const PLAYLIST = [
 
  {
   title: "My Last Rose of Summer",
-  file: "Media/My Last Rose of Summer .mp3",       // removed stray space
+  file: "Media/My Last Rose of Summer.mp3",       // removed stray space
   image: "Media/RoseSummerMine.jpeg",
   alt: "Cover art for My Last Rose of Summer",
   story: "A wonderful creation of an earlier recipe for this music being like a glass of fine wine. This song brings out many different feelings for me when I first hearing it."
 },
 {
   title: "Your Last Rose of Summer",
-  file: "Media/Your Last Rose of Summer .mp3",     // removed stray space
+  file: "Media/Your Last Rose of Summer.mp3",     // removed stray space
   image: "Media/RoseSummerYours.jpeg",
   alt: "Cover art for Your Last Rose of Summer",
   story: "Another creative remix of an obscure deep track from a band you may never expect would write this."
 },
 {
-  title: "My Suite Madam Bleu - Take 2",
-  file: "Media/My Suite Madam Bleu take 2.mp3", // ensure exact filename/case
+  title: "My Suite Madam Bleu (Take 2)",
+  file: "Media/My Suite Madam Bleu (Take 2).mp3", // ensure exact filename/case
   image: "Media/Bleu2.jpeg",
   alt: "Cover art for Suite Madam Bleu — Take 2",
-  story: "A creative interpretation of a well loved melody that I played over and over as an early teenager. The creators of this melody in the 70s where the first of their kind, soon after would follow Dream Theater which continues the progressive rock genre."
+  story: "A creative interpretation of a well loved melody that I played over and over as an early teenager."
 },    // ← if this is the last object in the array, do NOT add a comma
 
 {
-  title: "My Suite Madame Bleu - Take 3",
+  title: "My Suite Madame Bleu (Take 3)",
   file: "Media/My Suite Madame Bleu Take 3.mp3",
   image: "Media/Bleu3.jpeg",
   alt: "Cover art for Suite Madame Bleu — Take 3",
@@ -253,7 +254,7 @@ const PLAYLIST = [
   {
     title: "Vicarious Remix take 1",
     file:  "Media/01 Vicarious (Remix) 1.mp3",
-    image: "Media/vicarious.png",
+    img:   DEFAULT_IMG, "Media/vicarious.png",
     alt:   "01 Vicarious (Remix) 1 — default artwork",
     story: "This song represents imagry in the Moving Pictures exhibits for a song that speaks to the way we all vicariously live through the thoughts and imaginations of ourselves we get from the heros and beauty we see on television."
   },
@@ -412,7 +413,7 @@ const PLAYLIST = [
 
   {
     title: "A Classical Aspect of X ",
-    file:  "Media/A Classical Aspect of X.mp3",
+    file:  "Media/A Classical Aspect of X .mp3",
     img:   DEFAULT_IMG,
     alt:   "A Classical Aspect of X  — default artwork",
     story: DEFAULT_STORY
@@ -732,7 +733,7 @@ const PLAYLIST = [
 
   {
     title: "Labyrinths of Coral Caves ",
-    file:  "Media/Labyrinths of Coral Caves.mp3",
+    file:  "Media/Labyrinths of Coral Caves .mp3",
     img:   DEFAULT_IMG,
     alt:   "Labyrinths of Coral Caves  — default artwork",
     story: DEFAULT_STORY
@@ -1114,7 +1115,18 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-let lastBreakIdx=-1; function pickBreak(){if(!BREAKS.length)return null; if(BREAKS.length===1)return BREAKS[0]; let i; do{i=(Math.random()*BREAKS.length)|0}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
+let lastBreakIdx=-1; function pickBreakSequential(){if(!BREAKS.length)return null; if(BREAKS.length===1)return BREAKS[0]; let i; do{i=(Math.random()*BREAKS.length)|0}
+
+function pickBreakSequential(){
+  const nextType = (lastBreakType === 'snappy') ? 'id' : 'snappy';
+  const pool = (BREAKS && BREAKS[nextType]) ? BREAKS[nextType] : [];
+  if (!pool || !pool.length) return null;
+  const i = breakPtr[nextType] % pool.length;
+  breakPtr[nextType] = (i + 1) % pool.length;
+  lastBreakType = nextType;
+  return { type: nextType, file: pool[i] };
+}
+while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
@@ -1195,10 +1207,13 @@ function pause(){ audio.pause(); isPlaying=false; onAir.classList.remove('on'); 
 function next(){ stopBreak(); if(isShuffle){load(nextShuffled(),true)}else{load(idx+1,true)} }
 function prev(){ stopBreak(); if(isShuffle){load(prevShuffled(),true)}else{load(idx-1,true)} }
 
-audio.addEventListener('ended',()=>{
-  onAir.classList.remove('on'); isPlaying=false; if(rafId)cancelAnimationFrame(rafId);
-  if(loopBtn.textContent.includes('On')){ audio.currentTime=0; play(); return; }
-  playCountSinceBreak++; if(breaksEnabled && (playCountSinceBreak%breakEvery===0)){ playStationBreakThen(()=>next()) } else { next() }
+audio.addEventListener('ended', () => {
+  const toggle = document.querySelector('#breaksToggle');
+  if (toggle && toggle.checked) {
+    playBreak(false);
+  } else {
+    next();
+  }
 });
 audio.addEventListener('timeupdate',()=>{ if(!isScrubbing) refreshTimeLabels() });
 ['loadedmetadata','canplay','playing','error','stalled','abort','ended'].forEach(ev=>{
@@ -1238,7 +1253,7 @@ shareTrackBtn.addEventListener('click',()=>shareCurrentTrack());
 /* Station breaks */
 async function playStationBreakThen(fnAfter){
   await discoverBreaks();
-  const pick = pickBreak();
+  const pick = pickBreakSequential();
   if(!pick){showToast('No station breaks found'); fnAfter&&fnAfter(); return}
   try{audio.pause()}catch(e){} isPlaying=false;
   try{intro.pause()}catch(e){}
