@@ -1655,76 +1655,65 @@ window.addEventListener('load', () => {
 })();
 </script>
 
-<!-- === ON AIR TIME display (append-only; UNCLE8-safe) === -->
+<!-- === SESSION TIMER (append-only; UNCLE8-safe) === -->
 <style>
-  .pill.onairtime{
+  .pill.session-timer{
     display:inline-flex; align-items:center; gap:.6ch;
     padding:8px 14px; border-radius:999px;
     border:1px solid var(--line, #22324d);
-    background:#0f2a45; color:var(--ink, #e6e9ef);
+    background:#103158; color:var(--ink, #e6e9ef);
     font-weight:800; letter-spacing:.02em; margin-left:8px;
     box-shadow:var(--shadow, 0 18px 50px rgba(0,0,0,.45));
   }
-  .pill.onairtime .label{opacity:.85; font-size:.95em}
-  .pill.onairtime .clock{font-variant-numeric:tabular-nums; font-size:1.05em}
+  .pill.session-timer .label{opacity:.85; font-size:.95em}
+  .pill.session-timer .clock{font-variant-numeric:tabular-nums; font-size:1.05em}
   @media (max-width: 720px){
-    .pill.onairtime{ padding:6px 10px; font-weight:700; }
+    .pill.session-timer{ padding:6px 10px; font-weight:700; }
   }
 </style>
 <script>
 (function(){
-  // Insert a visual display (not a button) next to the ON AIR pill.
-  const onAir = document.getElementById('onAir');
-  const toolbar = document.querySelector('.toolbar');
-  if(!toolbar) return;
-  const pill = document.createElement('div');
-  pill.id = 'onAirTime';
-  pill.className = 'pill onairtime';
-  pill.innerHTML = '<span class="label">ON AIR TIME</span> <strong class="clock">00:00:00</strong>';
-  if (onAir) onAir.insertAdjacentElement('afterend', pill);
-  else toolbar.insertBefore(pill, toolbar.firstChild);
-
-  const audio = document.getElementById('audio'); // main program audio
-  if(!audio) return;
-
-  let startedAt = null;     // timestamp when ON AIR turned on
-  let totalMs = 0;          // accumulated ON AIR time this page load
-  let timer = null;
-
   function pad(n){ return (n<10? '0':'') + n; }
   function fmt(ms){
-    ms = Math.max(0, ms|0);
     let s = Math.floor(ms/1000);
     const h = Math.floor(s/3600); s -= h*3600;
     const m = Math.floor(s/60); s -= m*60;
     return pad(h)+':'+pad(m)+':'+pad(s);
   }
-  function draw(){
-    const live = timer ? (Date.now() - (startedAt||Date.now())) : 0;
-    pill.querySelector('.clock').textContent = fmt(totalMs + live);
-  }
-  function begin(){
-    if (timer) return;
-    startedAt = Date.now();
-    timer = setInterval(draw, 1000);
-    draw();
-  }
-  function halt(){
-    if (!timer) return;
-    totalMs += Date.now() - (startedAt||Date.now());
-    clearInterval(timer); timer = null; startedAt = null;
-    draw();
+
+  function placeTimer(){
+    const toolbar = document.querySelector('.toolbar');
+    if(!toolbar) return null;
+    // Avoid duplicates
+    let pill = document.getElementById('sessionTimer');
+    if (pill) return pill;
+    pill = document.createElement('div');
+    pill.id = 'sessionTimer';
+    pill.className = 'pill session-timer';
+    pill.innerHTML = '<span class="label">SESSION</span> <strong class="clock">00:00:00</strong>';
+    const onAir = document.getElementById('onAir');
+    if (onAir && onAir.parentElement === toolbar){
+      onAir.insertAdjacentElement('afterend', pill);
+    } else {
+      // Fallback: put as the first item in the toolbar
+      toolbar.insertBefore(pill, toolbar.firstChild);
+    }
+    return pill;
   }
 
-  // Count ON AIR time only while main audio is actually playing.
-  audio.addEventListener('playing', begin, {passive:true});
-  ['pause','ended','stalled','waiting','suspend','abort','error'].forEach(ev=>{
-    audio.addEventListener(ev, halt, {passive:true});
-  });
+  const start = Date.now();
+  function tick(){
+    const pill = document.getElementById('sessionTimer') || placeTimer();
+    if (!pill) return;
+    const clock = pill.querySelector('.clock');
+    if (clock) clock.textContent = fmt(Date.now()-start);
+  }
 
-  // If the page loads while audio is already playing (edge case), start counting
-  if (!audio.paused && !audio.ended) begin();
-  draw();
+  // Draw immediately and then every second.
+  placeTimer();
+  tick();
+  window.__kzakSessionTimer && clearInterval(window.__kzakSessionTimer);
+  window.__kzakSessionTimer = setInterval(tick, 1000);
 })();
 </script>
 </body>
