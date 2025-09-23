@@ -1655,7 +1655,7 @@ window.addEventListener('load', () => {
 })();
 </script>
 
-<!-- === SESSION TIMER (append-only; UNCLE8-safe) === -->
+<!-- === SESSION TIMER (continuous; append-only; UNCLE8-safe) === -->
 <style>
   .pill.session-timer{
     display:inline-flex; align-items:center; gap:.6ch;
@@ -1673,6 +1673,30 @@ window.addEventListener('load', () => {
 </style>
 <script>
 (function(){
+  // Remove any older ON AIR-only timer to avoid confusion
+  const oldOnAir = document.getElementById('onAirTime');
+  if (oldOnAir && oldOnAir.parentNode) oldOnAir.parentNode.removeChild(oldOnAir);
+  if (window.__kzakOnAirTimer){ clearInterval(window.__kzakOnAirTimer); window.__kzakOnAirTimer = null; }
+
+  // Place a continuous SESSION timer next to ON AIR
+  const onAir = document.getElementById('onAir');
+  const toolbar = document.querySelector('.toolbar');
+  if(!toolbar) return;
+  let pill = document.getElementById('sessionTimer');
+  if (!pill){
+    pill = document.createElement('div');
+    pill.id = 'sessionTimer';
+    pill.className = 'pill session-timer';
+    pill.innerHTML = '<span class="label">SESSION</span> <strong class="clock">00:00:00</strong>';
+    if (onAir && onAir.parentElement === toolbar){
+      onAir.insertAdjacentElement('afterend', pill);
+    } else {
+      toolbar.insertBefore(pill, toolbar.firstChild);
+    }
+  }
+
+  // Continuous counter from page load; never pauses for breaks or audio events
+  const start = Date.now();
   function pad(n){ return (n<10? '0':'') + n; }
   function fmt(ms){
     let s = Math.floor(ms/1000);
@@ -1680,39 +1704,12 @@ window.addEventListener('load', () => {
     const m = Math.floor(s/60); s -= m*60;
     return pad(h)+':'+pad(m)+':'+pad(s);
   }
-
-  function placeTimer(){
-    const toolbar = document.querySelector('.toolbar');
-    if(!toolbar) return null;
-    // Avoid duplicates
-    let pill = document.getElementById('sessionTimer');
-    if (pill) return pill;
-    pill = document.createElement('div');
-    pill.id = 'sessionTimer';
-    pill.className = 'pill session-timer';
-    pill.innerHTML = '<span class="label">SESSION</span> <strong class="clock">00:00:00</strong>';
-    const onAir = document.getElementById('onAir');
-    if (onAir && onAir.parentElement === toolbar){
-      onAir.insertAdjacentElement('afterend', pill);
-    } else {
-      // Fallback: put as the first item in the toolbar
-      toolbar.insertBefore(pill, toolbar.firstChild);
-    }
-    return pill;
-  }
-
-  const start = Date.now();
   function tick(){
-    const pill = document.getElementById('sessionTimer') || placeTimer();
-    if (!pill) return;
     const clock = pill.querySelector('.clock');
-    if (clock) clock.textContent = fmt(Date.now()-start);
+    if (clock) clock.textContent = fmt(Date.now() - start);
   }
-
-  // Draw immediately and then every second.
-  placeTimer();
   tick();
-  window.__kzakSessionTimer && clearInterval(window.__kzakSessionTimer);
+  if (window.__kzakSessionTimer) clearInterval(window.__kzakSessionTimer);
   window.__kzakSessionTimer = setInterval(tick, 1000);
 })();
 </script>
