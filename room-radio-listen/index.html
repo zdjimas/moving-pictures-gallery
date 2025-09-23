@@ -1661,7 +1661,7 @@ window.addEventListener('load', () => {
     display:inline-flex; align-items:center; gap:.6ch;
     padding:8px 14px; border-radius:999px; border:1px solid var(--line, #22324d);
     background:#122240; color:var(--ink, #e6e9ef); font-weight:800; letter-spacing:.02em;
-    box-shadow:var(--shadow, 0 18px 50px rgba(0,0,0,.45)); margin-right:8px;
+    box-shadow:var(--shadow, 0 18px 50px rgba(0,0,0,.45)); margin-left:8px;
   }
   .pill.timer .dot { width:10px; height:10px; border-radius:50%; background:#4f78ff; box-shadow:0 0 10px rgba(79,120,255,.7); }
   .pill.timer .label { font-variant-numeric: tabular-nums; }
@@ -1671,9 +1671,8 @@ window.addEventListener('load', () => {
 </style>
 <script>
 (function(){
-  // Insert the timer at the left side of the toolbar without touching existing controls
-  const tb = document.querySelector('.toolbar');
-  if(!tb) return;
+  const onAir = document.getElementById('onAir');
+  if(!onAir) return;
   const uptime = document.createElement('button');
   uptime.type = 'button';
   uptime.id = 'kzakUptime';
@@ -1681,7 +1680,7 @@ window.addEventListener('load', () => {
   uptime.title = 'Session uptime (resets on page refresh)';
   uptime.setAttribute('aria-label','Session uptime');
   uptime.innerHTML = '<span class="dot" aria-hidden="true"></span><span class="label">00:00:00</span>';
-  tb.insertBefore(uptime, tb.firstChild);
+  onAir.insertAdjacentElement('afterend', uptime);
 
   const start = Date.now();
   function pad(n){ return (n<10?'0':'') + n; }
@@ -1695,9 +1694,10 @@ window.addEventListener('load', () => {
   }
   function tick(){ uptime.querySelector('.label').textContent = fmt(Date.now()-start); }
   tick();
+  window.__kzakUptimeTimer && clearInterval(window.__kzakUptimeTimer);
   window.__kzakUptimeTimer = setInterval(tick, 1000);
 
-  // Optional: click copies uptime to clipboard (handy for logs)
+  // Click to copy uptime
   uptime.addEventListener('click', async () => {
     try {
       const text = uptime.querySelector('.label').textContent;
