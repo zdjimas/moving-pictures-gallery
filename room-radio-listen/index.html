@@ -1190,7 +1190,35 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-let lastBreakIdx=-1; function pickBreak(){if(!BREAKS.length)return null; if(BREAKS.length===1)return BREAKS[0]; let i; do{i=(Math.random()*BREAKS.length)|0}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
+let lastBreakIdx=-1; /* === UNCLE9+: Random-without-replacement alternating ID ↔ Snappy === */
+const PERSIST_DECKS = true;
+const ALT_STARTS_WITH = 'id';
+const DECK_KEYS = { ids: 'kzak.deck.ids', sn: 'kzak.deck.sn', alt: 'kzak.deck.alt' };
+const isSnappy = (f) => /snappy/i.test(f);
+let _idsSrc = [], _snSrc = [], _idsDeck = [], _snDeck = [], _idsIdx = 0, _snIdx = 0;
+let _nextBucket = (()=>{ try{ const v = localStorage.getItem(DECK_KEYS.alt); return v==='sn'?'sn':'id'; }catch(e){ return ALT_STARTS_WITH; } })();
+
+function fyShuffle(arr){ const a = arr.slice(); for(let i=a.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function rebuildDecksFrom(src){
+  const norm = (src||[]).map(p => p.replace(/^(Media\/?Breaks?|MediaBreaks?)/i,'MediaBreaks'));
+  _idsSrc = norm.filter(p => !isSnappy(p));
+  _snSrc  = norm.filter(p =>  isSnappy(p));
+  if (_idsDeck.length !== _idsSrc.length) { _idsDeck = fyShuffle(_idsSrc); _idsIdx = 0; }
+  if (_snDeck.length  !== _snSrc.length)  { _snDeck  = fyShuffle(_snSrc);  _snIdx  = 0; }
+}
+function drawFromIds(){ if(!_idsSrc.length) return null; if(_idsIdx >= _idsDeck.length){ _idsDeck = fyShuffle(_idsSrc); _idsIdx = 0; } return _idsDeck[_idsIdx++]; }
+function drawFromSn(){  if(!_snSrc.length)  return null; if(_snIdx  >= _snDeck.length){  _snDeck  = fyShuffle(_snSrc);  _snIdx  = 0; } return _snDeck[_snIdx++]; }
+
+function pickBreak(){
+  if (!Array.isArray(BREAKS) || !BREAKS.length) return null;
+  // Rebuild decks if source changed (length mismatch)
+  if ((_idsSrc.length + _snSrc.length) !== BREAKS.length) rebuildDecksFrom(BREAKS);
+  let url = null;
+  if (_nextBucket === 'id') { url = drawFromIds(); _nextBucket = 'sn'; }
+  else                      { url = drawFromSn();  _nextBucket = 'id'; }
+  try { localStorage.setItem(DECK_KEYS.alt, _nextBucket); } catch(e){}
+  return url;
+}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
