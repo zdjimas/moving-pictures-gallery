@@ -1190,50 +1190,7 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-let lastBreakIdx=-1; function pickBreak(){
-  try{
-    if(!Array.isArray(BREAKS) || BREAKS.length===0) return null;
-    if(!window.__breakState){ window.__breakState = { last:-1, alt:'id' }; }
-    const S = window.__breakState;
-    const isSnappy = (p)=>/snappy/i.test(p||'');
-    if(!Array.isArray(window.__deckId) || window.__deckId.length !== BREAKS.filter(p=>!isSnappy(p)).length){
-      window.__deckId = BREAKS.map((p,i)=>({i,p})).filter(o=>!isSnappy(o.p)).map(o=>o.i);
-      for(let i=window.__deckId.length-1;i>0;i--){const j=(Math.random()*(i+1))|0; const t=window.__deckId[i]; window.__deckId[i]=window.__deckId[j]; window.__deckId[j]=t;}
-      window.__ptrId = 0;
-    }
-    if(!Array.isArray(window.__deckSn) || window.__deckSn.length !== BREAKS.filter(p=>isSnappy(p)).length){
-      window.__deckSn = BREAKS.map((p,i)=>({i,p})).filter(o=>isSnappy(o.p)).map(o=>o.i);
-      for(let i=window.__deckSn.length-1;i>0;i--){const j=(Math.random()*(i+1))|0; const t=window.__deckSn[i]; window.__deckSn[i]=window.__deckSn[j]; window.__deckSn[j]=t;}
-      window.__ptrSn = 0;
-    }
-    function draw(deckName){
-      let deck = deckName==='id' ? window.__deckId : window.__deckSn;
-      let ptrName = deckName==='id' ? '__ptrId' : '__ptrSn';
-      if(deck.length===0){ return -1; }
-      if(window[ptrName] >= deck.length){
-        const lastIdx = S.last;
-        for(let i=deck.length-1;i>0;i--){const j=(Math.random()*(i+1))|0; [deck[i],deck[j]]=[deck[j],deck[i]];}
-        if(deck.length>1 && deck[0]===lastIdx){ const j=(Math.random()*(deck.length-1)|0)+1; const t=deck[0]; deck[0]=deck[j]; deck[j]=t; }
-        window[ptrName] = 0;
-      }
-      const pickIndex = deck[ window[ptrName]++ ];
-      return pickIndex;
-    }
-    let bucket = S.alt;
-    let idx = draw(bucket);
-    if(idx<0){ bucket = (bucket==='id'?'sn':'id'); idx = draw(bucket); }
-    S.alt = (bucket==='id'?'sn':'id');
-    S.last = idx;
-    return (idx>=0 ? BREAKS[idx] : null);
-  }catch(e){
-    try{ console.error('pickBreak error', e); }catch(_){}
-    if(!Array.isArray(BREAKS) || BREAKS.length===0) return null;
-    if(typeof window.lastBreakIdx!=='number') window.lastBreakIdx = -1;
-    let i; do { i = (Math.random()*BREAKS.length)|0; } while (BREAKS.length>1 && i===window.lastBreakIdx);
-    window.lastBreakIdx = i;
-    return BREAKS[i];
-  }
-}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
+let lastBreakIdx=-1; function pickBreak(){if(!BREAKS.length)return null; if(BREAKS.length===1)return BREAKS[0]; let i; do{i=(Math.random()*BREAKS.length)|0}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
@@ -1847,5 +1804,56 @@ window.addEventListener('load', () => {
   }catch(e){}
 })();
 </script>
+
+<script>
+/* === UNCLE9 Failsafe: ensure Skip works even if other JS fails === */
+(function(){
+  try{
+    function hideOverlay(){
+      try{ document.getElementById('welcomeOverlay')?.classList.remove('show'); }catch(_){}
+      try{ document.getElementById('welcomeOverlay').style.display='none'; }catch(_){}
+    }
+    function startPlayback(){
+      try{
+        if (typeof load==='function') {
+          if (typeof idx!=='number') { window.idx = 0; }
+          load(idx, true);
+        } else {
+          // enable UI so user can press Start Station
+          document.getElementById('startBtn')?.removeAttribute('disabled');
+          document.getElementById('pauseBtn')?.removeAttribute('disabled');
+          document.getElementById('nextBtn')?.removeAttribute('disabled');
+          document.getElementById('prevBtn')?.removeAttribute('disabled');
+        }
+      }catch(_){}
+    }
+    function bind(){
+      const skip = document.getElementById('skipWelcome');
+      if (skip && !skip._fsBound){
+        skip.addEventListener('click', function(){
+          hideOverlay();
+          startPlayback();
+        });
+        skip._fsBound = true;
+      }
+    }
+    if (document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', bind, {once:true});
+    } else {
+      bind();
+    }
+    // Also hide on Escape
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') { hideOverlay(); startPlayback(); } });
+    // Safety: if overlay still visible after 6s, allow a click anywhere to dismiss
+    setTimeout(()=>{ 
+      const ov = document.getElementById('welcomeOverlay');
+      if (ov && (ov.classList.contains('show') || ov.style.display!== 'none')){
+        ov.addEventListener('click', ()=>{ hideOverlay(); startPlayback(); }, {once:true});
+      }
+    }, 6000);
+  }catch(e){ console.warn('[UNCLE9 failsafe]', e); }
+})();
+</script>
+
 </body>
 </html>
