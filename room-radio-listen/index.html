@@ -212,38 +212,14 @@ let breakEvery=1;
 
 const PLAYLIST = [
 
-{
-  title: "If You Want Blood Later",
-  file:  "Media/If You Want Blood Later.mp3",
-  image: "Media/Bloodlater.jpeg",
-  alt:   "Cover art for KZAK",
-  story: 'One of the best music ever created from this band and the great singer Bon Scott, This song is in so many great movie scenes too.'
-},
-{
-  title: "If You Want Blood Now",
-  file:  "Media/If You Want Blood Now.mp3",
-  image: "Media/BloodNow.jpeg",
-  alt:   "Cover art for KZAK",
-  story: 'One of the best music ever created from this band and the great singer Bon Scott, This song is in so many great movie scenes too.  This version is a second creation built from the same tech recipe. Since I was a chef, its like baking a good cake if you have the right quality ingredients like a great band, rythym and singer!,  Rock On!.'
-}
+// Quotes: single-line, no interpolation
+const title = 'My Last Rose of Summer';
 
-  
-{
-  title: "My Last Rose of Summer",
-  file:  "Media/My Last Rose of Summer .mp3",
-  image: "Media/RoseSummerMine.jpeg",
-  alt:   "Cover art for My Last Rose of Summer",
-  story: `A wonderful creation—an earlier recipe for this music, like a glass of fine wine.
-This song brings out many different feelings for me whenever I hear it; it’s rich, layered, and nostalgic.`
-},
-{
-  title: "Your Last Rose of Summer",
-  file:  "Media/Your Last Rose of Summer .mp3",
-  image: "Media/RoseSummerYours.jpeg",
-  alt:   "Cover art for Your Last Rose of Summer",
-  story: `Another creative remix of an obscure deep track from a band you might not expect.
-It’s a sly nod to influences that still feel fresh today.`
-},
+// Backticks: multiline + interpolation
+const story = `A wonderful creation—like a fine wine.
+Now playing: ${title}.
+This spans multiple lines without \\n.`;
+
 {
   title: "My Suite Madam Bleu - Take 2",
   file:  "Media/My Suite Madam Bleu take 2.mp3",
