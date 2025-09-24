@@ -1209,12 +1209,39 @@ function rebuildDecksFrom(src){
 function drawFromIds(){ if(!_idsSrc.length) return null; if(_idsIdx >= _idsDeck.length){ _idsDeck = fyShuffle(_idsSrc); _idsIdx = 0; } return _idsDeck[_idsIdx++]; }
 function drawFromSn(){  if(!_snSrc.length)  return null; if(_snIdx  >= _snDeck.length){  _snDeck  = fyShuffle(_snSrc);  _snIdx  = 0; } return _snDeck[_snIdx++]; }
 
-function pickBreak(){
-  if (!Array.isArray(BREAKS) || !BREAKS.length) return null;
-  // Rebuild decks if source changed (length mismatch)
-  if ((_idsSrc.length + _snSrc.length) !== BREAKS.length) rebuildDecksFrom(BREAKS);
-  let url = null;
-  if (_nextBucket === 'id') { url = drawFromIds(); _nextBucket = 'sn'; }
+/* === UNCLE9+: Random-without-replacement alternating ID ↔ Snappy (encapsulated) === */
+(function(){
+  var KEY='kzak.deck.v1';
+  var ids=[], sn=[], deckId=[], deckSn=[], pId=0, pSn=0, next='id';
+  function isSnappy(f){ return /snappy/i.test(String(f||'')); }
+  function norm(list){ return (list||[]).map(function(p){ return String(p||'').replace(/^(Media\/?Breaks?|MediaBreaks?)/i,'MediaBreaks'); }); }
+  function reshuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=(Math.random()*(i+1))|0; var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  function rebuild(){
+    var src = Array.isArray(window.BREAKS) ? window.BREAKS : [];
+    var n = norm(src);
+    ids = n.filter(function(p){return !isSnappy(p)});
+    sn  = n.filter(function(p){return  isSnappy(p)});
+    deckId = reshuffle(ids);
+    deckSn = reshuffle(sn);
+    pId=0; pSn=0;
+  }
+  try{ var s=localStorage.getItem(KEY); if(s){ var o=JSON.parse(s); next=(o&&o.next==='sn')?'sn':'id'; } }catch(e){}
+
+  window.pickBreak = function(){
+    if(!Array.isArray(window.BREAKS) || !window.BREAKS.length) return null;
+    if(!deckId.length && !deckSn.length) rebuild();
+    var url=null;
+    if(next==='id'){
+      if(pId>=deckId.length){ deckId=reshuffle(ids); pId=0; }
+      url = deckId[pId++]; next='sn';
+    }else{
+      if(pSn>=deckSn.length){ deckSn=reshuffle(sn); pSn=0; }
+      url = deckSn[pSn++]; next='id';
+    }
+    try{ localStorage.setItem(KEY, JSON.stringify({next:next})); }catch(e){}
+    return url;
+  };
+})();
   else                      { url = drawFromSn();  _nextBucket = 'id'; }
   try { localStorage.setItem(DECK_KEYS.alt, _nextBucket); } catch(e){}
   return url;
