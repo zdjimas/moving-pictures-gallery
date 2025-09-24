@@ -210,125 +210,16 @@ let breakEvery=1;
 
 const PLAYLIST = [
 
- {
-  title: "Beyond The Realms of Death Again",
-  file:  "Media/Beyond Realms of Death take 3.mp3",
-  image: "Media/BeyondDeath.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `This is a great song that I listened to when I was in my later teens, one of my favorite melodies and songs from a great set of artists..`
-},
-
-
- {
-  title: "The Grander Illusion Ending Take 3j",
-  file:  "Media/The Grander Illusion Ending  take 3.mp3",
-  image: "Media/GranderIllusionEnd3.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `One of the best songs from this group,  I love this melody and was a great hang out melody to party with as a teen in the 80s. `
-},
-
-
- {
-  title: "The Grander Illusion Ending",
-  file:  "Media/The Grander Illusion Ending  - Final Take.mp3",
-  image: "Media/GranderIllusionEndFinal.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `One of the best songs from this group,  I love this melody and was a great hang out melody to party with as a teen in the 80s. `
-},
-
-
- {
-  title: "Another Man In the Arizona Wilderness",
-  file:  "Media/Another Man in the Arizona Wilderness.mp3",
-  image: "Media/AnotherManAZ.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `The lyrics are so strong and inspring from the group of genius members who I call the earliest progressive music band like later Dream Theater..`
-},
-
-
-
-
-
-
-
-{
-  title: "A Wilderness Do-over Please",
-  file:  "Media/A Wilderness Do-over Please.mp3",
-  image: "Media/Wilderness.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `The lyrics are so strong and inspring from the group of genius members who I call the earliest progressive music band like later Dream Theater..`
-},
-
-
-{
-  title: "Silent Sucidity Silenced",
-  file:  "Media/Silent Lucidity Silenced.mp3",
-  image: "Media/Lucidity.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `The lyrics for this original composition are amazing, one of their best songs performed and reperformed as Queensryche.   `
-},
-
-
-{
-  title: "People and Places Future",
-  file:  "Media/People and Places Future.mp3",
-  image: "Media/PeoplePlacesFuture.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `Rick Perry and Neal Schon are terrific creators of this great melody that Has been recooked with a new recipe..`
-},
-
-
-
-{
-  title: "People and Places Past",
-  file:  "Media/People and Places Past.mp3",
-  image: "Media/PeoplePlacesPast.jpg",
-  alt:   "Cover art for KZAK",
-  story: `Rick Perry and Neal Schon are terrific creators of this great melody that Has been recooked with a new recipe..`
-},
-
-
-
-{
-  title: "Precious Time Rescued",
-  file:  "Media/Our Precious Time Rescued.mp3",
-  image: "Media/PreciousTimeRescued.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `I love this great melody that Has been recooked with a new recipe. This song follows Poeple and Places on the original vinyl.`
-},
-
-
-
-
-
-
-
-
-  {
-  title: "If You Want Blood Later",
-  file:  "Media/If You Want Blood Later.mp3",
-  image: "Media/BloodLater.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `One of the best music ever created from this band and the great singer Bon Scott, This song is in so many great movie scenes too.`
-},
-{
-  title: "If You Want Blood Now",
-  file:  "Media/If You Want Blood Now.mp3",
-  image: "Media/BloodNow.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `One of the best music ever created from this band and the great singer Bon Scott, This song is in so many great movie scenes too.  This version is a second creation built from the same tech recipe. Since I was a chef, its like baking a good cake if you have the right quality ingredients like a great band, rythym and singer!,  Rock On!.`
-},
-
   {
   title: "My Last Rose of Summer",
-  file: "Media/My Last Rose of Summer.mp3",
+  file: "Media/My Last Rose of Summer .mp3",
   image: "Media/RoseSummerMine.jpeg",
   alt: "Cover art for My Last Rose of Summer",
   story: "Under Construction: a brief write-up about this track."
 },
 {
   title: "Your Last Rose of Summer",
-  file: "Media/Your Last Rose of Summer.mp3",
+  file: "Media/Your Last Rose of Summer .mp3",
   image: "Media/RoseSummerYours.jpeg",
   alt: "Cover art for Your Last Rose of Summer",
   story: "Under Construction: a brief write-up about this track."
@@ -527,7 +418,7 @@ const PLAYLIST = [
 
   {
     title: "A Classical Aspect of X ",
-    file:  "Media/A Classical Aspect of X.mp3",
+    file:  "Media/A Classical Aspect of X .mp3",
     img:   DEFAULT_IMG,
     alt:   "A Classical Aspect of X  — default artwork",
     story: DEFAULT_STORY
@@ -847,7 +738,7 @@ const PLAYLIST = [
 
   {
     title: "Labyrinths of Coral Caves ",
-    file:  "Media/Labyrinths of Coral Caves.mp3",
+    file:  "Media/Labyrinths of Coral Caves .mp3",
     img:   DEFAULT_IMG,
     alt:   "Labyrinths of Coral Caves  — default artwork",
     story: DEFAULT_STORY
@@ -1820,6 +1711,27 @@ window.addEventListener('load', () => {
   tick();
   if (window.__kzakSessionTimer) clearInterval(window.__kzakSessionTimer);
   window.__kzakSessionTimer = setInterval(tick, 1000);
+})();
+</script>
+
+<!-- === URL-ENCODING HARDENING (append-only; UNCLE9-safe) === -->
+<script>
+// Ensure any spaces/special chars in media paths are encoded per segment.
+(function(){
+  try{
+    const prev = window.pathToUrl;
+    window.pathToUrl = function(p){
+      if (!p) return "";
+      try{
+        return p.split('/').map((seg,i)=> i===0 ? seg : encodeURIComponent(seg)).join('/');
+      }catch(e){
+        return p; // fallback without breaking
+      }
+    };
+    // Optional: if previous existed and differs, keep a reference
+    window.pathToUrl._prev = prev;
+    console.log("[UNCLE9] pathToUrl hardened for encoded artwork/audio paths.");
+  }catch(e){}
 })();
 </script>
 </body>
