@@ -1190,61 +1190,49 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-let lastBreakIdx=-1; /* === UNCLE9+: Random-without-replacement alternating ID ↔ Snappy === */
-const PERSIST_DECKS = true;
-const ALT_STARTS_WITH = 'id';
-const DECK_KEYS = { ids: 'kzak.deck.ids', sn: 'kzak.deck.sn', alt: 'kzak.deck.alt' };
-const isSnappy = (f) => /snappy/i.test(f);
-let _idsSrc = [], _snSrc = [], _idsDeck = [], _snDeck = [], _idsIdx = 0, _snIdx = 0;
-let _nextBucket = (()=>{ try{ const v = localStorage.getItem(DECK_KEYS.alt); return v==='sn'?'sn':'id'; }catch(e){ return ALT_STARTS_WITH; } })();
-
-function fyShuffle(arr){ const a = arr.slice(); for(let i=a.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
-function rebuildDecksFrom(src){
-  const norm = (src||[]).map(p => p.replace(/^(Media\/?Breaks?|MediaBreaks?)/i,'MediaBreaks'));
-  _idsSrc = norm.filter(p => !isSnappy(p));
-  _snSrc  = norm.filter(p =>  isSnappy(p));
-  if (_idsDeck.length !== _idsSrc.length) { _idsDeck = fyShuffle(_idsSrc); _idsIdx = 0; }
-  if (_snDeck.length  !== _snSrc.length)  { _snDeck  = fyShuffle(_snSrc);  _snIdx  = 0; }
-}
-function drawFromIds(){ if(!_idsSrc.length) return null; if(_idsIdx >= _idsDeck.length){ _idsDeck = fyShuffle(_idsSrc); _idsIdx = 0; } return _idsDeck[_idsIdx++]; }
-function drawFromSn(){  if(!_snSrc.length)  return null; if(_snIdx  >= _snDeck.length){  _snDeck  = fyShuffle(_snSrc);  _snIdx  = 0; } return _snDeck[_snIdx++]; }
-
-/* === UNCLE9+: Random-without-replacement alternating ID ↔ Snappy (encapsulated) === */
-(function(){
-  var KEY='kzak.deck.v1';
-  var ids=[], sn=[], deckId=[], deckSn=[], pId=0, pSn=0, next='id';
-  function isSnappy(f){ return /snappy/i.test(String(f||'')); }
-  function norm(list){ return (list||[]).map(function(p){ return String(p||'').replace(/^(Media\/?Breaks?|MediaBreaks?)/i,'MediaBreaks'); }); }
-  function reshuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=(Math.random()*(i+1))|0; var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
-  function rebuild(){
-    var src = Array.isArray(window.BREAKS) ? window.BREAKS : [];
-    var n = norm(src);
-    ids = n.filter(function(p){return !isSnappy(p)});
-    sn  = n.filter(function(p){return  isSnappy(p)});
-    deckId = reshuffle(ids);
-    deckSn = reshuffle(sn);
-    pId=0; pSn=0;
-  }
-  try{ var s=localStorage.getItem(KEY); if(s){ var o=JSON.parse(s); next=(o&&o.next==='sn')?'sn':'id'; } }catch(e){}
-
-  window.pickBreak = function(){
-    if(!Array.isArray(window.BREAKS) || !window.BREAKS.length) return null;
-    if(!deckId.length && !deckSn.length) rebuild();
-    var url=null;
-    if(next==='id'){
-      if(pId>=deckId.length){ deckId=reshuffle(ids); pId=0; }
-      url = deckId[pId++]; next='sn';
-    }else{
-      if(pSn>=deckSn.length){ deckSn=reshuffle(sn); pSn=0; }
-      url = deckSn[pSn++]; next='id';
+let lastBreakIdx=-1; function pickBreak(){
+  try{
+    if(!Array.isArray(BREAKS) || BREAKS.length===0) return null;
+    if(!window.__breakState){ window.__breakState = { last:-1, alt:'id' }; }
+    const S = window.__breakState;
+    const isSnappy = (p)=>/snappy/i.test(p||'');
+    if(!Array.isArray(window.__deckId) || window.__deckId.length !== BREAKS.filter(p=>!isSnappy(p)).length){
+      window.__deckId = BREAKS.map((p,i)=>({i,p})).filter(o=>!isSnappy(o.p)).map(o=>o.i);
+      for(let i=window.__deckId.length-1;i>0;i--){const j=(Math.random()*(i+1))|0; const t=window.__deckId[i]; window.__deckId[i]=window.__deckId[j]; window.__deckId[j]=t;}
+      window.__ptrId = 0;
     }
-    try{ localStorage.setItem(KEY, JSON.stringify({next:next})); }catch(e){}
-    return url;
-  };
-})();
-  else                      { url = drawFromSn();  _nextBucket = 'id'; }
-  try { localStorage.setItem(DECK_KEYS.alt, _nextBucket); } catch(e){}
-  return url;
+    if(!Array.isArray(window.__deckSn) || window.__deckSn.length !== BREAKS.filter(p=>isSnappy(p)).length){
+      window.__deckSn = BREAKS.map((p,i)=>({i,p})).filter(o=>isSnappy(o.p)).map(o=>o.i);
+      for(let i=window.__deckSn.length-1;i>0;i--){const j=(Math.random()*(i+1))|0; const t=window.__deckSn[i]; window.__deckSn[i]=window.__deckSn[j]; window.__deckSn[j]=t;}
+      window.__ptrSn = 0;
+    }
+    function draw(deckName){
+      let deck = deckName==='id' ? window.__deckId : window.__deckSn;
+      let ptrName = deckName==='id' ? '__ptrId' : '__ptrSn';
+      if(deck.length===0){ return -1; }
+      if(window[ptrName] >= deck.length){
+        const lastIdx = S.last;
+        for(let i=deck.length-1;i>0;i--){const j=(Math.random()*(i+1))|0; [deck[i],deck[j]]=[deck[j],deck[i]];}
+        if(deck.length>1 && deck[0]===lastIdx){ const j=(Math.random()*(deck.length-1)|0)+1; const t=deck[0]; deck[0]=deck[j]; deck[j]=t; }
+        window[ptrName] = 0;
+      }
+      const pickIndex = deck[ window[ptrName]++ ];
+      return pickIndex;
+    }
+    let bucket = S.alt;
+    let idx = draw(bucket);
+    if(idx<0){ bucket = (bucket==='id'?'sn':'id'); idx = draw(bucket); }
+    S.alt = (bucket==='id'?'sn':'id');
+    S.last = idx;
+    return (idx>=0 ? BREAKS[idx] : null);
+  }catch(e){
+    try{ console.error('pickBreak error', e); }catch(_){}
+    if(!Array.isArray(BREAKS) || BREAKS.length===0) return null;
+    if(typeof window.lastBreakIdx!=='number') window.lastBreakIdx = -1;
+    let i; do { i = (Math.random()*BREAKS.length)|0; } while (BREAKS.length>1 && i===window.lastBreakIdx);
+    window.lastBreakIdx = i;
+    return BREAKS[i];
+  }
 }while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
