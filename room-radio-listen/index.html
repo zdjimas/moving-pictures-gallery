@@ -1249,10 +1249,24 @@ async function discoverBreaks(){
 let lastBreakIdx=-1; function pickBreak(){
   try{
     const files = Array.isArray(BREAKS) ? BREAKS : [];
-    if(!files.length) return null;
-    if (typeof window.__breakPtr !== 'number' || window.__breakPtr < 0 || window.__breakPtr >= files.length){
-      window.__breakPtr = 0;
+    if (!files.length) return null;
+    // read pointer (pref from session in-memory, else localStorage, else 0)
+    if (typeof window.__breakPtr !== 'number' || window.__breakPtr < 0 || window.__breakPtr >= files.length) {
+      try {
+        const fromLS = localStorage.getItem('kzak.break.ptr');
+        window.__breakPtr = (fromLS!=null) ? (parseInt(fromLS,10)||0) : 0;
+      } catch(_) { window.__breakPtr = 0; }
     }
+    const url = files[window.__breakPtr];
+    // advance & persist pointer for next time; wrap
+    window.__breakPtr = (window.__breakPtr + 1) % files.length;
+    try { localStorage.setItem('kzak.break.ptr', String(window.__breakPtr)); } catch(_){}
+    return url;
+  }catch(e){
+    try{ console.warn('[KZAK] pickBreak (seq) error', e); }catch(_){}
+    return (window.BREAKS && window.BREAKS[0]) || null;
+  }
+}
     const url = files[window.__breakPtr++];
     if (window.__breakPtr >= files.length) window.__breakPtr = 0; // wrap
     return url;
@@ -1810,6 +1824,156 @@ window.addEventListener('load', () => {
   } else {
     replace();
   }
+})();
+</script>
+
+
+<script>
+/* === UNCLE9 Seq+Persist+Skip (append-only) ===
+   - Sequential breaks in listed order (already randomized by you)
+   - Persists pointer across Force Break and auto breaks (localStorage+in-memory)
+   - Skips missing/unreadable files quickly; tries next */
+(function(){
+  'use strict';
+  function $(id){ return document.getElementById(id); }
+  async function headReachable(u){
+    try{
+      const r = await fetch(u, { method:'HEAD', cache:'no-store' });
+      return r && r.ok;
+    }catch(_){ return false; }
+  }
+  function probeCanPlay(bAudio, url, timeoutMs){
+    return new Promise((resolve, reject)=>{
+      let done=false, to=null;
+      function cleanup(){
+        if(to) clearTimeout(to);
+        bAudio.removeEventListener('loadedmetadata', onMeta);
+        bAudio.removeEventListener('canplay', onCan);
+        bAudio.removeEventListener('error', onErr);
+      }
+      function finish(ok){ if(done) return; done=true; cleanup(); ok ? resolve(true) : reject(new Error('unplayable')); }
+      function onMeta(){ finish(true); }
+      function onCan(){ finish(true); }
+      function onErr(){ finish(false); }
+      try{
+        bAudio.preload='auto';
+        bAudio.src=url;
+        bAudio.load();
+        bAudio.addEventListener('loadedmetadata', onMeta, {once:true});
+        bAudio.addEventListener('canplay', onCan, {once:true});
+        bAudio.addEventListener('error', onErr, {once:true});
+        to = setTimeout(()=>finish(false), timeoutMs||2500);
+      }catch(e){ finish(false); }
+    });
+  }
+  const firstReachable = (typeof window.firstReachable==='function') ? window.firstReachable : null;
+  function getPtr(){ try{ return (typeof window.__breakPtr==='number')?window.__breakPtr:(parseInt(localStorage.getItem('kzak.break.ptr')||'0',10)||0);}catch(_){return 0;} }
+  function setPtr(v){ window.__breakPtr=v; try{ localStorage.setItem('kzak.break.ptr', String(v)); }catch(_){} }
+  function nextPtr(n){ const files=(Array.isArray(window.BREAKS)?window.BREAKS:[]); if(!files.length) return 0; return (n+1)%files.length; }
+
+  function install(){
+    const A = $('#audio');
+    const I = $('#introAudio');
+    const B = $('#breakAudio');
+    const metaEl = $('#meta');
+    if (!B) return;
+
+    window.playStationBreakThen = async function(fnAfter){
+      try{
+        const files = Array.isArray(window.BREAKS) ? window.BREAKS : [];
+        const N = files.length|0;
+        if (!N){ try{ fnAfter&&fnAfter(); }catch(_){} return; }
+
+        // Try up to N times to find next playable break (sequential order)
+        let ptr = getPtr();
+        for (let tries=0; tries<N; tries++){
+          const raw = files[ptr];
+          const urlCandidate = window.pathToUrl ? window.pathToUrl(raw) : raw;
+          let okUrl = urlCandidate;
+
+          if (firstReachable){
+            const found = await firstReachable([urlCandidate]);
+            if (!found){ ptr = nextPtr(ptr); continue; }
+            okUrl = found;
+          } else {
+            const ok = await headReachable(urlCandidate);
+            if (!ok){ ptr = nextPtr(ptr); continue; }
+          }
+
+          // Pause main/intro, set UI
+          try{ A && A.pause(); }catch(_){}
+          try{ I && I.pause(); }catch(_){}
+          if (metaEl) metaEl.textContent = 'Station break';
+
+          try{
+            await probeCanPlay(B, okUrl, 2500);
+            // Advance and persist pointer *now* so Force Breaks consume in order
+            setPtr( nextPtr(ptr) );
+            await B.play();
+            B.addEventListener('ended', ()=>{ try{ metaEl && (metaEl.textContent = 'Ready'); }catch(_){} try{ fnAfter&&fnAfter(); }catch(_){ }}, {once:true});
+            return;
+          }catch(e){
+            // Bad file: advance pointer and try next
+            ptr = nextPtr(ptr);
+            setPtr(ptr);
+            continue;
+          }
+        }
+        // None playable; continue flow
+        try{ fnAfter&&fnAfter(); }catch(_){}
+      }catch(e){
+        console.warn('[KZAK] seq+persist+skip error', e);
+        try{ fnAfter&&fnAfter(); }catch(_){}
+      }
+    };
+  }
+
+  if (document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', install, {once:true}); }
+  else { install(); }
+})();
+</script>
+
+
+<!-- UNCLE9 SafeLoad Patch: robust filename handling for Suno.ai exports -->
+<script>
+(function(){
+  'use strict';
+  var __origFirstReachable = (typeof window.firstReachable === 'function') ? window.firstReachable : null;
+  if (!__origFirstReachable) return;
+  function normalizeWeirdChars(s){
+    try{
+      var x = (s||'').normalize('NFC')
+        .replace(/[\u00A0\u2007\u202F\u200B\u200C\u200D\u2060\uFEFF]/g, ' ')
+        .replace(/[“”„‟]/g, '"').replace(/[‘’‚‛]/g, "'")
+        .replace(/[–—﹘―]/g, '-')
+        .replace(/ {2,}/g, ' ');
+      return x;
+    }catch(_){ return s||''; }
+  }
+  function variantizePath(p){
+    var variants = [];
+    function add(v){ if (v && variants.indexOf(v) === -1) variants.push(v); }
+    var orig = String(p||''); add(orig);
+    var n = normalizeWeirdChars(orig); add(n);
+    add(n.replace(/\s+(\.[A-Za-z0-9]+)$/, '$1'));
+    add(n.replace(/\/["']([^"']+)["'](\.[A-Za-z0-9]+)$/, '/$1$2'));
+    add(n.replace(/\.mpg(\b|$)/i, '.mp3'));
+    add(n.replace(/\/\s*([^\/]*?)\s*(\.[A-Za-z0-9]+)$/, '/$1$2'));
+    add(n.replace(/\/([^\/]*?)\s{2,}([^\/]*?)(\.[A-Za-z0-9]+)$/, '/$1 $2$3'));
+    return variants;
+  }
+  window.firstReachable = async function(urls){
+    try{
+      var expanded = [];
+      (urls||[]).forEach(function(u){
+        variantizePath(u).forEach(function(v){ if (expanded.indexOf(v) === -1) expanded.push(v); });
+      });
+      return await __origFirstReachable(expanded);
+    }catch(e){
+      try{ console.warn('[SafeLoad] firstReachable wrapper failed', e); }catch(_){}
+      return __origFirstReachable(urls||[]);
+    }
+  };
 })();
 </script>
 
