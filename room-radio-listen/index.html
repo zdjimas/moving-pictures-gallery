@@ -1813,5 +1813,28 @@ window.addEventListener('load', () => {
 })();
 </script>
 
+
+<!-- Tiny patch: ensure Station Breaks are ON -->
+<script>
+(function(){
+  try{
+    function ensureBreaksOn(){
+      var btn = document.getElementById('breaksBtn');
+      if (!btn) return;
+      // If label shows "Off", click it once to turn ON
+      var t = (btn.textContent || '').toLowerCase();
+      if (t.indexOf('off') !== -1) {
+        btn.click();
+      }
+    }
+    if (document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', ensureBreaksOn, {once:true});
+    } else {
+      ensureBreaksOn();
+    }
+  }catch(e){ /* no-op */ }
+})();
+</script>
+
 </body>
 </html>
