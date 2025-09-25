@@ -1250,12 +1250,23 @@ let lastBreakIdx=-1; function pickBreak(){
   try{
     const files = Array.isArray(BREAKS) ? BREAKS : [];
     if (!files.length) return null;
-    // read pointer (pref from session in-memory, else localStorage, else 0)
+    // initialize/read pointer
     if (typeof window.__breakPtr !== 'number' || window.__breakPtr < 0 || window.__breakPtr >= files.length) {
       try {
         const fromLS = localStorage.getItem('kzak.break.ptr');
         window.__breakPtr = (fromLS!=null) ? (parseInt(fromLS,10)||0) : 0;
       } catch(_) { window.__breakPtr = 0; }
+    }
+    const url = files[window.__breakPtr];
+    // advance for next time; wrap
+    window.__breakPtr = (window.__breakPtr + 1) % files.length;
+    try { localStorage.setItem('kzak.break.ptr', String(window.__breakPtr)); } catch(_){}
+    return url;
+  }catch(e){
+    try{ console.warn('[KZAK] pickBreak (seq) error', e); }catch(_){}
+    return (window.BREAKS && window.BREAKS[0]) || null;
+  }
+} catch(_) { window.__breakPtr = 0; }
     }
     const url = files[window.__breakPtr];
     // advance & persist pointer for next time; wrap
@@ -1267,14 +1278,7 @@ let lastBreakIdx=-1; function pickBreak(){
     return (window.BREAKS && window.BREAKS[0]) || null;
   }
 }
-    const url = files[window.__breakPtr++];
-    if (window.__breakPtr >= files.length) window.__breakPtr = 0; // wrap
-    return url;
-  }catch(e){
-    try{ console.warn('[KZAK] pickBreak (linear) error', e); }catch(_){}
-    return (window.BREAKS && window.BREAKS[0]) || null;
-  }
-}
+    
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
