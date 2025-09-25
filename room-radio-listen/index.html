@@ -175,6 +175,9 @@ const DEFAULT_IMG="Media/default.jpg";
 const DEFAULT_STORY="Under Construction: a special write-up about this specific music creation…";
 const BREAK_DIRS=["MediaBreak","MediaBreaks"];
 let BREAKS = [
+  Here is a randomized order preserving each line exactly:
+
+```
   "MediaBreaks/Snappy14.mp3",
   "MediaBreaks/Radio-Id-Two.mp3",
   "MediaBreaks/Snappy3.mp3",
@@ -1191,18 +1194,18 @@ async function discoverBreaks(){
 let lastBreakIdx=-1; function pickBreak(){
   try{
     const files = Array.isArray(BREAKS) ? BREAKS : [];
-    if (!files.length) return null;
-    if (typeof window.__breakPtr !== 'number' || window.__breakPtr < 0 || window.__breakPtr >= files.length) {
+    if(!files.length) return null;
+    if (typeof window.__breakPtr !== 'number' || window.__breakPtr < 0 || window.__breakPtr >= files.length){
       window.__breakPtr = 0;
     }
-    const url = files[window.__breakPtr];
-    window.__breakPtr = (window.__breakPtr + 1) % files.length;
+    const url = files[window.__breakPtr++];
+    if (window.__breakPtr >= files.length) window.__breakPtr = 0; // wrap
     return url;
   }catch(e){
-    try{ console.warn('[KZAK] pickBreak (sequential) error', e); }catch(_){}
+    try{ console.warn('[KZAK] pickBreak (linear) error', e); }catch(_){}
     return (window.BREAKS && window.BREAKS[0]) || null;
   }
-}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
+}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
@@ -1325,67 +1328,10 @@ shareTrackBtn.addEventListener('click',()=>shareCurrentTrack());
 
 /* Station breaks */
 async function playStationBreakThen(fnAfter){
-  try{
-    await discoverBreaks();
-    const files = Array.isArray(BREAKS) ? BREAKS : [];
-    const N = files.length|0;
-    if (!N){ showToast && showToast('No station breaks found'); fnAfter&&fnAfter(); return; }
-
-    async function headReachable(u){
-      try{ const r = await fetch(u, { method:'HEAD', cache:'no-store' }); return r && r.ok; }catch(_){ return false; }
-    }
-    function probe(bEl, url, timeoutMs){
-      return new Promise((resolve, reject)=>{
-        let done=false, to=null;
-        function cleanup(){ if(to) clearTimeout(to);
-          bEl.removeEventListener('loadedmetadata', onMeta);
-          bEl.removeEventListener('canplay', onCan);
-          bEl.removeEventListener('error', onErr);
-        }
-        function finish(ok){ if(done) return; done=true; cleanup(); ok?resolve(true):reject(new Error('unplayable')); }
-        function onMeta(){ finish(true); } function onCan(){ finish(true); } function onErr(){ finish(false); }
-        try{
-          bEl.preload='auto'; bEl.src=url; bEl.load();
-          bEl.addEventListener('loadedmetadata', onMeta, {once:true});
-          bEl.addEventListener('canplay', onCan, {once:true});
-          bEl.addEventListener('error', onErr, {once:true});
-          to = setTimeout(()=>finish(false), timeoutMs||2500);
-        }catch(e){ finish(false); }
-      });
-    }
-
-    try{ audio && audio.pause(); }catch(_){}
-    try{ intro && intro.pause(); }catch(_){}
-    isPlaying=false; isBreakPlaying=false;
-    onAir && onAir.classList.remove('on');
-    startBtn && (startBtn.disabled=false);
-    pauseBtn && (pauseBtn.disabled=true);
-    meta && (meta.textContent='Station break');
-
-    for (let tries=0; tries<N; tries++){
-      const raw = pickBreak();
-      if (!raw) break;
-      const url = (window.pathToUrl ? window.pathToUrl(raw) : raw);
-      const ok = await headReachable(url);
-      if (!ok) continue;
-      try{
-        await probe(breakAudio, url, 2500);
-        isBreakPlaying = true;
-        await breakAudio.play();
-        breakAudio.addEventListener('ended', ()=>{ isBreakPlaying=false; try{ fnAfter&&fnAfter(); }catch(_){} }, {once:true});
-        return;
-      }catch(e){
-        isBreakPlaying=false;
-        continue;
-      }
-    }
-    try{ fnAfter&&fnAfter(); }catch(_){}
-  }catch(e){
-    try{ console.warn('[KZAK] playStationBreakThen (robust) error', e); }catch(_){}
-    try{ fnAfter&&fnAfter(); }catch(_){}
-  }
-}
-try{audio.pause()}catch(e){} isPlaying=false;
+  await discoverBreaks();
+  const pick = pickBreak();
+  if(!pick){showToast('No station breaks found'); fnAfter&&fnAfter(); return}
+  try{audio.pause()}catch(e){} isPlaying=false;
   try{intro.pause()}catch(e){}
   breakAudio.src=pathToUrl(pick); isBreakPlaying=true; onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; meta.textContent='Station break';
   try{
@@ -1397,25 +1343,8 @@ try{audio.pause()}catch(e){} isPlaying=false;
 }
 breaksBtn.addEventListener('click',()=>{breaksEnabled=!breaksEnabled; breaksBtn.textContent=breaksEnabled?'📻 Station Breaks: On':'📻 Station Breaks: Off'});
 breakTestBtn.addEventListener('click',()=>{
-if (isBreakPlaying){
-    try{ breakAudio.pause(); }catch(_){}
-    isBreakPlaying = false;
-    playStationBreakThen(()=>{
-      meta && (meta.textContent='Station break');
-    });
-    return;
-  }
   const wasPlaying = isPlaying;
-  playStationBreakThen(()=>{
-    if (wasPlaying){ play(); }
-    else {
-      meta && (meta.textContent='Paused');
-      startBtn && (startBtn.disabled=false);
-      pauseBtn && (pauseBtn.disabled=true);
-      onAir && onAir.classList.remove('on');
-    }
-  });
-});
+  playStationBreakThen(()=>{ if(wasPlaying){ play(); } else { meta.textContent='Paused'; startBtn.disabled=false; pauseBtn.disabled=true; onAir.classList.remove('on'); } });
 });
 
 // Ensure station breaks never overlap the main audio
@@ -1533,195 +1462,7 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 
 
 <!-- === APPEND-ONLY PATCH (UNCLE6 r4 append) === -->
-<script>
-(function(){
-  'use strict';
-  try{
-    // 0) Marker
-    console.log('%cUNCLE6 r4 append-only patch active','background:#0e1628;color:#89b4fa;padding:2px 6px;border-radius:6px');
 
-    // Wait for DOM to ensure original scripts ran
-    function ready(fn){ if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', fn, {once:true}); } else { fn(); } }
-
-    // 1) Balanced pickBreak override (keeps original globals intact)
-    ready(function(){
-      try{
-        const origPick = window.pickBreak;
-        let lastIndex = -1;
-        let useSnappyNext = true;
-        window.pickBreak = function(){
-          try{
-            const files = Array.isArray(window.BREAKS) ? window.BREAKS : [];
-            if(!files.length) return origPick ? origPick() : null;
-            if(files.length===1) return files[0];
-
-            const snappyIdx=[], identIdx=[];
-            for(let i=0;i<files.length;i++){
-              (/snappy\d*/i.test(files[i]) ? snappyIdx : identIdx).push(i);
-            }
-            function pickFrom(arr){
-              if(!arr.length) return null;
-              let cand = arr[Math.floor(Math.random()*arr.length)];
-              if(arr.length>1 && cand===lastIndex){
-                let j; do{ j=arr[Math.floor(Math.random()*arr.length)]; }while(j===cand);
-                cand = j;
-              }
-              return cand;
-            }
-
-            let chosen = null;
-            if(snappyIdx.length && identIdx.length){
-              chosen = useSnappyNext ? pickFrom(snappyIdx) : pickFrom(identIdx);
-              useSnappyNext = !useSnappyNext;
-              if(chosen==null){
-                const all = snappyIdx.concat(identIdx);
-                chosen = pickFrom(all);
-              }
-            }else{
-              const all = snappyIdx.length ? snappyIdx : identIdx;
-              chosen = pickFrom(all);
-            }
-            if(chosen==null) chosen = (lastIndex+1) % files.length;
-            lastIndex = chosen;
-            return files[chosen];
-          }catch(e){
-            console.warn('[KZAK] patched pickBreak error', e);
-            return origPick ? origPick() : (window.BREAKS && window.BREAKS[0]) || null;
-          }
-        };
-      }catch(e){ console.warn('[KZAK] pickBreak override init error', e); }
-    });
-
-    // 2) Artwork post-load enhancer (does not interfere with original load flow)
-    ready(function(){
-      try{
-        const _load = window.load;
-        if (typeof _load === 'function'){
-          window.load = function(i, autoplay){
-            const r = _load.apply(this, arguments);
-            try{
-              const tr = (window.PLAYLIST && typeof window.idx==='number') ? window.PLAYLIST[window.idx] : null;
-              if (tr){
-                const art = document.getElementById('art') || document.getElementById('artwork');
-                if (art && window.pathToUrl){
-                  const src = (tr.image||tr.img)||'Media/default.jpg';
-                  art.src = window.pathToUrl(src);
-                }
-                if (typeof window.setArtworkFor==='function'){
-                  setTimeout(()=>{ try{ window.setArtworkFor(tr); }catch(_){} }, 0);
-                }
-              }
-            }catch(e){ console.warn('[KZAK] post-load artwork patch error', e); }
-            return r;
-          };
-        }
-      }catch(e){ console.warn('[KZAK] load() enhancer init error', e); }
-    });
-
-    // 3) Remove per-row Share links quietly after playlist renders
-    ready(function(){
-      try{
-        const body = document.getElementById('plistBody');
-        if(!body) return;
-        // Run once now and again after a brief delay to catch rerenders
-        function stripShares(){
-          body.querySelectorAll('a[data-share]').forEach(a=>a.remove());
-          // Ensure clicking an item loads the track even if event delegation existed
-          body.querySelectorAll('.item').forEach(d=>{
-            if (!d._kzakClickBound){
-              d.addEventListener('click', ()=>{
-                const i = Number(d.getAttribute('data-i'));
-                if (Number.isFinite(i) && typeof window.load==='function') window.load(i, true);
-              });
-              d._kzakClickBound = true;
-            }
-          });
-        }
-        stripShares();
-        setTimeout(stripShares, 300);
-      }catch(e){ console.warn('[KZAK] strip share links error', e); }
-    });
-
-    // 4) Optional Media Session (CarPlay) behind a toggle
-    const ENABLE_MEDIA_SESSION = true; // flip to false to disable quickly
-    ready(function(){
-      if (!ENABLE_MEDIA_SESSION || !('mediaSession' in navigator)) return;
-      try{
-        const A = document.getElementById('audio');
-        function currentTrack(){ return (window.PLAYLIST && typeof window.idx==='number') ? window.PLAYLIST[window.idx] : null; }
-        function updateMetadata(){
-          const tr = currentTrack(); if (!tr) return;
-          const title = tr.title || 'Untitled';
-          const artist = 'KZAK Radio';
-          const album = 'Live Set';
-          const artURL = (tr.image || tr.img) ? (window.pathToUrl ? window.pathToUrl(tr.image||tr.img) : (tr.image||tr.img)) : 'Media/default.jpg';
-          try{
-            navigator.mediaSession.metadata = new MediaMetadata({
-              title, artist, album,
-              artwork: [
-                { src: artURL, sizes: '96x96',   type: 'image/jpeg' },
-                { src: artURL, sizes: '128x128', type: 'image/jpeg' },
-                { src: artURL, sizes: '256x256', type: 'image/jpeg' },
-                { src: artURL, sizes: '512x512', type: 'image/jpeg' }
-              ]
-            });
-          }catch(_){}
-        }
-        function updatePositionState(){
-          if (!Number.isFinite(A.duration) || A.duration <= 0) return;
-          try{
-            navigator.mediaSession.setPositionState({
-              duration: A.duration,
-              playbackRate: A.playbackRate || 1,
-              position: A.currentTime || 0
-            });
-          }catch(_){}
-        }
-        function setPlayingState(p){
-          try{ navigator.mediaSession.playbackState = p ? 'playing' : 'paused'; }catch(_){}
-        }
-        const SEEK_STEP = 15;
-        navigator.mediaSession.setActionHandler('play',   ()=>{ if (A.paused) A.play().catch(()=>{}); });
-        navigator.mediaSession.setActionHandler('pause',  ()=>{ try{A.pause();}catch(_){}});
-        navigator.mediaSession.setActionHandler('stop',   ()=>{ try{A.pause(); A.currentTime=0;}catch(_){}});
-        navigator.mediaSession.setActionHandler('seekforward',  (e)=>{
-          const step=(e&&e.seekOffset)||SEEK_STEP;
-          if (Number.isFinite(A.duration)) { A.currentTime=Math.min((A.currentTime||0)+step,A.duration); updatePositionState(); }
-          else { try{ next(); }catch(_){ } }
-        });
-        navigator.mediaSession.setActionHandler('seekbackward', (e)=>{
-          const step=(e&&e.seekOffset)||SEEK_STEP;
-          if (Number.isFinite(A.duration)) { A.currentTime=Math.max((A.currentTime||0)-step,0); updatePositionState(); }
-          else { try{ prev(); }catch(_){ } }
-        });
-        navigator.mediaSession.setActionHandler('nexttrack', ()=>{ try{ next(); setTimeout(()=>{updateMetadata(); updatePositionState();},0); }catch(_){}});
-        navigator.mediaSession.setActionHandler('previoustrack', ()=>{ try{ prev(); setTimeout(()=>{updateMetadata(); updatePositionState();},0); }catch(_){}});
-        navigator.mediaSession.setActionHandler('seekto', (e)=>{
-          if (e && typeof e.seekTime==='number' && Number.isFinite(A.duration)) {
-            A.currentTime=Math.max(0, Math.min(e.seekTime, A.duration));
-            if (e.fastSeek && 'fastSeek' in A){ try{ A.fastSeek(A.currentTime); }catch(_){ } }
-            updatePositionState();
-          }
-        });
-        A.addEventListener('loadedmetadata', ()=>{ updateMetadata(); updatePositionState(); });
-        A.addEventListener('play', ()=>{ setPlayingState(true); updatePositionState(); });
-        A.addEventListener('pause',()=>{ setPlayingState(false); updatePositionState(); });
-        A.addEventListener('timeupdate', ()=>{ updatePositionState(); });
-        // Also catch track changes
-        const _load = window.load;
-        if (typeof _load === 'function'){
-          window.load = function(i, autoplay){
-            const r = _load.apply(this, arguments);
-            try{ updateMetadata(); updatePositionState(); }catch(_){}
-            return r;
-          };
-        }
-      }catch(e){ console.warn('[KZAK] MediaSession patch error', e); }
-    });
-
-  }catch(e){ console.warn('[KZAK] append-only patch fatal', e); }
-})();
-</script>
 
 
 <!-- === APPEND-ONLY RUNTIME PATCH: Alternating, Sequential Breaks (safe; runs after load) === -->
@@ -1890,5 +1631,132 @@ window.addEventListener('load', () => {
   }catch(e){}
 })();
 </script>
+
+<script>
+/* === UNCLE9 Linear+Skip patch (append-only) ===
+   Goal: sequential breaks, skipping missing/unplayable files for both auto and Force Break. */
+(function(){
+  'use strict';
+  function $(id){ return document.getElementById(id); }
+  async function headReachable(u){
+    try{
+      const r = await fetch(u, { method:'HEAD', cache:'no-store' });
+      return r && r.ok;
+    }catch(_){ return false; }
+  }
+  // Probe decode/playability quickly on the actual breakAudio element
+  function probeOn(breakAudio, url, timeoutMs){
+    return new Promise((resolve, reject)=>{
+      let done=false, to=null;
+      function cleanup(){
+        if(to) clearTimeout(to);
+        breakAudio.removeEventListener('loadedmetadata', onMeta);
+        breakAudio.removeEventListener('canplay', onCan);
+        breakAudio.removeEventListener('error', onErr);
+      }
+      function finish(ok){ if(done) return; done=true; cleanup(); ok ? resolve(true) : reject(new Error('unplayable')); }
+      function onMeta(){ finish(true); }
+      function onCan(){ finish(true); }
+      function onErr(){ finish(false); }
+      try{
+        breakAudio.preload='auto';
+        breakAudio.src=url;
+        breakAudio.load();
+        breakAudio.addEventListener('loadedmetadata', onMeta, {once:true});
+        breakAudio.addEventListener('canplay', onCan, {once:true});
+        breakAudio.addEventListener('error', onErr, {once:true});
+        to = setTimeout(()=>finish(false), timeoutMs||2500);
+      }catch(e){ finish(false); }
+    });
+  }
+  const origDiscover = (typeof window.discoverBreaks==='function') ? window.discoverBreaks : null;
+  const firstReachable = (typeof window.firstReachable==='function') ? window.firstReachable : null;
+
+  // Replace playStationBreakThen with a fault-tolerant version
+  const replace = function(){
+    const A = $('audio') || document.getElementById('audio'); // main audio
+    const I = $('introAudio') || document.getElementById('introAudio');
+    const B = $('breakAudio') || document.getElementById('breakAudio');
+    const startBtn=$('startBtn'), pauseBtn=$('pauseBtn'), nextBtn=$('nextBtn'), prevBtn=$('prevBtn');
+    const metaEl = $('meta') || document.getElementById('meta');
+    if (!B) return; // cannot patch
+
+    window.playStationBreakThen = async function(fnAfter){
+      try{
+        if (origDiscover) await origDiscover();
+        const files = Array.isArray(window.BREAKS) ? window.BREAKS : [];
+        const N = files.length|0;
+        if (!N){ try{ fnAfter&&fnAfter(); }catch(_){} return; }
+
+        // Try up to N times (wraps) to find a playable break
+        for (let tries=0; tries<N; tries++){
+          const pick = window.pickBreak ? window.pickBreak() : null;
+          if (!pick) break;
+          const raw = String(pick);
+          const url = (window.pathToUrl ? window.pathToUrl(raw) : raw);
+
+          // Quick reachability check (prefer firstReachable if present)
+          let okUrl = url;
+          if (firstReachable){
+            const found = await firstReachable([url]);
+            if (!found){ continue; }
+            okUrl = found;
+          } else {
+            const ok = await headReachable(url);
+            if (!ok){ continue; }
+          }
+
+          // Pause main/intro audio, set UI state
+          try{ A && A.pause(); }catch(_){}
+          try{ I && I.pause(); }catch(_){}
+          if (startBtn) startBtn.disabled = true;
+          if (pauseBtn) pauseBtn.disabled = true;
+          if (nextBtn) nextBtn.disabled = true;
+          if (prevBtn) prevBtn.disabled = true;
+          if (metaEl) metaEl.textContent = 'Station break';
+
+          // Probe decode quickly; if good, play; otherwise continue to next
+          try{
+            await probeOn(B, okUrl, 2500);
+            await B.play();
+            B.addEventListener('ended', ()=>{ try{
+              if (startBtn) startBtn.disabled = false;
+              if (pauseBtn) pauseBtn.disabled = false;
+              if (nextBtn) nextBtn.disabled = false;
+              if (prevBtn) prevBtn.disabled = false;
+              metaEl && (metaEl.textContent = 'Ready');
+            }catch(_){}
+              try{ fnAfter&&fnAfter(); }catch(_){} }, {once:true});
+            return; // playing successfully
+          }catch(e){
+            // failure → try next
+            continue;
+          }
+        }
+
+        // If we got here, none were playable
+        try{
+          if (startBtn) startBtn.disabled = false;
+          if (pauseBtn) pauseBtn.disabled = false;
+          if (nextBtn) nextBtn.disabled = false;
+          if (prevBtn) prevBtn.disabled = false;
+          metaEl && (metaEl.textContent = 'Ready');
+        }catch(_){}
+        try{ fnAfter&&fnAfter(); }catch(_){}
+      }catch(e){
+        console.warn('[KZAK] robust break play error', e);
+        try{ fnAfter&&fnAfter(); }catch(_){}
+      }
+    };
+  };
+
+  if (document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', replace, {once:true});
+  } else {
+    replace();
+  }
+})();
+</script>
+
 </body>
 </html>
