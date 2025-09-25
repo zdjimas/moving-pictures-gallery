@@ -1818,5 +1818,132 @@ window.addEventListener('load', () => {
   }catch(e){}
 })();
 </script>
+
+<script>
+/* === UNCLE9 Linear+Skip patch (append-only) ===
+   Goal: sequential breaks, skipping missing/unplayable files for both auto and Force Break. */
+(function(){
+  'use strict';
+  function $(id){ return document.getElementById(id); }
+  async function headReachable(u){
+    try{
+      const r = await fetch(u, { method:'HEAD', cache:'no-store' });
+      return r && r.ok;
+    }catch(_){ return false; }
+  }
+  // Probe decode/playability quickly on the actual breakAudio element
+  function probeOn(breakAudio, url, timeoutMs){
+    return new Promise((resolve, reject)=>{
+      let done=false, to=null;
+      function cleanup(){
+        if(to) clearTimeout(to);
+        breakAudio.removeEventListener('loadedmetadata', onMeta);
+        breakAudio.removeEventListener('canplay', onCan);
+        breakAudio.removeEventListener('error', onErr);
+      }
+      function finish(ok){ if(done) return; done=true; cleanup(); ok ? resolve(true) : reject(new Error('unplayable')); }
+      function onMeta(){ finish(true); }
+      function onCan(){ finish(true); }
+      function onErr(){ finish(false); }
+      try{
+        breakAudio.preload='auto';
+        breakAudio.src=url;
+        breakAudio.load();
+        breakAudio.addEventListener('loadedmetadata', onMeta, {once:true});
+        breakAudio.addEventListener('canplay', onCan, {once:true});
+        breakAudio.addEventListener('error', onErr, {once:true});
+        to = setTimeout(()=>finish(false), timeoutMs||2500);
+      }catch(e){ finish(false); }
+    });
+  }
+  const origDiscover = (typeof window.discoverBreaks==='function') ? window.discoverBreaks : null;
+  const firstReachable = (typeof window.firstReachable==='function') ? window.firstReachable : null;
+
+  // Replace playStationBreakThen with a fault-tolerant version
+  const replace = function(){
+    const A = $('audio') || document.getElementById('audio'); // main audio
+    const I = $('introAudio') || document.getElementById('introAudio');
+    const B = $('breakAudio') || document.getElementById('breakAudio');
+    const startBtn=$('startBtn'), pauseBtn=$('pauseBtn'), nextBtn=$('nextBtn'), prevBtn=$('prevBtn');
+    const metaEl = $('meta') || document.getElementById('meta');
+    if (!B) return; // cannot patch
+
+    window.playStationBreakThen = async function(fnAfter){
+      try{
+        if (origDiscover) await origDiscover();
+        const files = Array.isArray(window.BREAKS) ? window.BREAKS : [];
+        const N = files.length|0;
+        if (!N){ try{ fnAfter&&fnAfter(); }catch(_){} return; }
+
+        // Try up to N times (wraps) to find a playable break
+        for (let tries=0; tries<N; tries++){
+          const pick = window.pickBreak ? window.pickBreak() : null;
+          if (!pick) break;
+          const raw = String(pick);
+          const url = (window.pathToUrl ? window.pathToUrl(raw) : raw);
+
+          // Quick reachability check (prefer firstReachable if present)
+          let okUrl = url;
+          if (firstReachable){
+            const found = await firstReachable([url]);
+            if (!found){ continue; }
+            okUrl = found;
+          } else {
+            const ok = await headReachable(url);
+            if (!ok){ continue; }
+          }
+
+          // Pause main/intro audio, set UI state
+          try{ A && A.pause(); }catch(_){}
+          try{ I && I.pause(); }catch(_){}
+          if (startBtn) startBtn.disabled = true;
+          if (pauseBtn) pauseBtn.disabled = true;
+          if (nextBtn) nextBtn.disabled = true;
+          if (prevBtn) prevBtn.disabled = true;
+          if (metaEl) metaEl.textContent = 'Station break';
+
+          // Probe decode quickly; if good, play; otherwise continue to next
+          try{
+            await probeOn(B, okUrl, 2500);
+            await B.play();
+            B.addEventListener('ended', ()=>{ try{
+              if (startBtn) startBtn.disabled = false;
+              if (pauseBtn) pauseBtn.disabled = false;
+              if (nextBtn) nextBtn.disabled = false;
+              if (prevBtn) prevBtn.disabled = false;
+              metaEl && (metaEl.textContent = 'Ready');
+            }catch(_){}
+              try{ fnAfter&&fnAfter(); }catch(_){} }, {once:true});
+            return; // playing successfully
+          }catch(e){
+            // failure → try next
+            continue;
+          }
+        }
+
+        // If we got here, none were playable
+        try{
+          if (startBtn) startBtn.disabled = false;
+          if (pauseBtn) pauseBtn.disabled = false;
+          if (nextBtn) nextBtn.disabled = false;
+          if (prevBtn) prevBtn.disabled = false;
+          metaEl && (metaEl.textContent = 'Ready');
+        }catch(_){}
+        try{ fnAfter&&fnAfter(); }catch(_){}
+      }catch(e){
+        console.warn('[KZAK] robust break play error', e);
+        try{ fnAfter&&fnAfter(); }catch(_){}
+      }
+    };
+  };
+
+  if (document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', replace, {once:true});
+  } else {
+    replace();
+  }
+})();
+</script>
+
 </body>
 </html>
