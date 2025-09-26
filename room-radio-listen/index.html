@@ -1967,6 +1967,130 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 
 
 <script>
+// ===== Station Breaks: Sequential, No-Repeat-Until-All-Played =====
+
+// 1) Define your breaks list once (keep your existing array if you have one)
+const BREAKS = [
+  "MediaBreaks/snappy1.mp3",
+  "MediaBreaks/snappy2.mp3",
+  "MediaBreaks/snappy3.mp3",
+  "MediaBreaks/radio-id1.mp3",
+  "MediaBreaks/radio-id2.mp3",
+  // ...add all files here, in the order you want to cycle
+];
+
+// 2) Session pointer (persists while this tab stays open)
+function getBreakPtr() {
+  const v = sessionStorage.getItem('kzak_break_ptr');
+  const n = Number(v);
+  return Number.isInteger(n) && n >= 0 ? n : 0;
+}
+function setBreakPtr(n) {
+  sessionStorage.setItem('kzak_break_ptr', String(n));
+}
+
+// 3) Dedicated audio element for breaks (prevents overlap)
+let breakAudio = document.getElementById('breakAudio');
+if (!breakAudio) {
+  breakAudio = document.createElement('audio');
+  breakAudio.id = 'breakAudio';
+  breakAudio.preload = 'auto';
+  breakAudio.style.display = 'none';
+  document.body.appendChild(breakAudio);
+}
+
+// State flags to prevent concurrency
+let isBreakActive = false;
+let pendingManualBreak = false;
+
+// 4) Core helper: returns the next break file and advances the pointer
+function nextBreakSrc() {
+  if (!BREAKS.length) return null;
+  let ptr = getBreakPtr();
+  if (ptr >= BREAKS.length) ptr = 0; // wrap if someone cleared/changed list mid-session
+  const src = BREAKS[ptr];
+  setBreakPtr((ptr + 1) % BREAKS.length);
+  return src;
+}
+
+// 5) Play a station break safely. Returns a Promise that resolves when the break finishes.
+async function playStationBreak({ trigger = 'auto' } = {}) {
+  if (isBreakActive) {
+    // If user tapped Force Break during a break, remember intent and run one more right after
+    if (trigger === 'manual') pendingManualBreak = true;
+    return;
+  }
+  const src = nextBreakSrc();
+  if (!src) return;
+
+  // Pause music but DO NOT change ON AIR if your light is tied to music only
+  const music = document.querySelector('audio'); // your main player element
+  const wasPlaying = music && !music.paused;
+
+  try {
+    isBreakActive = true;
+    if (music) music.pause();
+
+    breakAudio.src = src;
+    await breakAudio.play();
+
+    // When break ends, resume the previous state (or call your next-track logic)
+    breakAudio.onended = () => {
+      isBreakActive = false;
+
+      // If another manual break was requested during playback, run it now
+      if (pendingManualBreak) {
+        pendingManualBreak = false;
+        playStationBreak({ trigger: 'manual' });
+        return;
+      }
+
+      if (music) {
+        // Resume prior state; if your flow advances tracks here, call that instead
+        if (wasPlaying) {
+          music.play().catch(() => {});
+        }
+      }
+    };
+  } catch (err) {
+    // If autoplay is blocked or an error occurs, just clear flag and optionally resume music
+    isBreakActive = false;
+    if (wasPlaying && music) music.play().catch(() => {});
+    console.warn('Station break error:', err);
+  }
+}
+
+// 6) Hook: Force Break button
+// Wire your existing button to this call:
+window.forceStationBreak = function() {
+  playStationBreak({ trigger: 'manual' });
+};
+
+// 7) Hook: Automatic cadence (example: every 2 songs)
+// Call this from your existing "on song ended" / "before next song" logic.
+let songsSinceLastBreak = 0;
+window.onSongStarted = function(trackIdx) {
+  // call this whenever a *music* track starts (not for breaks)
+  songsSinceLastBreak++;
+  // Example cadence: after every 2 songs, play a break before the next starts
+  if (songsSinceLastBreak >= 2) {
+    songsSinceLastBreak = 0;
+    playStationBreak({ trigger: 'auto' });
+  }
+};
+
+// If you auto-advance tracks, ensure you reset songsSinceLastBreak as shown above.
+// IMPORTANT: do not start the next music track until break finishes if you call playStationBreak()
+// You can either:
+//   A) Let the code above pause/resume the same track (simple), or
+//   B) Structure your "queue next track" to wait until isBreakActive becomes false.
+</script>
+
+
+
+
+  
+<script>
 /** === Media Session integration for iOS Lock Screen / CarPlay ===
  * Shows the CURRENT TRACK TITLE on iPhone lock/pause screen and CarPlay.
  * No artwork is required; this works with just words (title/artist/album).
