@@ -1661,7 +1661,9 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
               ]
             });
           }catch(_){}
-        }
+        
+          try{ document.title = `${title} — KZAK`; }catch(_){}
+}
         function updatePositionState(){
           if (!Number.isFinite(A.duration) || A.duration <= 0) return;
           try{
