@@ -1842,6 +1842,128 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
   });
 })();
 </script>
+<script>
+(() => {
+  // 1) Resolve the actual music element
+  const audioEl =
+    window.audio ||
+    document.getElementById('audio') ||
+    document.querySelector('audio');
+
+  if (!audioEl || !('mediaSession' in navigator)) return;
+
+  const ms = navigator.mediaSession;
+
+  // 2) Absolute URL helper (CarPlay prefers absolute artwork URLs)
+  const absUrl = (p) => {
+    try {
+      // If you already encode via pathToUrl, use it first
+      const rel = (typeof pathToUrl === 'function') ? pathToUrl(p) : p;
+      return new URL(rel, window.location.href).href;
+    } catch {
+      return p;
+    }
+  };
+
+  // 3) Keep position state fresh
+  const updatePositionState = () => {
+    if (!('setPositionState' in ms)) return;
+    try {
+      ms.setPositionState({
+        duration:  isFinite(audioEl.duration)    ? audioEl.duration    : 0,
+        position:  isFinite(audioEl.currentTime) ? audioEl.currentTime : 0,
+        playbackRate: audioEl.playbackRate || 1
+      });
+    } catch {}
+  };
+
+  // 4) Publish the current track’s metadata.
+  //    Call this whenever a NEW SONG is loaded/started.
+  window.updateMediaSessionForTrack = (track) => {
+    if (!track) return;
+    const title  = track.title  || 'KZAK';
+    const artist = track.artist || 'KZAK • Frasier-Style Free Radio';
+    const album  = 'KZAK';
+    const artSrc = absUrl(track.image || 'Media/default.jpg');
+
+    ms.metadata = new MediaMetadata({
+      title, artist, album,
+      artwork: [
+        { src: artSrc, sizes: '96x96',  type: 'image/jpeg' },
+        { src: artSrc, sizes: '192x192', type: 'image/jpeg' },
+        { src: artSrc, sizes: '384x384', type: 'image/jpeg' },
+        { src: artSrc, sizes: '512x512', type: 'image/jpeg' }
+      ]
+    });
+
+    // Mirror to tab title for browsers that don't surface Media Session
+    document.title = `${title} — KZAK`;
+
+    // Hint iOS with fresh position
+    updatePositionState();
+  };
+
+  // Optional: if you want to show "Station Break" explicitly
+  window.updateMediaSessionForBreak = () => {
+    const artSrc = absUrl('Media/default.jpg');
+    ms.metadata = new MediaMetadata({
+      title: 'Station Break',
+      artist: 'KZAK',
+      album: 'IDs & Bumpers',
+      artwork: [{ src: artSrc, sizes: '256x256', type: 'image/jpeg' }]
+    });
+    document.title = `Station Break — KZAK`;
+    updatePositionState();
+  };
+
+  // 5) Wire hardware/CarPlay controls
+  ms.setActionHandler('play',    async () => { try { await audioEl.play(); } catch {} });
+  ms.setActionHandler('pause',   () => audioEl.pause());
+  ms.setActionHandler('previoustrack', () => { try { prev(); } catch {} });
+  ms.setActionHandler('nexttrack',     () => { try { next(); } catch {} });
+  ms.setActionHandler('seekbackward',  (d) => {
+    const step = (d && d.seekOffset) || 10;
+    audioEl.currentTime = Math.max(0, audioEl.currentTime - step);
+    updatePositionState();
+  });
+  ms.setActionHandler('seekforward',   (d) => {
+    const step = (d && d.seekOffset) || 10;
+    audioEl.currentTime = Math.min(audioEl.duration || Infinity, audioEl.currentTime + step);
+    updatePositionState();
+  });
+  ms.setActionHandler('seekto', (d) => {
+    if (!d || typeof d.seekTime !== 'number') return;
+    if (d.fastSeek && 'fastSeek' in audioEl) audioEl.fastSeek(d.seekTime);
+    else audioEl.currentTime = d.seekTime;
+    updatePositionState();
+  });
+
+  // 6) Keep iOS state synced during playback
+  audioEl.addEventListener('play',  () => { ms.playbackState = 'playing'; updatePositionState(); });
+  audioEl.addEventListener('pause', () => { ms.playbackState = 'paused';  updatePositionState(); });
+  audioEl.addEventListener('timeupdate', updatePositionState);
+
+  // 7) Critical timing: refresh metadata AFTER source is known
+  //    Call this from your load()/track-change logic *and* on loadedmetadata.
+  audioEl.addEventListener('loadedmetadata', () => {
+    try {
+      // Assuming you track the current song index in currentIndex
+      if (typeof currentIndex === 'number' && Array.isArray(window.PLAYLIST)) {
+        updateMediaSessionForTrack(window.PLAYLIST[currentIndex]);
+      }
+    } catch {}
+  });
+
+  // As a belt-and-suspenders approach, also refresh on 'playing'
+  audioEl.addEventListener('playing', () => {
+    try {
+      if (typeof currentIndex === 'number' && Array.isArray(window.PLAYLIST)) {
+        updateMediaSessionForTrack(window.PLAYLIST[currentIndex]);
+      }
+    } catch {}
+  });
+})();
+</script>
 
 
 <script>
