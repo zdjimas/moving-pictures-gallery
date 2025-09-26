@@ -18,13 +18,7 @@ h1{font-size:32px;line-height:1.15;margin:0;text-shadow:0 2px 10px rgba(0,0,0,.4
 .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
 .btn{background:#101a2d;border:1px solid var(--line);color:var(--ink);padding:10px 14px;border-radius:12px;cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:8px;box-shadow:var(--shadow)}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
-.pill{{
-    title: "Cactus Rose",
-    file:  "Media/Cactus Rose .mp3",
-    img:   "Media/CactusRose.jpeg",
-    alt:   "Cactus Rose artwork",
-    story: "An Original Creation by zdjimas"
-  } , :10px 14px;border-radius:999px;border:1px solid var(--line);background:#0e1628;display:inline-flex;align-items:center;gap:8px}
+.pill{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:#0e1628;display:inline-flex;align-items:center;gap:8px}
 .onair-dot{width:12px;height:12px;border-radius:50%;background:#384a63}
 .onair.on .onair-dot{background:#ff3b3b;box-shadow:0 0 16px rgba(255,59,59,.9)}
 .player{display:grid;grid-template-columns:1fr 380px;gap:22px;margin-top:16px}
@@ -224,7 +218,7 @@ let breakEvery=1;
   {
     title: "Voices In My Head",
     file:  "Media/Voices in my head.mp3",
-    img:   "Media/VoicesHead.jpeg",
+    img:   "Media/VoiceHead.jpeg",
     alt:   "Voices In My Head - artwork",
     story: "A great Tune by the first band I ever saw in concert at the age of 10, hint... Their Trix are Cheap"
   },
@@ -242,13 +236,19 @@ let breakEvery=1;
     alt:   "Castle Walls artwork",
     story: "A Heavier than normal version of this song from what was the first dream theater like band when I was 11 years old."
   },
-  
   {
-    title: "ReBending the Clock",
-    file:  "Media/ReBending the Clock.mp3",
-    img:   "Media/Bending.jpeg",
-    alt:   "ReBending the Clock artwork",
-    story: "A great Solo section from the similar named song by Petrucci"
+    title: "Cactus Rose",
+    file:  "Media/Cactus Rose.mp3",
+    img:   "Media/CactusRose.jpeg",
+    alt:   "JailBreak artwork",
+    story: "An Original Creation by zdjimas"
+  } , 
+  {
+    title: "Black and Blue Again",
+    file:  "Media/Black and Blue Again.mp3",
+    img:   "Media/BlackBlue.jpeg",
+    alt:   "JailBreak artwork",
+    story: "A great Tune by Van Hagar"
   } ,
 
      
@@ -270,8 +270,21 @@ let breakEvery=1;
     story: DEFAULT_STORY
   },
 
-   
+   {
+    title: "Pigs On My Wing Part Zed ",
+    file:  "Media/Pigs On My Wing Part Zed.mp3",
+    img:   "Media/PigWing2.jpeg",
+    alt:   "default artwork",
+    story: DEFAULT_STORY
+  },
 
+{
+  title: "If You Want Blood Later",
+  file:  "Media/If You Want Blood Later .mp3",
+  image: "Media/BloodLater.jpeg",
+  alt:   "Cover art for KZAK",
+  story: `One of the best music ever created from this band and the great singer Bon Scott, This song is in so many great movie scenes too.`
+},
 {
   title: "If You Want Blood Now",
   file:  "Media/If You Want Blood Now.mp3",
@@ -303,18 +316,30 @@ let breakEvery=1;
   alt:   "Cover art for KZAK",
   story: `One of the best songs from this group,  I love this melody and was a great hang out melody to party with as a teen in the 80s. `
 },
-
+{
+  title: "The Grander Illusion Ending",
+  file:  "Media/The Grander Illusion Ending  - Final Take .mp3",
+  image: "Media/GranderIllusionEndFinal.jpeg",
+  alt:   "Cover art for KZAK",
+  story: `One of the best songs from this group,  I love this melody and was a great hang out melody to party with as a teen in the 80s. `
+},
 {
   title: "Another Man In the Arizona Wilderness",
-  file:  "Media/Another Man in the Arizona Wilderness.mp3",
+  file:  "Media/Another Man in the Arizona Wilderness .mp3",
   image: "Media/AnotherManAZ.jpeg",
   alt:   "Cover art for KZAK",
   story: `The lyrics are so strong and inspring from the group of genius members who I call the earliest progressive music band like later Dream Theater..`
 },
-
+{
+  title: "A Wilderness Do-over Please",
+  file:  "Media/A Wilderness Do-over Please.mp3",
+  image: "Media/Wilderness.jpeg",
+  alt:   "Cover art for KZAK",
+  story: `The lyrics are so strong and inspring from the group of genius members who I call the earliest progressive music band like later Dream Theater..`
+},
 {
   title: "Silent Sucidity Silenced",
-  file:  "Media/Silent Lucidity Silenced.mp3",
+  file:  "Media/Silent Lucidity Silenced .mp3",
   image: "Media/Lucidity.jpeg",
   alt:   "Cover art for KZAK",
   story: `The lyrics for this original composition are amazing, one of their best songs performed and reperformed as Queensryche.   `
@@ -404,16 +429,7 @@ let breakEvery=1;
     alt:   "01. The Grudge (Remastered) — default artwork",
     story: DEFAULT_STORY
   },
-     
-{
-  title: "The Grander Illusion Ending",
-  file:  "Media/The Grander Illusion Ending  - Final Take.mp3",
-  image: "Media/GranderIllusionEndFinal.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `One of the best songs from this group,  I love this melody and was a great hang out melody to party with as a teen in the 80s. `
-},
 
-     
   {
     title: "03. Dogs (Cover) X2 tripper",
     file:  "Media/03. Dogs (Cover) X2 tripper.mp3",
@@ -478,16 +494,6 @@ let breakEvery=1;
     story: DEFAULT_STORY
   },
 
-{
-    title: "Pigs On My Wing Part Zed ",
-    file:  "Media/Pigs On My Wing - Part Zed.mp3",
-    img:   "Media/PigWing2.jpeg",
-    alt:   "default artwork",
-    story: DEFAULT_STORY
-  },
-
-
-   
   {
     title: "10 Right In Two (Remastered) (Cover) (1)",
     file:  "Media/10 Right In Two (Remastered) (Cover) (1).mp3",
@@ -519,15 +525,7 @@ let breakEvery=1;
     alt:   "10. Shine On You Crazy Diamond (Parts 6-9) (cover) — default artwork",
     story: DEFAULT_STORY
   },
-   
-{
-    title: "Cactus Rose",
-    file:  "Media/Cactus Rose .mp3",
-    img:   "Media/CactusRose.jpeg",
-    alt:   "Cactus Rose artwork",
-    story: "An Original Creation by zdjimas"
-  } , 
-   
+
   {
     title: "11. Pushit (Cover) v2",
     file:  "Media/11. Pushit (Cover) v2.mp3",
@@ -576,14 +574,6 @@ let breakEvery=1;
     story: DEFAULT_STORY
   },
 
-{
-    title: "Cactus Rose",
-    file:  "Media/Cactus Rose .mp3",
-    img:   "Media/CactusRose.jpeg",
-    alt:   "Cactus Rose artwork",
-    story: "An Original Creation by zdjimas"
-  } , 
-     
   {
     title: "A Demo in Time of Dying",
     file:  "Media/A Demo in Time of Dying.mp3",
@@ -639,14 +629,7 @@ let breakEvery=1;
     alt:   "All that glitters is gold remains — default artwork",
     story: DEFAULT_STORY
   },
-{
-  title: "If You Want Blood Later",
-  file:  "Media/If You Want Blood Later .mp3",
-  image: "Media/BloodLater.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `One of the best music ever created from this band and the great singer Bon Scott, This song is in so many great movie scenes too.`
-},
-     
+
   {
     title: "All that glitters is gold",
     file:  "Media/All that glitters is gold.mp3",
@@ -655,15 +638,6 @@ let breakEvery=1;
     story: DEFAULT_STORY
   },
 
-{
-  title: "A Wilderness Do-over Please",
-  file:  "Media/A Wilderness Do-over Please.mp3",
-  image: "Media/Wilderness.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `The lyrics are so strong and inspring from the group of genius members who I call the earliest progressive music band like later Dream Theater..`
-},
-
-     
   {
     title: "Another Dogs Cover - Really?",
     file:  "Media/Another Dogs Cover - Really?.mp3",
@@ -688,15 +662,6 @@ let breakEvery=1;
     story: DEFAULT_STORY
   },
 
-
-{
-  title: "If You Want Blood Later",
-  file:  "Media/If You Want Blood Later .mp3",
-  image: "Media/BloodLater.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `One of the best music ever created from this band and the great singer Bon Scott, This song is in so many great movie scenes too.`
-},
-     
   {
     title: "Barn Jam Friends",
     file:  "Media/Barn Jam Friends.mp3",
@@ -1306,42 +1271,7 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-let lastBreakIdx=-1; function pickBreak(){
-  // Deterministic sequential, no-repeat until all played (session-scoped)
-  try {
-    if (!Array.isArray(BREAKS) || !BREAKS.length) return null;
-
-    // De-duplicate while preserving order
-    const seen = new Set();
-    const list = BREAKS.filter(p => {
-      p = String(p || '').trim();
-      if (!p || seen.has(p)) return false;
-      seen.add(p);
-      return true;
-    });
-
-    const len = list.length;
-    if (len === 0) return null;
-
-    const KEY = 'kzak_break_ptr_seqV5';
-    let ptr = Number(sessionStorage.getItem(KEY));
-    if (!Number.isInteger(ptr) || ptr < 0 || ptr >= len) ptr = 0;
-
-    const src = list[ptr];
-    sessionStorage.setItem(KEY, String((ptr + 1) % len));
-
-    lastBreakIdx = Math.max(0, list.indexOf(src));
-    return src;
-  } catch (e) {
-    // Safe fallback to immediate non-repeat random
-    if (!Array.isArray(BREAKS) || !BREAKS.length) return null;
-    if (BREAKS.length === 1) return BREAKS[0];
-    let i;
-    do { i = (Math.random() * BREAKS.length) | 0; } while (i === lastBreakIdx);
-    lastBreakIdx = i;
-    return BREAKS[i];
-  }
-}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
+let lastBreakIdx=-1; function pickBreak(){if(!BREAKS.length)return null; if(BREAKS.length===1)return BREAKS[0]; let i; do{i=(Math.random()*BREAKS.length)|0}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
@@ -1731,9 +1661,7 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
               ]
             });
           }catch(_){}
-        
-          try{ document.title = `${title} — KZAK`; }catch(_){}
-}
+        }
         function updatePositionState(){
           if (!Number.isFinite(A.duration) || A.duration <= 0) return;
           try{
@@ -1790,506 +1718,7 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 })();
 </script>
 
-  <script>
-(() => {
-  // 1) Resolve the actual music element
-  const audioEl =
-    window.audio ||
-    document.getElementById('audio') ||
-    document.querySelector('audio');
 
-  if (!audioEl || !('mediaSession' in navigator)) return;
-
-  const ms = navigator.mediaSession;
-
-  // 2) Absolute URL helper (CarPlay prefers absolute artwork URLs)
-  const absUrl = (p) => {
-    try {
-      // If you already encode via pathToUrl, use it first
-      const rel = (typeof pathToUrl === 'function') ? pathToUrl(p) : p;
-      return new URL(rel, window.location.href).href;
-    } catch {
-      return p;
-    }
-  };
-
-  // 3) Keep position state fresh
-  const updatePositionState = () => {
-    if (!('setPositionState' in ms)) return;
-    try {
-      ms.setPositionState({
-        duration:  isFinite(audioEl.duration)    ? audioEl.duration    : 0,
-        position:  isFinite(audioEl.currentTime) ? audioEl.currentTime : 0,
-        playbackRate: audioEl.playbackRate || 1
-      });
-    } catch {}
-  };
-
-  // 4) Publish the current track’s metadata.
-  //    Call this whenever a NEW SONG is loaded/started.
-  window.updateMediaSessionForTrack = (track) => {
-    if (!track) return;
-    const title  = track.title  || 'KZAK';
-    const artist = track.artist || 'KZAK • Frasier-Style Free Radio';
-    const album  = 'KZAK';
-    const artSrc = absUrl(track.image || 'Media/default.jpg');
-
-    ms.metadata = new MediaMetadata({
-      title, artist, album,
-      artwork: [
-        { src: artSrc, sizes: '96x96',  type: 'image/jpeg' },
-        { src: artSrc, sizes: '192x192', type: 'image/jpeg' },
-        { src: artSrc, sizes: '384x384', type: 'image/jpeg' },
-        { src: artSrc, sizes: '512x512', type: 'image/jpeg' }
-      ]
-    });
-
-    // Mirror to tab title for browsers that don't surface Media Session
-    document.title = `${title} — KZAK`;
-
-    // Hint iOS with fresh position
-    updatePositionState();
-  };
-
-  // Optional: if you want to show "Station Break" explicitly
-  window.updateMediaSessionForBreak = () => {
-    const artSrc = absUrl('Media/default.jpg');
-    ms.metadata = new MediaMetadata({
-      title: 'Station Break',
-      artist: 'KZAK',
-      album: 'IDs & Bumpers',
-      artwork: [{ src: artSrc, sizes: '256x256', type: 'image/jpeg' }]
-    });
-    document.title = `Station Break — KZAK`;
-    updatePositionState();
-  };
-
-  // 5) Wire hardware/CarPlay controls
-  ms.setActionHandler('play',    async () => { try { await audioEl.play(); } catch {} });
-  ms.setActionHandler('pause',   () => audioEl.pause());
-  ms.setActionHandler('previoustrack', () => { try { prev(); } catch {} });
-  ms.setActionHandler('nexttrack',     () => { try { next(); } catch {} });
-  ms.setActionHandler('seekbackward',  (d) => {
-    const step = (d && d.seekOffset) || 10;
-    audioEl.currentTime = Math.max(0, audioEl.currentTime - step);
-    updatePositionState();
-  });
-  ms.setActionHandler('seekforward',   (d) => {
-    const step = (d && d.seekOffset) || 10;
-    audioEl.currentTime = Math.min(audioEl.duration || Infinity, audioEl.currentTime + step);
-    updatePositionState();
-  });
-  ms.setActionHandler('seekto', (d) => {
-    if (!d || typeof d.seekTime !== 'number') return;
-    if (d.fastSeek && 'fastSeek' in audioEl) audioEl.fastSeek(d.seekTime);
-    else audioEl.currentTime = d.seekTime;
-    updatePositionState();
-  });
-
-  // 6) Keep iOS state synced during playback
-  audioEl.addEventListener('play',  () => { ms.playbackState = 'playing'; updatePositionState(); });
-  audioEl.addEventListener('pause', () => { ms.playbackState = 'paused';  updatePositionState(); });
-  audioEl.addEventListener('timeupdate', updatePositionState);
-
-  // 7) Critical timing: refresh metadata AFTER source is known
-  //    Call this from your load()/track-change logic *and* on loadedmetadata.
-  audioEl.addEventListener('loadedmetadata', () => {
-    try {
-      // Assuming you track the current song index in currentIndex
-      if (typeof currentIndex === 'number' && Array.isArray(window.PLAYLIST)) {
-        updateMediaSessionForTrack(window.PLAYLIST[currentIndex]);
-      }
-    } catch {}
-  });
-
-  // As a belt-and-suspenders approach, also refresh on 'playing'
-  audioEl.addEventListener('playing', () => {
-    try {
-      if (typeof currentIndex === 'number' && Array.isArray(window.PLAYLIST)) {
-        updateMediaSessionForTrack(window.PLAYLIST[currentIndex]);
-      }
-    } catch {}
-  });
-})();
-</script>
-<script>
-(() => {
-  // 1) Resolve the actual music element
-  const audioEl =
-    window.audio ||
-    document.getElementById('audio') ||
-    document.querySelector('audio');
-
-  if (!audioEl || !('mediaSession' in navigator)) return;
-
-  const ms = navigator.mediaSession;
-
-  // 2) Absolute URL helper (CarPlay prefers absolute artwork URLs)
-  const absUrl = (p) => {
-    try {
-      // If you already encode via pathToUrl, use it first
-      const rel = (typeof pathToUrl === 'function') ? pathToUrl(p) : p;
-      return new URL(rel, window.location.href).href;
-    } catch {
-      return p;
-    }
-  };
-
-  // 3) Keep position state fresh
-  const updatePositionState = () => {
-    if (!('setPositionState' in ms)) return;
-    try {
-      ms.setPositionState({
-        duration:  isFinite(audioEl.duration)    ? audioEl.duration    : 0,
-        position:  isFinite(audioEl.currentTime) ? audioEl.currentTime : 0,
-        playbackRate: audioEl.playbackRate || 1
-      });
-    } catch {}
-  };
-
-  // 4) Publish the current track’s metadata.
-  //    Call this whenever a NEW SONG is loaded/started.
-  window.updateMediaSessionForTrack = (track) => {
-    if (!track) return;
-    const title  = track.title  || 'KZAK';
-    const artist = track.artist || 'KZAK • Frasier-Style Free Radio';
-    const album  = 'KZAK';
-    const artSrc = absUrl(track.image || 'Media/default.jpg');
-
-    ms.metadata = new MediaMetadata({
-      title, artist, album,
-      artwork: [
-        { src: artSrc, sizes: '96x96',  type: 'image/jpeg' },
-        { src: artSrc, sizes: '192x192', type: 'image/jpeg' },
-        { src: artSrc, sizes: '384x384', type: 'image/jpeg' },
-        { src: artSrc, sizes: '512x512', type: 'image/jpeg' }
-      ]
-    });
-
-    // Mirror to tab title for browsers that don't surface Media Session
-    document.title = `${title} — KZAK`;
-
-    // Hint iOS with fresh position
-    updatePositionState();
-  };
-
-  // Optional: if you want to show "Station Break" explicitly
-  window.updateMediaSessionForBreak = () => {
-    const artSrc = absUrl('Media/default.jpg');
-    ms.metadata = new MediaMetadata({
-      title: 'Station Break',
-      artist: 'KZAK',
-      album: 'IDs & Bumpers',
-      artwork: [{ src: artSrc, sizes: '256x256', type: 'image/jpeg' }]
-    });
-    document.title = `Station Break — KZAK`;
-    updatePositionState();
-  };
-
-  // 5) Wire hardware/CarPlay controls
-  ms.setActionHandler('play',    async () => { try { await audioEl.play(); } catch {} });
-  ms.setActionHandler('pause',   () => audioEl.pause());
-  ms.setActionHandler('previoustrack', () => { try { prev(); } catch {} });
-  ms.setActionHandler('nexttrack',     () => { try { next(); } catch {} });
-  ms.setActionHandler('seekbackward',  (d) => {
-    const step = (d && d.seekOffset) || 10;
-    audioEl.currentTime = Math.max(0, audioEl.currentTime - step);
-    updatePositionState();
-  });
-  ms.setActionHandler('seekforward',   (d) => {
-    const step = (d && d.seekOffset) || 10;
-    audioEl.currentTime = Math.min(audioEl.duration || Infinity, audioEl.currentTime + step);
-    updatePositionState();
-  });
-  ms.setActionHandler('seekto', (d) => {
-    if (!d || typeof d.seekTime !== 'number') return;
-    if (d.fastSeek && 'fastSeek' in audioEl) audioEl.fastSeek(d.seekTime);
-    else audioEl.currentTime = d.seekTime;
-    updatePositionState();
-  });
-
-  // 6) Keep iOS state synced during playback
-  audioEl.addEventListener('play',  () => { ms.playbackState = 'playing'; updatePositionState(); });
-  audioEl.addEventListener('pause', () => { ms.playbackState = 'paused';  updatePositionState(); });
-  audioEl.addEventListener('timeupdate', updatePositionState);
-
-  // 7) Critical timing: refresh metadata AFTER source is known
-  //    Call this from your load()/track-change logic *and* on loadedmetadata.
-  audioEl.addEventListener('loadedmetadata', () => {
-    try {
-      // Assuming you track the current song index in currentIndex
-      if (typeof currentIndex === 'number' && Array.isArray(window.PLAYLIST)) {
-        updateMediaSessionForTrack(window.PLAYLIST[currentIndex]);
-      }
-    } catch {}
-  });
-
-  // As a belt-and-suspenders approach, also refresh on 'playing'
-  audioEl.addEventListener('playing', () => {
-    try {
-      if (typeof currentIndex === 'number' && Array.isArray(window.PLAYLIST)) {
-        updateMediaSessionForTrack(window.PLAYLIST[currentIndex]);
-      }
-    } catch {}
-  });
-})();
-</script>
-
-
-<script>
-// ===== Station Breaks: Sequential, No-Repeat-Until-All-Played =====
-
-// 1) Define your breaks list once (keep your existing array if you have one)
-const BREAKS = [
-  "MediaBreaks/snappy1.mp3",
-  "MediaBreaks/snappy2.mp3",
-  "MediaBreaks/snappy3.mp3",
-  "MediaBreaks/radio-id1.mp3",
-  "MediaBreaks/radio-id2.mp3",
-  // ...add all files here, in the order you want to cycle
-];
-
-// 2) Session pointer (persists while this tab stays open)
-function getBreakPtr() {
-  const v = sessionStorage.getItem('kzak_break_ptr');
-  const n = Number(v);
-  return Number.isInteger(n) && n >= 0 ? n : 0;
-}
-function setBreakPtr(n) {
-  sessionStorage.setItem('kzak_break_ptr', String(n));
-}
-
-// 3) Dedicated audio element for breaks (prevents overlap)
-let breakAudio = document.getElementById('breakAudio');
-if (!breakAudio) {
-  breakAudio = document.createElement('audio');
-  breakAudio.id = 'breakAudio';
-  breakAudio.preload = 'auto';
-  breakAudio.style.display = 'none';
-  document.body.appendChild(breakAudio);
-}
-
-// State flags to prevent concurrency
-let isBreakActive = false;
-let pendingManualBreak = false;
-
-// 4) Core helper: returns the next break file and advances the pointer
-function nextBreakSrc() {
-  if (!BREAKS.length) return null;
-  let ptr = getBreakPtr();
-  if (ptr >= BREAKS.length) ptr = 0; // wrap if someone cleared/changed list mid-session
-  const src = BREAKS[ptr];
-  setBreakPtr((ptr + 1) % BREAKS.length);
-  return src;
-}
-
-// 5) Play a station break safely. Returns a Promise that resolves when the break finishes.
-async function playStationBreak({ trigger = 'auto' } = {}) {
-  if (isBreakActive) {
-    // If user tapped Force Break during a break, remember intent and run one more right after
-    if (trigger === 'manual') pendingManualBreak = true;
-    return;
-  }
-  const src = nextBreakSrc();
-  if (!src) return;
-
-  // Pause music but DO NOT change ON AIR if your light is tied to music only
-  const music = document.querySelector('audio'); // your main player element
-  const wasPlaying = music && !music.paused;
-
-  try {
-    isBreakActive = true;
-    if (music) music.pause();
-
-    breakAudio.src = src;
-    await breakAudio.play();
-
-    // When break ends, resume the previous state (or call your next-track logic)
-    breakAudio.onended = () => {
-      isBreakActive = false;
-
-      // If another manual break was requested during playback, run it now
-      if (pendingManualBreak) {
-        pendingManualBreak = false;
-        playStationBreak({ trigger: 'manual' });
-        return;
-      }
-
-      if (music) {
-        // Resume prior state; if your flow advances tracks here, call that instead
-        if (wasPlaying) {
-          music.play().catch(() => {});
-        }
-      }
-    };
-  } catch (err) {
-    // If autoplay is blocked or an error occurs, just clear flag and optionally resume music
-    isBreakActive = false;
-    if (wasPlaying && music) music.play().catch(() => {});
-    console.warn('Station break error:', err);
-  }
-}
-
-// 6) Hook: Force Break button
-// Wire your existing button to this call:
-window.forceStationBreak = function() {
-  playStationBreak({ trigger: 'manual' });
-};
-
-// 7) Hook: Automatic cadence (example: every 2 songs)
-// Call this from your existing "on song ended" / "before next song" logic.
-let songsSinceLastBreak = 0;
-window.onSongStarted = function(trackIdx) {
-  // call this whenever a *music* track starts (not for breaks)
-  songsSinceLastBreak++;
-  // Example cadence: after every 2 songs, play a break before the next starts
-  if (songsSinceLastBreak >= 2) {
-    songsSinceLastBreak = 0;
-    playStationBreak({ trigger: 'auto' });
-  }
-};
-
-// If you auto-advance tracks, ensure you reset songsSinceLastBreak as shown above.
-// IMPORTANT: do not start the next music track until break finishes if you call playStationBreak()
-// You can either:
-//   A) Let the code above pause/resume the same track (simple), or
-//   B) Structure your "queue next track" to wait until isBreakActive becomes false.
-</script>
-
-
-
-
-  
-<script>
-/** === Media Session integration for iOS Lock Screen / CarPlay ===
- * Shows the CURRENT TRACK TITLE on iPhone lock/pause screen and CarPlay.
- * No artwork is required; this works with just words (title/artist/album).
- */
-
-// 1) Call this whenever a new track starts (pass in your track object).
-function updateMediaSession(track, audioEl) {
-  if (!('mediaSession' in navigator) || !track) return;
-
-  // Build metadata strings (artist/album optional; use your own fields if you have them)
-  const title  = track.title || 'Unknown Title';
-  const artist = track.artist || 'KZAK Radio';       // <- put your default station/artist text here
-  const album  = track.album  || 'KZAK Playlist';    // <- optional
-
-  // If you truly do NOT want to show artwork, set artwork: [] (or omit the property).
-  // iOS will still display the text metadata.
-  const metadataInit = {
-    title,
-    artist,
-    album,
-    // artwork: [] // leave empty to avoid fetching images
-  };
-
-  // If you DO have per-track art and want it later, add it like this:
-  // if (track.image) {
-  //   metadataInit.artwork = [
-  //     { src: track.image, sizes: '512x512', type: 'image/jpeg' }
-  //   ];
-  // }
-
-  navigator.mediaSession.metadata = new MediaMetadata(metadataInit);
-
-  // Optional: also reflect the same text in the browser tab to keep things consistent
-  try { document.title = `${title} — ${artist}`; } catch (e) {}
-
-  // Update playback state
-  navigator.mediaSession.playbackState = audioEl.paused ? 'paused' : 'playing';
-
-  // Provide accurate position so system UI can show elapsed/remaining
-  setPositionStateSafe(audioEl);
-}
-
-// Keep the position state in sync (call on play, pause, timeupdate, seeking, seeked, loadedmetadata)
-function setPositionStateSafe(audioEl) {
-  if (!('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) return;
-  try {
-    navigator.mediaSession.setPositionState({
-      duration: isFinite(audioEl.duration) ? audioEl.duration : 0,
-      playbackRate: audioEl.playbackRate || 1,
-      position: isFinite(audioEl.currentTime) ? audioEl.currentTime : 0
-    });
-  } catch (_) { /* no-op */ }
-}
-
-// 2) Wire media button handlers once (play/pause/seek/next/prev)
-function installMediaActionHandlers(audioEl, nextFn, prevFn) {
-  if (!('mediaSession' in navigator)) return;
-
-  const ms = navigator.mediaSession;
-
-  ms.setActionHandler('play',  async () => { await audioEl.play(); ms.playbackState = 'playing'; setPositionStateSafe(audioEl); });
-  ms.setActionHandler('pause',       () => { audioEl.pause();      ms.playbackState = 'paused';  setPositionStateSafe(audioEl); });
-  ms.setActionHandler('stop',        () => { audioEl.pause(); audioEl.currentTime = 0; ms.playbackState = 'paused'; setPositionStateSafe(audioEl); });
-
-  ms.setActionHandler('seekto', (details) => {
-    if (typeof details.seekTime === 'number') audioEl.currentTime = details.seekTime;
-    if (details.fastSeek && audioEl.fastSeek) audioEl.fastSeek(details.seekTime);
-    setPositionStateSafe(audioEl);
-  });
-  ms.setActionHandler('seekbackward', (details) => {
-    const step = details.seekOffset || 10;
-    audioEl.currentTime = Math.max(0, audioEl.currentTime - step);
-    setPositionStateSafe(audioEl);
-  });
-  ms.setActionHandler('seekforward', (details) => {
-    const step = details.seekOffset || 30;
-    audioEl.currentTime = Math.min(audioEl.duration || Infinity, audioEl.currentTime + step);
-    setPositionStateSafe(audioEl);
-  });
-
-  // If you support next/previous track:
-  if (typeof nextFn === 'function') {
-    ms.setActionHandler('nexttrack', () => { nextFn(); });
-  }
-  if (typeof prevFn === 'function') {
-    ms.setActionHandler('previoustrack', () => { prevFn(); });
-  }
-}
-
-// === Hook into your existing player ===
-// Example wiring; adapt the variable/function names to your code.
-document.addEventListener('DOMContentLoaded', () => {
-  const audio = document.querySelector('audio'); // your main audio element
-
-  // Call this once after you create your player and know your next/prev functions:
-  installMediaActionHandlers(audio, nextTrack, prevTrack);
-
-  // Whenever you start a track, call updateMediaSession with the current track object
-  // E.g., inside your "startTrack(index)" function:
-  window.startTrack = function(idx) {
-    const track = PLAYLIST[idx]; // your existing playlist entry
-    audio.src = track.file;      // your existing load logic
-    audio.play().catch(()=>{});
-    updateMediaSession(track, audio); // <-- THIS ensures title shows on lock screen/CarPlay
-  };
-
-  // Keep position state current
-  ['play','pause','timeupdate','seeking','seeked','loadedmetadata','ratechange'].forEach(evt => {
-    audio.addEventListener(evt, () => setPositionStateSafe(audio));
-  });
-
-  // Optional: update state when playback ends (e.g., auto-next)
-  audio.addEventListener('ended', () => {
-    navigator.mediaSession.playbackState = 'paused';
-    setPositionStateSafe(audio);
-    // if you auto-advance, call nextTrack() which will itself call updateMediaSession(...)
-  });
-});
-
-// Stub examples; replace with your real implementations
-function nextTrack(){ /* your logic that eventually calls startTrack(nextIndex) */ }
-function prevTrack(){ /* your logic that eventually calls startTrack(prevIndex) */ }
-
-</script>
-
-
-
-
-  
 <!-- === APPEND-ONLY RUNTIME PATCH: Alternating, Sequential Breaks (safe; runs after load) === -->
 <script>
 window.addEventListener('load', () => {
@@ -2377,69 +1806,145 @@ window.addEventListener('load', () => {
 })();
 </script>
 
-<!-- === KZAK: Sequential, no-repeat Station Breaks (V3 override) === -->
+<!-- KZAK CarPlay/Lock Screen Media Session patch (v2) -->
 <script>
-(function(){
-  'use strict';
-  // Session-persistent pointer; cycles through BREAKS without repeats until wrap
-  const PTR_KEY = 'kzak_break_ptr_seqV3';
+(function mediaSessionCarPlayPatch(){
+  if (window.__kzakMediaSessionPatched) return;
+  window.__kzakMediaSessionPatched = true;
 
-  function dedupe(list){
-    const seen = new Set();
-    const out = [];
-    (list || []).forEach(p => {
-      const s = String(p || '').trim();
-      if (!s) return;
-      if (!seen.has(s)) { seen.add(s); out.push(s); }
-    });
-    return out;
-  }
+  if (!('mediaSession' in navigator)) return;
+  const ms = navigator.mediaSession;
 
-  function getPtr(max){
-    const n = Number(sessionStorage.getItem(PTR_KEY));
-    return (Number.isInteger(n) && n >= 0 && n < max) ? n : 0;
-  }
-  function setPtr(n){ sessionStorage.setItem(PTR_KEY, String(n)); }
-
-  // FINAL pickBreak override (runs last; supersedes any earlier patches)
-  window.pickBreak = function(){
-    try{
-      let list = Array.isArray(window.BREAKS) ? window.BREAKS.slice() : [];
-      // If BREAKS was empty but a discovery routine exists, we still return null here;
-      // the existing code path calls discoverBreaks() before pickBreak() anyway.
-      list = dedupe(list);
-      const len = list.length;
-      if (len === 0) return null;
-      if (len === 1) { setPtr(0); return list[0]; }
-
-      // Load pointer, return current, then advance (wrap-around)
-      let i = getPtr(len);
-      const src = list[i];
-      i = (i + 1) % len;
-      setPtr(i);
-      return src;
-    }catch(e){
-      console.warn('[KZAK] pickBreak V3 override error', e);
-      return (window.BREAKS && window.BREAKS[0]) || null;
+  function resolveMusicAudio() {
+    let a = document.querySelector('audio[data-role="music"]')
+         || document.getElementById('audio')
+         || document.querySelector('audio#music')
+         || document.querySelector('audio:not([id*="break" i]):not([class*="break" i])');
+    if (!a) {
+      const candidates = Array.from(document.querySelectorAll('audio'));
+      a = candidates.find(el => !el.muted && el.offsetParent !== null) || candidates[0];
     }
+    return a || null;
+  }
+
+  function absUrl(p) {
+    if (!p) return location.href;
+    try {
+      const rel = (typeof window.pathToUrl === 'function') ? window.pathToUrl(p) : p;
+      return new URL(rel, window.location.href).href;
+    } catch(e) {
+      try { return new URL(p, window.location.href).href; } catch { return p; }
+    }
+  }
+
+  function updatePositionState(audio) {
+    if (!audio || !('setPositionState' in ms)) return;
+    try {
+      ms.setPositionState({
+        duration:  isFinite(audio.duration)    ? audio.duration    : 0,
+        position:  isFinite(audio.currentTime) ? audio.currentTime : 0,
+        playbackRate: audio.playbackRate || 1
+      });
+    } catch(e) {}
+  }
+
+  window.updateMediaSessionForTrack = function(track){
+    const audio = resolveMusicAudio();
+    if (!audio) return;
+
+    const title  = (track && track.title)  || document.title || 'KZAK';
+    const artist = (track && track.artist) || 'KZAK • Frasier-Style Free Radio';
+    const album  = 'KZAK';
+    const artSrc = absUrl(track && (track.image || track.img) || 'Media/default.jpg');
+
+    try {
+      ms.metadata = new MediaMetadata({
+        title, artist, album,
+        artwork: [
+          { src: artSrc, sizes: '96x96',  type: 'image/jpeg' },
+          { src: artSrc, sizes: '192x192', type: 'image/jpeg' },
+          { src: artSrc, sizes: '384x384', type: 'image/jpeg' },
+          { src: artSrc, sizes: '512x512', type: 'image/jpeg' }
+        ]
+      });
+    } catch(e){}
+
+    try { document.title = `${title} — KZAK`; } catch(e){}
+    updatePositionState(audio);
   };
 
-  // Optional: reflect "Station Break" in Media Session if helper exists
-  const breakAudio = document.getElementById('breakAudio');
-  const audio = document.getElementById('audio');
-  if (breakAudio){
-    breakAudio.addEventListener('play', () => {
-      try { if (typeof window.updateMediaSessionForBreak === 'function') window.updateMediaSessionForBreak(); } catch(_) {}
-    }, {passive:true});
-    breakAudio.addEventListener('ended', () => {
+  window.updateMediaSessionForBreak = function(label){
+    const audio = resolveMusicAudio();
+    if (!audio) return;
+    const artSrc = absUrl('Media/default.jpg');
+    const title = label || 'Station Break';
+    try {
+      ms.metadata = new MediaMetadata({
+        title,
+        artist: 'KZAK',
+        album: 'IDs & Bumpers',
+        artwork: [{ src: artSrc, sizes: '256x256', type: 'image/jpeg' }]
+      });
+      document.title = `${title} — KZAK`;
+    } catch(e){}
+    updatePositionState(audio);
+  };
+
+  ms.setActionHandler('play',    async () => { const a = resolveMusicAudio(); if (a) { try { await a.play(); } catch(e){} } });
+  ms.setActionHandler('pause',   () => { const a = resolveMusicAudio(); if (a) a.pause(); });
+  ms.setActionHandler('previoustrack', () => { try { typeof prev === 'function' && prev(); } catch(e){} });
+  ms.setActionHandler('nexttrack',     () => { try { typeof next === 'function' && next(); } catch(e){} });
+  ms.setActionHandler('seekbackward',  (d) => { const a = resolveMusicAudio(); if (!a) return;
+    const step = (d && d.seekOffset) || 10; a.currentTime = Math.max(0, a.currentTime - step); updatePositionState(a); });
+  ms.setActionHandler('seekforward',   (d) => { const a = resolveMusicAudio(); if (!a) return;
+    const step = (d && d.seekOffset) || 10; a.currentTime = Math.min((a.duration||Infinity), a.currentTime + step); updatePositionState(a); });
+  ms.setActionHandler('seekto', (d) => { const a = resolveMusicAudio(); if (!a || !d || typeof d.seekTime !== 'number') return;
+    if (d.fastSeek && 'fastSeek' in a) a.fastSeek(d.seekTime); else a.currentTime = d.seekTime; updatePositionState(a); });
+
+  function bindAudioEvents(audio){
+    if (!audio || audio.__kzakMsBound) return;
+    audio.__kzakMsBound = true;
+    audio.addEventListener('play',  () => { ms.playbackState = 'playing'; updatePositionState(audio); }, {passive:true});
+    audio.addEventListener('pause', () => { ms.playbackState = 'paused';  updatePositionState(audio); }, {passive:true});
+    audio.addEventListener('timeupdate', () => updatePositionState(audio), {passive:true});
+    audio.addEventListener('loadedmetadata', () => {
       try {
-        if (audio && typeof window.updateMediaSessionForTrack === 'function' && Array.isArray(window.PLAYLIST) && typeof window.idx === 'number') {
-          window.updateMediaSessionForTrack(window.PLAYLIST[window.idx]);
+        if (typeof window.currentIndex === 'number' && Array.isArray(window.PLAYLIST)) {
+          window.updateMediaSessionForTrack(window.PLAYLIST[window.currentIndex]);
+        } else {
+          updatePositionState(audio);
         }
-      } catch(_){}
-    }, {once:false});
+      } catch(e){}
+    }, {passive:true});
+    audio.addEventListener('playing', () => {
+      try {
+        if (typeof window.currentIndex === 'number' && Array.isArray(window.PLAYLIST)) {
+          window.updateMediaSessionForTrack(window.PLAYLIST[window.currentIndex]);
+        }
+      } catch(e){}
+    }, {passive:true});
   }
+
+  function tick(){
+    const a = resolveMusicAudio();
+    if (a) bindAudioEvents(a);
+  }
+  tick();
+  const rebindTimer = setInterval(tick, 1500);
+
+  window.__kzakMsNudge = function(){
+    const a = resolveMusicAudio();
+    if (a) {
+      try {
+        if (typeof window.currentIndex === 'number' && Array.isArray(window.PLAYLIST)) {
+          window.updateMediaSessionForTrack(window.PLAYLIST[window.currentIndex]);
+        }
+      } catch(e){}
+      updatePositionState(a);
+    }
+  };
 })();
 </script>
+
 </body>
 </html>
