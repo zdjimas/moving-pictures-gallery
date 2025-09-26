@@ -1844,6 +1844,136 @@ toLobby.addEventListener('click', (e)=>{ e.preventDefault(); showExitAndReturn()
 </script>
 
 
+<script>
+/** === Media Session integration for iOS Lock Screen / CarPlay ===
+ * Shows the CURRENT TRACK TITLE on iPhone lock/pause screen and CarPlay.
+ * No artwork is required; this works with just words (title/artist/album).
+ */
+
+// 1) Call this whenever a new track starts (pass in your track object).
+function updateMediaSession(track, audioEl) {
+  if (!('mediaSession' in navigator) || !track) return;
+
+  // Build metadata strings (artist/album optional; use your own fields if you have them)
+  const title  = track.title || 'Unknown Title';
+  const artist = track.artist || 'KZAK Radio';       // <- put your default station/artist text here
+  const album  = track.album  || 'KZAK Playlist';    // <- optional
+
+  // If you truly do NOT want to show artwork, set artwork: [] (or omit the property).
+  // iOS will still display the text metadata.
+  const metadataInit = {
+    title,
+    artist,
+    album,
+    // artwork: [] // leave empty to avoid fetching images
+  };
+
+  // If you DO have per-track art and want it later, add it like this:
+  // if (track.image) {
+  //   metadataInit.artwork = [
+  //     { src: track.image, sizes: '512x512', type: 'image/jpeg' }
+  //   ];
+  // }
+
+  navigator.mediaSession.metadata = new MediaMetadata(metadataInit);
+
+  // Optional: also reflect the same text in the browser tab to keep things consistent
+  try { document.title = `${title} — ${artist}`; } catch (e) {}
+
+  // Update playback state
+  navigator.mediaSession.playbackState = audioEl.paused ? 'paused' : 'playing';
+
+  // Provide accurate position so system UI can show elapsed/remaining
+  setPositionStateSafe(audioEl);
+}
+
+// Keep the position state in sync (call on play, pause, timeupdate, seeking, seeked, loadedmetadata)
+function setPositionStateSafe(audioEl) {
+  if (!('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) return;
+  try {
+    navigator.mediaSession.setPositionState({
+      duration: isFinite(audioEl.duration) ? audioEl.duration : 0,
+      playbackRate: audioEl.playbackRate || 1,
+      position: isFinite(audioEl.currentTime) ? audioEl.currentTime : 0
+    });
+  } catch (_) { /* no-op */ }
+}
+
+// 2) Wire media button handlers once (play/pause/seek/next/prev)
+function installMediaActionHandlers(audioEl, nextFn, prevFn) {
+  if (!('mediaSession' in navigator)) return;
+
+  const ms = navigator.mediaSession;
+
+  ms.setActionHandler('play',  async () => { await audioEl.play(); ms.playbackState = 'playing'; setPositionStateSafe(audioEl); });
+  ms.setActionHandler('pause',       () => { audioEl.pause();      ms.playbackState = 'paused';  setPositionStateSafe(audioEl); });
+  ms.setActionHandler('stop',        () => { audioEl.pause(); audioEl.currentTime = 0; ms.playbackState = 'paused'; setPositionStateSafe(audioEl); });
+
+  ms.setActionHandler('seekto', (details) => {
+    if (typeof details.seekTime === 'number') audioEl.currentTime = details.seekTime;
+    if (details.fastSeek && audioEl.fastSeek) audioEl.fastSeek(details.seekTime);
+    setPositionStateSafe(audioEl);
+  });
+  ms.setActionHandler('seekbackward', (details) => {
+    const step = details.seekOffset || 10;
+    audioEl.currentTime = Math.max(0, audioEl.currentTime - step);
+    setPositionStateSafe(audioEl);
+  });
+  ms.setActionHandler('seekforward', (details) => {
+    const step = details.seekOffset || 30;
+    audioEl.currentTime = Math.min(audioEl.duration || Infinity, audioEl.currentTime + step);
+    setPositionStateSafe(audioEl);
+  });
+
+  // If you support next/previous track:
+  if (typeof nextFn === 'function') {
+    ms.setActionHandler('nexttrack', () => { nextFn(); });
+  }
+  if (typeof prevFn === 'function') {
+    ms.setActionHandler('previoustrack', () => { prevFn(); });
+  }
+}
+
+// === Hook into your existing player ===
+// Example wiring; adapt the variable/function names to your code.
+document.addEventListener('DOMContentLoaded', () => {
+  const audio = document.querySelector('audio'); // your main audio element
+
+  // Call this once after you create your player and know your next/prev functions:
+  installMediaActionHandlers(audio, nextTrack, prevTrack);
+
+  // Whenever you start a track, call updateMediaSession with the current track object
+  // E.g., inside your "startTrack(index)" function:
+  window.startTrack = function(idx) {
+    const track = PLAYLIST[idx]; // your existing playlist entry
+    audio.src = track.file;      // your existing load logic
+    audio.play().catch(()=>{});
+    updateMediaSession(track, audio); // <-- THIS ensures title shows on lock screen/CarPlay
+  };
+
+  // Keep position state current
+  ['play','pause','timeupdate','seeking','seeked','loadedmetadata','ratechange'].forEach(evt => {
+    audio.addEventListener(evt, () => setPositionStateSafe(audio));
+  });
+
+  // Optional: update state when playback ends (e.g., auto-next)
+  audio.addEventListener('ended', () => {
+    navigator.mediaSession.playbackState = 'paused';
+    setPositionStateSafe(audio);
+    // if you auto-advance, call nextTrack() which will itself call updateMediaSession(...)
+  });
+});
+
+// Stub examples; replace with your real implementations
+function nextTrack(){ /* your logic that eventually calls startTrack(nextIndex) */ }
+function prevTrack(){ /* your logic that eventually calls startTrack(prevIndex) */ }
+
+</script>
+
+
+
+
+  
 <!-- === APPEND-ONLY RUNTIME PATCH: Alternating, Sequential Breaks (safe; runs after load) === -->
 <script>
 window.addEventListener('load', () => {
