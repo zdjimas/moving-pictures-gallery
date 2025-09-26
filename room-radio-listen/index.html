@@ -2335,5 +2335,70 @@ window.addEventListener('load', () => {
   updateLamp();
 })();
 </script>
+
+<!-- === KZAK: Sequential, no-repeat Station Breaks (V3 override) === -->
+<script>
+(function(){
+  'use strict';
+  // Session-persistent pointer; cycles through BREAKS without repeats until wrap
+  const PTR_KEY = 'kzak_break_ptr_seqV3';
+
+  function dedupe(list){
+    const seen = new Set();
+    const out = [];
+    (list || []).forEach(p => {
+      const s = String(p || '').trim();
+      if (!s) return;
+      if (!seen.has(s)) { seen.add(s); out.push(s); }
+    });
+    return out;
+  }
+
+  function getPtr(max){
+    const n = Number(sessionStorage.getItem(PTR_KEY));
+    return (Number.isInteger(n) && n >= 0 && n < max) ? n : 0;
+  }
+  function setPtr(n){ sessionStorage.setItem(PTR_KEY, String(n)); }
+
+  // FINAL pickBreak override (runs last; supersedes any earlier patches)
+  window.pickBreak = function(){
+    try{
+      let list = Array.isArray(window.BREAKS) ? window.BREAKS.slice() : [];
+      // If BREAKS was empty but a discovery routine exists, we still return null here;
+      // the existing code path calls discoverBreaks() before pickBreak() anyway.
+      list = dedupe(list);
+      const len = list.length;
+      if (len === 0) return null;
+      if (len === 1) { setPtr(0); return list[0]; }
+
+      // Load pointer, return current, then advance (wrap-around)
+      let i = getPtr(len);
+      const src = list[i];
+      i = (i + 1) % len;
+      setPtr(i);
+      return src;
+    }catch(e){
+      console.warn('[KZAK] pickBreak V3 override error', e);
+      return (window.BREAKS && window.BREAKS[0]) || null;
+    }
+  };
+
+  // Optional: reflect "Station Break" in Media Session if helper exists
+  const breakAudio = document.getElementById('breakAudio');
+  const audio = document.getElementById('audio');
+  if (breakAudio){
+    breakAudio.addEventListener('play', () => {
+      try { if (typeof window.updateMediaSessionForBreak === 'function') window.updateMediaSessionForBreak(); } catch(_) {}
+    }, {passive:true});
+    breakAudio.addEventListener('ended', () => {
+      try {
+        if (audio && typeof window.updateMediaSessionForTrack === 'function' && Array.isArray(window.PLAYLIST) && typeof window.idx === 'number') {
+          window.updateMediaSessionForTrack(window.PLAYLIST[window.idx]);
+        }
+      } catch(_){}
+    }, {once:false});
+  }
+})();
+</script>
 </body>
 </html>
