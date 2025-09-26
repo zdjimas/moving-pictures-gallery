@@ -1954,5 +1954,143 @@ window.addEventListener('load', () => {
 })();
 </script>
 
+
+<!-- Media Session / CarPlay integration — UNCLE11 -->
+<script>
+(function kzakMediaSessionUNCLE11(){
+  if (window.__kzakMediaSessionPatched) return; window.__kzakMediaSessionPatched = true;
+  if (!('mediaSession' in navigator)) return;
+  const ms = navigator.mediaSession;
+
+  function musicAudio(){
+    return document.getElementById('audio') ||
+           document.querySelector('audio[data-role="music"]') ||
+           document.querySelector('audio:not([id*="break" i]):not([class*="break" i])');
+  }
+
+  function absUrl(p){
+    if (!p) return location.href;
+    try{
+      const rel = (typeof window.pathToUrl === 'function') ? window.pathToUrl(p) : p;
+      return new URL(rel, location.href).href;
+    }catch(e){ try{ return new URL(p, location.href).href; }catch{ return p; } }
+  }
+
+  function updatePositionState(a){
+    if (!a || !('setPositionState' in ms)) return;
+    try{
+      ms.setPositionState({
+        duration:  isFinite(a.duration)    ? a.duration    : 0,
+        position:  isFinite(a.currentTime) ? a.currentTime : 0,
+        playbackRate: a.playbackRate || 1
+      });
+    }catch(e){}
+  }
+
+  window.updateMediaSessionForTrack = function(track){
+    const a = musicAudio(); if (!a) return;
+    const title  = (track && track.title)  || document.title || 'KZAK';
+    const artist = (track && track.artist) || 'KZAK • Frasier-Style Free Radio';
+    const album  = 'KZAK';
+    const artSrc = absUrl(track && (track.image || track.img) || 'Media/default.jpg');
+    try{
+      ms.metadata = new MediaMetadata({
+        title, artist, album,
+        artwork: [
+          { src: artSrc, sizes: '96x96',  type: 'image/jpeg' },
+          { src: artSrc, sizes: '192x192', type: 'image/jpeg' },
+          { src: artSrc, sizes: '384x384', type: 'image/jpeg' },
+          { src: artSrc, sizes: '512x512', type: 'image/jpeg' }
+        ]
+      });
+      document.title = `${title} — KZAK`;
+    }catch(e){}
+    updatePositionState(a);
+  };
+
+  window.updateMediaSessionForBreak = function(label){
+    const a = musicAudio(); if (!a) return;
+    const title = label || 'Station Break';
+    const artSrc = absUrl('Media/default.jpg');
+    try{
+      ms.metadata = new MediaMetadata({
+        title, artist: 'KZAK', album: 'IDs & Bumpers',
+        artwork: [{ src: artSrc, sizes: '256x256', type: 'image/jpeg' }]
+      });
+      document.title = `${title} — KZAK`;
+    }catch(e){}
+    updatePositionState(a);
+  };
+
+  ms.setActionHandler('play',    async () => { const a = musicAudio(); if (a) { try { await a.play(); } catch(e){} } });
+  ms.setActionHandler('pause',   () => { const a = musicAudio(); if (a) a.pause(); });
+  ms.setActionHandler('previoustrack', () => { try { typeof prev === 'function' && prev(); } catch(e){} });
+  ms.setActionHandler('nexttrack',     () => { try { typeof next === 'function' && next(); } catch(e){} });
+  ms.setActionHandler('seekbackward',  (d) => { const a = musicAudio(); if (!a) return; const step=(d&&d.seekOffset)||10; a.currentTime=Math.max(0,a.currentTime-step); updatePositionState(a); });
+  ms.setActionHandler('seekforward',   (d) => { const a = musicAudio(); if (!a) return; const step=(d&&d.seekOffset)||10; a.currentTime=Math.min((a.duration||Infinity),a.currentTime+step); updatePositionState(a); });
+  ms.setActionHandler('seekto', (d) => { const a = musicAudio(); if (!a||!d||typeof d.seekTime!=='number') return; if (d.fastSeek && 'fastSeek' in a) a.fastSeek(d.seekTime); else a.currentTime=d.seekTime; updatePositionState(a); });
+
+  function bind(a){
+    if (!a || a.__msBound) return; a.__msBound = true;
+    a.addEventListener('play',  ()=>{ ms.playbackState='playing'; updatePositionState(a); }, {passive:true});
+    a.addEventListener('pause', ()=>{ ms.playbackState='paused';  updatePositionState(a); }, {passive:true});
+    a.addEventListener('timeupdate', ()=>updatePositionState(a), {passive:true});
+    a.addEventListener('loadedmetadata', ()=>{
+      try{
+        if (typeof window.idx === 'number' && Array.isArray(window.PLAYLIST)) {
+          window.updateMediaSessionForTrack(window.PLAYLIST[window.idx]);
+        }
+      }catch(e){}
+    }, {passive:true});
+    a.addEventListener('playing', ()=>{
+      try{
+        if (typeof window.idx === 'number' && Array.isArray(window.PLAYLIST)) {
+          window.updateMediaSessionForTrack(window.PLAYLIST[window.idx]);
+        }
+      }catch(e){}
+    }, {passive:true});
+  }
+
+  function tick(){ const a = musicAudio(); if (a) bind(a); }
+  tick(); setInterval(tick, 1500);
+  window.__kzakMsNudge = function(){
+    const a = musicAudio(); if (!a) return;
+    try {
+      if (typeof window.idx === 'number' && Array.isArray(window.PLAYLIST)) {
+        window.updateMediaSessionForTrack(window.PLAYLIST[window.idx]);
+      }
+    } catch(e){}
+    updatePositionState(a);
+  };
+})();
+</script>
+
+
+<!-- HARD-SET periodic CarPlay metadata refresh -->
+<script>
+(function kzakCarPlayForce(){
+  if (!('mediaSession' in navigator)) return;
+  if (window.__kzakCarPlayForce) return; window.__kzakCarPlayForce = true;
+  const ms = navigator.mediaSession;
+  function musicAudio(){
+    return document.getElementById('audio')
+        || document.querySelector('audio[data-role="music"]')
+        || document.querySelector('audio:not([id*="break" i]):not([class*="break" i])');
+  }
+  function setMeta(){
+    try {
+      if (typeof window.idx === 'number' && Array.isArray(window.PLAYLIST) && window.PLAYLIST[window.idx]) {
+        window.updateMediaSessionForTrack(window.PLAYLIST[window.idx]);
+      }
+    } catch(e){}
+  }
+  setInterval(()=>{
+    const a = musicAudio();
+    if (a && !a.paused && !a.ended) setMeta();
+  }, 5000);
+  window.__kzakCarPlayPush = setMeta;
+})();
+</script>
+
 </body>
 </html>
