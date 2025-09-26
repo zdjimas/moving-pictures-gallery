@@ -1306,7 +1306,34 @@ async function discoverBreaks(){
   const found=[]; for(const p of pats){const ok=await firstReachable([p]); if(ok) found.push(ok); if(found.length>=48) break;}
   if(found.length) BREAKS=found; return BREAKS;
 }
-let lastBreakIdx=-1; function pickBreak(){if(!BREAKS.length)return null; if(BREAKS.length===1)return BREAKS[0]; let i; do{i=(Math.random()*BREAKS.length)|0}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
+let lastBreakIdx=-1; 
+function pickBreak(){
+  // Sequential, no-repeat-until-wrap (session-scoped)
+  try {
+    let list = Array.isArray(BREAKS) ? BREAKS.slice() : [];
+    // de-duplicate while preserving order
+    const seen = new Set(); list = list.filter(p => { p = String(p||'').trim(); if(!p || seen.has(p)) return false; seen.add(p); return true; });
+    const len = list.length;
+    if (len === 0) return null;
+    // pointer
+    const KEY = 'kzak_break_ptr_seqV4';
+    let ptrRaw = sessionStorage.getItem(KEY);
+    let ptr = Number(ptrRaw);
+    if (!Number.isInteger(ptr) || ptr < 0 || ptr >= len) ptr = 0;
+    const src = list[ptr];
+    ptr = (ptr + 1) % len;
+    sessionStorage.setItem(KEY, String(ptr));
+    lastBreakIdx = Math.max(0, list.indexOf(src));
+    return src;
+  } catch (e) {
+    // Fallback to previous immediate-non-repeat random
+    if(!BREAKS.length) return null; 
+    if(BREAKS.length===1) return BREAKS[0];
+    let i; do{ i=(Math.random()*BREAKS.length)|0 } while(i===lastBreakIdx);
+    lastBreakIdx=i; 
+    return BREAKS[i];
+  }
+}while(i===lastBreakIdx); lastBreakIdx=i; return BREAKS[i]}
 
 /* ===== Elements ===== */
 const audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
@@ -2255,156 +2282,5 @@ function prevTrack(){ /* your logic that eventually calls startTrack(prevIndex) 
 
 
   
-<!-- === APPEND-ONLY RUNTIME PATCH: Alternating, Sequential Breaks (safe; runs after load) === -->
-<script>
-window.addEventListener('load', () => {
-  try {
-    if (!Array.isArray(window.BREAKS)) return;
-    try { window.breakEvery = 1; } catch (e) {}
-    const origPick = window.pickBreak;
-    if (typeof origPick !== 'function') return;
-
-    function buildBuckets() {
-      const files = window.BREAKS.slice();
-      const sn = [], id = [];
-      for (let i = 0; i < files.length; i++) {
-        const name = String(files[i] || '');
-        if (/snappy/i.test(name)) sn.push(i); else id.push(i);
-      }
-      return { files, snIdx: sn, idIdx: id };
-    }
-
-    let B = buildBuckets();
-    let ptr = { sn: 0, id: 0 };
-    let lastType = 'sn'; // first chosen becomes 'id' after track 1
-
-    function nextFrom(type) {
-      const arr = (type === 'sn') ? B.snIdx : B.idIdx;
-      if (!arr.length) return null;
-      const j = (type === 'sn') ? (ptr.sn % arr.length) : (ptr.id % arr.length);
-      if (type === 'sn') ptr.sn = (j + 1) % arr.length; else ptr.id = (j + 1) % arr.length;
-      return B.files[arr[j]];
-    }
-
-    window.pickBreak = function () {
-      try {
-        if (!Array.isArray(window.BREAKS) || B.files.length !== window.BREAKS.length) {
-          B = buildBuckets(); ptr = { sn: 0, id: 0 }; lastType = 'sn';
-        }
-        const type = (lastType === 'sn') ? 'id' : 'sn';
-        let f = nextFrom(type);
-        if (!f) f = nextFrom(type === 'sn' ? 'id' : 'sn');
-        if (!f) return origPick();
-        lastType = type;
-        return f;
-      } catch (e) {
-        return origPick();
-      }
-    };
-  } catch (e) {}
-});
-</script>
-
-<!-- === STATION BREAK LAMP (append-only) === -->
-<style>
-  .pill.break {
-    display:inline-flex; align-items:center; gap:.5ch;
-    padding:6px 12px; border-radius:999px; border:1px solid #7a4a00;
-    background:#3a2100; color:#ffd28a; font-weight:700; margin-left:8px;
-  }
-  .pill.break .dot {width:10px;height:10px;border-radius:50%;background:#996300}
-  .pill.break.on { background:#ffb000; color:#1a1a1a; box-shadow:0 0 14px #ffb000 }
-  .pill.break.on .dot { background:#742e00; box-shadow:0 0 10px #742e00 }
-</style>
-<script>
-(function(){
-  const onAir = document.getElementById('onAir');
-  const breakAudio = document.getElementById('breakAudio');
-  if (!onAir || !breakAudio) return;
-  const lamp = document.createElement('div');
-  lamp.id = 'breakLamp';
-  lamp.className = 'pill break';
-  lamp.innerHTML = '<span class="dot"></span><strong>STATION BREAK</strong>';
-  onAir.insertAdjacentElement('afterend', lamp);
-  function updateLamp(){
-    const onAirOn = onAir.classList.contains('on');
-    const breakActive = !breakAudio.paused && !breakAudio.ended;
-    lamp.classList.toggle('on', breakActive && !onAirOn);
-  }
-  ['playing','pause','ended','stalled','abort','error','timeupdate'].forEach(ev=>{
-    breakAudio.addEventListener(ev, updateLamp, {passive:true});
-  });
-  const audio = document.getElementById('audio');
-  if (audio){
-    ['playing','pause','ended'].forEach(ev=> audio.addEventListener(ev, updateLamp, {passive:true}) );
-  }
-  updateLamp();
-})();
-</script>
-
-<!-- === KZAK: Sequential, no-repeat Station Breaks (V3 override) === -->
-<script>
-(function(){
-  'use strict';
-  // Session-persistent pointer; cycles through BREAKS without repeats until wrap
-  const PTR_KEY = 'kzak_break_ptr_seqV3';
-
-  function dedupe(list){
-    const seen = new Set();
-    const out = [];
-    (list || []).forEach(p => {
-      const s = String(p || '').trim();
-      if (!s) return;
-      if (!seen.has(s)) { seen.add(s); out.push(s); }
-    });
-    return out;
-  }
-
-  function getPtr(max){
-    const n = Number(sessionStorage.getItem(PTR_KEY));
-    return (Number.isInteger(n) && n >= 0 && n < max) ? n : 0;
-  }
-  function setPtr(n){ sessionStorage.setItem(PTR_KEY, String(n)); }
-
-  // FINAL pickBreak override (runs last; supersedes any earlier patches)
-  window.pickBreak = function(){
-    try{
-      let list = Array.isArray(window.BREAKS) ? window.BREAKS.slice() : [];
-      // If BREAKS was empty but a discovery routine exists, we still return null here;
-      // the existing code path calls discoverBreaks() before pickBreak() anyway.
-      list = dedupe(list);
-      const len = list.length;
-      if (len === 0) return null;
-      if (len === 1) { setPtr(0); return list[0]; }
-
-      // Load pointer, return current, then advance (wrap-around)
-      let i = getPtr(len);
-      const src = list[i];
-      i = (i + 1) % len;
-      setPtr(i);
-      return src;
-    }catch(e){
-      console.warn('[KZAK] pickBreak V3 override error', e);
-      return (window.BREAKS && window.BREAKS[0]) || null;
-    }
-  };
-
-  // Optional: reflect "Station Break" in Media Session if helper exists
-  const breakAudio = document.getElementById('breakAudio');
-  const audio = document.getElementById('audio');
-  if (breakAudio){
-    breakAudio.addEventListener('play', () => {
-      try { if (typeof window.updateMediaSessionForBreak === 'function') window.updateMediaSessionForBreak(); } catch(_) {}
-    }, {passive:true});
-    breakAudio.addEventListener('ended', () => {
-      try {
-        if (audio && typeof window.updateMediaSessionForTrack === 'function' && Array.isArray(window.PLAYLIST) && typeof window.idx === 'number') {
-          window.updateMediaSessionForTrack(window.PLAYLIST[window.idx]);
-        }
-      } catch(_){}
-    }, {once:false});
-  }
-})();
-</script>
 </body>
 </html>
