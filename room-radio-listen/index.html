@@ -2176,5 +2176,96 @@ window.addEventListener('load', () => {
 })();
 </script>
 
+
+<!-- ABOUT / Release Stamp (Bullwinkle-v1 with 3-digit subversion) -->
+<style>
+  #kzakTestBox{position:fixed;right:10px;bottom:10px;z-index:9999;
+    font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:rgba(0,0,0,.70);color:#fff;border-radius:10px;padding:10px 12px;backdrop-filter:blur(3px)}
+  #kzakTestBox b{font-weight:700}
+  #kzakTestBox small{opacity:.8}
+  .kzak-about-btn{font:600 12px/1 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    letter-spacing:.02em;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.25);
+    background:rgba(0,0,0,.6);color:#fff;cursor:pointer}
+  .kzak-about-fallback{position:fixed;top:10px;right:10px;z-index:10000}
+</style>
+
+<div id="kzakTestBox" aria-live="polite" aria-label="Build stamp"></div>
+
+<script>
+(function(){
+  // === Release constants (bump SUBVER each test build) ===
+  const RELEASE   = 'Bullwinkle-v1';
+  const SUBVER    = 1; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
+
+  // Optional query overrides for verification (do not change committed values)
+  const q = new URLSearchParams(location.search);
+  const ovRelease = q.get('r');                 // e.g., ?r=HotfixX
+  const ovSubver  = parseInt(q.get('sv'),10);   // e.g., ?sv=999
+  const rel = (ovRelease && ovRelease.trim()) || RELEASE;
+  const sub = Number.isFinite(ovSubver) ? ovSubver : SUBVER;
+
+  // Format 3-digit subversion
+  const subStr = String(Math.max(0, Math.min(999, sub))).padStart(3, '0');
+  const releaseId = `${rel}.${subStr}`;
+
+  // Render box (create if missing)
+  let box = document.getElementById('kzakTestBox');
+  if (!box) { box = document.createElement('div'); box.id='kzakTestBox'; document.body.appendChild(box); }
+  const cacheTag = `${rel.toLowerCase()}-${subStr}`;
+  box.innerHTML =
+    `<div><b>Release:</b> ${releaseId}</div>
+     <div><small>${new Date(BUILD_UTC).toLocaleString()}</small></div>
+     <div><small>${location.pathname.replace(/.*\//,'')}<span id="kzakCacheTag"> • v=${cacheTag}</span></small></div>`;
+
+  // Cache-bust via pathToUrl()
+  if (typeof window.pathToUrl === 'function') {
+    const orig = window.pathToUrl;
+    window.pathToUrl = function(p){
+      const u = orig(p);
+      return u + (u.includes('?') ? '&' : '?') + 'v=' + encodeURIComponent(cacheTag);
+    };
+  }
+
+  // Ensure About toggle exists; mount if missing
+  (function ensureAboutButton(){
+    if (document.getElementById('kzakAboutBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'kzakAboutBtn';
+    btn.className = 'kzak-about-btn';
+    btn.type = 'button';
+    btn.textContent = 'ABOUT';
+    // Try common control bars; else fixed top-right
+    const targets = [
+      document.getElementById('controls'),
+      document.getElementById('toolbar'),
+      document.querySelector('.controls'),
+      document.querySelector('.toolbar'),
+      document.querySelector('header'),
+    ];
+    const host = targets.find(Boolean);
+    if (host) { btn.style.marginLeft = '8px'; host.appendChild(btn); }
+    else { btn.classList.add('kzak-about-fallback'); document.body.appendChild(btn); }
+
+    // Toggle behavior with persistence
+    const KEY = 'kzak.about.visible';
+    function apply(show){
+      box.style.display = show ? 'block' : 'none';
+      btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+      try { localStorage.setItem(KEY, show ? '1' : '0'); } catch(_){}
+    }
+    let saved = null; try { saved = localStorage.getItem(KEY); } catch(_){}
+    apply(saved !== '0'); // default visible
+    btn.addEventListener('click', () => apply(btn.getAttribute('aria-pressed') !== 'true'));
+  })();
+
+  // Also mirror into document.title for quick tab recognition
+  if (!document.title.includes(releaseId)) {
+    document.title = `${document.title} — ${releaseId}`;
+  }
+})();
+</script>
+
 </body>
 </html>
