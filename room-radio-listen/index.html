@@ -175,17 +175,40 @@ const DEFAULT_IMG="Media/default.jpg";
 const DEFAULT_STORY="Under Construction: a special write-up about this specific music creation…";
 const BREAK_DIRS=["MediaBreak","MediaBreaks"];
 let BREAKS = [
+  "MediaBreaks/Snappy14.mp3",
   "MediaBreaks/Radio-Id-Two.mp3",
+  "MediaBreaks/Radio-Id-Five.mp3",
+  "MediaBreaks/Snappy3.mp3",
   "MediaBreaks/en-US-News-NThisisK-Z-A-Kbringingyou.mp3",
+  "MediaBreaks/Snappy21.mp3",
+  "MediaBreaks/Snappy8.mp3",
+  "MediaBreaks/Snappy17.mp3",
+  "MediaBreaks/Snappy11.mp3",
+  "MediaBreaks/Radio-Id-Ad-workforce1.mp3",
+  "MediaBreaks/Snappy1.mp3",
   "MediaBreaks/AmyYourelisteningtoK-ZACHt.mp3",
+  "MediaBreaks/Snappy7.mp3",
+  "MediaBreaks/Snappy19.mp3",
+  "MediaBreaks/Snappy15.mp3",
+  "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
+  "MediaBreaks/Snappy9.mp3",
+  "MediaBreaks/Snappy13.mp3",
+  "MediaBreaks/Radio-Id-Four.mp3",
+  "MediaBreaks/Snappy18.mp3",
   "MediaBreaks/Radio-Id-One.mp3",
+  "MediaBreaks/Snappy6.mp3",
+  "MediaBreaks/snappy5.mp3",
+  "MediaBreaks/Snappy22.mp3",
+  "MediaBreaks/Radio-Id-Ad-workforce2.mp3",
+  "MediaBreaks/Snappy10.mp3",
   "MediaBreaks/Snappy23.mp3",
   "MediaBreaks/Radio-Id-Three.mp3",
   "MediaBreaks/en-US-Journey-DYouaretunedintoK-Z-A-Kb.mp3",
+  "MediaBreaks/Snappy2.mp3",
   "MediaBreaks/Snappy12.mp3",
-  "MediaBreaks/en-US-Journey-D-K_ZACH___where_the_f.wav",
   "MediaBreaks/Snappy20.mp3"
   ];
+
 
 let breakEvery=1;
 
@@ -196,7 +219,13 @@ let breakEvery=1;
 
 
 
-
+{
+    title: "Killing Rock and Roll with New Words",
+    file:  "Media/Killing Rock and Roll with New Words.mp3",
+    img:   "Media/KillingRock.jpeg",
+    alt:   "Killing Rock and Roll - artwork",
+    story: "An old time favorite melody by another band who lost someone in a plane crash, RIP Randy Rhodes."
+  },
   {
     title: "Voices In My Head",
     file:  "Media/Voices in my head.mp3",
@@ -280,13 +309,7 @@ let breakEvery=1;
   alt:   "Cover art for KZAK",
   story: `One of the best songs from this group,  I love this melody and was a great hang out melody to party with as a teen in the 80s. `
 },
-{
-  title: "The Grander Illusion Ending",
-  file:  "Media/The Grander Illusion Ending  - Final Take .mp3",
-  image: "Media/GranderIllusionEndFinal.jpeg",
-  alt:   "Cover art for KZAK",
-  story: `One of the best songs from this group,  I love this melody and was a great hang out melody to party with as a teen in the 80s. `
-},
+
 {
   title: "Another Man In the Arizona Wilderness",
   file:  "Media/Another Man in the Arizona Wilderness .mp3",
@@ -345,21 +368,8 @@ let breakEvery=1;
   alt: "Cover art for Suite Madam Bleu — Take 2",
   story: "Under Construction."
 },
-{
-  title: "My Suite Madame Bleu (Take 3)",
-  file: "Media/My Suite Madame Bleu Take 3.mp3",
-  image: "Media/Bleu3.jpeg",
-  alt: "Cover art for Suite Madame Bleu — Take 3",
-  story: "Under Construction."
-},
 
-{
-  title: "My America?",
-  file: "Media/My America?.mp3", // requires robust path encoding
-  image: "Media/MyAmerica.jpeg",
-  alt: "Cover art for My America?",
-  story: "Under Construction."
-},
+
 
 
   {
@@ -475,13 +485,7 @@ let breakEvery=1;
     story: DEFAULT_STORY
   },
    
-  {
-    title: "10 Right In Two (Remastered) (Cover) (1)",
-    file:  "Media/10 Right In Two (Remastered) (Cover) (1).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "10 Right In Two (Remastered) (Cover) (1) — default artwork",
-    story: DEFAULT_STORY
-  },
+  
 
   {
     title: "10 Right In Two (Remastered) (Cover)",
@@ -499,6 +503,16 @@ let breakEvery=1;
     story: DEFAULT_STORY
   },
 
+
+{
+  title: "The Grander Illusion Ending",
+  file:  "Media/The Grander Illusion Ending  - Final Take .mp3",
+  image: "Media/GranderIllusionEndFinal.jpeg",
+  alt:   "Cover art for KZAK",
+  story: `One of the best songs from this group,  I love this melody and was a great hang out melody to party with as a teen in the 80s. `
+},
+
+   
   {
     title: "10. Shine On You Crazy Diamond (Parts 6-9) (cover)",
     file:  "Media/10. Shine On You Crazy Diamond (Parts 6-9) (cover).mp3",
@@ -555,6 +569,15 @@ let breakEvery=1;
     story: DEFAULT_STORY
   },
 
+
+{
+  title: "My Suite Madame Bleu (Take 3)",
+  file: "Media/My Suite Madame Bleu Take 3.mp3",
+  image: "Media/Bleu3.jpeg",
+  alt: "Cover art for Suite Madame Bleu — Take 3",
+  story: "Under Construction."
+},
+   
   {
     title: "A Demo in Time of Dying",
     file:  "Media/A Demo in Time of Dying.mp3",
@@ -563,6 +586,15 @@ let breakEvery=1;
     story: DEFAULT_STORY
   },
 
+
+{
+    title: "10 Right In Two (Remastered) (Cover) (1)",
+    file:  "Media/10 Right In Two (Remastered) (Cover) (1).mp3",
+    img:   DEFAULT_IMG,
+    alt:   "10 Right In Two (Remastered) (Cover) (1) — default artwork",
+    story: DEFAULT_STORY
+  },
+   
   {
     title: "A Demo of Poor Tom",
     file:  "Media/A Demo of Poor Tom.mp3",
@@ -652,6 +684,16 @@ let breakEvery=1;
     story: DEFAULT_STORY
   },
 
+
+{
+  title: "My America?",
+  file: "Media/My America?.mp3", // requires robust path encoding
+  image: "Media/MyAmerica.jpeg",
+  alt: "Cover art for My America?",
+  story: "Under Construction."
+},
+
+   
   {
     title: "Barn Jam Friends",
     file:  "Media/Barn Jam Friends.mp3",
