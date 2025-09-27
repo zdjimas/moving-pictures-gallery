@@ -2053,5 +2053,98 @@ window.addEventListener('load', () => {
   window.__kzakLsInfo = () => ({ meta: navigator.mediaSession?.metadata, src: musicAudio()?.currentSrc, idx, title: currentTrack()?.title });
 })();
 </script>
+
+<!-- ABOUT toggle for Build Test Box -->
+<style>
+  .kzak-about-btn{
+    font:600 12px/1 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    letter-spacing:.02em;
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(0,0,0,.6);
+    color:#fff;
+    cursor:pointer;
+    transition:background .2s,border-color .2s,box-shadow .2s;
+    user-select:none;
+  }
+  .kzak-about-btn:hover{ background:rgba(0,0,0,.75); border-color:rgba(255,255,255,.35); }
+  .kzak-about-fallback{ position:fixed; top:10px; right:10px; z-index:10000; }
+</style>
+<script>
+(function(){
+  // Ensure the test box sits bottom-right; if your CSS moved it, enforce here.
+  (function ensureBottomRight(){
+    const box = document.getElementById('kzakTestBox');
+    if (!box) return;
+    box.style.right = '10px';
+    box.style.left = '';
+    box.style.bottom = '10px';
+  })();
+
+  // Create ABOUT button
+  function makeBtn(){
+    const btn = document.createElement('button');
+    btn.id = 'kzakAboutBtn';
+    btn.className = 'kzak-about-btn';
+    btn.type = 'button';
+    btn.textContent = 'ABOUT';
+    btn.setAttribute('aria-pressed','false');
+    return btn;
+  }
+
+  // Try to mount into an existing top control panel; otherwise fixed top-right
+  function mountBtn(btn){
+    const candidates = [
+      document.getElementById('controls'),
+      document.getElementById('toolbar'),
+      document.querySelector('.controls'),
+      document.querySelector('.toolbar'),
+      document.querySelector('header'),
+    ];
+    const target = candidates.find(Boolean);
+    if (target) {
+      // Insert as the last control, with a little spacing
+      btn.style.marginLeft = '8px';
+      btn.style.marginRight = '0';
+      target.appendChild(btn);
+    } else {
+      btn.classList.add('kzak-about-fallback');
+      document.body.appendChild(btn);
+    }
+  }
+
+  // Wire behavior
+  function wire(btn){
+    const LS_KEY = 'kzak.about.visible';
+    const box = document.getElementById('kzakTestBox');
+    if (!box) return;
+
+    function apply(v){
+      const visible = !!v;
+      box.style.display = visible ? 'block' : 'none';
+      btn.setAttribute('aria-pressed', visible ? 'true' : 'false');
+      btn.style.outline = visible ? '2px solid rgba(255,255,255,.35)' : '';
+      try { localStorage.setItem(LS_KEY, visible ? '1' : '0'); } catch(e){}
+    }
+
+    // Initial state: use saved state, default to current display (visible by default)
+    let saved = null;
+    try { saved = localStorage.getItem(LS_KEY); } catch(e){}
+    if (saved === '0') apply(false); else apply(true);
+
+    btn.addEventListener('click', () => {
+      const isOn = btn.getAttribute('aria-pressed') === 'true';
+      apply(!isOn);
+    });
+  }
+
+  // Boot
+  const btn = makeBtn();
+  mountBtn(btn);
+  wire(btn);
+})();
+</script>
+
 </body>
 </html>
