@@ -102,6 +102,14 @@ input[type=range]{width:100%}
   <div class="toolbar">
     <button id="toLobby" class="btn">⬅︎ Return to Lobby</button>
     <div id="onAir" class="pill onair"><span class="onair-dot"></span><strong>ON AIR</strong></div>
+<div class="tiny muted" style="margin:2px 0 0 2px">Select the Genre you want played from list All play</div>
+<div class="genre-bar" id="genreBar" aria-label="Genre filter" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 6px;">
+  <button id="btnAll"   class="gbtn active" data-genre="ALL"                 type="button">ALL</button>
+  <button id="btnHeavy" class="gbtn"        data-genre="Heavy and Metal"     type="button">Heavy and Metal</button>
+  <button id="btnRock"  class="gbtn"        data-genre="Middle Ground Rock"  type="button">Middle Ground Rock</button>
+  <button id="btnMellow"class="gbtn"        data-genre="Mellow Tunes"        type="button">Mellow Tunes</button>
+</div>
+
 <nav class="creator-links" aria-label="Creator links" style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
   <a href="https://www.tiktok.com/@chrisjmurphy65" class="btn" target="_blank" rel="noopener noreferrer">🎬 Watch on TikTok (CJ Murphy)</a>
 </nav>
@@ -2647,7 +2655,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 17; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 18; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2858,10 +2866,18 @@ window.addEventListener('load', () => {
 
 
 <script>
-/* === Bullwinkle-v1.017: In-place PLAYLIST switching (works with buildList closures) === */
+/* === Bullwinkle-v1.018: Robust wiring + in-place playlist switching === */
 (function(){
-  function ensureMaster(){
-    if (!Array.isArray(window.PLAYLIST)) return false;
+  function onceReady(fn){
+    var tries = 0, t = setInterval(function(){
+      if (window.PLAYLIST && typeof window.buildList === 'function' && typeof window.load === 'function'){
+        clearInterval(t); fn();
+      } else if (++tries > 120){ clearInterval(t); } // ~24s timeout
+    }, 200);
+  }
+
+  function deriveFromMaster(){
+    if (!Array.isArray(window.PLAYLIST)) return null;
     if (!window.PLAYLIST_MASTER){
       window.PLAYLIST_MASTER = window.PLAYLIST.map(function(t, i){
         var c = Object.assign({}, t);
@@ -2870,15 +2886,13 @@ window.addEventListener('load', () => {
         return c;
       });
     }
-    return true;
-  }
-
-  function deriveLists(){
     var M = window.PLAYLIST_MASTER;
-    window.PLAYLIST_ALL    = M.slice();
-    window.PLAYLIST_HEAVY  = M.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Heavy and Metal'; });
-    window.PLAYLIST_ROCK   = M.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Middle Ground Rock'; });
-    window.PLAYLIST_MELLOW = M.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Mellow Tunes'; });
+    return {
+      ALL:    M.slice(),
+      HEAVY:  M.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Heavy and Metal'; }),
+      ROCK:   M.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Middle Ground Rock'; }),
+      MELLOW: M.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Mellow Tunes'; }),
+    };
   }
 
   function updateHeader(label, count){
@@ -2890,66 +2904,57 @@ window.addEventListener('load', () => {
     }catch(_){}
   }
 
-  function swapPlaylistInPlace(newList){
-    // Mutate the existing PLAYLIST array so any closures still referencing the original array see new contents.
+  function mutatePlaylist(list){
     if (!Array.isArray(window.PLAYLIST)) return;
-    window.PLAYLIST.splice(0, window.PLAYLIST.length); // clear
-    for (var i=0; i<newList.length; i++) window.PLAYLIST.push(newList[i]);
+    window.PLAYLIST.splice(0, window.PLAYLIST.length);
+    for (var i=0;i<list.length;i++) window.PLAYLIST.push(list[i]);
   }
 
-  function activate(listKey){
-    if (!ensureMaster()) return;
-    deriveLists();
-    var nextList, label;
-    switch(listKey){
-      case 'HEAVY':  nextList = window.PLAYLIST_HEAVY;  label='Heavy and Metal'; break;
-      case 'ROCK':   nextList = window.PLAYLIST_ROCK;   label='Middle Ground Rock'; break;
-      case 'MELLOW': nextList = window.PLAYLIST_MELLOW; label='Mellow Tunes'; break;
-      default:       nextList = window.PLAYLIST_ALL;    label='ALL';
-    }
-
-    swapPlaylistInPlace(nextList);
-
-    // Rebuild the UI list from the mutated PLAYLIST
-    if (typeof window.buildList === 'function') window.buildList();
-
-    // Reset index and play first if available
+  function activate(key){
+    var lists = deriveFromMaster(); if (!lists) return;
+    var map = {ALL:'ALL', 'Heavy and Metal':'HEAVY', 'Middle Ground Rock':'ROCK', 'Mellow Tunes':'MELLOW'};
+    var label = (key==='ALL'||key==='HEAVY'||key==='ROCK'||key==='MELLOW') ? key : key; // already label text
+    var chosen = lists[key] || lists[map[key]] || lists.ALL;
+    mutatePlaylist(chosen);
+    // rebuild UI list and start playing
     window.idx = 0;
-    if (window.PLAYLIST.length && typeof window.load === 'function'){
-      window.load(0, true);
-    }
-
-    updateHeader(label, window.PLAYLIST.length);
-    // Refresh small genre label
+    if (typeof window.buildList === 'function') window.buildList();
+    if (window.PLAYLIST.length) window.load(0, true);
+    updateHeader(label==='ALL'? 'ALL' : (label==='HEAVY'?'Heavy and Metal':label==='ROCK'?'Middle Ground Rock':label==='MELLOW'?'Mellow Tunes':label),
+                 window.PLAYLIST.length);
+    // refresh small genre label
     setTimeout(function(){
       try{
-        var el = document.getElementById('genreNow');
-        if (el){
+        var g = document.getElementById('genreNow');
+        if (g){
           var t = window.PLAYLIST[0];
-          el.textContent = 'Genre: ' + ((t && (t.genre||'Middle Ground Rock')) || 'Middle Ground Rock');
+          g.textContent = 'Genre: ' + ((t && (t.genre||'Middle Ground Rock')) || 'Middle Ground Rock');
         }
       }catch(_){}
-    }, 200);
+    }, 250);
   }
 
-  function wireBar(){
+  function wire(){
     var bar = document.getElementById('genreBar');
-    if (!bar || bar._wired017) return;
-    bar._wired017 = true;
-    bar.addEventListener('click', function(ev){
-      var btn = ev.target.closest('.gbtn'); if(!btn) return;
-      bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
-      var key = btn.getAttribute('data-genre') || 'ALL';
-      if (key === 'ALL') activate('ALL');
-      else if (key === 'Heavy and Metal') activate('HEAVY');
-      else if (key === 'Middle Ground Rock') activate('ROCK');
-      else if (key === 'Mellow Tunes') activate('MELLOW');
-    });
+    if (bar && !bar._wired018){
+      bar._wired018 = true;
+      function setActiveBtn(btn){
+        bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
+      }
+      var bAll = document.getElementById('btnAll');
+      var bHvy = document.getElementById('btnHeavy');
+      var bRck = document.getElementById('btnRock');
+      var bMel = document.getElementById('btnMellow');
+      if (bAll)  bAll.addEventListener('click',  function(){ setActiveBtn(bAll);  activate('ALL'); });
+      if (bHvy)  bHvy.addEventListener('click',  function(){ setActiveBtn(bHvy);  activate('HEAVY'); });
+      if (bRck)  bRck.addEventListener('click',  function(){ setActiveBtn(bRck);  activate('ROCK'); });
+      if (bMel)  bMel.addEventListener('click',  function(){ setActiveBtn(bMel);  activate('MELLOW'); });
+    }
   }
 
-  // Keep genre label updated on every load
+  // Keep Genre: label updated on every load
   (function hookLoad(){
-    if (typeof window.load !== 'function' || window.load._v017) return;
+    if (typeof window.load !== 'function' || window.load._v018) return;
     var _load = window.load;
     window.load = function(i, autoplay){
       var r = _load(i, autoplay);
@@ -2962,13 +2967,11 @@ window.addEventListener('load', () => {
       }catch(_){}
       return r;
     };
-    window.load._v017 = true;
+    window.load._v018 = true;
   })();
 
   document.addEventListener('DOMContentLoaded', function(){
-    ensureMaster(); deriveLists(); wireBar();
-    // Initialize header for ALL
-    updateHeader('ALL', (window.PLAYLIST||[]).length);
+    onceReady(function(){ wire(); updateHeader('ALL', (window.PLAYLIST||[]).length); });
   });
 })();
 </script>
