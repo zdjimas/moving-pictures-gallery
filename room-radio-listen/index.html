@@ -2655,7 +2655,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 18; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 21; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2972,6 +2972,109 @@ window.addEventListener('load', () => {
 
   document.addEventListener('DOMContentLoaded', function(){
     onceReady(function(){ wire(); updateHeader('ALL', (window.PLAYLIST||[]).length); });
+  });
+})();
+</script>
+
+
+<script>
+/* === Bullwinkle-v1.021: Fresh-derive sublists per click; in-place mutation; exact labels === */
+(function(){
+  function ready(fn){
+    if (document.readyState === 'complete' || document.readyState === 'interactive') return fn();
+    document.addEventListener('DOMContentLoaded', fn);
+  }
+  function trim(s){ return (s==null?'':String(s)).replace(/\s+/g,' ').trim(); }
+
+  function deriveFromSource(){
+    // Always derive from the original source PLAYLIST embedded in the page
+    var src = window.__ORIG_PLAYLIST__;
+    if (!src){
+      // First run: clone the current PLAYLIST as the source of truth
+      if (!Array.isArray(window.PLAYLIST)) return null;
+      src = window.__ORIG_PLAYLIST__ = window.PLAYLIST.map(function(t){ return Object.assign({}, t); });
+    }
+    var ALL = src.slice();
+    var HEAVY=[], ROCK=[], MELLOW=[];
+    for (var i=0;i<ALL.length;i++){
+      var g = trim(ALL[i].genre) || 'Middle Ground Rock';
+      if (g === 'Heavy and Metal') HEAVY.push(ALL[i]);
+      else if (g === 'Mellow Tunes') MELLOW.push(ALL[i]);
+      else ROCK.push(ALL[i]);
+    }
+    return {ALL:ALL, HEAVY:HEAVY, ROCK:ROCK, MELLOW:MELLOW};
+  }
+
+  function mutateInPlace(newList){
+    if (!Array.isArray(window.PLAYLIST)) return;
+    window.PLAYLIST.splice(0, window.PLAYLIST.length);
+    for (var i=0;i<newList.length;i++) window.PLAYLIST.push(newList[i]);
+  }
+
+  function setHeader(label, count){
+    try{
+      var strong = document.querySelector('#plist .head strong');
+      if (strong) strong.textContent = 'Playlist' + (label==='ALL' ? '' : ' — ' + label);
+      var cr = document.getElementById('countRight');
+      if (cr) cr.textContent = (count||0) + ' items';
+    }catch(_){}
+  }
+
+  function updateGenreNow(i){
+    try{
+      var el = document.getElementById('genreNow'); if (!el) return;
+      var t = window.PLAYLIST && window.PLAYLIST[i|0];
+      el.textContent = 'Genre: ' + (trim(t && t.genre) || 'Middle Ground Rock');
+    }catch(_){}
+  }
+
+  function hookLoad(){
+    if (typeof window.load !== 'function' || window.load._v021) return;
+    var _load = window.load;
+    window.load = function(i, autoplay){
+      var r = _load(i, autoplay);
+      updateGenreNow(i);
+      return r;
+    };
+    window.load._v021 = true;
+  }
+
+  function activate(label){
+    var lists = deriveFromSource(); if (!lists) return;
+    var chosen = (label==='ALL') ? lists.ALL : (label==='Heavy and Metal') ? lists.HEAVY : (label==='Middle Ground Rock') ? lists.ROCK : (label==='Mellow Tunes') ? lists.MELLOW : lists.ALL;
+    mutateInPlace(chosen);
+    if (typeof window.buildList === 'function') window.buildList();
+    window.idx = 0;
+    if (window.PLAYLIST.length) window.load(0, true);
+    setHeader(label, window.PLAYLIST.length);
+    setTimeout(function(){ updateGenreNow(0); }, 200);
+  }
+
+  function wire(){
+    var bars = document.querySelectorAll('#genreBar, .genre-bar');
+    bars.forEach(function(bar){
+      if (bar._wired021) return;
+      bar._wired021 = true;
+      bar.addEventListener('click', function(ev){
+        var btn = ev.target.closest('[data-genre]'); if (!btn) return;
+        bar.querySelectorAll('[data-genre]').forEach(function(b){ b.classList.toggle('active', b===btn); });
+        activate(btn.getAttribute('data-genre') || 'ALL');
+      });
+    });
+  }
+
+  ready(function(){
+    // Capture the original PLAYLIST once the page’s code has defined it
+    var tries=0, t=setInterval(function(){
+      if (Array.isArray(window.PLAYLIST) && typeof window.buildList === 'function' && typeof window.load === 'function'){
+        clearInterval(t);
+        if (!window.__ORIG_PLAYLIST__) window.__ORIG_PLAYLIST__ = window.PLAYLIST.map(function(x){ return Object.assign({}, x); });
+        hookLoad();
+        wire();
+        setHeader('ALL', (window.PLAYLIST||[]).length);
+        updateGenreNow(typeof window.idx==='number' ? window.idx : 0);
+      } else if (++tries>120){ clearInterval(t); }
+    }, 200);
   });
 })();
 </script>
