@@ -120,7 +120,7 @@ input[type=range]{width:100%}
      target="_blank"
      rel="noopener noreferrer"
      aria-label="Watch these songs as videos on the creator's TikTok site">
-    🎬 Watch on TikTok (CJ Murphy)
+    🎬 See these MusicVideos on TikTok
   </a>
   </nav>
 
@@ -2648,6 +2648,145 @@ window.addEventListener('load', () => {
   const btn = makeBtn();
   mountBtn(btn);
   wire(btn);
+})();
+</script>
+
+  <script>
+/* === KZAK • Bullwinkle late-binding genre enforcement (robust) ===
+   Works even if the player initializes after this runs, or rebinds handlers.
+   Plays ONLY tracks whose `genre` matches the selected button
+   (ALL | Heavy and Metal | Middle Ground Rock | Mellow Tunes).
+*/
+(function(){
+  var HOOKED = false;
+  var G = { genreFilter: 'ALL' };
+
+  function isAllowed(i){
+    try{
+      if (G.genreFilter === 'ALL') return true;
+      var t = window.PLAYLIST && window.PLAYLIST[i];
+      var g = t && (t.genre || 'Middle Ground Rock');
+      return g === G.genreFilter;
+    }catch(e){ return true; }
+  }
+  function nextAllowed(from){
+    var n = (window.PLAYLIST||[]).length; if (!n) return null;
+    for (var step=1; step<=n; step++){
+      var j = (from + step) % n;
+      if (isAllowed(j)) return j;
+    }
+    return null;
+  }
+  function prevAllowed(from){
+    var n = (window.PLAYLIST||[]).length; if (!n) return null;
+    for (var step=1; step<=n; step++){
+      var j = (from - step + n) % n;
+      if (isAllowed(j)) return j;
+    }
+    return null;
+  }
+  function applyGenreToList(){
+    try{
+      var body = document.getElementById('plistBody'); if(!body) return;
+      Array.prototype.forEach.call(body.children, function(row){
+        var i = Number(row.getAttribute('data-i'));
+        row.hidden = !isAllowed(i);
+      });
+      var cr = document.getElementById('countRight');
+      if (cr){
+        var total = (window.PLAYLIST||[]).length, ok=0;
+        for (var i=0;i<total;i++) if (isAllowed(i)) ok++;
+        cr.textContent = (G.genreFilter==='ALL'? total : ok) + ' tracks';
+      }
+    }catch(_){}
+  }
+
+  // Wire genre buttons once
+  function hookGenreBar(){
+    var bar = document.getElementById('genreBar') || document.querySelector('.genre-bar');
+    if (!bar || bar._kzakHooked) return;
+    bar._kzakHooked = true;
+    bar.addEventListener('click', function(ev){
+      var btn = ev.target.closest('.gbtn'); if(!btn) return;
+      G.genreFilter = btn.getAttribute('data-genre') || 'ALL';
+      bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
+      applyGenreToList();
+      try{
+        var i = (typeof window.idx==='number') ? window.idx : 0;
+        if (!isAllowed(i)) {
+          var ni = nextAllowed(i);
+          if (ni !== null && window.load) window.load(ni, true);
+        }
+      }catch(_){}
+    });
+  }
+
+  // Wrap core methods once the player is up
+  function hookCore(){
+    if (HOOKED) return;
+    if (!(window.load && window.next && window.prev && window.PLAYLIST)) return;
+    HOOKED = true;
+
+    var _load = window.load;
+    window.load = function(i, autoplay){
+      try{
+        if (G.genreFilter !== 'ALL' && !isAllowed(i)) {
+          var ni = nextAllowed(i);
+          if (ni !== null) i = ni;
+        }
+      }catch(_){}
+      return _load(i, autoplay);
+    };
+
+    var _next = window.next, _prev = window.prev;
+    window.next = function(){
+      try{
+        var i = (typeof window.idx==='number') ? window.idx : 0;
+        var ni = nextAllowed(i);
+        if (ni !== null) return window.load(ni, true);
+      }catch(_){}
+      return _next();
+    };
+    window.prev = function(){
+      try{
+        var i = (typeof window.idx==='number') ? window.idx : 0;
+        var pi = prevAllowed(i);
+        if (pi !== null) return window.load(pi, true);
+      }catch(_){}
+      return _prev();
+    };
+
+    // Ensure end-of-track advance respects filter
+    try{
+      if (window.audio){
+        try { window.audio.removeEventListener('ended', window.next); } catch(_){}
+        window.audio.addEventListener('ended', function(){ try{ window.next(); }catch(_){} });
+      }
+    }catch(_){}
+  }
+
+  // Keep trying until the app finishes initializing, then keep the list filtered
+  var tries = 0;
+  var t = setInterval(function(){
+    try{
+      hookGenreBar();
+      hookCore();
+      applyGenreToList();
+      if (++tries > 40 && HOOKED) clearInterval(t); // ~10s max
+    }catch(_){}
+  }, 250);
+
+  // Safety watchdog while playing: if current track falls outside the filter, jump
+  setInterval(function(){
+    try{
+      if (G.genreFilter === 'ALL') return;
+      var i = (typeof window.idx==='number') ? window.idx : 0;
+      if (!isAllowed(i)) {
+        var ni = nextAllowed(i);
+        if (ni !== null && window.load) window.load(ni, true);
+      }
+    }catch(_){}
+  }, 1000);
 })();
 </script>
 
