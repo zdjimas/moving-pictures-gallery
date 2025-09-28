@@ -55,24 +55,24 @@ input[type=range]{width:100%}
 .bio img{width:44px;height:44px;border-radius:10px;object-fit:cover}
 .bio .name{font-weight:600}
 .bio .role{color:var(--muted);font-size:12px}
-</style>
-<style>
-/* === KZAK v1.003 UI Tweaks === */
-#startBtn.btn, #pauseBtn.btn {
-  font-size: 1.15rem;
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-weight: 700;
-}
-#startBtn.btn { background: #1a9b57 !important; color: #fff !important; }
-#pauseBtn.btn { background: #cc6a13 !important; color: #fff !important; }
-.creator-links .btn { font-weight: 600; }
+
+/* === KZAK v1.009 UI & Genre === */
+#startBtn.btn, #pauseBtn.btn { font-size: 1.15rem; padding: 10px 18px; border-radius: 10px; font-weight: 700; }
+#startBtn.btn { background:#1a9b57 !important; color:#fff !important; }
+#pauseBtn.btn { background:#cc6a13 !important; color:#fff !important; }
+.creator-links .btn { font-weight:600; }
 .founder-blurb a, .founder-blurb a:visited { color:#fff !important; }
 .genre-bar { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 6px; }
 .genre-bar .gbtn { padding:6px 10px; border-radius:10px; font-weight:600; cursor:pointer; }
 .genre-bar .gbtn.active { outline:2px solid #fff; }
 .item[hidden] { display:none !important; }
 .item .meta-genre { font-size: 11px; opacity: .85; margin-top: 4px; }
+#genreNow { font-size:12px; opacity:.85; margin:0 0 2px 0; }
+.panel .bio { display:flex; align-items:center; gap:12px; }
+.panel .bio > img { width:48px; height:48px; border-radius:8px; object-fit:cover; }
+.panel .bio .name { font-weight:700; }
+.panel .bio .role { font-size:12px; opacity:.85; }
+
 </style>
 </head>
 <body>
@@ -107,7 +107,7 @@ input[type=range]{width:100%}
     <div class="thumb"><img src="Media/frasier.png" alt=""></div>
     <div>
       <h1>KZAK • Frasier-Style Fun Radio without the talking</h1>
-      <div class="sub"><span id="tcount">0</span> Song Playlist • <span class="tiny">ON AIR lamp • Deep-link sharing</span> • Build: <span id="buildVersion">Bullwinkle-v1.007</span></div>
+      <div class="sub"><span id="tcount">0</span> Song Playlist • <span class="tiny">ON AIR lamp • Deep-link sharing</span></div>
     </div>
   </header>
 
@@ -120,11 +120,9 @@ input[type=range]{width:100%}
      target="_blank"
      rel="noopener noreferrer"
      aria-label="Watch these songs as videos on the creator's TikTok site">
-    🎬 See these MusicVideos on TikTok
+    🎬 Watch on TikTok (CJ Murphy)
   </a>
-  </nav>
-
-    
+</nav>
 <div class="tiny muted" style="margin:2px 0 0 2px">Select the Genre you want played from list All play</div>
 <!-- Genre Selection -->
 <div class="genre-bar" id="genreBar" aria-label="Genre filter">
@@ -133,7 +131,8 @@ input[type=range]{width:100%}
   <button class="gbtn" data-genre="Middle Ground Rock" type="button">Middle Ground Rock</button>
   <button class="gbtn" data-genre="Mellow Tunes" type="button">Mellow Tunes</button>
 </div>
-<button id="startBtn" class="btn">▶︎ Start Station</button>
+
+    <button id="startBtn" class="btn">▶︎ Start Station</button>
     <button id="pauseBtn" class="btn" disabled>⏸ Pause Station</button>
     <div class="btn" id="loopBtn">⟲ Loop</div>
     <div class="btn" id="shuffleBtn">🔀 Shuffle</div>
@@ -169,12 +168,14 @@ input[type=range]{width:100%}
         <div class="row sep track">
           <div class="art"><img id="art" src="Media/default.jpg" alt=""></div>
           <div class="info">
-            <h3 id="title">—</h3>
+            <div id="genreNow" class="muted">Genre: —</div>
+<h3 id="title">—</h3>
             <div class="muted" id="story">Under Construction: a special write-up about this specific music creation…</div>
           </div>
         </div>
         <div class="tiny muted" style="margin-top:8px">Tip: The ON AIR pill lights only when music plays.</div>
-      </div></section>
+      </div>
+    </section>
 
     <aside class="panel playlist" id="plist">
       <div class="head">
@@ -189,18 +190,17 @@ input[type=range]{width:100%}
   <section class="panel" style="margin-top:16px">
     <div class="bio">
       <img src="Media/ZachArt.jpeg" alt="">
-      <div><div class="name">zdjimas</div><div class="role">Concept, curation, engineering</div></div>
+      <div><div class="name">zdjimas</div>
 <p class="founder-blurb" style="margin: 8px 14px 0 14px; line-height:1.35;">
   A founding creator of this tool, Zachary shares is publishing, artwork and moving picture music video art within this current radio room exhibit, make sure you hit the return to lobby to see more or visit the the CJ Murphy's TikTok page at:
   <a href="https://www.tiktok.com/@chrisjmurphy65" target="_blank" rel="noopener noreferrer">https://www.tiktok.com/@chrisjmurphy65</a>.
 </p>
-
+<div class="role">Concept, curation, engineering</div></div>
     </div>
     <div class="bio" style="border-top:1px solid var(--line)">
       <img src="Media/CJMURPHY.png" alt="">
       <div><div class="name">cjmurphy</div><div class="role">Composition, arrangement, sound design</div></div>
-    </div><p class="founder-blurb" style="margin: 6px 14px 0 14px; line-height:1.35;">CJ Murphy is co-author and co-creator of the music and artwork exhibits shown and created on TikTok. Checkout the book <em>The Last Job Youll Ever Hate, Thrive in the Age of AI</em> at: <a href="https://thehumanworkforce.com" target="_blank" rel="noopener noreferrer">https://thehumanworkforce.com</a>.</p>
-
+    </div>
   </section>
 </div>
 
@@ -2651,145 +2651,6 @@ window.addEventListener('load', () => {
 })();
 </script>
 
-  <script>
-/* === KZAK • Bullwinkle late-binding genre enforcement (robust) ===
-   Works even if the player initializes after this runs, or rebinds handlers.
-   Plays ONLY tracks whose `genre` matches the selected button
-   (ALL | Heavy and Metal | Middle Ground Rock | Mellow Tunes).
-*/
-(function(){
-  var HOOKED = false;
-  var G = { genreFilter: 'ALL' };
-
-  function isAllowed(i){
-    try{
-      if (G.genreFilter === 'ALL') return true;
-      var t = window.PLAYLIST && window.PLAYLIST[i];
-      var g = t && (t.genre || 'Middle Ground Rock');
-      return g === G.genreFilter;
-    }catch(e){ return true; }
-  }
-  function nextAllowed(from){
-    var n = (window.PLAYLIST||[]).length; if (!n) return null;
-    for (var step=1; step<=n; step++){
-      var j = (from + step) % n;
-      if (isAllowed(j)) return j;
-    }
-    return null;
-  }
-  function prevAllowed(from){
-    var n = (window.PLAYLIST||[]).length; if (!n) return null;
-    for (var step=1; step<=n; step++){
-      var j = (from - step + n) % n;
-      if (isAllowed(j)) return j;
-    }
-    return null;
-  }
-  function applyGenreToList(){
-    try{
-      var body = document.getElementById('plistBody'); if(!body) return;
-      Array.prototype.forEach.call(body.children, function(row){
-        var i = Number(row.getAttribute('data-i'));
-        row.hidden = !isAllowed(i);
-      });
-      var cr = document.getElementById('countRight');
-      if (cr){
-        var total = (window.PLAYLIST||[]).length, ok=0;
-        for (var i=0;i<total;i++) if (isAllowed(i)) ok++;
-        cr.textContent = (G.genreFilter==='ALL'? total : ok) + ' tracks';
-      }
-    }catch(_){}
-  }
-
-  // Wire genre buttons once
-  function hookGenreBar(){
-    var bar = document.getElementById('genreBar') || document.querySelector('.genre-bar');
-    if (!bar || bar._kzakHooked) return;
-    bar._kzakHooked = true;
-    bar.addEventListener('click', function(ev){
-      var btn = ev.target.closest('.gbtn'); if(!btn) return;
-      G.genreFilter = btn.getAttribute('data-genre') || 'ALL';
-      bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
-      applyGenreToList();
-      try{
-        var i = (typeof window.idx==='number') ? window.idx : 0;
-        if (!isAllowed(i)) {
-          var ni = nextAllowed(i);
-          if (ni !== null && window.load) window.load(ni, true);
-        }
-      }catch(_){}
-    });
-  }
-
-  // Wrap core methods once the player is up
-  function hookCore(){
-    if (HOOKED) return;
-    if (!(window.load && window.next && window.prev && window.PLAYLIST)) return;
-    HOOKED = true;
-
-    var _load = window.load;
-    window.load = function(i, autoplay){
-      try{
-        if (G.genreFilter !== 'ALL' && !isAllowed(i)) {
-          var ni = nextAllowed(i);
-          if (ni !== null) i = ni;
-        }
-      }catch(_){}
-      return _load(i, autoplay);
-    };
-
-    var _next = window.next, _prev = window.prev;
-    window.next = function(){
-      try{
-        var i = (typeof window.idx==='number') ? window.idx : 0;
-        var ni = nextAllowed(i);
-        if (ni !== null) return window.load(ni, true);
-      }catch(_){}
-      return _next();
-    };
-    window.prev = function(){
-      try{
-        var i = (typeof window.idx==='number') ? window.idx : 0;
-        var pi = prevAllowed(i);
-        if (pi !== null) return window.load(pi, true);
-      }catch(_){}
-      return _prev();
-    };
-
-    // Ensure end-of-track advance respects filter
-    try{
-      if (window.audio){
-        try { window.audio.removeEventListener('ended', window.next); } catch(_){}
-        window.audio.addEventListener('ended', function(){ try{ window.next(); }catch(_){} });
-      }
-    }catch(_){}
-  }
-
-  // Keep trying until the app finishes initializing, then keep the list filtered
-  var tries = 0;
-  var t = setInterval(function(){
-    try{
-      hookGenreBar();
-      hookCore();
-      applyGenreToList();
-      if (++tries > 40 && HOOKED) clearInterval(t); // ~10s max
-    }catch(_){}
-  }, 250);
-
-  // Safety watchdog while playing: if current track falls outside the filter, jump
-  setInterval(function(){
-    try{
-      if (G.genreFilter === 'ALL') return;
-      var i = (typeof window.idx==='number') ? window.idx : 0;
-      if (!isAllowed(i)) {
-        var ni = nextAllowed(i);
-        if (ni !== null && window.load) window.load(ni, true);
-      }
-    }catch(_){}
-  }, 1000);
-})();
-</script>
-
 
 <!-- ABOUT / Release Stamp (Bullwinkle-v1 with 3-digit subversion) -->
 <style>
@@ -2810,7 +2671,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 7; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 9; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2884,149 +2745,134 @@ window.addEventListener('load', () => {
 
 <script>
 (function(){
-  // Default genre for any track lacking one
-  (window.PLAYLIST||[]).forEach(function(t){ if (!t.genre) t.genre = 'Middle Ground Rock'; });
+  var HOOKED=false;
+  var G={ genre:'ALL' };
 
-  // Attach a genre line to each playlist row after buildList() runs
-  function annotateGenres(){
-    try{
-      var body = document.getElementById('plistBody');
-      if(!body) return;
-      Array.prototype.forEach.call(body.children, function(row){
-        var i = Number(row.getAttribute('data-i'));
-        if (!Number.isFinite(i)) return;
-        var t = (window.PLAYLIST || [])[i]; if(!t) return;
-        if (!row.querySelector('.meta-genre')) {
-          var g = document.createElement('div');
-          g.className = 'meta-genre muted';
-          g.textContent = 'Genre: ' + (t.genre || 'Middle Ground Rock');
-          row.querySelector('.info')?.appendChild(g);
-        } else {
-          row.querySelector('.meta-genre').textContent = 'Genre: ' + (t.genre || 'Middle Ground Rock');
-        }
-      });
-    }catch(e){}
-  }
-
-  // Monkey-patch buildList to call annotateGenres + apply filter
-  var _buildList = window.buildList;
-  window.buildList = function(){
-    if (typeof _buildList === 'function') _buildList();
-    annotateGenres();
-    applyGenreToList();
-  };
-
-  // Genre filter state + UI handlers
-  var genreFilter = 'ALL';
-  var bar = document.getElementById('genreBar');
-  if (bar){
-    bar.addEventListener('click', function(ev){
-      var btn = ev.target.closest('.gbtn'); if(!btn) return;
-      genreFilter = btn.getAttribute('data-genre') || 'ALL';
-      bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
-      applyGenreToList();
-      // If current track doesn't match, jump to next allowed
-      try{
-        var i = window.idx|0;
-        if (!isAllowed(i)) {
-          var ni = findNextAllowed(i);
-          if (ni !== null) window.load(ni, true);
-        }
-      }catch(_){}
-    });
-  }
+  // Default genre on any track without one
+  (window.PLAYLIST||[]).forEach(function(t){ if(!t.genre) t.genre='Middle Ground Rock'; });
 
   function isAllowed(i){
     try{
-      if (genreFilter === 'ALL') return true;
-      var t = window.PLAYLIST[i];
-      return t && (t.genre||'Middle Ground Rock') === genreFilter;
+      if (G.genre==='ALL') return true;
+      var t = window.PLAYLIST && window.PLAYLIST[i];
+      var g = t && (t.genre || 'Middle Ground Rock');
+      return g === G.genre;
     }catch(e){ return true; }
   }
-  function findNextAllowed(from){
-    var n = (window.PLAYLIST||[]).length; if (!n) return null;
-    for (var step=1; step<=n; step++){
-      var j = (from + step) % n;
-      if (isAllowed(j)) return j;
-    }
+  function nextAllowed(from){
+    var n=(window.PLAYLIST||[]).length; if(!n) return null;
+    for(var step=1; step<=n; step++){ var j=(from+step)%n; if(isAllowed(j)) return j; }
     return null;
   }
-  function findPrevAllowed(from){
-    var n = (window.PLAYLIST||[]).length; if (!n) return null;
-    for (var step=1; step<=n; step++){
-      var j = (from - step + n) % n;
-      if (isAllowed(j)) return j;
-    }
+  function prevAllowed(from){
+    var n=(window.PLAYLIST||[]).length; if(!n) return null;
+    for(var step=1; step<=n; step++){ var j=(from-step+n)%n; if(isAllowed(j)) return j; }
     return null;
   }
-
-  // Apply filter to the visible list
-  function applyGenreToList(){
+  function annotateGenres(){
     try{
-      var body = document.getElementById('plistBody');
-      if(!body) return;
+      var body=document.getElementById('plistBody'); if(!body) return;
       Array.prototype.forEach.call(body.children, function(row){
-        var i = Number(row.getAttribute('data-i'));
-        row.hidden = !isAllowed(i);
+        var i=Number(row.getAttribute('data-i')); if(!Number.isFinite(i)) return;
+        var t=(window.PLAYLIST||[])[i]; if(!t) return;
+        var info=row.querySelector('.info')||row;
+        var e=info.querySelector('.meta-genre');
+        if(!e){ e=document.createElement('div'); e.className='meta-genre muted'; info.appendChild(e); }
+        e.textContent='Genre: '+(t.genre||'Middle Ground Rock');
       });
-      // Update countRight if present
-      try{
-        var cnt = 0, n = (window.PLAYLIST||[]).length;
-        for (var i=0;i<n;i++) if (isAllowed(i)) cnt++;
-        var cr = document.getElementById('countRight');
-        if (cr) cr.textContent = (genreFilter==='ALL' ? n : cnt) + ' tracks';
-        var tmax = document.getElementById('tmax');
-        if (tmax) tmax.textContent = String(n);
-      }catch(_){}
     }catch(e){}
   }
-
-  // Monkey-patch load() so any internal call to a disallowed index is redirected
-  var _load = window.load;
-  if (typeof _load === 'function'){
-    window.load = function(i, autoplay){
-      try{
-        if (genreFilter !== 'ALL' && !isAllowed(i)) {
-          var ni = findNextAllowed(i);
-          if (ni !== null) i = ni;
-        }
-      }catch(_){}
-      return _load(i, autoplay);
-    };
+  function updateGenreNow(){
+    try{
+      var g=document.getElementById('genreNow'); if(!g) return;
+      var i=(typeof window.idx==='number')?window.idx:0;
+      var t=window.PLAYLIST && window.PLAYLIST[i];
+      g.textContent='Genre: '+((t && (t.genre||'Middle Ground Rock'))||'Middle Ground Rock');
+    }catch(_){}
   }
-
-  // Monkey-patch next/prev to respect filter
-  var _next = window.next;
-  var _prev = window.prev;
-  window.next = function(){
+  function applyGenreToList(){
     try{
-      var i = window.idx|0;
-      var ni = findNextAllowed(i);
-      if (ni === null) return _next ? _next() : void 0;
-      return window.load(ni, true);
-    }catch(e){ return _next ? _next() : void 0; }
-  };
-  window.prev = function(){
+      var body=document.getElementById('plistBody'); if(!body) return;
+      Array.prototype.forEach.call(body.children, function(row){
+        var i=Number(row.getAttribute('data-i'));
+        row.hidden=!isAllowed(i);
+      });
+      var cr=document.getElementById('countRight');
+      if(cr){ var total=(window.PLAYLIST||[]).length, ok=0; for(var i=0;i<total;i++) if(isAllowed(i)) ok++; cr.textContent=(G.genre==='ALL'? total: ok)+' tracks'; }
+    }catch(_){}
+  }
+  function hookGenreBar(){
+    var bar=document.getElementById('genreBar')||document.querySelector('.genre-bar');
+    if(!bar||bar._kzakhooked) return;
+    bar._kzakhooked=true;
+    bar.addEventListener('click', function(ev){
+      var btn=ev.target.closest('.gbtn'); if(!btn) return;
+      G.genre=btn.getAttribute('data-genre')||'ALL';
+      bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
+      applyGenreToList();
+      var i=(typeof window.idx==='number')?window.idx:0;
+      if(!isAllowed(i)){ var ni=nextAllowed(i); if(ni!==null && window.load) window.load(ni,true); }
+    });
+  }
+  function hookCore(){
+    if(HOOKED) return;
+    if(!(window.load && window.next && window.prev)) return;
+    HOOKED=true;
+    var _load=window.load;
+    window.load=function(i,autoplay){
+      try{
+        if(G.genre!=='ALL' && !isAllowed(i)){ var ni=nextAllowed((typeof window.idx==='number')?window.idx:0); if(ni!==null) i=ni; }
+      }catch(_){}
+      var r=_load(i,autoplay); try{ updateGenreNow(); }catch(_){}
+      return r;
+    };
+    var _next=window.next, _prev=window.prev;
+    window.next=function(){
+      try{ var i=(typeof window.idx==='number')?window.idx:0; var ni=nextAllowed(i); if(ni!==null) return window.load(ni,true);}catch(_){}
+      return _next();
+    };
+    window.prev=function(){
+      try{ var i=(typeof window.idx==='number')?window.idx:0; var pi=prevAllowed(i); if(pi!==null) return window.load(pi,true);}catch(_){}
+      return _prev();
+    };
     try{
-      var i = window.idx|0;
-      var pi = findPrevAllowed(i);
-      if (pi === null) return _prev ? _prev() : void 0;
-      return window.load(pi, true);
-    }catch(e){ return _prev ? _prev() : void 0; }
-  };
-
-  // Also guard auto-advance after a track ends by patching 'ended' listener
-  try{
-    if (window.audio){
-      var handlers = window.audio.onended;
+      if(window.audio){
+        try{ window.audio.removeEventListener('ended', window.next); }catch(_){}
+        window.audio.addEventListener('ended', function(){ try{ window.next(); }catch(_){}});
+      }
+    }catch(_){}
+  }
+  function hardBindButtons(){
+    var nb=document.getElementById('nextBtn');
+    var pb=document.getElementById('prevBtn');
+    function guard(handler){
+      return function(ev){
+        if(G.genre!=='ALL'){ ev.stopImmediatePropagation(); ev.preventDefault(); try{ handler(); }catch(_){ } }
+      };
     }
-  }catch(_){}
-
-  // Initial annotate + apply after DOM ready
-  document.addEventListener('DOMContentLoaded', function(){
-    annotateGenres();
-    applyGenreToList();
-  });
+    if(nb && !nb._kzakGuard){
+      nb.addEventListener('click', guard(function(){ window.next && window.next(); }), true);
+      nb._kzakGuard=true;
+    }
+    if(pb && !pb._kzakGuard){
+      pb.addEventListener('click', guard(function(){ window.prev && window.prev(); }), true);
+      pb._kzakGuard=true;
+    }
+  }
+  var tries=0, t=setInterval(function(){
+    try{
+      hookGenreBar(); hookCore(); hardBindButtons(); annotateGenres(); applyGenreToList(); updateGenreNow();
+      if(++tries>40 && HOOKED) clearInterval(t);
+    }catch(_){}
+  },250);
+  setInterval(function(){
+    try{
+      if(G.genre==='ALL') return;
+      var i=(typeof window.idx==='number')?window.idx:0;
+      if(!isAllowed(i)){ var ni=nextAllowed(i); if(ni!==null && window.load) window.load(ni,true); }
+    }catch(_){}
+  },800);
+  document.addEventListener('DOMContentLoaded', function(){ annotateGenres(); applyGenreToList(); updateGenreNow(); });
 })();
 </script>
 
