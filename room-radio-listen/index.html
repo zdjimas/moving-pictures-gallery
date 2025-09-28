@@ -61,7 +61,6 @@ input[type=range]{width:100%}
 #pauseBtn.btn { background:#cc6a13 !important; color:#fff !important; }
 .item .meta-genre { font-size: 11px; opacity: .85; margin-top: 4px; }
 
-.founder-blurb a, .founder-blurb a:visited { color:#fff !important; }
 </style>
 </head>
 <body>
@@ -2648,7 +2647,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 14; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 15; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2859,306 +2858,95 @@ window.addEventListener('load', () => {
 
 
 <script>
-/* === Bullwinkle-v1.012: Clean Genre Filter (preserves breaks) === */
+/* === Bullwinkle-v1.015: Hard Playlist Switching per Genre (uses PLAYLIST reassignment) === */
 (function(){
-  var genreFilter = 'ALL';
-  var PLAY = window.PLAYLIST || [];
+  // Wait for PLAYLIST to exist
+  if (!Array.isArray(window.PLAYLIST)) return;
 
-  // Normalize missing genre
-  PLAY.forEach(function(t){ if(!t.genre) t.genre = 'Middle Ground Rock'; });
+  // Preserve the original complete list
+  window.PLAYLIST_MASTER = (window.PLAYLIST_MASTER || window.PLAYLIST.map(function(t, i){
+    var c = Object.assign({}, t);
+    if (!c.genre) c.genre = 'Middle Ground Rock';
+    c._i = i;
+    return c;
+  }));
 
-  function isAllowed(i){
-    if (genreFilter === 'ALL') return true;
-    var t = PLAY[i];
-    return t && (t.genre || 'Middle Ground Rock') === genreFilter;
-  }
-  function nextAllowedFrom(start){
-    var n = PLAY.length; if (!n) return start;
-    for (var step=1; step<=n; step++){
-      var j = (start + step) % n;
-      if (isAllowed(j)) return j;
-    }
-    return start;
-  }
-  function prevAllowedFrom(start){
-    var n = PLAY.length; if (!n) return start;
-    for (var step=1; step<=n; step++){
-      var j = (start - step + n) % n;
-      if (isAllowed(j)) return j;
-    }
-    return start;
-  }
+  // Build genre constants from the master list (no manual duplication required)
+  window.PLAYLIST_ALL    = window.PLAYLIST_MASTER.slice();
+  window.PLAYLIST_HEAVY  = window.PLAYLIST_MASTER.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Heavy and Metal'; });
+  window.PLAYLIST_ROCK   = window.PLAYLIST_MASTER.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Middle Ground Rock'; });
+  window.PLAYLIST_MELLOW = window.PLAYLIST_MASTER.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Mellow Tunes'; });
 
-  function updateRightList(){
+  // Utility to refresh UI from the current PLAYLIST
+  function refreshFromActive(listName){
     try{
-      var body = document.getElementById('plistBody'); if (!body) return;
-      var rows = Array.prototype.slice.call(body.children);
-      rows.forEach(function(row){
-        var i = Number(row.getAttribute('data-i'));
-        row.hidden = !isAllowed(i);
-        // remove any prior per-row genre tag we might have injected
-        var mg = row.querySelector('.meta-genre'); if (mg) mg.remove();
-      });
-      // header label
-      var titleEl = document.querySelector('#plist .head strong');
-      if (titleEl){
-        titleEl.textContent = 'Playlist' + (genreFilter==='ALL' ? '' : ' — ' + genreFilter);
+      // Swap global PLAYLIST to the chosen list
+      var nextList =
+        listName==='HEAVY'  ? window.PLAYLIST_HEAVY  :
+        listName==='ROCK'   ? window.PLAYLIST_ROCK   :
+        listName==='MELLOW' ? window.PLAYLIST_MELLOW :
+                               window.PLAYLIST_ALL;
+      window.PLAYLIST = nextList.slice(); // shallow copy so buildList reads this snapshot
+
+      // Rebuild right pane & counters
+      if (typeof window.buildList === 'function') window.buildList();
+
+      // Reset index and start playing first track if any
+      window.idx = 0;
+      if (window.PLAYLIST.length && typeof window.load === 'function') {
+        window.load(0, true);
       }
-      // count
-      var cr = document.getElementById('countRight');
-      if (cr){
-        var ok = 0; for (var i=0;i<PLAY.length;i++) if (isAllowed(i)) ok++;
-        cr.textContent = (genreFilter==='ALL' ? PLAY.length : ok) + ' items';
+
+      // Update playlist header
+      var strong = document.querySelector('#plist .head strong');
+      if (strong){
+        var lbl = (
+          listName==='HEAVY'  ? 'Heavy and Metal' :
+          listName==='ROCK'   ? 'Middle Ground Rock' :
+          listName==='MELLOW' ? 'Mellow Tunes' : 'ALL'
+        );
+        strong.textContent = 'Playlist' + (lbl==='ALL' ? '' : ' — ' + lbl);
       }
-    }catch(_){}
+    }catch(e){ /* no-op */ }
   }
 
+  // Keep the 'Genre:' label above title in sync
   function updateGenreNow(){
     try{
       var el = document.getElementById('genreNow'); if (!el) return;
       var i = (typeof window.idx==='number') ? window.idx : 0;
-      var t = PLAY[i];
+      var t = window.PLAYLIST && window.PLAYLIST[i];
       el.textContent = 'Genre: ' + ((t && (t.genre||'Middle Ground Rock')) || 'Middle Ground Rock');
     }catch(_){}
   }
-
-  // Wrap load() so any disallowed index is redirected using the ATTEMPTED index, not current
-  if (typeof window.load === 'function' && !window.load._genre012){
-    var _load = window.load;
+  var _load015 = window.load;
+  if (typeof _load015 === 'function' && !_load015._v015){
     window.load = function(i, autoplay){
-      try{
-        if (genreFilter !== 'ALL' && !isAllowed(i)) {
-          i = nextAllowedFrom(i);
-        }
-      }catch(_){}
-      var r = _load(i, autoplay);
+      var r = _load015(i, autoplay);
       try{ updateGenreNow(); }catch(_){}
       return r;
     };
-    window.load._genre012 = true;
+    window.load._v015 = true;
   }
 
-  // Patch next/prev minimally to respect subset without breaking break cadence
-  if (typeof window.next === 'function' && !window.next._genre012){
-    var _next = window.next;
-    window.next = function(){
-      if (genreFilter === 'ALL') return _next();
-      var i = (typeof window.idx==='number') ? window.idx : 0;
-      return window.load(nextAllowedFrom(i), true);
-    };
-    window.next._genre012 = true;
-  }
-  if (typeof window.prev === 'function' && !window.prev._genre012){
-    var _prev = window.prev;
-    window.prev = function(){
-      if (genreFilter === 'ALL') return _prev();
-      var i = (typeof window.idx==='number') ? window.idx : 0;
-      return window.load(prevAllowedFrom(i), true);
-    };
-    window.prev._genre012 = true;
-  }
-
-  // Genre buttons
+  // Wire the top buttons
   var bar = document.getElementById('genreBar');
-  if (bar && !bar._genre012){
-    bar._genre012 = true;
+  if (bar && !bar._wired015){
+    bar._wired015 = true;
     bar.addEventListener('click', function(ev){
       var btn = ev.target.closest('.gbtn'); if(!btn) return;
-      genreFilter = btn.getAttribute('data-genre') || 'ALL';
-      bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
-      updateRightList();
-      // If current is outside subset, move to the next allowed FROM current attempted index
-      var cur = (typeof window.idx==='number') ? window.idx : 0;
-      if (!isAllowed(cur) && typeof window.load === 'function') {
-        window.load(nextAllowedFrom(cur), true);
-      }
-    });
-  }
-
-  // Keep right list filtered and header updated across rebuilds
-  document.addEventListener('DOMContentLoaded', function(){
-    updateRightList();
-    updateGenreNow();
-    setTimeout(function(){ updateRightList(); updateGenreNow(); }, 500);
-  });
-  // Soft watchdog (list can rebuild when the playlist is updated)
-  setInterval(updateRightList, 2500);
-})();
-</script>
-
-
-<script>
-/* === Bullwinkle-v1.014: Concrete Active Playlists per Genre (random within subset) === */
-(function(){
-  // Guard against double-initialization
-  if (window.__kzakGenreLists014) return;
-  window.__kzakGenreLists014 = true;
-
-  var MASTER = (window.PLAYLIST || []).map(function(t, i){ 
-    if (!t.genre) t.genre = 'Middle Ground Rock';
-    // keep a pointer to original index
-    t._i = (typeof t._i === 'number') ? t._i : i;
-    return t;
-  });
-
-  // Derive concrete lists once
-  var LISTS = {
-    ALL: MASTER,
-    'Heavy and Metal': MASTER.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Heavy and Metal'; }),
-    'Middle Ground Rock': MASTER.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Middle Ground Rock'; }),
-    'Mellow Tunes': MASTER.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Mellow Tunes'; })
-  };
-
-  var state = {
-    key: 'ALL',
-    list: LISTS.ALL,
-    order: [],
-    pos: 0,
-    hooked: false
-  };
-
-  function makeOrder(n, shuffle){
-    var a = []; for (var i=0;i<n;i++) a.push(i);
-    if (shuffle){
-      for (var k=n-1;k>0;k--){ var j=Math.floor(Math.random()*(k+1)); var tmp=a[k]; a[k]=a[j]; a[j]=tmp; }
-    }
-    return a;
-  }
-
-  // Render right pane strictly from state.list
-  function renderRightFromActive(){
-    try{
-      var body = document.getElementById('plistBody');
-      if (!body) return;
-      // Build rows
-      var html = '';
-      for (var p=0; p<state.list.length; p++){
-        var t = state.list[p];
-        var idx = t._i; // master index
-        var img = t.img || t.image || '';
-        var tt  = t.title || ('Track ' + (idx+1));
-        var file= t.file || t.src || '';
-        html += ''
-          + '<div class="item" data-i="'+ idx +'">'
-          +   '<img class="cover" src="'+ (img||'') + '" alt="">'
-          +   '<div class="info">'
-          +     '<div class="title">'+ tt +'</div>'
-          +     '<div class="path muted">'+ file +'</div>'
-          +   '</div>'
-          + '</div>';
-      }
-      body.innerHTML = html;
-
-      // Click to play any item
-      body.addEventListener('click', function(ev){
-        var item = ev.target.closest('.item'); if(!item) return;
-        var masterIdx = Number(item.getAttribute('data-i'));
-        // align state.pos to this item position if present in current list
-        for (var p=0; p<state.order.length; p++){
-          var localIdx = state.order[p];
-          var it = state.list[localIdx];
-          if (it && it._i === masterIdx){ state.pos = p; break; }
-        }
-        if (typeof window.load === 'function') window.load(masterIdx, true);
-      }, { once: true }); // delegate once; list is rebuilt on each switch
-
-      // Header + count
-      var strong = document.querySelector('#plist .head strong');
-      if (strong) strong.textContent = 'Playlist' + (state.key==='ALL' ? '' : ' — ' + state.key);
-      var cr = document.getElementById('countRight');
-      if (cr) cr.textContent = (state.list.length) + ' items';
-    }catch(_){}
-  }
-
-  function updateGenreNow(){
-    try{
-      var el = document.getElementById('genreNow'); if (!el) return;
-      var i = (typeof window.idx==='number') ? window.idx : 0;
-      var t = MASTER[i];
-      el.textContent = 'Genre: ' + ((t && (t.genre||'Middle Ground Rock')) || 'Middle Ground Rock');
-    }catch(_){}
-  }
-
-  function setActive(key){
-    state.key  = key || 'ALL';
-    state.list = (key==='ALL') ? LISTS.ALL : LISTS[key];
-    state.order = makeOrder(state.list.length, true);
-    state.pos = 0;
-    renderRightFromActive();
-    // If switching away from ALL and current song not in subset, start subset
-    if (state.key !== 'ALL' && state.list.length){
-      var cur = (typeof window.idx==='number') ? window.idx : -1;
-      var found = state.list.some(function(t){ return t._i === cur; });
-      if (!found && typeof window.load === 'function'){
-        var masterIdx = state.list[state.order[state.pos]]._i;
-        window.load(masterIdx, true);
-      }
-    }
-  }
-
-  function hookCore(){
-    if (state.hooked) return;
-    if (!(typeof window.load === 'function' && typeof window.next === 'function' && typeof window.prev === 'function')) return;
-    state.hooked = true;
-
-    var _load = window.load, _next = window.next, _prev = window.prev;
-
-    // Wrap load: keep your internal behavior; we just update the "now" label
-    window.load = function(i, autoplay){
-      var r = _load(i, autoplay);
-      try{ updateGenreNow(); }catch(_){}
-      return r;
-    };
-
-    // Wrap next/prev to stay inside active list (when key != ALL)
-    window.next = function(){
-      if (state.key === 'ALL' || !state.list.length) return _next();
-      state.pos = (state.pos + 1) % state.order.length;
-      var masterIdx = state.list[state.order[state.pos]]._i;
-      return window.load(masterIdx, true);
-    };
-    window.prev = function(){
-      if (state.key === 'ALL' || !state.list.length) return _prev();
-      state.pos = (state.pos - 1 + state.order.length) % state.order.length;
-      var masterIdx = state.list[state.order[state.pos]]._i;
-      return window.load(masterIdx, true);
-    };
-
-    // Ensure end-of-track uses our next
-    try{
-      if (window.audio){
-        try { window.audio.removeEventListener('ended', window.next); } catch(_){}
-        window.audio.addEventListener('ended', function(){ try{ window.next(); }catch(_){} });
-      }
-    }catch(_){}
-  }
-
-  // Hook genre buttons
-  function hookButtons(){
-    var bar = document.getElementById('genreBar');
-    if (!bar || bar.__kzak014) return;
-    bar.__kzak014 = true;
-    bar.addEventListener('click', function(ev){
-      var btn = ev.target.closest('.gbtn'); if (!btn) return;
       var key = btn.getAttribute('data-genre') || 'ALL';
-      // Update active class
       bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
-      setActive(key);
+      if (key === 'ALL')      refreshFromActive('ALL');
+      else if (key === 'Heavy and Metal') refreshFromActive('HEAVY');
+      else if (key === 'Middle Ground Rock') refreshFromActive('ROCK');
+      else if (key === 'Mellow Tunes') refreshFromActive('MELLOW');
     });
   }
 
-  document.addEventListener('DOMContentLoaded', function(){
-    hookCore();
-    hookButtons();
-    setActive('ALL');     // start with ALL
-    updateGenreNow();
-  });
-
-  // Retry hooks if app binds late
-  var tries = 0, timer = setInterval(function(){
-    hookCore(); hookButtons();
-    if (++tries > 40 && state.hooked) clearInterval(timer);
-  }, 250);
+  // Initial ensure: set to ALL derived, rebuild once so counts/header are correct
+  refreshFromActive('ALL');
+  setTimeout(updateGenreNow, 400);
 })();
 </script>
 
