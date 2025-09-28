@@ -2647,7 +2647,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 10; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 11; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2853,6 +2853,111 @@ window.addEventListener('load', () => {
   });
   // Also reapply after 1s in case buildList rebuilt late
   setTimeout(function(){ applyGenreUI(); updateGenreNow(); }, 1000);
+})();
+</script>
+
+
+<script>
+/* === Bullwinkle-v1.011: Minimal Genre Filter (preserves station breaks) === */
+(function(){
+  var genreFilter = 'ALL';
+  var PLAY = window.PLAYLIST || [];
+
+  // Normalize missing genre to "Middle Ground Rock"
+  PLAY.forEach(function(t){ if(!t.genre){ t.genre = 'Middle Ground Rock'; }});
+
+  function isAllowed(i){
+    try{
+      if (genreFilter === 'ALL') return true;
+      var t = PLAY[i];
+      return t && (t.genre || 'Middle Ground Rock') === genreFilter;
+    }catch(e){ return true; }
+  }
+  function nextAllowed(from){
+    var n = PLAY.length; if (!n) return from;
+    for (var step=1; step<=n; step++){
+      var j = (from + step) % n;
+      if (isAllowed(j)) return j;
+    }
+    return from;
+  }
+
+  function annotateRowsAndHide(){
+    try{
+      var body = document.getElementById('plistBody'); if (!body) return;
+      var rows = Array.prototype.slice.call(body.children);
+      rows.forEach(function(row){
+        var i = Number(row.getAttribute('data-i'));
+        // annotate genre line under each title
+        var info = row.querySelector('.info') || row;
+        var g = info.querySelector('.meta-genre');
+        if (!g) { g = document.createElement('div'); g.className = 'meta-genre muted'; info.appendChild(g); }
+        var t = PLAY[i];
+        g.textContent = 'Genre: ' + ((t && (t.genre||'Middle Ground Rock')) || 'Middle Ground Rock');
+
+        // filter visibility
+        row.hidden = !isAllowed(i);
+      });
+      var cr = document.getElementById('countRight');
+      if (cr){
+        var ok = 0; for (var i=0;i<PLAY.length;i++) if (isAllowed(i)) ok++;
+        cr.textContent = (genreFilter==='ALL' ? PLAY.length : ok) + ' items';
+      }
+    }catch(_){}
+  }
+
+  function updateGenreNow(){
+    try{
+      var el = document.getElementById('genreNow'); if (!el) return;
+      var i = (typeof window.idx === 'number') ? window.idx : 0;
+      var t = PLAY[i];
+      el.textContent = 'Genre: ' + ((t && (t.genre||'Middle Ground Rock')) || 'Middle Ground Rock');
+    }catch(_){}
+  }
+
+  // Hook buttons
+  var bar = document.getElementById('genreBar');
+  if (bar){
+    bar.addEventListener('click', function(ev){
+      var btn = ev.target.closest('.gbtn'); if(!btn) return;
+      genreFilter = btn.getAttribute('data-genre') || 'ALL';
+      bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
+      annotateRowsAndHide();
+      // If current track is not allowed, redirect to next allowed
+      try{
+        var cur = (typeof window.idx === 'number') ? window.idx : 0;
+        if (!isAllowed(cur) && typeof window.load === 'function'){
+          window.load(nextAllowed(cur), true);
+        }
+      }catch(_){}
+    });
+  }
+
+  // Wrap only load() so we preserve next()/prev() internals and station breaks
+  if (typeof window.load === 'function' && !window.load._genreWrapped011){
+    var _load = window.load;
+    window.load = function(i, autoplay){
+      try{
+        if (genreFilter !== 'ALL' && !isAllowed(i)) {
+          i = nextAllowed((typeof window.idx === 'number') ? window.idx : 0);
+        }
+      }catch(_){}
+      var r = _load(i, autoplay);
+      try{ updateGenreNow(); }catch(_){}
+      return r;
+    };
+    window.load._genreWrapped011 = true;
+  }
+
+  // Keep the list filtered and label accurate even if buildList runs later
+  document.addEventListener('DOMContentLoaded', function(){
+    annotateRowsAndHide();
+    updateGenreNow();
+    // Re-apply after a short delay to catch late list builds
+    setTimeout(function(){ annotateRowsAndHide(); updateGenreNow(); }, 600);
+  });
+  // Also re-annotate every few seconds without being intrusive
+  setInterval(function(){ annotateRowsAndHide(); }, 3000);
 })();
 </script>
 
