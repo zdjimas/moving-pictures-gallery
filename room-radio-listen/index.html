@@ -2647,7 +2647,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 16; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 17; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2858,7 +2858,7 @@ window.addEventListener('load', () => {
 
 
 <script>
-/* === Bullwinkle-v1.016: Explicit Genre Bar + Hard Playlist Switching === */
+/* === Bullwinkle-v1.017: In-place PLAYLIST switching (works with buildList closures) === */
 (function(){
   function ensureMaster(){
     if (!Array.isArray(window.PLAYLIST)) return false;
@@ -2881,13 +2881,20 @@ window.addEventListener('load', () => {
     window.PLAYLIST_MELLOW = M.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Mellow Tunes'; });
   }
 
-  function setHeader(label, count){
+  function updateHeader(label, count){
     try{
       var strong = document.querySelector('#plist .head strong');
       if (strong) strong.textContent = 'Playlist' + (label==='ALL' ? '' : ' — ' + label);
       var cr = document.getElementById('countRight');
       if (cr) cr.textContent = (count||0) + ' items';
     }catch(_){}
+  }
+
+  function swapPlaylistInPlace(newList){
+    // Mutate the existing PLAYLIST array so any closures still referencing the original array see new contents.
+    if (!Array.isArray(window.PLAYLIST)) return;
+    window.PLAYLIST.splice(0, window.PLAYLIST.length); // clear
+    for (var i=0; i<newList.length; i++) window.PLAYLIST.push(newList[i]);
   }
 
   function activate(listKey){
@@ -2900,16 +2907,20 @@ window.addEventListener('load', () => {
       case 'MELLOW': nextList = window.PLAYLIST_MELLOW; label='Mellow Tunes'; break;
       default:       nextList = window.PLAYLIST_ALL;    label='ALL';
     }
-    // Reassign global PLAYLIST and rebuild UI
-    window.PLAYLIST = nextList.slice();
+
+    swapPlaylistInPlace(nextList);
+
+    // Rebuild the UI list from the mutated PLAYLIST
     if (typeof window.buildList === 'function') window.buildList();
-    // Reset to first item in the new list (if any)
+
+    // Reset index and play first if available
     window.idx = 0;
     if (window.PLAYLIST.length && typeof window.load === 'function'){
       window.load(0, true);
     }
-    setHeader(label, window.PLAYLIST.length);
-    // Update the small genre label above title
+
+    updateHeader(label, window.PLAYLIST.length);
+    // Refresh small genre label
     setTimeout(function(){
       try{
         var el = document.getElementById('genreNow');
@@ -2923,8 +2934,8 @@ window.addEventListener('load', () => {
 
   function wireBar(){
     var bar = document.getElementById('genreBar');
-    if (!bar || bar._wired016) return;
-    bar._wired016 = true;
+    if (!bar || bar._wired017) return;
+    bar._wired017 = true;
     bar.addEventListener('click', function(ev){
       var btn = ev.target.closest('.gbtn'); if(!btn) return;
       bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
@@ -2936,9 +2947,9 @@ window.addEventListener('load', () => {
     });
   }
 
-  // Keep header count accurate on load() as tracks change
-  (function hookLoadLabel(){
-    if (typeof window.load !== 'function' || window.load._v016) return;
+  // Keep genre label updated on every load
+  (function hookLoad(){
+    if (typeof window.load !== 'function' || window.load._v017) return;
     var _load = window.load;
     window.load = function(i, autoplay){
       var r = _load(i, autoplay);
@@ -2951,14 +2962,13 @@ window.addEventListener('load', () => {
       }catch(_){}
       return r;
     };
-    window.load._v016 = true;
+    window.load._v017 = true;
   })();
 
-  // Initialize after DOM is ready
   document.addEventListener('DOMContentLoaded', function(){
     ensureMaster(); deriveLists(); wireBar();
-    // Initialize header/count for ALL
-    setHeader('ALL', (window.PLAYLIST||[]).length);
+    // Initialize header for ALL
+    updateHeader('ALL', (window.PLAYLIST||[]).length);
   });
 })();
 </script>
