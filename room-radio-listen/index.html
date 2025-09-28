@@ -107,7 +107,7 @@ input[type=range]{width:100%}
     <div class="thumb"><img src="Media/frasier.png" alt=""></div>
     <div>
       <h1>KZAK • Frasier-Style Fun Radio without the talking</h1>
-      <div class="sub"><span id="tcount">0</span> Song Playlist • <span class="tiny">ON AIR lamp • Deep-link sharing</span> • Build: <span id="buildVersion">Bullwinkle-v1.004</span></div>
+      <div class="sub"><span id="tcount">0</span> Song Playlist • <span class="tiny">ON AIR lamp • Deep-link sharing</span> • Build: <span id="buildVersion">Bullwinkle-v1.006</span></div>
     </div>
   </header>
 
@@ -174,19 +174,7 @@ input[type=range]{width:100%}
           </div>
         </div>
         <div class="tiny muted" style="margin-top:8px">Tip: The ON AIR pill lights only when music plays.</div>
-      </div>
-    
-<div class="bio">
-  <img src="Media/CJMurphy.jpeg" alt="">
-  <div><div class="name">CJ Murphy</div><div class="role">Co-author & co-creator</div></div>
-</div>
-<p class="founder-blurb" style="margin: 6px 14px 0 14px; line-height:1.35;">
-  CJ Murphy is co-author and co-creator of the music and artwork exhibits shown and created on TikTok.
-  Checkout the book <em>The Last Job Youll Ever Hate, Thrive in the Age of AI</em> at:
-  <a href="https://thehumanworkforce.com" target="_blank" rel="noopener noreferrer">https://thehumanworkforce.com</a>.
-</p>
-
-</section>
+      </div></section>
 
     <aside class="panel playlist" id="plist">
       <div class="head">
@@ -211,7 +199,8 @@ input[type=range]{width:100%}
     <div class="bio" style="border-top:1px solid var(--line)">
       <img src="Media/CJMURPHY.png" alt="">
       <div><div class="name">cjmurphy</div><div class="role">Composition, arrangement, sound design</div></div>
-    </div>
+    </div><p class="founder-blurb" style="margin: 6px 14px 0 14px; line-height:1.35;">CJ Murphy is co-author and co-creator of the music and artwork exhibits shown and created on TikTok. Checkout the book <em>The Last Job Youll Ever Hate, Thrive in the Age of AI</em> at: <a href="https://thehumanworkforce.com" target="_blank" rel="noopener noreferrer">https://thehumanworkforce.com</a>.</p>
+
   </section>
 </div>
 
@@ -421,7 +410,7 @@ let breakEvery=1;
     file:  "Media/Riffs Raff.mp3",
     img:   "Media/RiffsRaff1.jpeg",
     alt:   "Riffs Raff - artwork",
-    genre: "Heave and Metal",
+    genre: "Heavy and Metal",
     
     story: "Taking the beloved song that got me hooked on early music from singer Bon Scott and giving it a twist."
   },
@@ -2682,7 +2671,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 4; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 6; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
