@@ -2647,7 +2647,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 15; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 16; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2858,95 +2858,108 @@ window.addEventListener('load', () => {
 
 
 <script>
-/* === Bullwinkle-v1.015: Hard Playlist Switching per Genre (uses PLAYLIST reassignment) === */
+/* === Bullwinkle-v1.016: Explicit Genre Bar + Hard Playlist Switching === */
 (function(){
-  // Wait for PLAYLIST to exist
-  if (!Array.isArray(window.PLAYLIST)) return;
-
-  // Preserve the original complete list
-  window.PLAYLIST_MASTER = (window.PLAYLIST_MASTER || window.PLAYLIST.map(function(t, i){
-    var c = Object.assign({}, t);
-    if (!c.genre) c.genre = 'Middle Ground Rock';
-    c._i = i;
-    return c;
-  }));
-
-  // Build genre constants from the master list (no manual duplication required)
-  window.PLAYLIST_ALL    = window.PLAYLIST_MASTER.slice();
-  window.PLAYLIST_HEAVY  = window.PLAYLIST_MASTER.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Heavy and Metal'; });
-  window.PLAYLIST_ROCK   = window.PLAYLIST_MASTER.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Middle Ground Rock'; });
-  window.PLAYLIST_MELLOW = window.PLAYLIST_MASTER.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Mellow Tunes'; });
-
-  // Utility to refresh UI from the current PLAYLIST
-  function refreshFromActive(listName){
-    try{
-      // Swap global PLAYLIST to the chosen list
-      var nextList =
-        listName==='HEAVY'  ? window.PLAYLIST_HEAVY  :
-        listName==='ROCK'   ? window.PLAYLIST_ROCK   :
-        listName==='MELLOW' ? window.PLAYLIST_MELLOW :
-                               window.PLAYLIST_ALL;
-      window.PLAYLIST = nextList.slice(); // shallow copy so buildList reads this snapshot
-
-      // Rebuild right pane & counters
-      if (typeof window.buildList === 'function') window.buildList();
-
-      // Reset index and start playing first track if any
-      window.idx = 0;
-      if (window.PLAYLIST.length && typeof window.load === 'function') {
-        window.load(0, true);
-      }
-
-      // Update playlist header
-      var strong = document.querySelector('#plist .head strong');
-      if (strong){
-        var lbl = (
-          listName==='HEAVY'  ? 'Heavy and Metal' :
-          listName==='ROCK'   ? 'Middle Ground Rock' :
-          listName==='MELLOW' ? 'Mellow Tunes' : 'ALL'
-        );
-        strong.textContent = 'Playlist' + (lbl==='ALL' ? '' : ' — ' + lbl);
-      }
-    }catch(e){ /* no-op */ }
+  function ensureMaster(){
+    if (!Array.isArray(window.PLAYLIST)) return false;
+    if (!window.PLAYLIST_MASTER){
+      window.PLAYLIST_MASTER = window.PLAYLIST.map(function(t, i){
+        var c = Object.assign({}, t);
+        if (!c.genre) c.genre = 'Middle Ground Rock';
+        c._i = i;
+        return c;
+      });
+    }
+    return true;
   }
 
-  // Keep the 'Genre:' label above title in sync
-  function updateGenreNow(){
+  function deriveLists(){
+    var M = window.PLAYLIST_MASTER;
+    window.PLAYLIST_ALL    = M.slice();
+    window.PLAYLIST_HEAVY  = M.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Heavy and Metal'; });
+    window.PLAYLIST_ROCK   = M.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Middle Ground Rock'; });
+    window.PLAYLIST_MELLOW = M.filter(function(t){ return (t.genre||'Middle Ground Rock') === 'Mellow Tunes'; });
+  }
+
+  function setHeader(label, count){
     try{
-      var el = document.getElementById('genreNow'); if (!el) return;
-      var i = (typeof window.idx==='number') ? window.idx : 0;
-      var t = window.PLAYLIST && window.PLAYLIST[i];
-      el.textContent = 'Genre: ' + ((t && (t.genre||'Middle Ground Rock')) || 'Middle Ground Rock');
+      var strong = document.querySelector('#plist .head strong');
+      if (strong) strong.textContent = 'Playlist' + (label==='ALL' ? '' : ' — ' + label);
+      var cr = document.getElementById('countRight');
+      if (cr) cr.textContent = (count||0) + ' items';
     }catch(_){}
   }
-  var _load015 = window.load;
-  if (typeof _load015 === 'function' && !_load015._v015){
-    window.load = function(i, autoplay){
-      var r = _load015(i, autoplay);
-      try{ updateGenreNow(); }catch(_){}
-      return r;
-    };
-    window.load._v015 = true;
+
+  function activate(listKey){
+    if (!ensureMaster()) return;
+    deriveLists();
+    var nextList, label;
+    switch(listKey){
+      case 'HEAVY':  nextList = window.PLAYLIST_HEAVY;  label='Heavy and Metal'; break;
+      case 'ROCK':   nextList = window.PLAYLIST_ROCK;   label='Middle Ground Rock'; break;
+      case 'MELLOW': nextList = window.PLAYLIST_MELLOW; label='Mellow Tunes'; break;
+      default:       nextList = window.PLAYLIST_ALL;    label='ALL';
+    }
+    // Reassign global PLAYLIST and rebuild UI
+    window.PLAYLIST = nextList.slice();
+    if (typeof window.buildList === 'function') window.buildList();
+    // Reset to first item in the new list (if any)
+    window.idx = 0;
+    if (window.PLAYLIST.length && typeof window.load === 'function'){
+      window.load(0, true);
+    }
+    setHeader(label, window.PLAYLIST.length);
+    // Update the small genre label above title
+    setTimeout(function(){
+      try{
+        var el = document.getElementById('genreNow');
+        if (el){
+          var t = window.PLAYLIST[0];
+          el.textContent = 'Genre: ' + ((t && (t.genre||'Middle Ground Rock')) || 'Middle Ground Rock');
+        }
+      }catch(_){}
+    }, 200);
   }
 
-  // Wire the top buttons
-  var bar = document.getElementById('genreBar');
-  if (bar && !bar._wired015){
-    bar._wired015 = true;
+  function wireBar(){
+    var bar = document.getElementById('genreBar');
+    if (!bar || bar._wired016) return;
+    bar._wired016 = true;
     bar.addEventListener('click', function(ev){
       var btn = ev.target.closest('.gbtn'); if(!btn) return;
-      var key = btn.getAttribute('data-genre') || 'ALL';
       bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
-      if (key === 'ALL')      refreshFromActive('ALL');
-      else if (key === 'Heavy and Metal') refreshFromActive('HEAVY');
-      else if (key === 'Middle Ground Rock') refreshFromActive('ROCK');
-      else if (key === 'Mellow Tunes') refreshFromActive('MELLOW');
+      var key = btn.getAttribute('data-genre') || 'ALL';
+      if (key === 'ALL') activate('ALL');
+      else if (key === 'Heavy and Metal') activate('HEAVY');
+      else if (key === 'Middle Ground Rock') activate('ROCK');
+      else if (key === 'Mellow Tunes') activate('MELLOW');
     });
   }
 
-  // Initial ensure: set to ALL derived, rebuild once so counts/header are correct
-  refreshFromActive('ALL');
-  setTimeout(updateGenreNow, 400);
+  // Keep header count accurate on load() as tracks change
+  (function hookLoadLabel(){
+    if (typeof window.load !== 'function' || window.load._v016) return;
+    var _load = window.load;
+    window.load = function(i, autoplay){
+      var r = _load(i, autoplay);
+      try{
+        var el = document.getElementById('genreNow');
+        if (el){
+          var t = window.PLAYLIST && window.PLAYLIST[i];
+          el.textContent = 'Genre: ' + ((t && (t.genre||'Middle Ground Rock')) || 'Middle Ground Rock');
+        }
+      }catch(_){}
+      return r;
+    };
+    window.load._v016 = true;
+  })();
+
+  // Initialize after DOM is ready
+  document.addEventListener('DOMContentLoaded', function(){
+    ensureMaster(); deriveLists(); wireBar();
+    // Initialize header/count for ALL
+    setHeader('ALL', (window.PLAYLIST||[]).length);
+  });
 })();
 </script>
 
