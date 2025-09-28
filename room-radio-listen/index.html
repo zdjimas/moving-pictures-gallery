@@ -2647,7 +2647,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 12; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 13; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2858,57 +2858,82 @@ window.addEventListener('load', () => {
 
 
 <script>
-/* === Bullwinkle-v1.012: Clean Genre Filter (preserves breaks) === */
+/* === Bullwinkle-v1.013: Genre Sublist + Random Playback (preserves breaks) === */
 (function(){
-  var genreFilter = 'ALL';
   var PLAY = window.PLAYLIST || [];
-
   // Normalize missing genre
   PLAY.forEach(function(t){ if(!t.genre) t.genre = 'Middle Ground Rock'; });
 
-  function isAllowed(i){
-    if (genreFilter === 'ALL') return true;
-    var t = PLAY[i];
-    return t && (t.genre || 'Middle Ground Rock') === genreFilter;
-  }
-  function nextAllowedFrom(start){
-    var n = PLAY.length; if (!n) return start;
-    for (var step=1; step<=n; step++){
-      var j = (start + step) % n;
-      if (isAllowed(j)) return j;
+  var state = {
+    mode: 'ALL',           // 'ALL' | 'Heavy and Metal' | 'Middle Ground Rock' | 'Mellow Tunes'
+    indices: [],           // allowed indices
+    order: [],             // shuffled order of indices
+    pos: 0,                // pointer within 'order'
+    hooked: false
+  };
+
+  function shuffle(a){
+    // Fisher–Yates
+    for (var i=a.length-1; i>0; i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var tmp = a[i]; a[i]=a[j]; a[j]=tmp;
     }
-    return start;
-  }
-  function prevAllowedFrom(start){
-    var n = PLAY.length; if (!n) return start;
-    for (var step=1; step<=n; step++){
-      var j = (start - step + n) % n;
-      if (isAllowed(j)) return j;
-    }
-    return start;
+    return a;
   }
 
-  function updateRightList(){
+  function rebuildSubset(mode){
+    state.mode = mode || 'ALL';
+    if (state.mode === 'ALL'){
+      state.indices = [];
+      state.order = [];
+      state.pos = 0;
+      updateRightPanelHeader();
+      filterRightList();    // show all
+      return;
+    }
+    var idxs = [];
+    for (var i=0;i<PLAY.length;i++){
+      var g = (PLAY[i].genre || 'Middle Ground Rock');
+      if (g === state.mode) idxs.push(i);
+    }
+    state.indices = idxs;
+    state.order = shuffle(idxs.slice());
+    // Try to align pos with current song if it's in the subset; else start at first
+    var cur = typeof window.idx === 'number' ? window.idx : -1;
+    var p = state.order.indexOf(cur);
+    state.pos = (p >= 0 ? p : 0);
+    updateRightPanelHeader();
+    filterRightList();
+  }
+
+  function updateRightPanelHeader(){
+    try{
+      var strong = document.querySelector('#plist .head strong');
+      if (strong){
+        strong.textContent = 'Playlist' + (state.mode==='ALL' ? '' : ' — ' + state.mode);
+      }
+      var cr = document.getElementById('countRight');
+      if (cr){
+        if (state.mode === 'ALL'){
+          cr.textContent = PLAY.length + ' items';
+        } else {
+          cr.textContent = state.indices.length + ' items';
+        }
+      }
+    }catch(_){}
+  }
+
+  function filterRightList(){
     try{
       var body = document.getElementById('plistBody'); if (!body) return;
       var rows = Array.prototype.slice.call(body.children);
       rows.forEach(function(row){
         var i = Number(row.getAttribute('data-i'));
-        row.hidden = !isAllowed(i);
-        // remove any prior per-row genre tag we might have injected
+        var allowed = (state.mode==='ALL') ? true : state.indices.indexOf(i) !== -1;
+        row.hidden = !allowed;
+        // remove any leftover genre badges to the right
         var mg = row.querySelector('.meta-genre'); if (mg) mg.remove();
       });
-      // header label
-      var titleEl = document.querySelector('#plist .head strong');
-      if (titleEl){
-        titleEl.textContent = 'Playlist' + (genreFilter==='ALL' ? '' : ' — ' + genreFilter);
-      }
-      // count
-      var cr = document.getElementById('countRight');
-      if (cr){
-        var ok = 0; for (var i=0;i<PLAY.length;i++) if (isAllowed(i)) ok++;
-        cr.textContent = (genreFilter==='ALL' ? PLAY.length : ok) + ' items';
-      }
     }catch(_){}
   }
 
@@ -2921,67 +2946,98 @@ window.addEventListener('load', () => {
     }catch(_){}
   }
 
-  // Wrap load() so any disallowed index is redirected using the ATTEMPTED index, not current
-  if (typeof window.load === 'function' && !window.load._genre012){
+  // Core wrappers: preserve breaks by continuing to call load(), but choose the index from our order when mode != ALL
+  function hookCore(){
+    if (state.hooked) return;
+    if (typeof window.load !== 'function' || typeof window.next !== 'function' || typeof window.prev !== 'function') return;
+
+    // Wrap load: only redirect when mode != ALL and asked index not in subset
     var _load = window.load;
     window.load = function(i, autoplay){
-      try{
-        if (genreFilter !== 'ALL' && !isAllowed(i)) {
-          i = nextAllowedFrom(i);
+      if (state.mode !== 'ALL'){
+        var inSubset = state.indices.indexOf(i) !== -1;
+        if (!inSubset){
+          // position doesn't change here; we defer selection to next()/prev() to maintain cadence.
+          // But if called directly with an outside index, map to closest in our order from current pos.
+          i = state.order[state.pos] || i;
+        } else {
+          // keep pos aligned with requested index if it exists in order
+          var p = state.order.indexOf(i);
+          if (p >= 0) state.pos = p;
         }
-      }catch(_){}
+      }
       var r = _load(i, autoplay);
-      try{ updateGenreNow(); }catch(_){}
+      try { updateGenreNow(); } catch(_){}
       return r;
     };
-    window.load._genre012 = true;
-  }
 
-  // Patch next/prev minimally to respect subset without breaking break cadence
-  if (typeof window.next === 'function' && !window.next._genre012){
-    var _next = window.next;
+    // Wrap next: choose from shuffled order
+    var _next = window.next, _prev = window.prev;
     window.next = function(){
-      if (genreFilter === 'ALL') return _next();
-      var i = (typeof window.idx==='number') ? window.idx : 0;
-      return window.load(nextAllowedFrom(i), true);
+      if (state.mode === 'ALL') return _next();
+      if (!state.order.length) return _next();
+      state.pos = (state.pos + 1) % state.order.length;
+      var i = state.order[state.pos];
+      return window.load(i, true);
     };
-    window.next._genre012 = true;
-  }
-  if (typeof window.prev === 'function' && !window.prev._genre012){
-    var _prev = window.prev;
     window.prev = function(){
-      if (genreFilter === 'ALL') return _prev();
-      var i = (typeof window.idx==='number') ? window.idx : 0;
-      return window.load(prevAllowedFrom(i), true);
+      if (state.mode === 'ALL') return _prev();
+      if (!state.order.length) return _prev();
+      state.pos = (state.pos - 1 + state.order.length) % state.order.length;
+      var i = state.order[state.pos];
+      return window.load(i, true);
     };
-    window.prev._genre012 = true;
+
+    // Ensure auto-advance uses our next
+    try{
+      if (window.audio){
+        try { window.audio.removeEventListener('ended', window.next); } catch(_){}
+        window.audio.addEventListener('ended', function(){ try{ window.next(); }catch(_){} });
+      }
+    }catch(_){}
+
+    state.hooked = true;
   }
 
-  // Genre buttons
-  var bar = document.getElementById('genreBar');
-  if (bar && !bar._genre012){
-    bar._genre012 = true;
+  // Genre buttons -> rebuild subset + start playing subset if current track not allowed
+  function hookButtons(){
+    var bar = document.getElementById('genreBar');
+    if (!bar || bar._g013) return;
+    bar._g013 = true;
     bar.addEventListener('click', function(ev){
-      var btn = ev.target.closest('.gbtn'); if(!btn) return;
-      genreFilter = btn.getAttribute('data-genre') || 'ALL';
+      var btn = ev.target.closest('.gbtn'); if (!btn) return;
+      var mode = btn.getAttribute('data-genre') || 'ALL';
+      // set active UI
       bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
-      updateRightList();
-      // If current is outside subset, move to the next allowed FROM current attempted index
-      var cur = (typeof window.idx==='number') ? window.idx : 0;
-      if (!isAllowed(cur) && typeof window.load === 'function') {
-        window.load(nextAllowedFrom(cur), true);
+      rebuildSubset(mode);
+      // if in subset mode and current not allowed, jump into subset (random order start)
+      if (state.mode !== 'ALL'){
+        var cur = typeof window.idx === 'number' ? window.idx : -1;
+        if (state.indices.indexOf(cur) === -1){
+          var i = state.order[state.pos] || cur;
+          if (typeof window.load === 'function') window.load(i, true);
+        }
+      } else {
+        // back to ALL: reveal all rows
+        filterRightList();
+        updateRightPanelHeader();
       }
     });
   }
 
-  // Keep right list filtered and header updated across rebuilds
+  // Initial wires
   document.addEventListener('DOMContentLoaded', function(){
-    updateRightList();
+    hookCore();
+    hookButtons();
     updateGenreNow();
-    setTimeout(function(){ updateRightList(); updateGenreNow(); }, 500);
+    updateRightPanelHeader();
   });
-  // Soft watchdog (list can rebuild when the playlist is updated)
-  setInterval(updateRightList, 2500);
+  // Retry in case app binds late
+  var tries = 0, t = setInterval(function(){
+    hookCore();
+    hookButtons();
+    if (++tries > 40 && state.hooked) clearInterval(t);
+  }, 250);
 })();
 </script>
 
