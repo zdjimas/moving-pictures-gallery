@@ -2647,7 +2647,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 11; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 12; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2858,46 +2858,52 @@ window.addEventListener('load', () => {
 
 
 <script>
-/* === Bullwinkle-v1.011: Minimal Genre Filter (preserves station breaks) === */
+/* === Bullwinkle-v1.012: Clean Genre Filter (preserves breaks) === */
 (function(){
   var genreFilter = 'ALL';
   var PLAY = window.PLAYLIST || [];
 
-  // Normalize missing genre to "Middle Ground Rock"
-  PLAY.forEach(function(t){ if(!t.genre){ t.genre = 'Middle Ground Rock'; }});
+  // Normalize missing genre
+  PLAY.forEach(function(t){ if(!t.genre) t.genre = 'Middle Ground Rock'; });
 
   function isAllowed(i){
-    try{
-      if (genreFilter === 'ALL') return true;
-      var t = PLAY[i];
-      return t && (t.genre || 'Middle Ground Rock') === genreFilter;
-    }catch(e){ return true; }
+    if (genreFilter === 'ALL') return true;
+    var t = PLAY[i];
+    return t && (t.genre || 'Middle Ground Rock') === genreFilter;
   }
-  function nextAllowed(from){
-    var n = PLAY.length; if (!n) return from;
+  function nextAllowedFrom(start){
+    var n = PLAY.length; if (!n) return start;
     for (var step=1; step<=n; step++){
-      var j = (from + step) % n;
+      var j = (start + step) % n;
       if (isAllowed(j)) return j;
     }
-    return from;
+    return start;
+  }
+  function prevAllowedFrom(start){
+    var n = PLAY.length; if (!n) return start;
+    for (var step=1; step<=n; step++){
+      var j = (start - step + n) % n;
+      if (isAllowed(j)) return j;
+    }
+    return start;
   }
 
-  function annotateRowsAndHide(){
+  function updateRightList(){
     try{
       var body = document.getElementById('plistBody'); if (!body) return;
       var rows = Array.prototype.slice.call(body.children);
       rows.forEach(function(row){
         var i = Number(row.getAttribute('data-i'));
-        // annotate genre line under each title
-        var info = row.querySelector('.info') || row;
-        var g = info.querySelector('.meta-genre');
-        if (!g) { g = document.createElement('div'); g.className = 'meta-genre muted'; info.appendChild(g); }
-        var t = PLAY[i];
-        g.textContent = 'Genre: ' + ((t && (t.genre||'Middle Ground Rock')) || 'Middle Ground Rock');
-
-        // filter visibility
         row.hidden = !isAllowed(i);
+        // remove any prior per-row genre tag we might have injected
+        var mg = row.querySelector('.meta-genre'); if (mg) mg.remove();
       });
+      // header label
+      var titleEl = document.querySelector('#plist .head strong');
+      if (titleEl){
+        titleEl.textContent = 'Playlist' + (genreFilter==='ALL' ? '' : ' — ' + genreFilter);
+      }
+      // count
       var cr = document.getElementById('countRight');
       if (cr){
         var ok = 0; for (var i=0;i<PLAY.length;i++) if (isAllowed(i)) ok++;
@@ -2909,55 +2915,73 @@ window.addEventListener('load', () => {
   function updateGenreNow(){
     try{
       var el = document.getElementById('genreNow'); if (!el) return;
-      var i = (typeof window.idx === 'number') ? window.idx : 0;
+      var i = (typeof window.idx==='number') ? window.idx : 0;
       var t = PLAY[i];
       el.textContent = 'Genre: ' + ((t && (t.genre||'Middle Ground Rock')) || 'Middle Ground Rock');
     }catch(_){}
   }
 
-  // Hook buttons
-  var bar = document.getElementById('genreBar');
-  if (bar){
-    bar.addEventListener('click', function(ev){
-      var btn = ev.target.closest('.gbtn'); if(!btn) return;
-      genreFilter = btn.getAttribute('data-genre') || 'ALL';
-      bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
-      annotateRowsAndHide();
-      // If current track is not allowed, redirect to next allowed
-      try{
-        var cur = (typeof window.idx === 'number') ? window.idx : 0;
-        if (!isAllowed(cur) && typeof window.load === 'function'){
-          window.load(nextAllowed(cur), true);
-        }
-      }catch(_){}
-    });
-  }
-
-  // Wrap only load() so we preserve next()/prev() internals and station breaks
-  if (typeof window.load === 'function' && !window.load._genreWrapped011){
+  // Wrap load() so any disallowed index is redirected using the ATTEMPTED index, not current
+  if (typeof window.load === 'function' && !window.load._genre012){
     var _load = window.load;
     window.load = function(i, autoplay){
       try{
         if (genreFilter !== 'ALL' && !isAllowed(i)) {
-          i = nextAllowed((typeof window.idx === 'number') ? window.idx : 0);
+          i = nextAllowedFrom(i);
         }
       }catch(_){}
       var r = _load(i, autoplay);
       try{ updateGenreNow(); }catch(_){}
       return r;
     };
-    window.load._genreWrapped011 = true;
+    window.load._genre012 = true;
   }
 
-  // Keep the list filtered and label accurate even if buildList runs later
+  // Patch next/prev minimally to respect subset without breaking break cadence
+  if (typeof window.next === 'function' && !window.next._genre012){
+    var _next = window.next;
+    window.next = function(){
+      if (genreFilter === 'ALL') return _next();
+      var i = (typeof window.idx==='number') ? window.idx : 0;
+      return window.load(nextAllowedFrom(i), true);
+    };
+    window.next._genre012 = true;
+  }
+  if (typeof window.prev === 'function' && !window.prev._genre012){
+    var _prev = window.prev;
+    window.prev = function(){
+      if (genreFilter === 'ALL') return _prev();
+      var i = (typeof window.idx==='number') ? window.idx : 0;
+      return window.load(prevAllowedFrom(i), true);
+    };
+    window.prev._genre012 = true;
+  }
+
+  // Genre buttons
+  var bar = document.getElementById('genreBar');
+  if (bar && !bar._genre012){
+    bar._genre012 = true;
+    bar.addEventListener('click', function(ev){
+      var btn = ev.target.closest('.gbtn'); if(!btn) return;
+      genreFilter = btn.getAttribute('data-genre') || 'ALL';
+      bar.querySelectorAll('.gbtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
+      updateRightList();
+      // If current is outside subset, move to the next allowed FROM current attempted index
+      var cur = (typeof window.idx==='number') ? window.idx : 0;
+      if (!isAllowed(cur) && typeof window.load === 'function') {
+        window.load(nextAllowedFrom(cur), true);
+      }
+    });
+  }
+
+  // Keep right list filtered and header updated across rebuilds
   document.addEventListener('DOMContentLoaded', function(){
-    annotateRowsAndHide();
+    updateRightList();
     updateGenreNow();
-    // Re-apply after a short delay to catch late list builds
-    setTimeout(function(){ annotateRowsAndHide(); updateGenreNow(); }, 600);
+    setTimeout(function(){ updateRightList(); updateGenreNow(); }, 500);
   });
-  // Also re-annotate every few seconds without being intrusive
-  setInterval(function(){ annotateRowsAndHide(); }, 3000);
+  // Soft watchdog (list can rebuild when the playlist is updated)
+  setInterval(updateRightList, 2500);
 })();
 </script>
 
