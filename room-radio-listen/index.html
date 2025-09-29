@@ -3041,7 +3041,7 @@ document.addEventListener('click', (ev)=>{
 
   
 
-<!-- Bullwinkle Footer Bios -->
+<!-- Bullwinkle Footer Bios (kept) -->
 <style>
   .bio-block { margin: 16px auto; max-width: 1200px; padding: 0 16px; }
   .bio-card {
@@ -3056,7 +3056,7 @@ document.addEventListener('click', (ev)=>{
   .bio-card p { margin: 4px 0 0 0; line-height: 1.35; }
   .bio-card a, .bio-card a:visited { color: #fff !important; text-decoration: underline; }
 </style>
-<div class="bio-block">
+<div class="bio-block" id="bullwinkle-footer-bios">
   <div class="bio-card">
     <img src="Media/ZachArt.jpeg" alt="zdjimas portrait">
     <div>
@@ -3083,34 +3083,63 @@ document.addEventListener('click', (ev)=>{
 </div>
 
 
-<!-- Bullwinkle: auto-stamp release badge -->
+<!-- Bullwinkle: auto-stamp release badge + remove old duplicate bios -->
 <script>
-  (function () {
-    const SUBVER = 35;                             // bump when you ship
-    const PAD = String(SUBVER).padStart(3,'0');
-    const VER = `Bullwinkle-v1.${PAD}`;
-    const FILETAG = `v=bullwinkle-v1-${PAD}`;
-    const STAMP = new Date().toLocaleString();
+(function () {
+  const SUBVER = 36; // bump this for each release
+  const PAD = String(SUBVER).padStart(3,'0');
+  const VER = `Bullwinkle-v1.${PAD}`;
+  const FILETAG = `v=bullwinkle-v1-${PAD}`;
+  const STAMP = new Date().toLocaleString();
 
+  function stampBadge() {
+    const targets = Array.from(document.querySelectorAll('body *'))
+      .filter(el => !el.firstElementChild && el.textContent);
+    let changed = false;
+    for (const el of targets) {
+      const t = el.textContent;
+      const t1 = t.replace(/Release:\s*Bullwinkle-v1\.\d+/i, `Release: ${VER}`)
+                  .replace(/v=bullwinkle-v1-\d+/i, FILETAG);
+      if (t1 !== t) { el.textContent = t1; changed = true; }
+    }
+    // If you maintain explicit IDs, set them too
     const badge = document.getElementById('releaseBadge');
     const info  = document.getElementById('releaseInfo');
-    if (badge) badge.textContent = `Release: ${VER}`;
-    if (info)  info.textContent  = `index.html - ${FILETAG} • ${STAMP}`;
+    if (badge) { badge.textContent = `Release: ${VER}`; changed = true; }
+    if (info)  { info.textContent  = `index.html - ${FILETAG} • ${STAMP}`; changed = true; }
+    return changed;
+  }
 
-    const RX = [
-      { find: /Release:\s*Bullwinkle-v1\.\d+/i, replace: `Release: ${VER}` },
-      { find: /v=bullwinkle-v1-\d+/i,          replace: FILETAG }
-    ];
-    document.querySelectorAll('body *').forEach(el => {
-      if (!el.firstElementChild && el.textContent) {
-        RX.forEach(({find, replace}) => {
-          if (find.test(el.textContent)) {
-            el.textContent = el.textContent.replace(find, replace);
-          }
-        });
-      }
+  function removeDuplicateBios(){
+    // Remove bio-like rows that have names but no links (old blank bios)
+    const candidates = Array.from(document.querySelectorAll('div, section, article')).filter(el => {
+      const txt = el.textContent || '';
+      const hasNames = /\bzdjimas\b/i.test(txt) && /\bcjmurphy\b/i.test(txt);
+      const hasLinks = el.querySelector('a[href*="tiktok.com"], a[href*="thehumanworkforce.com"]');
+      const isOurBlock = el.id === 'bullwinkle-footer-bios';
+      // likely the old block if it has both names, lacks our link anchors, and isn't our new block
+      return hasNames && !hasLinks && !isOurBlock && el.clientHeight < 220;
     });
-  })();
+    // Remove only the first such container (the blank-looking duplicate)
+    if (candidates.length) {
+      candidates[0].remove();
+    }
+  }
+
+  function runAll(){
+    stampBadge();
+    removeDuplicateBios();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runAll);
+  } else {
+    runAll();
+  }
+  // Retry after a short delay in case the badge is stamped late
+  setTimeout(runAll, 300);
+  setTimeout(runAll, 1000);
+})();
 </script>
 
 </body>
