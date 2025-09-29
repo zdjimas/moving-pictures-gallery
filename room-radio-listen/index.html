@@ -184,17 +184,38 @@ input[type=range]{width:100%}
     </aside>
   </div>
 
-  <!-- Footer -->
-  <section class="panel" style="margin-top:16px">
-    <div class="bio">
-      <img src="Media/ZachArt.jpeg" alt="">
-      <div><div class="name">zdjimas</div><div class="role">Concept, curation, engineering</div></div>
+  
+<!-- Footer (clean, single) -->
+<section class="panel" style="margin-top:16px">
+  <style>
+    .bio a, .bio a:visited { color:#fff !important; text-decoration:underline; }
+    .bio p { margin:4px 0 0 0; line-height:1.35; }
+  </style>
+  <div class="bio">
+    <img src="Media/ZachArt.jpeg" alt="zdjimas">
+    <div>
+      <div class="name">zdjimas</div>
+      <p>
+        A founding creator of this tool, Zachary shares his publishing, artwork, and moving‑picture music
+        video art within this radio room exhibit. Make sure you hit “Return to Lobby” to see more or visit
+        CJ Murphy’s TikTok page:
+        <a href="https://www.tiktok.com/@chrisjmurphy65" target="_blank" rel="noopener">tiktok.com/@chrisjmurphy65</a>.
+      </p>
     </div>
-    <div class="bio" style="border-top:1px solid var(--line)">
-      <img src="Media/CJMURPHY.png" alt="">
-      <div><div class="name">cjmurphy</div><div class="role">Composition, arrangement, sound design</div></div>
+  </div>
+  <div class="bio" style="border-top:1px solid var(--line)">
+    <img src="Media/CJMURPHY.png" alt="CJ Murphy">
+    <div>
+      <div class="name">CJ Murphy</div>
+      <p>
+        CJ Murphy is co‑author and co‑creator of the music and artwork exhibits shown and created on TikTok.
+        Check out the book <em>The Last Job You’ll Ever Hate: Thrive in the Age of AI</em> at
+        <a href="https://thehumanworkforce.com" target="_blank" rel="noopener">thehumanworkforce.com</a>.
+      </p>
     </div>
-  </section>
+  </div>
+</section>
+
 </div>
 
 <!-- media elements -->
@@ -3233,6 +3254,64 @@ document.addEventListener('click', (ev)=>{
     document.addEventListener('DOMContentLoaded', () => { stampBadgeRobust(); dedupeFooters(); });
   } else {
     stampBadgeRobust(); dedupeFooters();
+  }
+})();
+</script>
+
+
+<!-- Bullwinkle version badge + dedupe footer, v1.036 -->
+<script>
+(function () {
+  const SUBVER = 36;
+  const PAD = String(SUBVER).padStart(3,'0');
+  const VER = `Bullwinkle-v1.${PAD}`;
+  const FILE = `v=bullwinkle-v1-${PAD}`;
+  const RX_VER  = /Release:\s*Bullwinkle-v1\.\d+/i;
+  const RX_FILE = /v=bullwinkle-v1-\d+/i;
+
+  function replaceInTextNodes(root) {
+    const walker = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT, null);
+    let n, changed = false;
+    while ((n = walker.nextNode())) {
+      const t = n.nodeValue || '';
+      const t2 = t.replace(RX_VER, `Release: ${VER}`).replace(RX_FILE, FILE);
+      if (t2 !== t) { n.nodeValue = t2; changed = true; }
+    }
+    const badge = document.getElementById('releaseBadge');
+    const info  = document.getElementById('releaseInfo');
+    if (badge) { badge.textContent = `Release: ${VER}`; changed = true; }
+    if (info)  { info.textContent  = `index.html - ${FILE}`; changed = true; }
+    return changed;
+  }
+
+  function startBadgeObserver() {
+    replaceInTextNodes(document.body);
+    const obs = new MutationObserver(() => replaceInTextNodes(document.body));
+    obs.observe(document.body, { subtree:true, childList:true, characterData:true });
+    setTimeout(() => replaceInTextNodes(document.body), 300);
+    setTimeout(() => replaceInTextNodes(document.body), 1000);
+  }
+
+  // Remove duplicate mini bios if still present
+  function pruneDuplicateMiniBios(){
+    const roles = [
+      /Concept,\s*curation,\s*engineering/i,
+      /Composition,\s*arrangement,\s*sound\s*design/i
+    ];
+    const nodes = Array.from(document.querySelectorAll('div,section,article')).filter(el => {
+      const txt = (el.textContent||'').trim();
+      const hasRole = roles.some(rx => rx.test(txt));
+      const hasTikTok = !!el.querySelector('a[href*="tiktok.com/@chrisjmurphy65"]');
+      const hasBook  = !!el.querySelector('a[href*="thehumanworkforce.com"]');
+      return hasRole && !hasTikTok && !hasBook;
+    });
+    nodes.forEach(n => n.remove());
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { startBadgeObserver(); pruneDuplicateMiniBios(); });
+  } else {
+    startBadgeObserver(); pruneDuplicateMiniBios();
   }
 })();
 </script>
