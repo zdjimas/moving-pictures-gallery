@@ -3040,5 +3040,78 @@ document.addEventListener('click', (ev)=>{
 
 
   
+
+<!-- Bullwinkle Footer Bios -->
+<style>
+  .bio-block { margin: 16px auto; max-width: 1200px; padding: 0 16px; }
+  .bio-card {
+    display: flex; gap: 12px; align-items: center;
+    background: rgba(22,29,39,.85); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px; padding: 12px 14px; color: #e7eef9;
+    box-shadow: 0 10px 26px rgba(0,0,0,.35);
+  }
+  .bio-card + .bio-card { margin-top: 8px; }
+  .bio-card img { width: 54px; height: 54px; border-radius: 12px; object-fit: cover; }
+  .bio-card .name { font-weight: 800; margin-bottom: 2px; }
+  .bio-card p { margin: 4px 0 0 0; line-height: 1.35; }
+  .bio-card a, .bio-card a:visited { color: #fff !important; text-decoration: underline; }
+</style>
+<div class="bio-block">
+  <div class="bio-card">
+    <img src="Media/ZachArt.jpeg" alt="zdjimas portrait">
+    <div>
+      <div class="name">zdjimas</div>
+      <p>
+        A founding creator of this tool, Zachary shares his publishing, artwork, and moving‑picture music
+        video art within this radio room exhibit. Make sure you hit “Return to Lobby” to see more or visit
+        CJ Murphy’s TikTok page:
+        <a href="https://www.tiktok.com/@chrisjmurphy65" target="_blank" rel="noopener">tiktok.com/@chrisjmurphy65</a>.
+      </p>
+    </div>
+  </div>
+  <div class="bio-card">
+    <img src="Media/CJMURPHY.png" alt="CJ Murphy portrait">
+    <div>
+      <div class="name">CJ Murphy</div>
+      <p>
+        CJ Murphy is co‑author and co‑creator of the music and artwork exhibits shown and created on TikTok.
+        Check out the book <em>The Last Job You’ll Ever Hate: Thrive in the Age of AI</em> at
+        <a href="https://thehumanworkforce.com" target="_blank" rel="noopener">thehumanworkforce.com</a>.
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- Bullwinkle: auto-stamp release badge -->
+<script>
+  (function () {
+    const SUBVER = 35;                             // bump when you ship
+    const PAD = String(SUBVER).padStart(3,'0');
+    const VER = `Bullwinkle-v1.${PAD}`;
+    const FILETAG = `v=bullwinkle-v1-${PAD}`;
+    const STAMP = new Date().toLocaleString();
+
+    const badge = document.getElementById('releaseBadge');
+    const info  = document.getElementById('releaseInfo');
+    if (badge) badge.textContent = `Release: ${VER}`;
+    if (info)  info.textContent  = `index.html - ${FILETAG} • ${STAMP}`;
+
+    const RX = [
+      { find: /Release:\s*Bullwinkle-v1\.\d+/i, replace: `Release: ${VER}` },
+      { find: /v=bullwinkle-v1-\d+/i,          replace: FILETAG }
+    ];
+    document.querySelectorAll('body *').forEach(el => {
+      if (!el.firstElementChild && el.textContent) {
+        RX.forEach(({find, replace}) => {
+          if (find.test(el.textContent)) {
+            el.textContent = el.textContent.replace(find, replace);
+          }
+        });
+      }
+    });
+  })();
+</script>
+
 </body>
 </html>
