@@ -312,7 +312,7 @@ let shuffleOrder=[],shufflePos=0;
 tmax.textContent=PLAYLIST.length; tcount.textContent=PLAYLIST.length; countRight.textContent=PLAYLIST.length+' items';
 
 /* Playlist UI */
-function buildList(){plistBody.innerHTML=''; PLAYLIST.forEach((tr,i)=>{const d=document.createElement('div'); d.className='item'; d.setAttribute('data-i',i); d.innerHTML=`<div><strong>${String(i+1).padStart(3,'0')}</strong> ${t.title||'(untitled)'}</div>`; d.addEventListener('click',e=>{if(e.target&&e.target.getAttribute('data-share'))return; load(i,true)}); d.querySelector('[data-share]')?.addEventListener('click',e=>{e.stopPropagation(); }); plistBody.appendChild(d)})}
+function buildList(){plistBody.innerHTML=''; PLAYLIST.forEach((tr,i)=>{const d=document.createElement('div'); d.className='item'; d.setAttribute('data-i',i); d.innerHTML=`<div><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}<div class="tiny">${tr.file}</div></div>``; d.addEventListener('click',e=>{if(e.target&&e.target.getAttribute('data-share'))return; load(i,true)}); d.querySelector('[data-share]')?.addEventListener('click',e=>{e.stopPropagation(); shareCurrentTrack(i)}); plistBody.appendChild(d)})}
 function markActive(){[...plistBody.children].forEach(n=>n.classList.toggle('active',Number(n.getAttribute('data-i'))===idx))}
 buildList();
 
@@ -1167,7 +1167,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 39; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 40; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
