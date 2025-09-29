@@ -2655,7 +2655,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 22; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 23; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2978,55 +2978,32 @@ window.addEventListener('load', () => {
 
 
 <script>
-/* === Bullwinkle-v1.022: Genre Map + Fresh Derivation + In-place Switch === */
+/* === Bullwinkle-v1.023: Fixed genre playlists via duplicated constant lists + hard switching === */
 (function(){
-  function ready(fn){
-    if (document.readyState === 'complete' || document.readyState === 'interactive') return fn();
-    document.addEventListener('DOMContentLoaded', fn);
+  function whenReady(fn){
+    var tries = 0, t = setInterval(function(){
+      if (Array.isArray(window.PLAYLIST) && typeof window.buildList==='function' && typeof window.load==='function'){
+        clearInterval(t); fn();
+      } else if (++tries > 120){ clearInterval(t); }
+    }, 200);
   }
   function trim(s){ return (s==null?'':String(s)).replace(/\s+/g,' ').trim(); }
-  function canonGenre(g){
-    g = trim(g).toLowerCase();
-    if (g === 'heavy and metal') return 'Heavy and Metal';
-    if (g === 'mellow tunes') return 'Mellow Tunes';
-    if (g === 'middle ground rock') return 'Middle Ground Rock';
-    return trim(g).length ? g : 'Middle Ground Rock';
-  }
-  function canonFile(f){
-    return (f==null?'':String(f)).toLowerCase().replace(/\\/g,'/').trim();
-  }
 
-  var ORIG = null;
-  var GENRE_BY_FILE = Object.create(null);
-
-  function captureOriginal(){
-    if (ORIG) return;
-    if (!Array.isArray(window.PLAYLIST)) return;
-    ORIG = window.PLAYLIST.map(function(t){
+  function buildGenreConstantsFromCurrent(){
+    var src = (window.PLAYLIST || []).map(function(t){ 
       var c = Object.assign({}, t);
-      c.genre = canonGenre(c.genre);
-      // Build lookup by file
-      if (c.file) GENRE_BY_FILE[canonFile(c.file)] = c.genre;
+      c.genre = trim(c.genre) || 'Middle Ground Rock';
       return c;
     });
+    window.PLAYLIST_ALL    = src.slice();
+    window.PLAYLIST_HEAVY  = src.filter(function(t){ return t.genre === 'Heavy and Metal'; });
+    window.PLAYLIST_ROCK   = src.filter(function(t){ return t.genre === 'Middle Ground Rock'; });
+    window.PLAYLIST_MELLOW = src.filter(function(t){ return t.genre === 'Mellow Tunes'; });
   }
 
-  function deriveLists(){
-    captureOriginal();
-    var ALL = ORIG.slice(), HEAVY=[], ROCK=[], MELLOW=[];
-    for (var i=0;i<ALL.length;i++){
-      var g = ALL[i].genre;
-      if (g === 'Heavy and Metal') HEAVY.push(ALL[i]);
-      else if (g === 'Mellow Tunes') MELLOW.push(ALL[i]);
-      else ROCK.push(ALL[i]);
-    }
-    return {ALL:ALL, HEAVY:HEAVY, ROCK:ROCK, MELLOW:MELLOW};
-  }
-
-  function mutateInPlace(newList){
-    if (!Array.isArray(window.PLAYLIST)) return;
+  function mutatePlaylistInPlace(list){
     window.PLAYLIST.splice(0, window.PLAYLIST.length);
-    for (var i=0;i<newList.length;i++) window.PLAYLIST.push(newList[i]);
+    for (var i=0;i<list.length;i++) window.PLAYLIST.push(list[i]);
   }
 
   function setHeader(label, count){
@@ -3038,64 +3015,62 @@ window.addEventListener('load', () => {
     }catch(_){}
   }
 
-  function setNowGenreFromIndex(i){
+  function updateNowGenre(i){
     try{
       var el = document.getElementById('genreNow'); if (!el) return;
-      var item = Array.isArray(window.PLAYLIST) ? window.PLAYLIST[i|0] : null;
-      var f = canonFile(item && item.file);
-      var g = GENRE_BY_FILE[f] || canonGenre(item && item.genre);
-      el.textContent = 'Genre: ' + (g || 'Middle Ground Rock');
+      var t = window.PLAYLIST && window.PLAYLIST[i|0];
+      el.textContent = 'Genre: ' + (trim(t && t.genre) || 'Middle Ground Rock');
     }catch(_){}
   }
 
-  function hookLoadForLabel(){
-    if (typeof window.load !== 'function' || window.load._v022) return;
+  function hookLoadLabel(){
+    if (typeof window.load !== 'function' || window.load._v023) return;
     var _load = window.load;
     window.load = function(i, autoplay){
       var r = _load(i, autoplay);
-      setNowGenreFromIndex(i);
+      updateNowGenre(i);
       return r;
     };
-    window.load._v022 = true;
+    window.load._v023 = true;
   }
 
-  function activate(label){
-    var lists = deriveLists(); if (!lists) return;
-    var chosen = (label==='ALL') ? lists.ALL : (label==='Heavy and Metal') ? lists.HEAVY : (label==='Middle Ground Rock') ? lists.ROCK : (label==='Mellow Tunes') ? lists.MELLOW : lists.ALL;
-    mutateInPlace(chosen);
+  function activateList(key){
+    var label='ALL', list=window.PLAYLIST_ALL || [];
+    if (key==='HEAVY')  { label='Heavy and Metal';   list=window.PLAYLIST_HEAVY  || []; }
+    if (key==='ROCK')   { label='Middle Ground Rock';list=window.PLAYLIST_ROCK   || []; }
+    if (key==='MELLOW') { label='Mellow Tunes';      list=window.PLAYLIST_MELLOW || []; }
+
+    mutatePlaylistInPlace(list);
     if (typeof window.buildList === 'function') window.buildList();
+
     window.idx = 0;
-    if (window.PLAYLIST.length) window.load(0, true);
+    if (window.PLAYLIST.length && typeof window.load === 'function') window.load(0, true);
+
     setHeader(label, window.PLAYLIST.length);
-    setTimeout(function(){ setNowGenreFromIndex(0); }, 150);
+    setTimeout(function(){ updateNowGenre(0); }, 200);
   }
 
-  function wire(){
-    // Bind to all buttons with data-genre (works even if there are multiple bars)
+  function wireButtons(){
     var bars = document.querySelectorAll('#genreBar, .genre-bar');
     bars.forEach(function(bar){
-      if (bar._wired022) return;
-      bar._wired022 = true;
+      if (bar._wired023) return;
+      bar._wired023 = true;
       bar.addEventListener('click', function(ev){
         var btn = ev.target.closest('[data-genre]'); if (!btn) return;
         bar.querySelectorAll('[data-genre]').forEach(function(b){ b.classList.toggle('active', b===btn); });
-        activate(btn.getAttribute('data-genre') || 'ALL');
+        var g = btn.getAttribute('data-genre') || 'ALL';
+        var key = (g==='ALL')?'ALL':(g==='Heavy and Metal')?'HEAVY':(g==='Middle Ground Rock')?'ROCK':(g==='Mellow Tunes')?'MELLOW':'ALL';
+        activateList(key);
       });
     });
   }
 
-  // Initialize once the page code is ready
-  ready(function(){
-    var tries=0, t=setInterval(function(){
-      if (Array.isArray(window.PLAYLIST) && typeof window.buildList==='function' && typeof window.load==='function'){
-        clearInterval(t);
-        captureOriginal();
-        hookLoadForLabel();
-        wire();
-        setHeader('ALL', window.PLAYLIST.length);
-        setNowGenreFromIndex(typeof window.idx==='number' ? window.idx : 0);
-      } else if (++tries>120){ clearInterval(t); }
-    }, 200);
+  whenReady(function(){
+    buildGenreConstantsFromCurrent();
+    hookLoadLabel();
+    wireButtons();
+    setHeader('ALL', (window.PLAYLIST||[]).length);
+    updateNowGenre(typeof window.idx==='number' ? window.idx : 0);
   });
 })();
 </script>
