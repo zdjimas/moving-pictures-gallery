@@ -1,5 +1,19 @@
 /* Auto-generated from songlist2.txt */
 const PLAYLIST_HEAVY = [
+ 
+  
+  
+  {
+    title: "A Greener Manalishi",
+    file:  "Media/A Greener Manalishi.mp3",
+    img:   "Media/AGreenerManalishi.jpeg",
+    alt:   "A Greener Manalishi  - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A Song from Unleashed in the East, revisited and remaked."
+  },
+
+  
   {
     title: "An Alternate Planet Caravan",
     file:  "Media/An Alternate Planet Caravan.mp3",
