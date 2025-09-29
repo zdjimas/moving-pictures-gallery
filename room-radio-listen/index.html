@@ -64,12 +64,7 @@ input[type=range]{width:100%}
 </style>
 
 <style>
-  /* v1.034: managed right-pane list */
-  #vitems { max-height: 460px; overflow-y: auto; overscroll-behavior: contain; }
-  #vitems .row { display:flex; justify-content:space-between; padding:10px 12px;
-                 border-bottom:1px solid rgba(255,255,255,.08); cursor:pointer; }
-  #vitems .row:hover { background: rgba(255,255,255,.06); }
-  #vitems .rmeta { opacity:.7; font-size:12px; }
+  #plist .items { max-height: 460px; overflow-y: auto; overscroll-behavior: contain; }
 </style>
 
 </head>
@@ -115,16 +110,20 @@ input[type=range]{width:100%}
 <nav class="creator-links" aria-label="Creator links" style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
   <a href="https://www.tiktok.com/@chrisjmurphy65" class="btn" target="_blank" rel="noopener noreferrer">🎬 Watch on TikTok (CJ Murphy)</a>
 </nav>
- 
+<div class="tiny muted" style="margin:2px 0 0 2px">Select the Genre you want played from list All play</div>
 
-<div class="tiny"
-     style="margin:6px 0 8px 2px; font-size:16px; font-weight:800; color:#fff; letter-spacing:.2px; text-shadow:0 1px 2px rgba(0,0,0,.35);">
-  Select the Genre you want played for this session
+<div id="genreCallout33" style="
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin:8px auto 8px;padding:10px 14px;max-width:720px;
+  background:linear-gradient(180deg,#2a3f68 0%,#1f3154 100%);
+  color:#fff;font-weight:800;font-size:16px;letter-spacing:.2px;
+  border:1px solid rgba(255,255,255,.18);border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);text-align:center;">
+  <span style='display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:999px;background:rgba(255,255,255,.14);font-size:14px;'>♪</span>
+  <span>Select the <u>Genre</u> you want the station to play for this session</span>
 </div>
-
-    
 <div class="genre-bar" id="genreBar" aria-label="Genre filter" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 6px;">
-  
+  <button class="gbtn active" data-genre="ALL" type="button">ALL</button>
   <button class="gbtn" data-genre="Heavy and Metal" type="button">Heavy and Metal</button>
   <button class="gbtn" data-genre="Middle Ground Rock" type="button">Middle Ground Rock</button>
   <button class="gbtn" data-genre="Mellow Tunes" type="button">Mellow Tunes</button>
@@ -2874,12 +2873,34 @@ window.addEventListener('load', () => {
 </script>
 
 
+<script>
+(function(){
+  function up(s){ return String(s||'').trim().toUpperCase(); }
+  function once(){
+    const bars = Array.from(document.querySelectorAll('.genre-bar'));
+    if (!bars.length) return;
+    const keep = document.getElementById('genreBar') || bars[0];
+    bars.forEach(b => { if (b !== keep) b.remove(); });
+    keep.querySelectorAll('button, .btn, .pill, .chip').forEach(el => {
+      if (up(el.textContent) === 'ALL') el.remove();
+    });
+    const callout = document.getElementById('genreCallout33');
+    if (callout && callout.nextElementSibling !== keep){
+      keep.parentNode.insertBefore(callout, keep);
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', once);
+  else once();
+})();
+</script>
+
+
 <script type="module">
 import HEAVY  from './playlist-heavy.js';
 import ROCK   from './playlist-rock.js';
 import MELLOW from './playlist-mellow.js';
 
-/* Bullwinkle-v1.034: self-managed right list to guarantee visible refresh */
+/* Bullwinkle-v1.033: capture-level wiring and hard playlist swap */
 const MAP = new Map([
   ['heavy and metal', {list: HEAVY,  label: 'Heavy and Metal'}],
   ['middle ground rock', {list: ROCK, label: 'Middle Ground Rock'}],
@@ -2911,38 +2932,26 @@ function updateNowGenre(i=0){
   }catch{}
 }
 
-function ensureHost(){
-  const body = document.querySelector('#plist .body');
-  if (!body) return null;
-  let host = document.getElementById('vitems');
-  if (!host){
-    host = document.createElement('div');
-    host.id = 'vitems';
-    body.appendChild(host);
-  }
-  // Hide legacy siblings inside body to avoid duplicate lists
-  Array.from(body.children).forEach(ch => {
-    if (ch !== host) ch.style.display = 'none';
-  });
-  host.style.display = 'block';
-  return host;
-}
-
-function renderRight(){
-  const host = ensureHost(); if (!host) return;
-  host.innerHTML = '';
-  (window.PLAYLIST || []).forEach((t,i)=>{
+function fallbackRender(){
+  const pane = document.querySelector('#plist .items'); if (!pane) return;
+  pane.innerHTML = '';
+  (window.PLAYLIST||[]).forEach((t,i)=>{
     const row = document.createElement('div');
     row.className = 'row';
+    row.style.cssText = 'display:flex;justify-content:space-between;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);';
     row.addEventListener('click', ()=>{ if (typeof window.load === 'function') window.load(i,true); });
-    const left = document.createElement('div');
-    left.textContent = String(i+1).padStart(3,'0') + ' ' + (t.title || '(untitled)');
-    const right = document.createElement('div');
-    right.className = 'rmeta';
-    right.textContent = t.genre || '';
+    const left = document.createElement('div'); left.textContent = String(i+1).padStart(3,'0') + ' ' + (t.title || '(untitled)');
+    const right = document.createElement('div'); right.textContent = t.genre || ''; right.style.cssText='opacity:.7;font-size:12px;';
     row.appendChild(left); row.appendChild(right);
-    host.appendChild(row);
+    pane.appendChild(row);
   });
+}
+
+function repaint(){
+  if (typeof window.buildList === 'function') window.buildList();
+  const pane = document.querySelector('#plist .items');
+  const match = !!(pane && pane.childElementCount === (window.PLAYLIST?.length||0) && window.PLAYLIST?.length);
+  if (!match) fallbackRender();
 }
 
 function playFromStart(){
@@ -2953,15 +2962,16 @@ function playFromStart(){
 function activate(label){
   const entry = MAP.get(norm(label)) || MAP.get('middle ground rock');
   mutate(entry.list);
+  repaint();
   setHeader(entry.label);
-  renderRight();
   playFromStart();
-  document.querySelectorAll('[data-genre], button, .btn, .pill, .chip').forEach(el=>{
+  // try to reflect active state
+  document.querySelectorAll('button, .btn, .pill, .chip, [data-genre]').forEach(el=>{
     el.classList.toggle('active', norm(el.textContent) === norm(entry.label));
   });
 }
 
-// Capture-level listener to ensure we override legacy handlers
+/* Capture-level listener so we win before legacy handlers */
 document.addEventListener('click', (ev)=>{
   const el = ev.target.closest('button, .btn, .pill, .chip, [data-genre]'); if (!el) return;
   const key = norm(el.textContent);
@@ -2970,18 +2980,18 @@ document.addEventListener('click', (ev)=>{
   activate(el.textContent);
 }, true);
 
-// Hook load() so "Genre:" label stays correct
+/* Keep genre label accurate on track changes */
 (function hookLoad(){
   const attempt = () => {
     if (typeof window.load !== 'function') return false;
-    if (window.load._v034) return true;
+    if (window.load._v033) return true;
     const _load = window.load;
     window.load = function(i, autoplay){
       const r = _load(i, autoplay);
       updateNowGenre(i);
       return r;
     };
-    window.load._v034 = true;
+    window.load._v033 = true;
     return true;
   };
   if (!attempt()){
@@ -2989,10 +2999,10 @@ document.addEventListener('click', (ev)=>{
   }
 })();
 
-// Boot once the page has load()
+/* Boot with ROCK once legacy functions exist */
 (function init(){
   const t = setInterval(()=>{
-    if (typeof window.load === 'function'){
+    if (typeof window.buildList === 'function' && typeof window.load === 'function'){
       clearInterval(t);
       activate('Middle Ground Rock');
     }
@@ -3000,45 +3010,5 @@ document.addEventListener('click', (ev)=>{
 })();
 </script>
 
-
-
-<script>
-(function () {
-  const VER_NUM = 34;                         // <- just update this number
-  const VER_TAG = `Bullwinkle-v1.${VER_NUM.toString().padStart(3,'0')}`;
-  const QUERY_TXT = [
-    /Release:\s*Bullwinkle-v1\.\d+/i,
-    /v=bullwinkle-v1-\d+/i
-  ];
-  const REPLACERS = [
-    `Release: ${VER_TAG}`,
-    `v=bullwinkle-v1-${VER_NUM.toString().padStart(3,'0')}`
-  ];
-
-  // Pass 1: try a direct badge element if you have one
-  const badge = document.getElementById('releaseBadge');
-  if (badge) {
-    badge.textContent = `Release: ${VER_TAG}`;
-    const info = document.getElementById('releaseInfo');
-    if (info) info.textContent = `index.html - v=bullwinkle-v1-${VER_NUM.toString().padStart(3,'0')}`;
-    return;
-  }
-
-  // Pass 2: search the DOM for the two strings and rewrite them
-  const all = document.querySelectorAll('body *');
-  for (const el of all) {
-    if (!el.childElementCount && el.textContent) {
-      QUERY_TXT.forEach((rx, i) => {
-        if (rx.test(el.textContent)) {
-          el.textContent = el.textContent.replace(rx, REPLACERS[i]);
-        }
-      });
-    }
-  }
-})();
-</script>
-
-
-  
 </body>
 </html>
