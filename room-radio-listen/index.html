@@ -64,8 +64,12 @@ input[type=range]{width:100%}
 </style>
 
 <style>
-  /* Cap playlist height (approx 8 rows) */
-  #plist .items { max-height: 460px; overflow-y: auto; overscroll-behavior: contain; }
+  /* v1.034: managed right-pane list */
+  #vitems { max-height: 460px; overflow-y: auto; overscroll-behavior: contain; }
+  #vitems .row { display:flex; justify-content:space-between; padding:10px 12px;
+                 border-bottom:1px solid rgba(255,255,255,.08); cursor:pointer; }
+  #vitems .row:hover { background: rgba(255,255,255,.06); }
+  #vitems .rmeta { opacity:.7; font-size:12px; }
 </style>
 
 </head>
@@ -112,17 +116,6 @@ input[type=range]{width:100%}
   <a href="https://www.tiktok.com/@chrisjmurphy65" class="btn" target="_blank" rel="noopener noreferrer">🎬 Watch on TikTok (CJ Murphy)</a>
 </nav>
 <div class="tiny muted" style="margin:2px 0 0 2px">Select the Genre you want played from list All play</div>
-
-<div id="genreCallout32" style="
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  margin:8px auto 8px;padding:10px 14px;max-width:720px;
-  background:linear-gradient(180deg,#2a3f68 0%,#1f3154 100%);
-  color:#fff;font-weight:800;font-size:16px;letter-spacing:.2px;
-  border:1px solid rgba(255,255,255,.18);border-radius:12px;
-  box-shadow:0 8px 24px rgba(0,0,0,.35);text-align:center;">
-  <span style='display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:999px;background:rgba(255,255,255,.14);font-size:14px;'>♪</span>
-  <span>Select the <u>Genre</u> you want the station to play for this session</span>
-</div>
 <div class="genre-bar" id="genreBar" aria-label="Genre filter" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 6px;">
   <button class="gbtn active" data-genre="ALL" type="button">ALL</button>
   <button class="gbtn" data-genre="Heavy and Metal" type="button">Heavy and Metal</button>
@@ -2874,37 +2867,12 @@ window.addEventListener('load', () => {
 </script>
 
 
-<script>
-(function(){
-  function normalize(s){ return String(s||'').trim().toUpperCase(); }
-  function setup(){
-    const bars = Array.from(document.querySelectorAll('.genre-bar'));
-    if (!bars.length) return;
-    const keep = document.getElementById('genreBar') || bars[0];
-    bars.forEach(b => { if (b !== keep) b.remove(); });
-    keep.querySelectorAll('button, .btn, .pill, .chip').forEach(el => {
-      if (normalize(el.textContent) === 'ALL') el.remove();
-    });
-    const callout = document.getElementById('genreCallout32');
-    if (callout && callout.nextElementSibling !== keep){
-      keep.parentNode.insertBefore(callout, keep);
-    }
-  }
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', setup);
-  } else {
-    setup();
-  }
-})();
-</script>
-
-
 <script type="module">
 import HEAVY  from './playlist-heavy.js';
 import ROCK   from './playlist-rock.js';
 import MELLOW from './playlist-mellow.js';
 
-/* Bullwinkle-v1.032-fixed: non-destructive controller */
+/* Bullwinkle-v1.034: self-managed right list to guarantee visible refresh */
 const MAP = new Map([
   ['heavy and metal', {list: HEAVY,  label: 'Heavy and Metal'}],
   ['middle ground rock', {list: ROCK, label: 'Middle Ground Rock'}],
@@ -2912,10 +2880,12 @@ const MAP = new Map([
 ]);
 
 function norm(s){ return String(s||'').toLowerCase().replace(/\s+/g,' ').trim(); }
+
 function mutate(list){
   const dst = Array.isArray(window.PLAYLIST) ? window.PLAYLIST : (window.PLAYLIST = []);
   dst.splice(0, dst.length, ...list);
 }
+
 function setHeader(label){
   try{
     const strong = document.querySelector('#plist .head strong');
@@ -2924,6 +2894,7 @@ function setHeader(label){
     if (count)  count.textContent  = (window.PLAYLIST?.length || 0) + ' items';
   }catch{}
 }
+
 function updateNowGenre(i=0){
   try{
     const el = document.getElementById('genreNow'); if (!el) return;
@@ -2932,83 +2903,78 @@ function updateNowGenre(i=0){
     if (g) el.textContent = 'Genre: ' + g;
   }catch{}
 }
-function fallbackRender(){
-  const pane = document.querySelector('#plist .items'); if (!pane) return;
-  pane.innerHTML = '';
-  (window.PLAYLIST||[]).forEach((t,i)=>{
+
+function ensureHost(){
+  const body = document.querySelector('#plist .body');
+  if (!body) return null;
+  let host = document.getElementById('vitems');
+  if (!host){
+    host = document.createElement('div');
+    host.id = 'vitems';
+    body.appendChild(host);
+  }
+  // Hide legacy siblings inside body to avoid duplicate lists
+  Array.from(body.children).forEach(ch => {
+    if (ch !== host) ch.style.display = 'none';
+  });
+  host.style.display = 'block';
+  return host;
+}
+
+function renderRight(){
+  const host = ensureHost(); if (!host) return;
+  host.innerHTML = '';
+  (window.PLAYLIST || []).forEach((t,i)=>{
     const row = document.createElement('div');
     row.className = 'row';
-    row.style.cssText = 'display:flex;justify-content:space-between;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);';
     row.addEventListener('click', ()=>{ if (typeof window.load === 'function') window.load(i,true); });
     const left = document.createElement('div');
     left.textContent = String(i+1).padStart(3,'0') + ' ' + (t.title || '(untitled)');
     const right = document.createElement('div');
+    right.className = 'rmeta';
     right.textContent = t.genre || '';
-    right.style.cssText = 'opacity:.7;font-size:12px;';
     row.appendChild(left); row.appendChild(right);
-    pane.appendChild(row);
+    host.appendChild(row);
   });
 }
-function repaint(){
-  if (typeof window.buildList === 'function') window.buildList();
-  const pane = document.querySelector('#plist .items');
-  const ok = !!(pane && pane.childElementCount === (window.PLAYLIST?.length||0) && window.PLAYLIST?.length);
-  if (!ok) fallbackRender();
-}
+
 function playFromStart(){
-  if (typeof window.load === 'function'){
-    if ((window.PLAYLIST?.length||0) > 0) window.load(0, true);
-  }
+  if (typeof window.load === 'function'){ if ((window.PLAYLIST?.length||0)>0) window.load(0,true); }
   updateNowGenre(0);
 }
-function activate(labelText){
-  const entry = MAP.get(norm(labelText)) || MAP.get('middle ground rock');
+
+function activate(label){
+  const entry = MAP.get(norm(label)) || MAP.get('middle ground rock');
   mutate(entry.list);
-  repaint();
   setHeader(entry.label);
+  renderRight();
   playFromStart();
-  document.querySelectorAll('[data-genre]').forEach(b=>{
-    b.classList.toggle('active', norm(b.textContent) === norm(entry.label));
+  document.querySelectorAll('[data-genre], button, .btn, .pill, .chip').forEach(el=>{
+    el.classList.toggle('active', norm(el.textContent) === norm(entry.label));
   });
 }
 
-function wire(){
-  const bar = document.getElementById('genreBar');
-  if (bar && !bar._wired032){
-    bar._wired032 = true;
-    bar.addEventListener('click', (ev)=>{
-      const btn = ev.target.closest('[data-genre]'); if (!btn) return;
-      activate(btn.textContent);
-    });
-  }
-  // Wire pills elsewhere; strip ALL
-  document.querySelectorAll('button, .btn, .pill, .chip').forEach(el=>{
-    const k = norm(el.textContent);
-    if (k === 'all'){ el.remove(); }
-    if (MAP.has(k) && !el._wired032){
-      el._wired032 = true;
-      el.addEventListener('click', ()=> activate(el.textContent));
-    }
-  });
-  // Keep banner above bar
-  const callout = document.getElementById('genreCallout32');
-  if (callout && bar && callout.nextElementSibling !== bar){
-    bar.parentNode.insertBefore(callout, bar);
-  }
-}
+// Capture-level listener to ensure we override legacy handlers
+document.addEventListener('click', (ev)=>{
+  const el = ev.target.closest('button, .btn, .pill, .chip, [data-genre]'); if (!el) return;
+  const key = norm(el.textContent);
+  if (!MAP.has(key)) return;
+  ev.preventDefault(); ev.stopImmediatePropagation(); ev.stopPropagation();
+  activate(el.textContent);
+}, true);
 
-// Hook load() once so genre label stays accurate
+// Hook load() so "Genre:" label stays correct
 (function hookLoad(){
   const attempt = () => {
     if (typeof window.load !== 'function') return false;
-    if (window.load._v032) return true;
+    if (window.load._v034) return true;
     const _load = window.load;
     window.load = function(i, autoplay){
       const r = _load(i, autoplay);
       updateNowGenre(i);
       return r;
     };
-    window.load._v032 = true;
+    window.load._v034 = true;
     return true;
   };
   if (!attempt()){
@@ -3016,11 +2982,10 @@ function wire(){
   }
 })();
 
-// Wait for legacy functions, then boot with ROCK
+// Boot once the page has load()
 (function init(){
   const t = setInterval(()=>{
-    wire();
-    if (typeof window.buildList === 'function' && typeof window.load === 'function'){
+    if (typeof window.load === 'function'){
       clearInterval(t);
       activate('Middle Ground Rock');
     }
