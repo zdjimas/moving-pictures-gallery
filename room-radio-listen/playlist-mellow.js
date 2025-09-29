@@ -2,7 +2,7 @@
 const PLAYLIST_MELLOW = [
   {
   title: "Silent Sucidity Silenced",
-  file:  "Media/Silent Lucidity Silenced .mp3",
+  file:  "Media/Silent Lucidity Silenced.mp3",
   image: "Media/Lucidity.jpeg",
   alt:   "Cover art for KZAK",
     genre: "Mellow Tunes",
