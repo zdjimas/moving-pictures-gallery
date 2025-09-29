@@ -236,6 +236,7 @@ let breakEvery=1;
 /* ===== Playlist (short sample — replace with your full list) ===== */
 
  /* PLAYLIST moved to external JS modules */
+var PLAYLIST = [];
 /* ===== Utilities ===== */
 const $=s=>document.querySelector(s);
 function fmt(t){t|=0;const m=(t/60)|0,s=(t%60)|0;return m+':'+(s<10?'0':'')+s}
@@ -1152,7 +1153,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 25; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 26; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -1479,7 +1480,7 @@ import HEAVY from './playlist-heavy.js';
 import ROCK  from './playlist-rock.js';
 import MELLOW from './playlist-mellow.js';
 
-/* === Bullwinkle-v1.025: External lists only; default ROCK === */
+/* === Bullwinkle-v1.026: External lists only; default ROCK; legacy-safe PLAYLIST === */
 
 function setHeader(label, count){
   try{
@@ -1499,23 +1500,22 @@ function updateNowGenre(i){
   }catch(e){}
 }
 
-// Hook load() once to keep the label accurate
 (function hookLoad(){
-  if (typeof window.load !== 'function') {
-    // wait for legacy scripts
-    const t = setInterval(()=>{
-      if (typeof window.load === 'function'){ clearInterval(t); hookLoad(); }
-    }, 100);
-    return;
-  }
-  if (window.load._v025) return;
-  const _load = window.load;
-  window.load = function(i, autoplay){
-    const r = _load(i, autoplay);
-    updateNowGenre(i);
-    return r;
+  const go = () => {
+    if (typeof window.load !== 'function') return false;
+    if (window.load._v026) return true;
+    const _load = window.load;
+    window.load = function(i, autoplay){
+      const r = _load(i, autoplay);
+      updateNowGenre(i);
+      return r;
+    };
+    window.load._v026 = true;
+    return true;
   };
-  window.load._v025 = true;
+  if (!go()){
+    const t = setInterval(()=>{ if (go()) clearInterval(t); }, 100);
+  }
 })();
 
 function mutateInPlace(list){
@@ -1523,46 +1523,44 @@ function mutateInPlace(list){
   window.PLAYLIST.splice(0, window.PLAYLIST.length, ...list);
 }
 
-// Initialize with ROCK as default
-(function init(){
-  const t = setInterval(()=>{
-    if (typeof window.buildList === 'function' && typeof window.load === 'function'){
-      clearInterval(t);
-      mutateInPlace(ROCK);
-      window.buildList();
-      window.idx = 0;
-      if (window.PLAYLIST.length) window.load(0, true);
-      setHeader('Middle Ground Rock', window.PLAYLIST.length);
-      updateNowGenre(0);
-      wireButtons();
-    }
-  }, 120);
-})();
+function bootWith(list, label){
+  mutateInPlace(list);
+  if (typeof window.buildList === 'function') window.buildList();
+  window.idx = 0;
+  if (window.PLAYLIST.length && typeof window.load === 'function') window.load(0, true);
+  setHeader(label, window.PLAYLIST.length);
+  updateNowGenre(0);
+}
 
 function activateByLabel(label){
   let list = ROCK, header = 'Middle Ground Rock';
   if (label === 'Heavy and Metal'){ list = HEAVY; header = 'Heavy and Metal'; }
   else if (label === 'Mellow Tunes'){ list = MELLOW; header = 'Mellow Tunes'; }
   else if (label === 'Middle Ground Rock'){ list = ROCK; header = 'Middle Ground Rock'; }
-
-  mutateInPlace(list);
-  window.buildList();
-  window.idx = 0;
-  if (window.PLAYLIST.length) window.load(0, true);
-  setHeader(header, window.PLAYLIST.length);
-  updateNowGenre(0);
+  bootWith(list, header);
 }
 
 function wireButtons(){
   const bar = document.getElementById('genreBar');
-  if (!bar || bar._wired025) return;
-  bar._wired025 = true;
+  if (!bar || bar._wired026) return;
+  bar._wired026 = true;
   bar.addEventListener('click', (ev)=>{
     const btn = ev.target.closest('[data-genre]'); if (!btn) return;
     bar.querySelectorAll('[data-genre]').forEach(b=>b.classList.toggle('active', b===btn));
     activateByLabel(btn.getAttribute('data-genre'));
   });
 }
+
+// Wait for legacy functions, then boot using ROCK
+(function init(){
+  const t = setInterval(()=>{
+    if (typeof window.buildList === 'function' && typeof window.load === 'function'){
+      clearInterval(t);
+      wireButtons();
+      bootWith(ROCK, 'Middle Ground Rock');
+    }
+  }, 120);
+})();
 </script>
 
 </body>
