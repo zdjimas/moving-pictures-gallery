@@ -3000,5 +3000,45 @@ document.addEventListener('click', (ev)=>{
 })();
 </script>
 
+
+
+<script>
+(function () {
+  const VER_NUM = 34;                         // <- just update this number
+  const VER_TAG = `Bullwinkle-v1.${VER_NUM.toString().padStart(3,'0')}`;
+  const QUERY_TXT = [
+    /Release:\s*Bullwinkle-v1\.\d+/i,
+    /v=bullwinkle-v1-\d+/i
+  ];
+  const REPLACERS = [
+    `Release: ${VER_TAG}`,
+    `v=bullwinkle-v1-${VER_NUM.toString().padStart(3,'0')}`
+  ];
+
+  // Pass 1: try a direct badge element if you have one
+  const badge = document.getElementById('releaseBadge');
+  if (badge) {
+    badge.textContent = `Release: ${VER_TAG}`;
+    const info = document.getElementById('releaseInfo');
+    if (info) info.textContent = `index.html - v=bullwinkle-v1-${VER_NUM.toString().padStart(3,'0')}`;
+    return;
+  }
+
+  // Pass 2: search the DOM for the two strings and rewrite them
+  const all = document.querySelectorAll('body *');
+  for (const el of all) {
+    if (!el.childElementCount && el.textContent) {
+      QUERY_TXT.forEach((rx, i) => {
+        if (rx.test(el.textContent)) {
+          el.textContent = el.textContent.replace(rx, REPLACERS[i]);
+        }
+      });
+    }
+  }
+})();
+</script>
+
+
+  
 </body>
 </html>
