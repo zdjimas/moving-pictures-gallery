@@ -3141,6 +3141,101 @@ document.addEventListener('click', (ev)=>{
   setTimeout(runAll, 1000);
 })();
 </script>
+<script>
+/* ===== Bullwinkle runtime patch — v1.036 ===== */
+(function () {
+  /* ---------- 1) Version badge: rewrite TEXT NODES, not just elements ---------- */
+  const SUBVER = 36;                                     // <- bump for next release
+  const PAD    = String(SUBVER).padStart(3, '0');
+  const VER    = `Bullwinkle-v1.${PAD}`;
+  const FILE   = `v=bullwinkle-v1-${PAD}`;
+  const STAMP  = new Date().toLocaleString();
+
+  const RX_VER  = /Release:\s*Bullwinkle-v1\.\d+/i;
+  const RX_FILE = /v=bullwinkle-v1-\d+/i;
+
+  function replaceInTextNodes(root) {
+    const walker = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT, null);
+    let n, changed = false;
+    while ((n = walker.nextNode())) {
+      const t = n.nodeValue;
+      if (!t) continue;
+      const t2 = t.replace(RX_VER, `Release: ${VER}`).replace(RX_FILE, FILE);
+      if (t !== t2) { n.nodeValue = t2; changed = true; }
+    }
+    // If you keep explicit IDs, stamp them too
+    const badge = document.getElementById('releaseBadge');
+    const info  = document.getElementById('releaseInfo');
+    if (badge) { badge.textContent = `Release: ${VER}`; changed = true; }
+    if (info)  { info.textContent  = `index.html - ${FILE} • ${STAMP}`; changed = true; }
+    return changed;
+  }
+
+  // Initial pass + observe late mutations (e.g., widgets that stamp after load)
+  function stampBadgeRobust() {
+    replaceInTextNodes(document.body);
+    const obs = new MutationObserver(muts => {
+      let touched = false;
+      for (const m of muts) {
+        if (m.type === 'childList' || m.type === 'characterData') touched = true;
+      }
+      if (touched) replaceInTextNodes(document.body);
+    });
+    obs.observe(document.body, { subtree: true, childList: true, characterData: true });
+    // A couple of delayed retries help if something paints very late:
+    setTimeout(() => replaceInTextNodes(document.body), 300);
+    setTimeout(() => replaceInTextNodes(document.body), 1000);
+  }
+
+  /* ---------- 2) Footer: keep the LAST block that has either link ---------- */
+  function dedupeFooters() {
+    const anchors = Array.from(document.querySelectorAll(
+      'a[href*="tiktok.com/@chrisjmurphy65"], a[href*="thehumanworkforce.com"]'
+    ));
+
+    if (!anchors.length) return;  // nothing to do
+
+    // For each link, choose a reasonable ancestor container for a "footer card"
+    function footerContainer(el) {
+      // Prefer an explicit wrapper if present
+      let n = el.closest('#bullwinkle-footer-bios, .bio-block');
+      if (n) return n;
+      // Otherwise climb until a block-like DIV with some padding/width (fallback)
+      n = el;
+      for (let i = 0; i < 6 && n && n !== document.body; i++) {
+        n = n.parentElement;
+        if (!n) break;
+        if (n.tagName === 'DIV') {
+          // heuristic: looks like a footer section
+          if (n.querySelector('a[href*="tiktok.com"], a[href*="thehumanworkforce.com"]')) return n;
+        }
+      }
+      return el.parentElement || el;
+    }
+
+    const blocks = anchors.map(a => footerContainer(a)).filter(Boolean);
+
+    // Unique blocks (in DOM order)
+    const seen = new Set();
+    const unique = [];
+    blocks.forEach(b => { if (!seen.has(b)) { unique.push(b); seen.add(b); } });
+
+    if (unique.length <= 1) return;  // already deduped
+
+    // Keep LAST; remove all earlier ones
+    for (let i = 0; i < unique.length - 1; i++) {
+      unique[i].remove();
+    }
+  }
+
+  // Run once DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { stampBadgeRobust(); dedupeFooters(); });
+  } else {
+    stampBadgeRobust(); dedupeFooters();
+  }
+})();
+</script>
 
 </body>
 </html>
