@@ -1,10 +1,9 @@
- <!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>KZAK • Frasier-Style Fun Radio (Bullwinkle-v1.030)</title>
-
+  <title>KZAK • Frasier-Style Fun Radio (Bullwinkle-v1.030-fix)</title>
   <style>
     :root {
       --bg: #0a0f16;
@@ -12,7 +11,6 @@
       --line: rgba(255,255,255,.08);
       --text: #e7eef9;
       --muted: rgba(231,238,249,.75);
-      --primary: #2a8cff;
       --pill: #192233;
       --pill-active: #295080;
     }
@@ -29,84 +27,56 @@
     header h1 { font-size: 26px; margin: 0; letter-spacing:.2px; }
     header .badge { padding:4px 8px; border-radius:999px; background:#2d384b; font-size:12px; color:#cfe0ff; }
 
-    /* Genre selector */
-    #genreInstr { color: var(--muted); }
-    .genre-bar { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:10px 0 6px; }
-    .gbtn {
-      border: 1px solid var(--line);
-      background: var(--pill);
-      color: var(--text);
-      padding: 6px 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
+    .genre-callout {
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      margin: 8px auto 8px; padding: 10px 14px; max-width: 780px;
+      background: linear-gradient(180deg, #2a3f68 0%, #1f3154 100%);
+      color: #fff; font-weight: 800; font-size: 16px; letter-spacing: .2px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.35);
+      text-align: center;
     }
+    .genre-bar { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:10px 0 6px; }
+    .gbtn { border:1px solid var(--line); background:var(--pill); color:var(--text);
+            padding:8px 12px; border-radius:12px; cursor:pointer; font-weight:700; font-size:14px; }
     .gbtn.active { background: var(--pill-active); border-color: #406aa1; }
 
-    /* Layout */
-    .grid { display:grid; grid-template-columns: 1fr 360px; gap: 18px; margin-top: 14px; }
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      box-shadow: 0 10px 26px rgba(0,0,0,.35);
-      overflow: hidden;
-    }
-    .panel .head {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      font-weight: 700;
-    }
-    .panel .body { padding: 14px; }
+    .grid { display:grid; grid-template-columns: 1fr 360px; gap:18px; margin-top:14px; }
+    .panel { background: var(--panel); border:1px solid var(--line); border-radius:14px; box-shadow:0 10px 26px rgba(0,0,0,.35); overflow:hidden; }
+    .panel .head { padding:12px 14px; border-bottom:1px solid var(--line); background: rgba(255,255,255,.03); font-weight:700; }
+    .panel .body { padding:14px; }
 
-    /* Now playing */
-    #now { display:flex; gap: 14px; }
-    #cover { width: 180px; height: 180px; border-radius: 10px; background:#0d1420; object-fit: cover; }
-    .info h3 { margin: 6px 0 6px; font-size: 20px; }
+    #now { display:flex; gap:14px; }
+    #cover { width:180px; height:180px; border-radius:10px; background:#0d1420; object-fit:cover; }
+    .info h3 { margin: 6px 0 6px; font-size:20px; }
     .muted { color: var(--muted); }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .btn { padding: 8px 12px; border-radius:12px; border:1px solid var(--line); background:#133158; color:#fff; cursor:pointer; font-weight:700; }
 
-    /* Playlist (right) */
-    #plist .items { max-height: 460px; overflow-y: auto; overscroll-behavior: contain; }
-    #plist .row {
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 10px 12px; border-bottom: 1px solid var(--line);
-      cursor: pointer;
-    }
+    #plist .items { max-height: 460px; overflow-y:auto; overscroll-behavior:contain; }
+    #plist .row { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-bottom:1px solid var(--line); cursor:pointer; }
     #plist .row:hover { background: rgba(255,255,255,.04); }
-    .tiny { font-size: 12px; }
+    .tiny { font-size:12px; }
 
-    /* Footer bios */
     footer { margin-top: 18px; }
-    .bio {
-      display:flex; align-items:center; gap:12px; padding:12px 14px;
-      background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
-    }
-    .bio + .bio { margin-top: 8px; }
+    .bio { display:flex; align-items:center; gap:12px; padding:12px 14px; background: var(--panel); border:1px solid var(--line); border-radius:14px; }
+    .bio + .bio { margin-top:8px; }
     .bio img { width:54px; height:54px; border-radius:12px; object-fit:cover; }
     .bio .name { font-weight:700; }
     .bio p { margin:4px 0 0 0; line-height:1.35; }
     .bio a, .bio a:visited { color:#fff !important; text-decoration: underline; }
-
-    /* Buttons row */
-    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
-    .btn {
-      padding: 8px 12px; border-radius: 12px; border:1px solid var(--line);
-      background:#133158; color:#fff; cursor:pointer; font-weight:700;
-    }
-    .btn.secondary { background:#223146; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <h1>KZAK • Frasier-Style Fun Radio without the talking</h1>
-      <span class="badge">Bullwinkle-v1.030</span>
+      <span class="badge">Bullwinkle-v1.030-fix</span>
     </header>
 
-    <!-- Genre selection (single instance) -->
-    <div id="genreInstr" class="tiny muted" style="text-align:center; margin:4px 0 6px 0;">
-      Select the Genre you want the station to play for this session
+    <div id="genreCallout" class="genre-callout">
+      <span class="icon" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:999px;background:rgba(255,255,255,.14);font-size:14px;">♪</span>
+      <span>Select the <u>Genre</u> you want the station to play for this session</span>
     </div>
     <div class="genre-bar" id="genreBar" aria-label="Genre filter">
       <button class="gbtn" data-genre="Heavy and Metal" type="button">Heavy and Metal</button>
@@ -115,7 +85,6 @@
     </div>
 
     <div class="grid">
-      <!-- Now playing / player -->
       <section class="panel">
         <div class="head">Station Console</div>
         <div class="body">
@@ -125,22 +94,19 @@
               <div id="genreNow" class="muted" style="font-size:12px;opacity:.85;margin:0 0 2px 0;">Genre: —</div>
               <h3 id="title">—</h3>
               <div id="story" class="muted">—</div>
-
               <div class="controls">
                 <button class="btn" id="startBtn">Start Station</button>
-                <button class="btn secondary" id="pauseBtn">Pause Station</button>
-                <button class="btn secondary" id="prevBtn">Prev</button>
-                <button class="btn secondary" id="nextBtn">Next</button>
+                <button class="btn" id="pauseBtn">Pause Station</button>
+                <button class="btn" id="prevBtn">Prev</button>
+                <button class="btn" id="nextBtn">Next</button>
               </div>
               <div class="tiny muted" style="margin-top:8px;">Tip: The ON AIR pill lights only when music plays.</div>
             </div>
           </div>
-
           <audio id="player" preload="metadata"></audio>
         </div>
       </section>
 
-      <!-- Playlist (right) -->
       <aside class="panel" id="plist">
         <div class="head">
           <strong>Playlist — Middle Ground Rock</strong>
@@ -152,13 +118,12 @@
       </aside>
     </div>
 
-    <!-- Footer bios -->
     <footer>
-      <div class="bio" style="border: 1px solid var(--line);">
+      <div class="bio">
         <img src="Media/ZachArt.jpeg" alt="zdjimas portrait">
         <div>
           <div class="name">zdjimas</div>
-          <p>A founding creator of this tool, Zachary shares his publishing, artwork, and moving-picture music video art within this radio room exhibit. Make sure you hit “Return to Lobby” to see more or visit CJ Murphy’s TikTok page: 
+          <p>A founding creator of this tool, Zachary shares his publishing, artwork, and moving‑picture music video art within this radio room exhibit. Make sure you hit “Return to Lobby” to see more or visit CJ Murphy’s TikTok page:
             <a href="https://www.tiktok.com/@chrisjmurphy65" target="_blank" rel="noopener noreferrer">tiktok.com/@chrisjmurphy65</a>.
           </p>
         </div>
@@ -167,7 +132,7 @@
         <img src="Media/CJMURPHY.png" alt="CJ Murphy portrait">
         <div>
           <div class="name">CJ Murphy</div>
-          <p>CJ Murphy is co-author and co-creator of the music and artwork exhibits shown and created on TikTok. Check out the book <em>The Last Job You’ll Ever Hate: Thrive in the Age of AI</em> at 
+          <p>CJ Murphy is co‑author and co‑creator of the music and artwork exhibits shown and created on TikTok. Check out the book <em>The Last Job You’ll Ever Hate: Thrive in the Age of AI</em> at
             <a href="https://thehumanworkforce.com" target="_blank" rel="noopener noreferrer">thehumanworkforce.com</a>.
           </p>
         </div>
@@ -175,14 +140,12 @@
     </footer>
   </div>
 
-  <!-- Legacy compatibility: define PLAYLIST so nothing crashes before module loads -->
   <script>
-    // Global placeholders for legacy compatibility
+    // Legacy globals for compatibility
     var PLAYLIST = [];
     var idx = 0;
   </script>
 
-  <!-- Controller using ONLY the external lists; default: ROCK -->
   <script type="module">
     import HEAVY  from './playlist-heavy.js';
     import ROCK   from './playlist-rock.js';
@@ -194,15 +157,15 @@
       'Mellow Tunes': { list: MELLOW, header: 'Mellow Tunes' }
     };
 
-    const audio = document.getElementById('player');
+    const audio   = document.getElementById('player');
     const titleEl = document.getElementById('title');
     const coverEl = document.getElementById('cover');
     const storyEl = document.getElementById('story');
     const genreNowEl = document.getElementById('genreNow');
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn  = document.getElementById('prevBtn');
+    const nextBtn  = document.getElementById('nextBtn');
 
     function setHeader(label, count){
       const strong = document.querySelector('#plist .head strong');
@@ -217,8 +180,8 @@
       genreNowEl.textContent = 'Genre: ' + g;
     }
 
-    // Fallback player/load logic (works standalone but also coexists with legacy)
-    window.buildList = function buildList(){
+    // Minimal list renderer
+    function buildList(){
       const list = document.querySelector('#plist .items');
       if (!list) return;
       list.innerHTML = '';
@@ -234,9 +197,10 @@
         row.addEventListener('click', () => load(i, true));
         list.appendChild(row);
       });
-    };
+    }
+    window.buildList = buildList;
 
-    window.load = function load(i, autoplay){
+    function load(i, autoplay){
       if (!PLAYLIST.length) return;
       idx = (i|0);
       const t = PLAYLIST[idx];
@@ -245,11 +209,12 @@
       coverEl.alt = t.alt || 'cover';
       storyEl.textContent = t.story || '';
       updateNowGenre(idx);
-      if (t.file) {
+      if (t.file){
         audio.src = t.file;
-        if (autoplay) audio.play().catch(()=>{ /* user gesture may be required */ });
+        if (autoplay) audio.play().catch(()=>{});
       }
-    };
+    }
+    window.load = load;
 
     function mutateInPlace(arr){
       PLAYLIST.splice(0, PLAYLIST.length, ...arr);
@@ -273,7 +238,6 @@
       if (PLAYLIST.length) load(0, true);
       setHeader(entry.header, PLAYLIST.length);
       updateNowGenre(0);
-      // Toggle button active state
       document.querySelectorAll('#genreBar [data-genre]').forEach(b=>{
         b.classList.toggle('active', b.getAttribute('data-genre') === label);
       });
@@ -289,15 +253,14 @@
       });
     }
 
-    // Transport controls
+    // Transport
     startBtn.addEventListener('click', () => { if (audio.src) audio.play(); else load(0, true); });
     pauseBtn.addEventListener('click', () => audio.pause());
     prevBtn.addEventListener('click', () => { if (!PLAYLIST.length) return; idx = (idx-1+PLAYLIST.length)%PLAYLIST.length; load(idx, true); });
     nextBtn.addEventListener('click', () => { if (!PLAYLIST.length) return; idx = (idx+1)%PLAYLIST.length; load(idx, true); });
 
-    // Initialize
     wireButtons();
-    bootWith('Middle Ground Rock'); // default
+    bootWith('Middle Ground Rock');
   </script>
 </body>
 </html>
