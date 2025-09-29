@@ -3238,16 +3238,70 @@ document.addEventListener('click', (ev)=>{
 </script>
 
 
-<!-- Bullwinkle runtime patch v1.037: fix badge + hide duplicate mini-cards only -->
+<!-- Bullwinkle runtime patch v1.038 -->
 <script>
-(function () {
-  const SUBVER = 37; // bump for next release
+(function(){
+  const SUBVER = 38;
   const PAD = String(SUBVER).padStart(3,'0');
   const VER = `Bullwinkle-v1.${PAD}`;
   const FILE = `v=bullwinkle-v1-${PAD}`;
   const STAMP = new Date().toLocaleString();
 
-  // 1) Robust badge updater across text nodes + late mutations
+  // --- 1) Welcome modal: guarantee it can be dismissed ---
+  function findWelcome() {
+    // Look for the banner by common cues (title text or button text).
+    const byTitle = Array.from(document.querySelectorAll('*'))
+      .find(el => /Welcome\s+to\s+KZAK/i.test(el.textContent || '') && el.closest && el.closest('div,section,article'));
+    const root = byTitle ? byTitle.closest('div,section,article') : null;
+    return root || null;
+  }
+
+  function startStation() {
+    // Prefer a dedicated API if it exists
+    if (typeof window.startStation === 'function') { try { window.startStation(); return; } catch(e){} }
+    // Fallback: click the Start Station button if visible
+    const btn = Array.from(document.querySelectorAll('button, a')).find(el => /Start\s+Station/i.test(el.textContent || ''));
+    if (btn) btn.click();
+    // If player has a load function and a playlist, try to begin
+    if (typeof window.load === 'function' && Array.isArray(window.PLAYLIST) && window.PLAYLIST.length) {
+      try { window.load(0, true); } catch(e){}
+    }
+  }
+
+  function playWelcomeThenStart() {
+    // If there's a playWelcome function, use it then start after a short delay
+    if (typeof window.playWelcome === 'function') {
+      try { window.playWelcome(); setTimeout(startStation, 500); return; } catch(e){}
+    }
+    startStation();
+  }
+
+  function enableWelcomeControls() {
+    const modal = findWelcome();
+    if (!modal) return;
+    modal.style.pointerEvents = 'auto';  // ensure it accepts clicks
+    // Bind buttons by label text
+    const btnPlay = Array.from(modal.querySelectorAll('button, a')).find(el => /Play\s+Welcome/i.test(el.textContent || ''));
+    const btnSkip = Array.from(modal.querySelectorAll('button, a')).find(el => /Skip/i.test(el.textContent || ''));
+    const closeModal = ()=>{ modal.style.display = 'none'; modal.setAttribute('aria-hidden', 'true'); };
+    if (btnPlay && !btnPlay._wired038){
+      btnPlay._wired038 = true;
+      btnPlay.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); closeModal(); playWelcomeThenStart(); });
+    }
+    if (btnSkip && !btnSkip._wired038){
+      btnSkip._wired038 = true;
+      btnSkip.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); closeModal(); startStation(); });
+    }
+    // Also allow pressing Escape to close
+    if (!modal._esc038){
+      modal._esc038 = true;
+      document.addEventListener('keydown', (ev)=>{
+        if (ev.key === 'Escape'){ closeModal(); }
+      });
+    }
+  }
+
+  // --- 2) Robust badge updater (text nodes + observer) ---
   const RX_VER  = /Release:\s*Bullwinkle-v1\.\d+/i;
   const RX_FILE = /v=bullwinkle-v1-\d+/i;
   function replaceInTextNodes(root) {
@@ -3263,34 +3317,42 @@ document.addEventListener('click', (ev)=>{
     if (badge) badge.textContent = `Release: ${VER}`;
     if (info)  info.textContent  = `index.html - ${FILE} • ${STAMP}`;
   }
-  function startBadgeObserver() {
+  function startBadgeObserver(){
     replaceInTextNodes(document.body);
-    const obs = new MutationObserver(() => replaceInTextNodes(document.body));
+    const obs = new MutationObserver(()=> replaceInTextNodes(document.body));
     obs.observe(document.body, { subtree:true, childList:true, characterData:true });
-    setTimeout(() => replaceInTextNodes(document.body), 300);
-    setTimeout(() => replaceInTextNodes(document.body), 1000);
+    setTimeout(()=> replaceInTextNodes(document.body), 300);
+    setTimeout(()=> replaceInTextNodes(document.body), 1000);
   }
 
-  // 2) Hide ONLY the small duplicate mini-cards (do NOT touch other sections)
-  function hideMiniCardsDupes(){
+  // --- 3) Hide duplicate mini cards (non-destructive) ---
+  function hideMiniCards(){
     const looksLikeMini = (el) => {
       const txt = (el.textContent || '').replace(/\s+/g,' ').trim();
       const hasRole = /Concept, curation, engineering/i.test(txt) ||
                       /Composition, arrangement, sound design/i.test(txt);
       const hasLinks = el.querySelector('a[href*="tiktok.com"], a[href*="thehumanworkforce.com"]');
-      // mini-cards are typically short in height; richer bios have paragraphs/links
       return hasRole && !hasLinks;
     };
-    document.querySelectorAll('div,section,article').forEach(el => {
+    Array.from(document.querySelectorAll('div,section,article')).forEach(el => {
       if (looksLikeMini(el)) el.style.display = 'none';
     });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { startBadgeObserver(); hideMiniCardsDupes(); });
-  } else {
-    startBadgeObserver(); hideMiniCardsDupes();
+  function boot(){
+    enableWelcomeControls();
+    startBadgeObserver();
+    hideMiniCards();
   }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+  // Retry wiring welcome in case it renders late
+  setTimeout(enableWelcomeControls, 200);
+  setTimeout(enableWelcomeControls, 800);
 })();
 </script>
 
