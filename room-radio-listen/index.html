@@ -1153,7 +1153,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 27; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 28; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -1480,13 +1480,15 @@ import HEAVY  from './playlist-heavy.js';
 import ROCK   from './playlist-rock.js';
 import MELLOW from './playlist-mellow.js';
 
-/* === Bullwinkle-v1.027: Strong switching with UI verification & fallback render === */
+/* === Bullwinkle-v1.028: Three-genre hard switch with guaranteed UI refresh === */
 
 const LABELS = {
-  'Heavy and Metal': { list: HEAVY,  key: 'HEAVY'  },
-  'Middle Ground Rock': { list: ROCK,   key: 'ROCK'   },
-  'Mellow Tunes': { list: MELLOW, key: 'MELLOW' }
+  'heavy and metal': { list: HEAVY,  header: 'Heavy and Metal' },
+  'middle ground rock': { list: ROCK, header: 'Middle Ground Rock' },
+  'mellow tunes': { list: MELLOW, header: 'Mellow Tunes' }
 };
+
+function normalize(s){ return String(s||'').toLowerCase().replace(/\s+/g,' ').trim(); }
 
 function mutateInPlace(arr){
   if (!Array.isArray(window.PLAYLIST)) window.PLAYLIST = [];
@@ -1514,83 +1516,99 @@ function updateNowGenre(i){
 (function hookLoad(){
   const go = () => {
     if (typeof window.load !== 'function') return false;
-    if (window.load._v027) return true;
+    if (window.load._v028) return true;
     const _load = window.load;
     window.load = function(i, autoplay){
       const r = _load(i, autoplay);
       updateNowGenre(i);
       return r;
     };
-    window.load._v027 = true;
+    window.load._v028 = true;
     return true;
   };
-  if (!go()) {
+  if (!go()){
     const t = setInterval(()=>{ if (go()) clearInterval(t); }, 100);
   }
 })();
 
-function tryBuildList(){
-  if (typeof window.buildList === 'function') window.buildList();
-  // verify right pane; if mismatch, fallback render
-  const right = document.querySelector('#plist');
-  const items = right && right.querySelectorAll('.item,.track,.row');
-  const mismatch = !items || items.length !== window.PLAYLIST.length;
-  if (mismatch && right){
-    let list = right.querySelector('.items');
-    if (!list){
-      list = document.createElement('div');
-      list.className = 'items';
-      right.appendChild(list);
-    }
-    list.innerHTML = '';
-    window.PLAYLIST.forEach((t, idx)=>{
-      const d = document.createElement('div');
-      d.className = 'row';
-      d.style.padding = '8px 10px';
-      d.style.borderBottom = '1px solid rgba(255,255,255,.08)';
-      d.textContent = String(idx+1).padStart(3,'0') + ' ' + (t.title || '(untitled)');
-      list.appendChild(d);
-    });
+// Guaranteed right-pane render from PLAYLIST
+function renderRightPane(){
+  const pane = document.querySelector('#plist');
+  if (!pane) return;
+  // Find or create inner list container
+  let list = pane.querySelector('.items');
+  if (!list){
+    list = document.createElement('div');
+    list.className = 'items';
+    pane.appendChild(list);
   }
+  list.innerHTML = '';
+  window.PLAYLIST.forEach((t, i)=>{
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.style.display = 'flex';
+    row.style.justifyContent = 'space-between';
+    row.style.padding = '8px 10px';
+    row.style.borderBottom = '1px solid rgba(255,255,255,.08)';
+    const left = document.createElement('div');
+    left.textContent = String(i+1).padStart(3,'0') + ' ' + (t.title || '(untitled)');
+    const right = document.createElement('div');
+    right.style.opacity = '.6';
+    right.style.fontSize = '12px';
+    right.textContent = t.genre || '';
+    row.appendChild(left);
+    row.appendChild(right);
+    list.appendChild(row);
+  });
 }
 
-function boot(label){
-  const entry = LABELS[label] || LABELS['Middle Ground Rock'];
-  mutateInPlace(entry.list);
-  tryBuildList();
+function rebuildUI(headerLabel){
+  // Try legacy builder first
+  if (typeof window.buildList === 'function') window.buildList();
+  // Then ensure a correct list exists
+  renderRightPane();
+  // Reset & play
   window.idx = 0;
   if (window.PLAYLIST.length && typeof window.load === 'function') window.load(0, true);
-  setHeader(label, window.PLAYLIST.length);
+  setHeader(headerLabel, window.PLAYLIST.length);
   updateNowGenre(0);
 }
 
 function activate(label){
-  const entry = LABELS[label] || LABELS['Middle Ground Rock'];
+  const key = normalize(label);
+  const entry = LABELS[key] || LABELS['middle ground rock'];
   mutateInPlace(entry.list);
-  tryBuildList();
-  window.idx = 0;
-  if (window.PLAYLIST.length && typeof window.load === 'function') window.load(0, true);
-  setHeader(label, window.PLAYLIST.length);
-  updateNowGenre(0);
+  rebuildUI(entry.header);
 }
 
 function wireButtons(){
   const bar = document.getElementById('genreBar');
-  if (!bar || bar._wired027) return;
-  bar._wired027 = true;
-  bar.addEventListener('click', (ev)=>{
-    const btn = ev.target.closest('[data-genre]'); if (!btn) return;
-    bar.querySelectorAll('[data-genre]').forEach(b=>b.classList.toggle('active', b===btn));
-    activate(btn.getAttribute('data-genre'));
+  if (bar && !bar._wired028){
+    bar._wired028 = true;
+    bar.addEventListener('click', (ev)=>{
+      const btn = ev.target.closest('[data-genre]'); if (!btn) return;
+      bar.querySelectorAll('[data-genre]').forEach(b=>b.classList.toggle('active', b===btn));
+      activate(btn.getAttribute('data-genre'));
+    });
+  }
+  // Also wire any other visible genre pills/buttons that contain the label text
+  document.querySelectorAll('button, .btn, .pill, .chip').forEach(el=>{
+    const key = normalize(el.textContent);
+    if (LABELS[key] && !el._wired028){
+      el._wired028 = true;
+      el.addEventListener('click', ()=> activate(el.textContent));
+    }
   });
 }
 
+// Boot with ROCK
 (function init(){
   const t = setInterval(()=>{
     if (typeof window.buildList === 'function' && typeof window.load === 'function'){
       clearInterval(t);
       wireButtons();
-      boot('Middle Ground Rock');
+      mutateInPlace(ROCK);
+      rebuildUI('Middle Ground Rock');
     }
   }, 120);
 })();
