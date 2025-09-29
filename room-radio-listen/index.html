@@ -103,6 +103,7 @@ input[type=range]{width:100%}
     <button id="toLobby" class="btn">⬅︎ Return to Lobby</button>
     <div id="onAir" class="pill onair"><span class="onair-dot"></span><strong>ON AIR</strong></div>
 <div class="tiny muted" style="margin:2px 0 0 2px">Select the Genre you want played from list All play</div>
+<div class="tiny muted" style="margin:4px 0 6px 0;text-align:center">Select the Genre you want the station to play for this session</div>
 <div class="genre-bar" id="genreBar" aria-label="Genre filter" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 6px;">
   <button id="btnAll"   class="gbtn active" data-genre="ALL"                 type="button">ALL</button>
   <button id="btnHeavy" class="gbtn"        data-genre="Heavy and Metal"     type="button">Heavy and Metal</button>
@@ -175,20 +176,36 @@ input[type=range]{width:100%}
     </aside>
   </div>
 
-  <!-- Footer -->
-  <section class="panel" style="margin-top:16px">
-    <div class="bio">
-      <img src="Media/ZachArt.jpeg" alt="">
-      <div><div class="name">zdjimas</div><div class="role">Concept, curation, engineering</div></div>
+  
+<!-- Footer -->
+<section class="panel" style="margin-top:16px">
+  <style>
+    .bio { display:flex; align-items:center; gap:12px; padding:12px 14px; }
+    .bio img { width:54px; height:54px; border-radius:12px; object-fit:cover; }
+    .bio .name { font-weight:700; }
+    .bio p { margin:4px 0 0 0; line-height:1.3; }
+    .bio a, .bio a:visited { color:#fff !important; text-decoration:underline; }
+  </style>
+
+  <div class="bio" style="border-bottom:1px solid var(--line)">
+    <img src="Media/ZachArt.jpeg" alt="zdjimas portrait">
+    <div>
+      <div class="name">zdjimas</div>
+      <p>A founding creator of this tool, Zachary shares his publishing, artwork, and moving‑picture music video art within this radio room exhibit. Make sure you hit “Return to Lobby” to see more or visit CJ Murphy’s TikTok page: <a href="https://www.tiktok.com/@chrisjmurphy65" target="_blank" rel="noopener noreferrer">tiktok.com/@chrisjmurphy65</a>.</p>
     </div>
-    <div class="bio" style="border-top:1px solid var(--line)">
-      <img src="Media/CJMURPHY.png" alt="">
-      <div><div class="name">cjmurphy</div><div class="role">Composition, arrangement, sound design</div></div>
+  </div>
+
+  <div class="bio">
+    <img src="Media/CJMURPHY.png" alt="CJ Murphy portrait">
+    <div>
+      <div class="name">CJ Murphy</div>
+      <p>CJ Murphy is co‑author and co‑creator of the music and artwork exhibits shown and created on TikTok. Check out the book <em>The Last Job You’ll Ever Hate: Thrive in the Age of AI</em> at <a href="https://thehumanworkforce.com" target="_blank" rel="noopener noreferrer">thehumanworkforce.com</a>.</p>
     </div>
-  </section>
-</div>
+  </div>
+</section>
 
 <!-- media elements -->
+
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
 <audio id="introAudio" preload="auto" src="Media/KZAK-Welcome.mp3"></audio>
 <audio id="breakAudio" preload="auto"></audio>
@@ -1153,7 +1170,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 28; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 29; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
