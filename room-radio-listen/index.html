@@ -235,7 +235,7 @@ let breakEvery=1;
 
 /* ===== Playlist (short sample — replace with your full list) ===== */
 
- /* PLAYLIST moved to external JS modules */
+ /* PLAYLIST moved to external modules */
 var PLAYLIST = [];
 /* ===== Utilities ===== */
 const $=s=>document.querySelector(s);
@@ -1153,7 +1153,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 26; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 27; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -1480,27 +1480,121 @@ import HEAVY  from './playlist-heavy.js';
 import ROCK   from './playlist-rock.js';
 import MELLOW from './playlist-mellow.js';
 
-/* === Bullwinkle-v1.027: robust genre switching === */
+/* === Bullwinkle-v1.027: Strong switching with UI verification & fallback render === */
 
 const LABELS = {
-  heavy:  'Heavy and Metal',
-  rock:   'Middle Ground Rock',
-  mellow: 'Mellow Tunes',
+  'Heavy and Metal': { list: HEAVY,  key: 'HEAVY'  },
+  'Middle Ground Rock': { list: ROCK,   key: 'ROCK'   },
+  'Mellow Tunes': { list: MELLOW, key: 'MELLOW' }
 };
 
+function mutateInPlace(arr){
+  if (!Array.isArray(window.PLAYLIST)) window.PLAYLIST = [];
+  window.PLAYLIST.splice(0, window.PLAYLIST.length, ...arr);
+}
+
 function setHeader(label, count){
-  try {
+  try{
     const strong = document.querySelector('#plist .head strong');
     if (strong) strong.textContent = 'Playlist — ' + label;
     const cr = document.getElementById('countRight');
     if (cr) cr.textContent = (count||0) + ' items';
-  } catch {}
+  }catch(e){}
 }
 
 function updateNowGenre(i){
-  try {
-    const el = document.getElementById('genreNow');
+  try{
+    const el = document.getElementById('genreNow'); if (!el) return;
+    const t = window.PLAYLIST && window.PLAYLIST[i|0];
+    const g = (t && t.genre) ? String(t.genre).replace(/\s+/g,' ').trim() : 'Middle Ground Rock';
+    el.textContent = 'Genre: ' + g;
+  }catch(e){}
+}
 
+(function hookLoad(){
+  const go = () => {
+    if (typeof window.load !== 'function') return false;
+    if (window.load._v027) return true;
+    const _load = window.load;
+    window.load = function(i, autoplay){
+      const r = _load(i, autoplay);
+      updateNowGenre(i);
+      return r;
+    };
+    window.load._v027 = true;
+    return true;
+  };
+  if (!go()) {
+    const t = setInterval(()=>{ if (go()) clearInterval(t); }, 100);
+  }
+})();
+
+function tryBuildList(){
+  if (typeof window.buildList === 'function') window.buildList();
+  // verify right pane; if mismatch, fallback render
+  const right = document.querySelector('#plist');
+  const items = right && right.querySelectorAll('.item,.track,.row');
+  const mismatch = !items || items.length !== window.PLAYLIST.length;
+  if (mismatch && right){
+    let list = right.querySelector('.items');
+    if (!list){
+      list = document.createElement('div');
+      list.className = 'items';
+      right.appendChild(list);
+    }
+    list.innerHTML = '';
+    window.PLAYLIST.forEach((t, idx)=>{
+      const d = document.createElement('div');
+      d.className = 'row';
+      d.style.padding = '8px 10px';
+      d.style.borderBottom = '1px solid rgba(255,255,255,.08)';
+      d.textContent = String(idx+1).padStart(3,'0') + ' ' + (t.title || '(untitled)');
+      list.appendChild(d);
+    });
+  }
+}
+
+function boot(label){
+  const entry = LABELS[label] || LABELS['Middle Ground Rock'];
+  mutateInPlace(entry.list);
+  tryBuildList();
+  window.idx = 0;
+  if (window.PLAYLIST.length && typeof window.load === 'function') window.load(0, true);
+  setHeader(label, window.PLAYLIST.length);
+  updateNowGenre(0);
+}
+
+function activate(label){
+  const entry = LABELS[label] || LABELS['Middle Ground Rock'];
+  mutateInPlace(entry.list);
+  tryBuildList();
+  window.idx = 0;
+  if (window.PLAYLIST.length && typeof window.load === 'function') window.load(0, true);
+  setHeader(label, window.PLAYLIST.length);
+  updateNowGenre(0);
+}
+
+function wireButtons(){
+  const bar = document.getElementById('genreBar');
+  if (!bar || bar._wired027) return;
+  bar._wired027 = true;
+  bar.addEventListener('click', (ev)=>{
+    const btn = ev.target.closest('[data-genre]'); if (!btn) return;
+    bar.querySelectorAll('[data-genre]').forEach(b=>b.classList.toggle('active', b===btn));
+    activate(btn.getAttribute('data-genre'));
+  });
+}
+
+(function init(){
+  const t = setInterval(()=>{
+    if (typeof window.buildList === 'function' && typeof window.load === 'function'){
+      clearInterval(t);
+      wireButtons();
+      boot('Middle Ground Rock');
+    }
+  }, 120);
+})();
+</script>
 
 </body>
 </html>
