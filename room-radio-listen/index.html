@@ -243,7 +243,7 @@ let breakEvery=1;
 
 /* ===== Playlist (short sample — replace with your full list) ===== */
 
- const PLAYLIST = [
+ window.PLAYLIST = [
 
 
 
@@ -1744,6 +1744,8 @@ let breakEvery=1;
   }
 
 ];
+var PLAYLIST = window.PLAYLIST;
+
 
 
 
@@ -2896,9 +2898,9 @@ window.addEventListener('load', () => {
 
 
 <script type="module">
-import HEAVY  from './playlist-heavy.js';
-import ROCK   from './playlist-rock.js';
-import MELLOW from './playlist-mellow.js';
+import HEAVY  from './playlist-heavy.js?v=038';
+import ROCK   from './playlist-rock.js?v=038';
+import MELLOW from './playlist-mellow.js?v=038';
 
 /* Bullwinkle-v1.033: capture-level wiring and hard playlist swap */
 const MAP = new Map([
@@ -3010,5 +3012,50 @@ document.addEventListener('click', (ev)=>{
 })();
 </script>
 
+
+<script>
+/* Bullwinkle-v1.038 — Swap hardening (state reset + clean start) */
+(function(){
+  var _activate = window.activate;
+  if (typeof _activate !== 'function') return; // respect existing boot logic
+
+  function resetState(){
+    try { if (window.pause) window.pause(); } catch(_){}
+    try { if (window.audio){ window.audio.pause(); window.audio.removeAttribute('src'); window.audio.load(); } } catch(_){}
+    try { if (Array.isArray(window.shuffleOrder)) window.shuffleOrder.length = 0; } catch(_){}
+    try { if (typeof window.shufflePos === 'number') window.shufflePos = 0; } catch(_){}
+    try { window.genreFilter = 'ALL'; } catch(_){}
+    try { var u = new URL(location.href); u.searchParams.delete('t'); history.replaceState({},'',u); } catch(_){}
+  }
+
+  window.activate = function(label){
+    _activate(label);
+    resetState();
+    try { if (typeof window.buildList === 'function') window.buildList(); } catch(_){}
+    try { if (typeof window.load === 'function' && (window.PLAYLIST?.length||0)>0) window.load(0,true); } catch(_){}
+  };
+})();
+</script>
+
+<script>
+(function(){
+  const SUBVER = 38;
+  const PAD  = String(SUBVER).padStart(3,'0');
+  const VER  = `Bullwinkle-v1.${PAD}`;
+  const FILE = `v=bullwinkle-v1-${PAD}`;
+  const RXV  = /Release:\s*Bullwinkle-v1\.\d+/i;
+  const RXF  = /v=bullwinkle-v1-\d+/i;
+  function stamp(root=document.body){
+    const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null);
+    let n; while(n=w.nextNode()){
+      const t=n.nodeValue||'';
+      const u=t.replace(RXV,`Release: ${VER}`).replace(RXF,FILE);
+      if(u!==t) n.nodeValue=u;
+    }
+  }
+  stamp();
+  new MutationObserver(()=>stamp()).observe(document.body,{subtree:true,childList:true,characterData:true});
+})();
+</script>
 </body>
 </html>
