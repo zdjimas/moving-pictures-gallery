@@ -3088,5 +3088,48 @@ document.addEventListener('click', (ev)=>{
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){hideGenreInRows(document);syncActive();if(!document.__zdjimasLinked)document.__zdjimasLinked=linkZdjimas()},{once:true})}else{hideGenreInRows(document);syncActive();if(!document.__zdjimasLinked)document.__zdjimasLinked=linkZdjimas()}
 })();
 </script>
+
+<script>
+(function(){
+  // Link the first visible occurrence of "cjmurphy" to the TikTok profile (non-invasive)
+  function linkNameOnce(name, url, flagKey){
+    try{
+      if (document[flagKey]) return true;
+      const skip = new Set(['SCRIPT','STYLE','NOSCRIPT','HEAD','TITLE','META','LINK']);
+      const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+      let n;
+      const needle = String(name).toLowerCase();
+      while ((n = w.nextNode())){
+        const p = n.parentNode;
+        if (!p || skip.has(p.tagName)) continue;
+        const text = n.nodeValue || '';
+        const idx = text.toLowerCase().indexOf(needle);
+        if (idx === -1) continue;
+        if (p.tagName === 'A' || p.closest('a')) { document[flagKey] = true; return true; }
+        const before = document.createTextNode(text.slice(0, idx));
+        const after  = document.createTextNode(text.slice(idx + needle.length));
+        const a = document.createElement('a');
+        a.href = url; a.target = '_blank'; a.rel = 'noopener';
+        a.textContent = text.substr(idx, needle.length);
+        p.replaceChild(after, n);
+        p.insertBefore(a, after);
+        p.insertBefore(before, a);
+        document[flagKey] = true;
+        return true;
+      }
+    }catch(_){}
+    return false;
+  }
+
+  function run(){ linkNameOnce('cjmurphy', 'https://www.tiktok.com/@chrisjmurphy65', '__cjmurphyLinked'); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  } else {
+    run();
+  }
+  // Also observe mutations just in case the bio block renders late
+  new MutationObserver(()=> run()).observe(document.body, { childList: true, subtree: true, characterData: true });
+})();
+</script>
 </body>
 </html>
