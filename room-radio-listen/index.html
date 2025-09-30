@@ -3058,92 +3058,34 @@ document.addEventListener('click', (ev)=>{
 })();
 </script>
 
-<!-- Bullwinkle-v1.038 — Cosmetic Enhancements (safe) -->
+<!-- Bullwinkle-v1.038 — Safe cosmetic patch: hide row Share & Genre; hyperlink "zdjimas"; style genre buttons -->
 <style>
-  /* Hide per-row Share link/column without touching logic */
-  #plist .items a[data-share] { display:none !important; }
-
-  /* Professional genre buttons */
-  .genre-btn{
-    padding:12px 16px;
-    font-size:15px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.25);
-    box-shadow:0 6px 16px rgba(0,0,0,.35);
-    transition:transform .08s ease, box-shadow .2s ease, filter .2s ease;
-    outline-offset:2px;
-  }
-  .genre-btn:hover{ transform:translateY(-1px); box-shadow:0 10px 22px rgba(0,0,0,.45); }
-  .genre-btn:active{ transform:translateY(0); filter:saturate(1.1); }
-  .genre-btn.g-heavy{ background:linear-gradient(135deg,#2a0f0f,#4b0c0c 55%,#6b1111); color:#fff;
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; letter-spacing:.02em; }
-  .genre-btn.g-heavy.active{ box-shadow:0 0 0 2px rgba(255,70,70,.6), inset 0 0 0 9999px rgba(255,70,70,.08); }
-  .genre-btn.g-rock{ background:linear-gradient(135deg,#0b2348,#103464 55%,#164a8a); color:#e9f1ff;
-    font-family:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif; letter-spacing:.01em; }
-  .genre-btn.g-rock.active{ box-shadow:0 0 0 2px rgba(94,178,255,.55), inset 0 0 0 9999px rgba(94,178,255,.08); }
-  .genre-btn.g-mellow{ background:linear-gradient(135deg,#0b3a34,#105a51 55%,#157a6c); color:#eafff9;
-    font-family:Georgia,"Times New Roman",Times,serif; font-weight:600; letter-spacing:.02em; }
-  .genre-btn.g-mellow.active{ box-shadow:0 0 0 2px rgba(64,214,178,.55), inset 0 0 0 9999px rgba(64,214,178,.08); }
+  #plist .items a[data-share]{display:none!important}
+  #plist .items .genre, #plist .items .tiny.genre, #plist .items .right.genre{display:none!important}
+  .genre-btn{padding:12px 16px;font-size:15px;border-radius:12px;border:1px solid rgba(255,255,255,.25);box-shadow:0 6px 16px rgba(0,0,0,.35);transition:transform .08s,box-shadow .2s,filter .2s;outline-offset:2px}
+  .genre-btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(0,0,0,.45)}
+  .genre-btn:active{transform:translateY(0);filter:saturate(1.1)}
+  .genre-btn.g-heavy{background:linear-gradient(135deg,#2a0f0f,#4b0c0c 55%,#6b1111);color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;letter-spacing:.02em}
+  .genre-btn.g-heavy.active{box-shadow:0 0 0 2px rgba(255,70,70,.6), inset 0 0 0 9999px rgba(255,70,70,.08)}
+  .genre-btn.g-rock{background:linear-gradient(135deg,#0b2348,#103464 55%,#164a8a);color:#e9f1ff;font-family:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.01em}
+  .genre-btn.g-rock.active{box-shadow:0 0 0 2px rgba(94,178,255,.55), inset 0 0 0 9999px rgba(94,178,255,.08)}
+  .genre-btn.g-mellow{background:linear-gradient(135deg,#0b3a34,#105a51 55%,#157a6c);color:#eafff9;font-family:Georgia,"Times New Roman",Times,serif;font-weight:600;letter-spacing:.02em}
+  .genre-btn.g-mellow.active{box-shadow:0 0 0 2px rgba(64,214,178,.55), inset 0 0 0 9999px rgba(64,214,178,.08)}
 </style>
 <script>
 (function(){
-  // Tag the three genre buttons by visible text only (no logic changes)
-  function norm(t){ return String(t||'').toLowerCase().replace(/\s+/g,' ').trim(); }
-  const map = new Map([
-    ['heavy and metal', 'g-heavy'],
-    ['middle ground rock', 'g-rock'],
-    ['mellow tunes', 'g-mellow'],
-  ]);
-  const cands = Array.from(document.querySelectorAll('button, .btn, .chip, [data-genre]'));
-  for (const el of cands){
-    const key = map.get(norm(el.textContent));
-    if (!key) continue;
-    el.classList.add('genre-btn', key);
-    if (el.tagName !== 'BUTTON') el.setAttribute('role','button');
-    el.setAttribute('aria-pressed', el.classList.contains('active') ? 'true' : 'false');
-  }
-  function syncActive(){
-    let g = ''; try{ g = (window.PLAYLIST && window.PLAYLIST[0] && window.PLAYLIST[0].genre) ? window.PLAYLIST[0].genre : ''; }catch(_){}
-    const activeText = norm(g);
-    for (const el of cands){
-      const key = map.get(norm(el.textContent)); if (!key) continue;
-      const isActive = norm(el.textContent) === activeText;
-      el.classList.toggle('active', isActive);
-      el.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    }
-  }
-  new MutationObserver(syncActive).observe(document.body, { childList:true, subtree:true, characterData:true });
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncActive, {once:true}); else syncActive();
-
-  // Safely hyperlink "zdjimas" in bio area only (do not touch scripts/styles)
-  try{
-    // Find a bio container by known links nearby (TikTok or thehumanworkforce)
-    const anchor = document.querySelector('a[href*="tiktok.com"], a[href*="thehumanworkforce.com"]');
-    const container = anchor ? anchor.closest('section,article,div,footer') : null;
-    if (container){
-      const tw = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
-      let n;
-      while ((n = tw.nextNode())){
-        if (!n.nodeValue) continue;
-        const txt = n.nodeValue;
-        const i = txt.toLowerCase().indexOf('zdjimas');
-        if (i >= 0){
-          const before = document.createTextNode(txt.slice(0,i));
-          const after  = document.createTextNode(txt.slice(i+'zdjimas'.length));
-          const a = document.createElement('a');
-          a.href = 'https://suno.com/@zdjimas';
-          a.target = '_blank';
-          a.rel = 'noopener';
-          a.textContent = 'zdjimas';
-          const parent = n.parentNode;
-          parent.replaceChild(after, n);
-          parent.insertBefore(a, after);
-          parent.insertBefore(before, a);
-          break; // hyperlink only the first occurrence
-        }
-      }
-    }
-  }catch(e){/* non-fatal */}
+  function norm(t){return String(t||'').toLowerCase().replace(/\s+/g,' ').trim()}
+  const map=new Map([['heavy and metal','g-heavy'],['middle ground rock','g-rock'],['mellow tunes','g-mellow']]);
+  const btns=Array.from(document.querySelectorAll('button,.btn,.chip,[data-genre]'));
+  for(const el of btns){const key=map.get(norm(el.textContent));if(!key)continue;el.classList.add('genre-btn',key);if(el.tagName!=='BUTTON')el.setAttribute('role','button');el.setAttribute('aria-pressed',el.classList.contains('active')?'true':'false')}
+  function syncActive(){let g='';try{g=(window.PLAYLIST&&window.PLAYLIST[0]&&window.PLAYLIST[0].genre)?window.PLAYLIST[0].genre:''}catch(_){}
+    const activeText=norm(g);for(const el of btns){const key=map.get(norm(el.textContent));if(!key)continue;const on=norm(el.textContent)===activeText;el.classList.toggle('active',on);el.setAttribute('aria-pressed',on?'true':'false')}}
+  function hideGenreInRows(root){try{const scope=root||document;const rows=scope.querySelectorAll('#plist .items .item,#plist .items .row,#plist .items>div');rows.forEach(r=>{for(const ch of Array.from(r.children)){const txt=(ch.textContent||'').trim();if(/^genre\s*:/i.test(txt))ch.style.display='none'}})}catch(_){}}
+  function linkZdjimas(){try{const skip=new Set(['SCRIPT','STYLE','NOSCRIPT','HEAD','TITLE','META','LINK']);const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null);let n;while((n=w.nextNode())){const p=n.parentNode;if(!p||skip.has(p.tagName))continue;const text=n.nodeValue||'';const i=text.toLowerCase().indexOf('zdjimas');if(i===-1)continue;if(p.tagName==='A'||p.closest('a'))return true;const b=document.createTextNode(text.slice(0,i));const a=document.createTextNode(text.slice(i+'zdjimas'.length));const link=document.createElement('a');link.href='https://suno.com/@zdjimas';link.target='_blank';link.rel='noopener';link.textContent='zdjimas';p.replaceChild(a,n);p.insertBefore(link,a);p.insertBefore(b,link);return true}}catch(_){}
+    return false}
+  const mo=new MutationObserver(()=>{hideGenreInRows(document);syncActive();if(!document.__zdjimasLinked)document.__zdjimasLinked=linkZdjimas()});
+  mo.observe(document.body,{childList:true,subtree:true,characterData:true});
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){hideGenreInRows(document);syncActive();if(!document.__zdjimasLinked)document.__zdjimasLinked=linkZdjimas()},{once:true})}else{hideGenreInRows(document);syncActive();if(!document.__zdjimasLinked)document.__zdjimasLinked=linkZdjimas()}
 })();
 </script>
 </body>
