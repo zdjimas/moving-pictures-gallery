@@ -2957,7 +2957,15 @@ function repaint(){
 }
 
 function playFromStart(){
-  if (typeof window.load === 'function'){ if ((window.PLAYLIST?.length||0)>0) window.load(0,true); }
+  // Only autoplay if the Welcome overlay is NOT visible.
+  var ov = document.getElementById('welcomeOverlay');
+  var showing = !!(ov && (ov.classList.contains('show') || ov.style.display === '' || ov.style.display === 'grid'));
+  var shouldAutoplay = !showing;
+  if (typeof window.load === 'function'){
+    if ((window.PLAYLIST?.length||0) > 0) window.load(0, shouldAutoplay);
+  }
+  updateNowGenre(0);
+}
   updateNowGenre(0);
 }
 
