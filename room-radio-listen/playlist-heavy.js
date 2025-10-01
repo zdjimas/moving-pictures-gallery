@@ -52,7 +52,7 @@ const PLAYLIST_HEAVY = [
 {
     title: "A Trippy Nightmare to Remember",
     file:  "Media/A Trippy Nightmare to Remember.mp3",
-    img:   "Media/Trippy.jpeg",
+    img:   "Media/ATrippy.jpeg",
     alt:   "A Trippy Nightmare  - artwork",
     genre: "Heavy and Metal",
     
