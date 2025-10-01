@@ -1,7 +1,65 @@
 /* Auto-generated from songlist2.txt */
 const PLAYLIST_HEAVY = [
  
-  
+
+
+{
+    title: "Divesting From Space",
+    file:  "Media/Divesting from Space - an AI tribute to Dream Theater.mp3",
+    img:   "Media/DivestSpace.jpeg",
+    alt:   "Divesting From Space - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A Song from the Awake Album, Calm and Soothing"
+  },
+ {
+    title: "Jambi Lambi",
+    file:  "Media/Jambi Lambi.mp3",
+    img:   "Media/JambiLambi.jpeg",
+    alt:   "Jambi Lambi  - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A song from 10000 days album recreated and expanded.."
+  },
+ {
+    title: "The Ressurection of Fear Inoculum",
+    file:  "Media/The Ressurection of Fear Inoculum .mp3",
+    img:   "Media/RessurectionFear.jpeg",
+    alt:   "Ressurection of Fear  - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A Song the album with the same name, Translated into something a little unique."
+  },
+ {
+    title: "Living Forever",
+    file:  "Media/Living Forever.mp3",
+    img:   "Media/LivingForever.jpeg",
+    alt:   "Living Forever  - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A wonderful melody from the early days of Dream Theater"
+  },
+ {
+    title: "Poles Apart an AI Symphony Cover",
+    file:  "Media/Poles Apart an AI Symphony Cover.mp3",
+    img:   "Media/PolesApart.jpeg",
+    alt:   "Poles Apart - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A Song the 1990s album from creator David Gilmour, revisited in a Symphony Orchestra Manner."
+  },
+
+{
+    title: "A Trippy Nightmare to Remember",
+    file:  "Media/A Trippy Nightmare to Remember.mp3",
+    img:   "Media/Trippy.jpeg",
+    alt:   "A Trippy Nightmare  - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A instrumental song from the band that brought you The Count of Tuscany."
+  },
+
+ 
   
   {
     title: "A Greener Manalishi",
