@@ -2665,7 +2665,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 39; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 40; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -3058,7 +3058,7 @@ document.addEventListener('click', (ev)=>{
 })();
 </script>
 
-<!-- Bullwinkle-v1.039 — Ultra-safe cosmetics: hide row Share/Genre; link bios; style genre buttons -->
+<!-- Bullwinkle-v1.040 — Ultra-safe cosmetics: hide row Share/Genre; link bios; style genre buttons; hide playlist header Share -->
 <style>
   /* Hide per-row Share link/column without touching app logic */
   #plist .items a[data-share]{display:none!important}
@@ -3085,7 +3085,6 @@ document.addEventListener('click', (ev)=>{
 </style>
 <script>
 (function(){
-  // --- Tag the three genre buttons by visible text only (no logic changes) ---
   function norm(t){return String(t||'').toLowerCase().replace(/\s+/g,' ').trim()}
   const map=new Map([['heavy and metal','g-heavy'],['middle ground rock','g-rock'],['mellow tunes','g-mellow']]);
   const btns=Array.from(document.querySelectorAll('button,.btn,.chip,[data-genre]'));
@@ -3093,7 +3092,6 @@ document.addEventListener('click', (ev)=>{
   function syncActive(){let g='';try{g=(window.PLAYLIST&&window.PLAYLIST[0]&&window.PLAYLIST[0].genre)?window.PLAYLIST[0].genre:''}catch(_){}
     const activeText=norm(g);for(const el of btns){const key=map.get(norm(el.textContent));if(!key)continue;const on=norm(el.textContent)===activeText;el.classList.toggle('active',on);el.setAttribute('aria-pressed',on?'true':'false')}}
 
-  // --- Hide any inline "Genre: ..." fragments in rows (template untouched) ---
   function hideInlineGenre(){
     try{
       const rows=document.querySelectorAll('#plist .items .item,#plist .items > div');
@@ -3101,11 +3099,26 @@ document.addEventListener('click', (ev)=>{
     }catch(_){}
   }
 
-  // --- Non-invasive hyperlinking for bios (first visible occurrence each) ---
   function linkOnce(needle,url,flag){try{if(document[flag])return true;const skip=new Set(['SCRIPT','STYLE','NOSCRIPT','HEAD','TITLE','META','LINK']);const tw=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null);let n;const nd=String(needle).toLowerCase();while((n=tw.nextNode())){const p=n.parentNode;if(!p||skip.has(p.tagName))continue;const txt=n.nodeValue||'';const i=txt.toLowerCase().indexOf(nd);if(i===-1)continue;if(p.tagName==='A'||p.closest('a')){document[flag]=true;return true;}const before=document.createTextNode(txt.slice(0,i));const after=document.createTextNode(txt.slice(i+nd.length));const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.textContent=txt.substr(i,nd.length);p.replaceChild(after,n);p.insertBefore(a,after);p.insertBefore(before,a);document[flag]=true;return true}}catch(_){}
     return false}
 
-  function run(){ hideInlineGenre(); syncActive(); linkOnce('zdjimas','https://suno.com/@zdjimas','__linkZ'); linkOnce('cjmurphy','https://www.tiktok.com/@chrisjmurphy65','__linkC'); }
+  // Hide any "Share" control anywhere inside playlist panel header/body (not the console/global Share)
+  function hidePlaylistShareControls(){
+    try{
+      const root=document.getElementById('plist')||document.querySelector('#plist,.playlist,[data-pane=\"playlist\"]');
+      if(!root) return;
+      const nodes=root.querySelectorAll('a,button');
+      nodes.forEach(el=>{
+        const t=(el.textContent||'').replace(/\s+/g,' ').trim();
+        const title=(el.getAttribute('title')||'')+' '+(el.getAttribute('aria-label')||'');
+        if(/^share$/i.test(t) || /(^|\s)share(\s|$)/i.test(title) || el.hasAttribute('data-share')){
+          el.style.display='none';
+        }
+      });
+    }catch(_){}
+  }
+
+  function run(){ hideInlineGenre(); syncActive(); hidePlaylistShareControls(); linkOnce('zdjimas','https://suno.com/@zdjimas','__linkZ'); linkOnce('cjmurphy','https://www.tiktok.com/@chrisjmurphy65','__linkC'); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run, {once:true}); else run();
   new MutationObserver(run).observe(document.body,{childList:true,subtree:true,characterData:true});
 })();
