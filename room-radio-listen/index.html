@@ -2665,7 +2665,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 41; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 42; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -3058,7 +3058,7 @@ document.addEventListener('click', (ev)=>{
 })();
 </script>
 
-<!-- Bullwinkle-v1.041 — Ultra-safe cosmetics + autoplay gate (no logic changes) -->
+<!-- Bullwinkle-v1.042 — Autoplay gate + persistent scrub (ultra-safe; no core logic changes) -->
 <style>
   /* Hide per-row Share link/column without touching app logic */
   #plist .items a[data-share]{display:none!important}
@@ -3069,65 +3069,105 @@ document.addEventListener('click', (ev)=>{
 (function(){
   function norm(t){return String(t||'').toLowerCase().replace(/\s+/g,' ').trim()}
 
-  /* === Autoplay gate: pause audio while Welcome overlay is visible === */
-  (function autoplayGate(){
-    let guardActive = true;
+  /* === 1) Autoplay gate: if Welcome overlay is visible, force load(..., false) === */
+  (function wrapLoadAutoplay(){
+    if (window.__wrapped_load || typeof window.load !== 'function') return;
     function overlayVisible(){
       try{
-        const nodes = Array.from(document.querySelectorAll('div,section,article,dialog'));
-        const m = nodes.find(el => /Welcome\s+to\s+KZAK/i.test(el.textContent||''));
-        if(!m) return false;
-        const cs = getComputedStyle(m);
-        return cs && cs.display !== 'none' && cs.visibility !== 'hidden' && parseFloat(cs.opacity||'1') > 0.01;
+        // Prefer explicit id if present; else text match
+        const el = document.getElementById('welcomeOverlay') ||
+                   Array.from(document.querySelectorAll('div,section,article,dialog')).find(e=>/Welcome\s+to\s+KZAK/i.test(e.textContent||''));
+        if(!el) return false;
+        const cs = getComputedStyle(el);
+        if (!cs) return false;
+        // Visible if not display:none and not fully hidden
+        const visible = cs.display !== 'none' && cs.visibility !== 'hidden' && parseFloat(cs.opacity||'1') > 0.01;
+        return visible;
       }catch(_){ return false; }
     }
-    function onPlay(ev){
-      if(!guardActive) return;
-      if(overlayVisible()){
-        try{
-          const a = window.audio || ev.target;
-          if(a && typeof a.pause === 'function'){
-            a.pause(); a.currentTime = 0;
-          }
-        }catch(_){}
-      }
-    }
-    function disableGuard(){ guardActive = false; }
-
-    // Disable guard when user chooses to start
-    document.addEventListener('click', function(e){
-      const t = (e.target && (e.target.textContent||'') || '').trim();
-      if (/(Start\s*Station|Play\s*Welcome|Skip)/i.test(t)) disableGuard();
-    }, true);
-
-    // Also disable when overlay disappears
-    const mo = new MutationObserver(function(){
-      if(!overlayVisible()) disableGuard();
-    });
-    mo.observe(document.documentElement, { childList:true, subtree:true, attributes:true, attributeFilter:['style','class'] });
-
-    // Capture play events globally without touching player logic
-    document.addEventListener('play', onPlay, true);
-    if (window.audio && window.audio.addEventListener) window.audio.addEventListener('play', onPlay, true);
+    const _load = window.load;
+    window.load = function(idx, autoplay){
+      try{
+        if (overlayVisible() && autoplay === true){
+          return _load.call(this, idx, false);
+        }
+      }catch(_){}
+      return _load.apply(this, arguments);
+    };
+    window.__wrapped_load = true;
   })();
 
-  /* === Non-invasive bio links (first visible occurrence only) === */
+  /* === 2) Persistent scrub: remove Genre/Share cells after every playlist repaint === */
+  function hideRowExtras(root){
+    try{
+      const pane = (root||document).querySelector('#plist .items');
+      if(!pane) return;
+      // Active genre text to match plain labels
+      const activeGenre = (function(){
+        try{
+          const g = window.PLAYLIST && window.PLAYLIST[0] && window.PLAYLIST[0].genre;
+          return norm(g||'');
+        }catch(_){ return ''; }
+      })();
+
+      // Per-row Share controls inside playlist
+      pane.querySelectorAll('[data-share], a[aria-label*="share" i], button[aria-label*="share" i]')
+          .forEach(el => { el.style.display = 'none'; });
+
+      // Explicit genre-marked elements
+      pane.querySelectorAll('.genre, [data-genre]')
+          .forEach(el => { el.style.display = 'none'; });
+
+      // Labeled "Genre: ..." cells, or cells equal to the active genre text
+      pane.querySelectorAll('.item, .row, :scope > div').forEach(r=>{
+        Array.from(r.children).forEach(ch=>{
+          const txt = (ch.textContent||'').trim();
+          if (/^genre\s*:/i.test(txt) || (activeGenre && norm(txt) === activeGenre)){
+            ch.style.display = 'none';
+          }
+        });
+      });
+    }catch(_){}
+  }
+
+  // Wrap buildList once so every repaint gets scrubbed
+  (function wrapBuildList(){
+    if (window.__wrap_buildList || typeof window.buildList !== 'function') return;
+    const _build = window.buildList;
+    window.buildList = function(){
+      const res = _build.apply(this, arguments);
+      hideRowExtras(document);
+      return res;
+    };
+    window.__wrap_buildList = true;
+  })();
+
+  // Initial run + keep in sync with DOM updates
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => hideRowExtras(document), {once:true});
+  } else {
+    hideRowExtras(document);
+  }
+  new MutationObserver(() => hideRowExtras(document)).observe(document.body, {childList:true, subtree:true, characterData:true});
+
+  /* === 3) Non-invasive bio links (first visible occurrence only) === */
   function linkOnce(needle,url,flag){
     try{
       if(document[flag]) return true;
-      const skip=new Set(['SCRIPT','STYLE','NOSCRIPT','HEAD','TITLE','META','LINK']);
-      const tw=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null);
-      let n; const nd=norm(needle);
-      while((n=tw.nextNode())){
-        const p=n.parentNode; if(!p||skip.has(p.tagName)) continue;
-        const txt=n.nodeValue||''; const i=norm(txt).indexOf(nd);
-        if(i===-1) continue;
-        if(p.tagName==='A'||p.closest('a')){document[flag]=true; return true;}
-        const before=document.createTextNode(txt.slice(0,i));
-        const after=document.createTextNode(txt.slice(i+needle.length));
-        const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; a.textContent=txt.substr(i, needle.length);
-        p.replaceChild(after,n); p.insertBefore(a,after); p.insertBefore(before,a);
-        document[flag]=true; return true;
+      const nd = norm(needle);
+      const skip = new Set(['SCRIPT','STYLE','NOSCRIPT','HEAD','TITLE','META','LINK']);
+      const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+      let n;
+      while((n = tw.nextNode())){
+        const p = n.parentNode; if(!p || skip.has(p.tagName)) continue;
+        const txt = n.nodeValue || ''; const i = norm(txt).indexOf(nd);
+        if (i === -1) continue;
+        if (p.tagName === 'A' || p.closest('a')){ document[flag] = true; return true; }
+        const before = document.createTextNode(txt.slice(0, i));
+        const after  = document.createTextNode(txt.slice(i + needle.length));
+        const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = txt.substr(i, needle.length);
+        p.replaceChild(after, n); p.insertBefore(a, after); p.insertBefore(before, a);
+        document[flag] = true; return true;
       }
     }catch(_){}
     return false;
@@ -3136,9 +3176,8 @@ document.addEventListener('click', (ev)=>{
     linkOnce('zdjimas','https://suno.com/@zdjimas','__linkZ');
     linkOnce('cjmurphy','https://www.tiktok.com/@chrisjmurphy65','__linkC');
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', runLinks, {once:true});
-  else runLinks();
-  new MutationObserver(runLinks).observe(document.body,{childList:true,subtree:true,characterData:true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', runLinks, {once:true}); else runLinks();
+  new MutationObserver(runLinks).observe(document.body,{childList:true, subtree:true, characterData:true});
 })();
 </script>
 </body>
