@@ -2665,7 +2665,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 42; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 43; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -3058,31 +3058,24 @@ document.addEventListener('click', (ev)=>{
 })();
 </script>
 
-<!-- Bullwinkle-v1.042 — Autoplay gate + persistent scrub (ultra-safe; no core logic changes) -->
+<!-- Bullwinkle-v1.043 — Autopause + persistent scrub + genre button styling + bio links (non-invasive) -->
 <style>
-  /* Hide per-row Share link/column without touching app logic */
   #plist .items a[data-share]{display:none!important}
-  /* Hide common 'genre' badges/columns in the right list */
   #plist .items .genre, #plist .items .tiny.genre, #plist .items .right.genre{display:none!important}
 </style>
 <script>
 (function(){
-  function norm(t){return String(t||'').toLowerCase().replace(/\s+/g,' ').trim()}
-
-  /* === 1) Autoplay gate: if Welcome overlay is visible, force load(..., false) === */
+  function norm(t){ return String(t||'').toLowerCase().replace(/\s+/g,' ').trim(); }
   (function wrapLoadAutoplay(){
     if (window.__wrapped_load || typeof window.load !== 'function') return;
     function overlayVisible(){
       try{
-        // Prefer explicit id if present; else text match
         const el = document.getElementById('welcomeOverlay') ||
-                   Array.from(document.querySelectorAll('div,section,article,dialog')).find(e=>/Welcome\s+to\s+KZAK/i.test(e.textContent||''));
+                   Array.from(document.querySelectorAll('div,section,article,dialog'))
+                     .find(e => /Welcome\s+to\s+KZAK/i.test(e.textContent||''));
         if(!el) return false;
         const cs = getComputedStyle(el);
-        if (!cs) return false;
-        // Visible if not display:none and not fully hidden
-        const visible = cs.display !== 'none' && cs.visibility !== 'hidden' && parseFloat(cs.opacity||'1') > 0.01;
-        return visible;
+        return cs && cs.display !== 'none' && cs.visibility !== 'hidden' && parseFloat(cs.opacity||'1') > 0.01;
       }catch(_){ return false; }
     }
     const _load = window.load;
@@ -3095,32 +3088,31 @@ document.addEventListener('click', (ev)=>{
       return _load.apply(this, arguments);
     };
     window.__wrapped_load = true;
+    function onPlay(ev){
+      try{
+        if (!overlayVisible()) return;
+        const a = ev && ev.target;
+        if (a && typeof a.pause === 'function'){ a.pause(); a.currentTime = 0; }
+      }catch(_){}
+    }
+    document.addEventListener('play', onPlay, true);
   })();
 
-  /* === 2) Persistent scrub: remove Genre/Share cells after every playlist repaint === */
+
   function hideRowExtras(root){
     try{
       const pane = (root||document).querySelector('#plist .items');
       if(!pane) return;
-      // Active genre text to match plain labels
       const activeGenre = (function(){
-        try{
-          const g = window.PLAYLIST && window.PLAYLIST[0] && window.PLAYLIST[0].genre;
-          return norm(g||'');
-        }catch(_){ return ''; }
+        try{ return norm((window.PLAYLIST && window.PLAYLIST[0] && window.PLAYLIST[0].genre) || ''); }
+        catch(_){ return ''; }
       })();
-
-      // Per-row Share controls inside playlist
       pane.querySelectorAll('[data-share], a[aria-label*="share" i], button[aria-label*="share" i]')
           .forEach(el => { el.style.display = 'none'; });
-
-      // Explicit genre-marked elements
       pane.querySelectorAll('.genre, [data-genre]')
           .forEach(el => { el.style.display = 'none'; });
-
-      // Labeled "Genre: ..." cells, or cells equal to the active genre text
-      pane.querySelectorAll('.item, .row, :scope > div').forEach(r=>{
-        Array.from(r.children).forEach(ch=>{
+      pane.querySelectorAll('.item, .row, :scope > div').forEach(r => {
+        Array.from(r.children).forEach(ch => {
           const txt = (ch.textContent||'').trim();
           if (/^genre\s*:/i.test(txt) || (activeGenre && norm(txt) === activeGenre)){
             ch.style.display = 'none';
@@ -3129,8 +3121,6 @@ document.addEventListener('click', (ev)=>{
       });
     }catch(_){}
   }
-
-  // Wrap buildList once so every repaint gets scrubbed
   (function wrapBuildList(){
     if (window.__wrap_buildList || typeof window.buildList !== 'function') return;
     const _build = window.buildList;
@@ -3141,44 +3131,78 @@ document.addEventListener('click', (ev)=>{
     };
     window.__wrap_buildList = true;
   })();
-
-  // Initial run + keep in sync with DOM updates
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => hideRowExtras(document), {once:true});
-  } else {
-    hideRowExtras(document);
+  function hidePlaylistShareControls(){
+    try{
+      const root = document.getElementById('plist') || document.querySelector('#plist,.playlist,[data-pane="playlist"]');
+      if(!root) return;
+      const nodes = root.querySelectorAll('a,button,[role="button"]');
+      nodes.forEach(el=>{
+        const t = norm(el.textContent);
+        const lab = norm((el.getAttribute('title')||'')+' '+(el.getAttribute('aria-label')||''));
+        if (t==='share' || /\bshare\b/.test(lab) || el.hasAttribute('data-share')){
+          el.style.display = 'none';
+        }
+      });
+    }catch(_){}
   }
-  new MutationObserver(() => hideRowExtras(document)).observe(document.body, {childList:true, subtree:true, characterData:true});
+  function runAll(){ hideRowExtras(document); hidePlaylistShareControls(); tagGenreButtons(); linkBios(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', runAll, {once:true});
+  else runAll();
+  new MutationObserver(runAll).observe(document.body, {childList:true, subtree:true, characterData:true});
 
-  /* === 3) Non-invasive bio links (first visible occurrence only) === */
+
+  function tagGenreButtons(){
+    const map = new Map([['heavy and metal','g-heavy'],['middle ground rock','g-rock'],['mellow tunes','g-mellow']]);
+    const btns = Array.from(document.querySelectorAll('button,.btn,.chip,[data-genre]'));
+    let active = '';
+    try{ active = norm(window.PLAYLIST && window.PLAYLIST[0] && window.PLAYLIST[0].genre || ''); }catch(_){}
+    for(const el of btns){
+      const key = map.get(norm(el.textContent)); if(!key) continue;
+      el.classList.add('genre-btn', key);
+      if (el.tagName !== 'BUTTON') el.setAttribute('role','button');
+      const on = norm(el.textContent)===active;
+      el.classList.toggle('active', on);
+      el.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  }
   function linkOnce(needle,url,flag){
     try{
       if(document[flag]) return true;
       const nd = norm(needle);
-      const skip = new Set(['SCRIPT','STYLE','NOSCRIPT','HEAD','TITLE','META','LINK']);
-      const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
-      let n;
-      while((n = tw.nextNode())){
-        const p = n.parentNode; if(!p || skip.has(p.tagName)) continue;
-        const txt = n.nodeValue || ''; const i = norm(txt).indexOf(nd);
-        if (i === -1) continue;
-        if (p.tagName === 'A' || p.closest('a')){ document[flag] = true; return true; }
-        const before = document.createTextNode(txt.slice(0, i));
-        const after  = document.createTextNode(txt.slice(i + needle.length));
-        const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = txt.substr(i, needle.length);
-        p.replaceChild(after, n); p.insertBefore(a, after); p.insertBefore(before, a);
-        document[flag] = true; return true;
+      const skip=new Set(['SCRIPT','STYLE','NOSCRIPT','HEAD','TITLE','META','LINK']);
+      const tw=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null);
+      let n; while((n=tw.nextNode())){
+        const p=n.parentNode; if(!p||skip.has(p.tagName)) continue;
+        const txt=n.nodeValue||''; const i=norm(txt).indexOf(nd);
+        if(i===-1) continue;
+        if(p.tagName==='A'||p.closest('a')){document[flag]=true; return true;}
+        const before=document.createTextNode(txt.slice(0,i));
+        const after=document.createTextNode(txt.slice(i+needle.length));
+        const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; a.textContent=txt.substr(i, needle.length);
+        p.replaceChild(after,n); p.insertBefore(a,after); p.insertBefore(before,a);
+        document[flag]=true; return true;
       }
     }catch(_){}
     return false;
   }
-  function runLinks(){
+  function linkBios(){
     linkOnce('zdjimas','https://suno.com/@zdjimas','__linkZ');
     linkOnce('cjmurphy','https://www.tiktok.com/@chrisjmurphy65','__linkC');
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', runLinks, {once:true}); else runLinks();
-  new MutationObserver(runLinks).observe(document.body,{childList:true, subtree:true, characterData:true});
-})();
+})(); 
 </script>
+<style>
+  .genre-btn{padding:12px 16px;font-size:15px;border-radius:12px;border:1px solid rgba(255,255,255,.25);
+    box-shadow:0 6px 16px rgba(0,0,0,.35);transition:transform .08s,box-shadow .2s,filter .2s;outline-offset:2px}
+  .genre-btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(0,0,0,.45)}
+  .genre-btn:active{transform:translateY(0);filter:saturate(1.1)}
+  .genre-btn.g-heavy{background:linear-gradient(135deg,#2a0f0f,#4b0c0c 55%,#6b1111);color:#fff;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;letter-spacing:.02em}
+  .genre-btn.g-rock{background:linear-gradient(135deg,#0b2348,#103464 55%,#164a8a);color:#e9f1ff;
+    font-family:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.01em}
+  .genre-btn.g-mellow{background:linear-gradient(135deg,#0b3a34,#105a51 55%,#157a6c);color:#eafff9;
+    font-family:Georgia,"Times New Roman",Times,serif;font-weight:600;letter-spacing:.02em}
+  .genre-btn.active{box-shadow:0 0 0 2px rgba(255,255,255,.35), inset 0 0 0 9999px rgba(255,255,255,.08)}
+</style>
 </body>
 </html>
