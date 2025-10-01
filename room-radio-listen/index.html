@@ -2665,7 +2665,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 43; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 44; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -3058,7 +3058,7 @@ document.addEventListener('click', (ev)=>{
 })();
 </script>
 
-<!-- Bullwinkle-v1.043 — Autopause + persistent scrub + genre button styling + bio links (non-invasive) -->
+<!-- Bullwinkle-v1.044 — Welcome plays correctly + no preplay + persistent playlist scrub (non-invasive) -->
 <style>
   #plist .items a[data-share]{display:none!important}
   #plist .items .genre, #plist .items .tiny.genre, #plist .items .right.genre{display:none!important}
@@ -3066,8 +3066,10 @@ document.addEventListener('click', (ev)=>{
 <script>
 (function(){
   function norm(t){ return String(t||'').toLowerCase().replace(/\s+/g,' ').trim(); }
+
   (function wrapLoadAutoplay(){
     if (window.__wrapped_load || typeof window.load !== 'function') return;
+    let allowWhileWelcome = false;
     function overlayVisible(){
       try{
         const el = document.getElementById('welcomeOverlay') ||
@@ -3078,19 +3080,24 @@ document.addEventListener('click', (ev)=>{
         return cs && cs.display !== 'none' && cs.visibility !== 'hidden' && parseFloat(cs.opacity||'1') > 0.01;
       }catch(_){ return false; }
     }
+    document.addEventListener('click', function(e){
+      const t = (e.target && (e.target.textContent||'') || '').replace(/\s+/g,' ').trim();
+      if (/(Play\s*Welcome|Start\s*Station|Skip)/i.test(t)) { allowWhileWelcome = true; setTimeout(()=>{allowWhileWelcome=false;}, 10000); }
+    }, true);
+    const mo = new MutationObserver(function(){ if(!overlayVisible()) allowWhileWelcome=false; });
+    mo.observe(document.documentElement, {childList:true, subtree:true, attributes:true});
+
     const _load = window.load;
     window.load = function(idx, autoplay){
       try{
-        if (overlayVisible() && autoplay === true){
-          return _load.call(this, idx, false);
-        }
+        if (overlayVisible() && !allowWhileWelcome && autoplay === true) return _load.call(this, idx, false);
       }catch(_){}
       return _load.apply(this, arguments);
     };
     window.__wrapped_load = true;
     function onPlay(ev){
       try{
-        if (!overlayVisible()) return;
+        if (!overlayVisible() || allowWhileWelcome) return;
         const a = ev && ev.target;
         if (a && typeof a.pause === 'function'){ a.pause(); a.currentTime = 0; }
       }catch(_){}
@@ -3098,25 +3105,17 @@ document.addEventListener('click', (ev)=>{
     document.addEventListener('play', onPlay, true);
   })();
 
-
   function hideRowExtras(root){
     try{
       const pane = (root||document).querySelector('#plist .items');
       if(!pane) return;
-      const activeGenre = (function(){
-        try{ return norm((window.PLAYLIST && window.PLAYLIST[0] && window.PLAYLIST[0].genre) || ''); }
-        catch(_){ return ''; }
-      })();
-      pane.querySelectorAll('[data-share], a[aria-label*="share" i], button[aria-label*="share" i]')
-          .forEach(el => { el.style.display = 'none'; });
-      pane.querySelectorAll('.genre, [data-genre]')
-          .forEach(el => { el.style.display = 'none'; });
+      const activeGenre = (function(){ try{ return norm((window.PLAYLIST && window.PLAYLIST[0] && window.PLAYLIST[0].genre) || ''); }catch(_){ return ''; } })();
+      pane.querySelectorAll('[data-share], a[aria-label*="share" i], button[aria-label*="share" i]').forEach(el => { el.style.display = 'none'; });
+      pane.querySelectorAll('.genre, [data-genre]').forEach(el => { el.style.display = 'none'; });
       pane.querySelectorAll('.item, .row, :scope > div').forEach(r => {
         Array.from(r.children).forEach(ch => {
           const txt = (ch.textContent||'').trim();
-          if (/^genre\s*:/i.test(txt) || (activeGenre && norm(txt) === activeGenre)){
-            ch.style.display = 'none';
-          }
+          if (/^genre\s*:/i.test(txt) || (activeGenre && norm(txt) === activeGenre)) ch.style.display = 'none';
         });
       });
     }catch(_){}
@@ -3131,65 +3130,38 @@ document.addEventListener('click', (ev)=>{
     };
     window.__wrap_buildList = true;
   })();
+
   function hidePlaylistShareControls(){
     try{
-      const root = document.getElementById('plist') || document.querySelector('#plist,.playlist,[data-pane="playlist"]');
+      const root = document.getElementById('plist') || document.querySelector('#plist,.playlist,[data-pane=\"playlist\"]');
       if(!root) return;
-      const nodes = root.querySelectorAll('a,button,[role="button"]');
+      const nodes = root.querySelectorAll('a,button,[role=\"button\"]');
       nodes.forEach(el=>{
         const t = norm(el.textContent);
         const lab = norm((el.getAttribute('title')||'')+' '+(el.getAttribute('aria-label')||''));
-        if (t==='share' || /\bshare\b/.test(lab) || el.hasAttribute('data-share')){
-          el.style.display = 'none';
-        }
+        if (t==='share' || /\\bshare\\b/.test(lab) || el.hasAttribute('data-share')) el.style.display = 'none';
       });
     }catch(_){}
   }
-  function runAll(){ hideRowExtras(document); hidePlaylistShareControls(); tagGenreButtons(); linkBios(); }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', runAll, {once:true});
-  else runAll();
-  new MutationObserver(runAll).observe(document.body, {childList:true, subtree:true, characterData:true});
-
 
   function tagGenreButtons(){
     const map = new Map([['heavy and metal','g-heavy'],['middle ground rock','g-rock'],['mellow tunes','g-mellow']]);
     const btns = Array.from(document.querySelectorAll('button,.btn,.chip,[data-genre]'));
-    let active = '';
-    try{ active = norm(window.PLAYLIST && window.PLAYLIST[0] && window.PLAYLIST[0].genre || ''); }catch(_){}
+    let active = ''; try{ active = norm(window.PLAYLIST && window.PLAYLIST[0] && window.PLAYLIST[0].genre || ''); }catch(_){}
     for(const el of btns){
       const key = map.get(norm(el.textContent)); if(!key) continue;
       el.classList.add('genre-btn', key);
       if (el.tagName !== 'BUTTON') el.setAttribute('role','button');
       const on = norm(el.textContent)===active;
-      el.classList.toggle('active', on);
-      el.setAttribute('aria-pressed', on ? 'true' : 'false');
+      el.classList.toggle('active', on); el.setAttribute('aria-pressed', on ? 'true' : 'false');
     }
   }
-  function linkOnce(needle,url,flag){
-    try{
-      if(document[flag]) return true;
-      const nd = norm(needle);
-      const skip=new Set(['SCRIPT','STYLE','NOSCRIPT','HEAD','TITLE','META','LINK']);
-      const tw=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null);
-      let n; while((n=tw.nextNode())){
-        const p=n.parentNode; if(!p||skip.has(p.tagName)) continue;
-        const txt=n.nodeValue||''; const i=norm(txt).indexOf(nd);
-        if(i===-1) continue;
-        if(p.tagName==='A'||p.closest('a')){document[flag]=true; return true;}
-        const before=document.createTextNode(txt.slice(0,i));
-        const after=document.createTextNode(txt.slice(i+needle.length));
-        const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; a.textContent=txt.substr(i, needle.length);
-        p.replaceChild(after,n); p.insertBefore(a,after); p.insertBefore(before,a);
-        document[flag]=true; return true;
-      }
-    }catch(_){}
-    return false;
-  }
-  function linkBios(){
-    linkOnce('zdjimas','https://suno.com/@zdjimas','__linkZ');
-    linkOnce('cjmurphy','https://www.tiktok.com/@chrisjmurphy65','__linkC');
-  }
-})(); 
+
+  function runAll(){ hideRowExtras(document); hidePlaylistShareControls(); tagGenreButtons(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', runAll, {once:true});
+  else runAll();
+  new MutationObserver(runAll).observe(document.body, {childList:true, subtree:true, characterData:true});
+})();
 </script>
 <style>
   .genre-btn{padding:12px 16px;font-size:15px;border-radius:12px;border:1px solid rgba(255,255,255,.25);
