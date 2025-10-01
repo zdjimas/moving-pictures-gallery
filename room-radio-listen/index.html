@@ -2665,7 +2665,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 40; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 41; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -3058,70 +3058,107 @@ document.addEventListener('click', (ev)=>{
 })();
 </script>
 
-<!-- Bullwinkle-v1.040 — Ultra-safe cosmetics: hide row Share/Genre; link bios; style genre buttons; hide playlist header Share -->
+<!-- Bullwinkle-v1.041 — Ultra-safe cosmetics: remove all playlist genre cells; hide Share controls; link bios; style genre buttons -->
 <style>
   /* Hide per-row Share link/column without touching app logic */
   #plist .items a[data-share]{display:none!important}
-
-  /* Hide common 'genre' badges/columns in the right list */
-  #plist .items .genre,
-  #plist .items .tiny.genre,
-  #plist .items .right.genre{display:none!important}
-
-  /* Genre buttons visual polish (non-invasive) */
+  /* Also hide any generic 'Share' controls inside the playlist panel (keeps console/global Share) */
+  #plist a[aria-label*="Share" i], #plist button[aria-label*="Share" i], #plist [data-share]{display:none!important}
+  #plist a:where(:not([aria-label])){}
+  /* Hide common 'genre' classes in the right list */
+  #plist .items .genre, #plist .items .tiny.genre, #plist .items .right.genre{display:none!important}
+  /* If genre appears as a labeled badge like "Genre: Rock", hide those spans/divs too */
+  #plist .items .item span, #plist .items .item div { white-space: nowrap; }
+</style>
+<script>
+(function(){
+  function norm(t){ return String(t||'').toLowerCase().replace(/\s+/g,' ').trim(); }
+  function getActiveGenre(){
+    try{
+      if (window.PLAYLIST && window.PLAYLIST[0] && window.PLAYLIST[0].genre) return String(window.PLAYLIST[0].genre);
+    }catch(_){}
+    // fallback to any header that shows the genre
+    const h=document.querySelector('#nowGenre,#genreName,#now .genre,.sub .genre');
+    return h && h.textContent ? h.textContent : '';
+  }
+  // Remove any child in playlist rows that looks like a genre badge/cell.
+  function scrubGenreCells(root){
+    const g = norm(getActiveGenre());
+    const pane = (root||document).querySelector('#plist .items');
+    if (!pane) return;
+    const rows = pane.querySelectorAll('.item, .row, :scope > div');
+    rows.forEach(r=>{
+      Array.from(r.children).forEach(el=>{
+        const lab = (el.getAttribute('aria-label')||'')+' '+(el.getAttribute('title')||'');
+        const text = norm(el.textContent||'');
+        const isGenreClass = /\bgenre\b/i.test(el.className||'') || el.hasAttribute('data-genre');
+        const saysGenre = /^genre\s*:/.test(text) || /genre/i.test(lab);
+        const equalsActive = g && text === g;
+        if (isGenreClass || saysGenre || equalsActive) {
+          el.style.display = 'none';
+        }
+      });
+    });
+  }
+  // Hide Share controls inside playlist panel header/body (not console/global Share)
+  function hidePlaylistShareControls(){
+    const root=document.getElementById('plist')||document.querySelector('#plist,.playlist,[data-pane="playlist"]');
+    if(!root) return;
+    const nodes=root.querySelectorAll('a,button,[role="button"]');
+    nodes.forEach(el=>{
+      const t=norm(el.textContent);
+      const lab=norm((el.getAttribute('title')||'')+' '+(el.getAttribute('aria-label')||''));
+      if (t==='share'|| /\bshare\b/.test(lab) || el.hasAttribute('data-share')) { el.style.display='none'; }
+    });
+  }
+  // Genre buttons visual tagging (no logic changes)
+  function tagGenreButtons(){
+    const map=new Map([['heavy and metal','g-heavy'],['middle ground rock','g-rock'],['mellow tunes','g-mellow']]);
+    const btns=Array.from(document.querySelectorAll('button,.btn,.chip,[data-genre]'));
+    for(const el of btns){ const key=map.get(norm(el.textContent)); if(!key) continue;
+      el.classList.add('genre-btn',key); if(el.tagName!=='BUTTON') el.setAttribute('role','button');
+      el.setAttribute('aria-pressed', el.classList.contains('active') ? 'true':'false'); }
+    const g=norm(getActiveGenre());
+    for(const el of btns){ const on = norm(el.textContent)===g; el.classList.toggle('active', on); el.setAttribute('aria-pressed', on?'true':'false'); }
+  }
+  // Non-invasive hyperlinking for bios (first visible occurrence only)
+  function linkOnce(needle,url,flag){
+    try{
+      if(document[flag]) return true;
+      const skip=new Set(['SCRIPT','STYLE','NOSCRIPT','HEAD','TITLE','META','LINK']);
+      const tw=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null);
+      let n; const nd=norm(needle);
+      while((n=tw.nextNode())){
+        const p=n.parentNode; if(!p||skip.has(p.tagName)) continue;
+        const txt=n.nodeValue||''; const i=norm(txt).indexOf(nd);
+        if(i===-1) continue;
+        if(p.tagName==='A'||p.closest('a')){document[flag]=true; return true;}
+        const before=document.createTextNode(txt.slice(0,i));
+        const after=document.createTextNode(txt.slice(i+needle.length));
+        const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; a.textContent=txt.substr(i, needle.length);
+        p.replaceChild(after,n); p.insertBefore(a,after); p.insertBefore(before,a);
+        document[flag]=true; return true;
+      }
+    }catch(_){}
+    return false;
+  }
+  function run(){ scrubGenreCells(document); hidePlaylistShareControls(); tagGenreButtons(); linkOnce('zdjimas','https://suno.com/@zdjimas','__linkZ'); linkOnce('cjmurphy','https://www.tiktok.com/@chrisjmurphy65','__linkC'); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run, {once:true}); else run();
+  new MutationObserver(run).observe(document.body,{childList:true,subtree:true,characterData:true});
+})();
+</script>
+<style>
+  /* Genre buttons (visual only) */
   .genre-btn{padding:12px 16px;font-size:15px;border-radius:12px;border:1px solid rgba(255,255,255,.25);
     box-shadow:0 6px 16px rgba(0,0,0,.35);transition:transform .08s,box-shadow .2s,filter .2s;outline-offset:2px}
   .genre-btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(0,0,0,.45)}
   .genre-btn:active{transform:translateY(0);filter:saturate(1.1)}
   .genre-btn.g-heavy{background:linear-gradient(135deg,#2a0f0f,#4b0c0c 55%,#6b1111);color:#fff;
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;letter-spacing:.02em}
-  .genre-btn.g-heavy.active{box-shadow:0 0 0 2px rgba(255,70,70,.6), inset 0 0 0 9999px rgba(255,70,70,.08)}
   .genre-btn.g-rock{background:linear-gradient(135deg,#0b2348,#103464 55%,#164a8a);color:#e9f1ff;
     font-family:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.01em}
-  .genre-btn.g-rock.active{box-shadow:0 0 0 2px rgba(94,178,255,.55), inset 0 0 0 9999px rgba(94,178,255,.08)}
   .genre-btn.g-mellow{background:linear-gradient(135deg,#0b3a34,#105a51 55%,#157a6c);color:#eafff9;
     font-family:Georgia,"Times New Roman",Times,serif;font-weight:600;letter-spacing:.02em}
-  .genre-btn.g-mellow.active{box-shadow:0 0 0 2px rgba(64,214,178,.55), inset 0 0 0 9999px rgba(64,214,178,.08)}
 </style>
-<script>
-(function(){
-  function norm(t){return String(t||'').toLowerCase().replace(/\s+/g,' ').trim()}
-  const map=new Map([['heavy and metal','g-heavy'],['middle ground rock','g-rock'],['mellow tunes','g-mellow']]);
-  const btns=Array.from(document.querySelectorAll('button,.btn,.chip,[data-genre]'));
-  for(const el of btns){const key=map.get(norm(el.textContent));if(!key)continue;el.classList.add('genre-btn',key);if(el.tagName!=='BUTTON')el.setAttribute('role','button');el.setAttribute('aria-pressed',el.classList.contains('active')?'true':'false')}
-  function syncActive(){let g='';try{g=(window.PLAYLIST&&window.PLAYLIST[0]&&window.PLAYLIST[0].genre)?window.PLAYLIST[0].genre:''}catch(_){}
-    const activeText=norm(g);for(const el of btns){const key=map.get(norm(el.textContent));if(!key)continue;const on=norm(el.textContent)===activeText;el.classList.toggle('active',on);el.setAttribute('aria-pressed',on?'true':'false')}}
-
-  function hideInlineGenre(){
-    try{
-      const rows=document.querySelectorAll('#plist .items .item,#plist .items > div');
-      rows.forEach(r=>{for(const el of Array.from(r.children)){const t=(el.textContent||'').trim();if(/^genre\s*:/i.test(t)) el.style.display='none'}});
-    }catch(_){}
-  }
-
-  function linkOnce(needle,url,flag){try{if(document[flag])return true;const skip=new Set(['SCRIPT','STYLE','NOSCRIPT','HEAD','TITLE','META','LINK']);const tw=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null);let n;const nd=String(needle).toLowerCase();while((n=tw.nextNode())){const p=n.parentNode;if(!p||skip.has(p.tagName))continue;const txt=n.nodeValue||'';const i=txt.toLowerCase().indexOf(nd);if(i===-1)continue;if(p.tagName==='A'||p.closest('a')){document[flag]=true;return true;}const before=document.createTextNode(txt.slice(0,i));const after=document.createTextNode(txt.slice(i+nd.length));const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.textContent=txt.substr(i,nd.length);p.replaceChild(after,n);p.insertBefore(a,after);p.insertBefore(before,a);document[flag]=true;return true}}catch(_){}
-    return false}
-
-  // Hide any "Share" control anywhere inside playlist panel header/body (not the console/global Share)
-  function hidePlaylistShareControls(){
-    try{
-      const root=document.getElementById('plist')||document.querySelector('#plist,.playlist,[data-pane=\"playlist\"]');
-      if(!root) return;
-      const nodes=root.querySelectorAll('a,button');
-      nodes.forEach(el=>{
-        const t=(el.textContent||'').replace(/\s+/g,' ').trim();
-        const title=(el.getAttribute('title')||'')+' '+(el.getAttribute('aria-label')||'');
-        if(/^share$/i.test(t) || /(^|\s)share(\s|$)/i.test(title) || el.hasAttribute('data-share')){
-          el.style.display='none';
-        }
-      });
-    }catch(_){}
-  }
-
-  function run(){ hideInlineGenre(); syncActive(); hidePlaylistShareControls(); linkOnce('zdjimas','https://suno.com/@zdjimas','__linkZ'); linkOnce('cjmurphy','https://www.tiktok.com/@chrisjmurphy65','__linkC'); }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', run, {once:true}); else run();
-  new MutationObserver(run).observe(document.body,{childList:true,subtree:true,characterData:true});
-})();
-</script>
 </body>
 </html>
