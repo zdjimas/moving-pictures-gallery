@@ -1,4 +1,4 @@
-cf<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -108,7 +108,7 @@ input[type=range]{width:100%}
     <button id="toLobby" class="btn">⬅︎ Return to Lobby</button>
     <div id="onAir" class="pill onair"><span class="onair-dot"></span><strong>ON AIR</strong></div>
 <nav class="creator-links" aria-label="Creator links" style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
-  <a href="https://www.tiktok.com/@chrisjmurphy65" class="btn" target="_blank" rel="noopener noreferrer">🎬 Watch This Music on TikTok</a>
+  <a href="https://www.tiktok.com/@chrisjmurphy65" class="btn" target="_blank" rel="noopener noreferrer">🎬 Watch on TikTok (CJ Murphy)</a>
 </nav>
 
 
@@ -2665,7 +2665,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 44; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER    = 45; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -3058,7 +3058,7 @@ document.addEventListener('click', (ev)=>{
 })();
 </script>
 
-<!-- Bullwinkle-v1.044 — Welcome plays correctly + no preplay + persistent playlist scrub (non-invasive) -->
+<!-- Bullwinkle-v1.045 — Welcome plays; no preplay; Share Track shares direct MP3; genre/share scrub persists -->
 <style>
   #plist .items a[data-share]{display:none!important}
   #plist .items .genre, #plist .items .tiny.genre, #plist .items .right.genre{display:none!important}
@@ -3066,6 +3066,7 @@ document.addEventListener('click', (ev)=>{
 <script>
 (function(){
   function norm(t){ return String(t||'').toLowerCase().replace(/\s+/g,' ').trim(); }
+  function absUrl(u){ try{ return new URL(u, location.href).href; }catch(_){ return u; } }
 
   (function wrapLoadAutoplay(){
     if (window.__wrapped_load || typeof window.load !== 'function') return;
@@ -3092,17 +3093,33 @@ document.addEventListener('click', (ev)=>{
       try{
         if (overlayVisible() && !allowWhileWelcome && autoplay === true) return _load.call(this, idx, false);
       }catch(_){}
-      return _load.apply(this, arguments);
+      const res = _load.apply(this, arguments);
+      try{
+        const a = window.audio || document.querySelector('audio');
+        const url = a && (a.currentSrc || a.src);
+        if (url) window.__currentTrackUrl = absUrl(url);
+        window.__lastLoadedIndex = idx;
+      }catch(_){}
+      return res;
     };
     window.__wrapped_load = true;
-    function onPlay(ev){
+    function syncFromAudio(ev){
+      try{
+        const a = ev && ev.target || window.audio || document.querySelector('audio');
+        const url = a && (a.currentSrc || a.src);
+        if (url) window.__currentTrackUrl = absUrl(url);
+      }catch(_){}
+    }
+    document.addEventListener('play', syncFromAudio, true);
+    document.addEventListener('loadedmetadata', syncFromAudio, true);
+    function onPlayGuard(ev){
       try{
         if (!overlayVisible() || allowWhileWelcome) return;
         const a = ev && ev.target;
         if (a && typeof a.pause === 'function'){ a.pause(); a.currentTime = 0; }
       }catch(_){}
     }
-    document.addEventListener('play', onPlay, true);
+    document.addEventListener('play', onPlayGuard, true);
   })();
 
   function hideRowExtras(root){
@@ -3144,6 +3161,51 @@ document.addEventListener('click', (ev)=>{
     }catch(_){}
   }
 
+  async function shareCurrentTrack(){
+    let url = null;
+    try{
+      const a = window.audio || document.querySelector('audio');
+      const s = a && (a.currentSrc || a.src);
+      if (s) url = absUrl(s);
+    }catch(_){}
+    if (!url){
+      try{
+        const i = window.__lastLoadedIndex ?? window.idx ?? window.currentIndex ?? 0;
+        const item = (window.PLAYLIST && window.PLAYLIST[i]) || null;
+        if (item){
+          const key = ['file','src','url','mp3','path','href'].find(k => k in item);
+          if (key && item[key]) url = absUrl(item[key]);
+        }
+      }catch(_){}
+    }
+    if (!url){ alert('Sorry — could not determine the direct track link.'); return; }
+    try{
+      if (navigator.share){
+        await navigator.share({title: document.title || 'KZAK Track', text: 'Listen to this track', url});
+        return;
+      }
+    }catch(_){}
+    try{
+      await navigator.clipboard.writeText(url);
+      alert('Track link copied to clipboard:\\n' + url);
+    }catch(_){
+      prompt('Copy this track link:', url);
+    }
+  }
+
+  function wireShareTrack(){
+    const nodes = Array.from(document.querySelectorAll('a,button,[role=\"button\"]'));
+    for (const el of nodes){
+      const label = (el.textContent||el.getAttribute('aria-label')||el.getAttribute('title')||'').replace(/\\s+/g,' ').trim();
+      if (/^share\\s*track$/i.test(label)){
+        if (!el.__wiredShareTrack){
+          el.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); shareCurrentTrack(); }, true);
+          el.__wiredShareTrack = true;
+        }
+      }
+    }
+  }
+
   function tagGenreButtons(){
     const map = new Map([['heavy and metal','g-heavy'],['middle ground rock','g-rock'],['mellow tunes','g-mellow']]);
     const btns = Array.from(document.querySelectorAll('button,.btn,.chip,[data-genre]'));
@@ -3157,7 +3219,7 @@ document.addEventListener('click', (ev)=>{
     }
   }
 
-  function runAll(){ hideRowExtras(document); hidePlaylistShareControls(); tagGenreButtons(); }
+  function runAll(){ hideRowExtras(document); hidePlaylistShareControls(); tagGenreButtons(); wireShareTrack(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', runAll, {once:true});
   else runAll();
   new MutationObserver(runAll).observe(document.body, {childList:true, subtree:true, characterData:true});
