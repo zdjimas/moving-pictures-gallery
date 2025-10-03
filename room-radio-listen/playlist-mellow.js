@@ -1,5 +1,18 @@
 /* Auto-generated from songlist2.txt */
 const PLAYLIST_MELLOW = [
+ 
+  {
+  title: "You Don't Need A Gun - Sitar Version",
+  file:  "Media/You Don't Need A Gun - Sitar Version.mp3",
+  image: "Media/YouDontNeedAGun.jpeg",
+  alt:   "You Dont Need A Gun - Cover Art",
+    genre: "Mellow Tunes",
+    
+  story: `The melody here is from a well known groove from Billy Idol, turned into something unique and interesting.   `
+},
+
+  
+  
   {
   title: "Silent Sucidity Silenced",
   file:  "Media/Silent Lucidity Silenced.mp3",
