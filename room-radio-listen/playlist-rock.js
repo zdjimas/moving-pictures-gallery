@@ -19,14 +19,14 @@ const PLAYLIST_ROCK = [
     story: "From the Demo Archives from Dirty Deeds Done Dirt Cheap desings."
   },
 {
-    title: "Catching My Fall,
-    file:  "Media/Catching My Fall.mp3",
-    img:   "Media/CatchingMyFaCatching My FallGrandios Designs  - artwork",
-    genre: "Middle Ground Rock",
-    
-    story: "A winner tune from the spike haired rebel yell creator.
-  },
-{
+  title: "Catching My Fall",
+  file:  "Media/Catching My Fall.mp3",
+  img:   "Media/CatchingMyFall.jpeg",        // adjust filename if needed
+  alt:   "Catching My Fall — artwork",
+  genre: "Middle Ground Rock",
+  story: "A winner tune from the spike-haired Rebel Yell creator."
+},
+
     title: "Alexanders Greatness",
     file:  "Media/Alexanders Greatness.mp3",
     img:   "Media/AlexandersGreatness.jpeg",
