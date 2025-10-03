@@ -1,5 +1,79 @@
 /* Auto-generated from songlist2.txt */
 const PLAYLIST_ROCK = [
+ 
+  {
+    title: "Billys Eyes Without His Face",
+    file:  "Media/Billys Eyes without His Face.mp3",
+    img:   "Media/BillysEyesWithoutHisFace.png",
+    alt:   "Billys Eyes  - artwork",
+    genre: "Middle Ground Rock",
+    
+    story: "From the Dance Rock Master Himeself, one of my favorates to listen to in my 20s."
+  },
+{
+    title: "Touching Too Much",
+    file:  "Media/Touching Too Much.mp3",
+    img:   "Media/TouchingTooMuch.jpeg",
+    alt:   "Touching Too Much  - artwork",
+    genre: "Middle Ground Rock",
+    
+    story: "From the Demo Archives from Dirty Deeds Done Dirt Cheap desings."
+  },
+{
+    title: "Catching My Fall,
+    file:  "Media/Catching My Fall.mp3",
+    img:   "Media/CatchingMyFaCatching My FallGrandios Designs  - artwork",
+    genre: "Middle Ground Rock",
+    
+    story: "A winner tune from the spike haired rebel yell creator.
+  },
+{
+    title: "Alexanders Greatness",
+    file:  "Media/Alexanders Greatness.mp3",
+    img:   "Media/AlexandersGreatness.jpeg",
+    alt:   "Alexanders Greatness  - artwork",
+    genre: "Middle Ground Rock",
+    
+    story: "From our friends who built their music on Progress fast paced delivery,  Whose Maiden is Iron"
+  },
+
+
+{
+    title: "Billys Flesh For Fantasy",
+    file:  "Media/Billys Flesh For Fantasy.mp3",
+    img:   "Media/BillysFleshForFantasy.jpeg",
+    alt:   "Billys Flesh For Fantasy  - artwork",
+    genre: "Middle Ground Rock",
+    
+    story: "Another Dance Party Remix originally created by Billy Idol"
+  },
+{
+    title: "She Sells Sanctuary Plots",
+    file:  "Media/She Sells Sanctuary Plots.mp3",
+    img:   "Media/SheSellsSanctuaryPlots.jpeg",
+    alt:   "She Sells Sanctuary Plots  - artwork",
+    genre: "Middle Ground Rock",
+    
+    story: "A great song from a band who went unrecodgnized after the 90s,  The Cult built this melody"
+  },
+
+  {
+    title: "The Love Removal Machine from the Manor",
+    file:  "Media/The Love Removal Machine from the Manor.mp3",
+    img:   "Media/The Love Removal Machine.jpeg",
+    alt:   "The Love Removal Machine from the Manor - artwork",
+    genre: "Middle Ground Rock",
+    
+    story: "Another classic song from a band who went unrecodgnized after the 90s,  The Cult also built this melody"
+  },
+  
+  
+  
+  
+  
+  
+  
+  
   {
     title: "Grandios Designs",
     file:  "Media/Grandios Designs .mp3",
