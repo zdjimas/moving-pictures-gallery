@@ -1,6 +1,5 @@
 /* Auto-generated from songlist2.txt */
-const PLAYLIST_ROCK = [
- 
+const PLAYLIST_ROCK = [ 
   {
     title: "Billys Eyes Without His Face",
     file:  "Media/Billys Eyes without His Face.mp3",
@@ -66,13 +65,7 @@ const PLAYLIST_ROCK = [
     
     story: "Another classic song from a band who went unrecodgnized after the 90s,  The Cult also built this melody"
   },
-  
-  
-  
-  
-  
-  
-  
+ 
   
   {
     title: "Grandios Designs",
