@@ -1,152 +1,54 @@
-/* Auto-generated from songlist2.txt */
-const PLAYLIST_ROCK = [ 
+/* Clean ROCK playlist for Bullwinkle-v1.047 */
+const PLAYLIST_ROCK = [
   {
     title: "Billys Eyes Without His Face",
-    file:  "Media/Billys Eyes without His Face.mp3",
-    img:   "Media/BillysEyesWithoutHisFace.png",
-    alt:   "Billys Eyes  - artwork",
+    file: "Media/Billys Eyes without His Face.mp3",
+    img: "Media/BillysEyesWithoutHisFace.png",
+    alt: "Billys Eyes — artwork",
     genre: "Middle Ground Rock",
-    
-    story: "From the Dance Rock Master Himeself, one of my favorates to listen to in my 20s."
+    story: "From the dance-rock master; a favorite from my 20s.",
   },
-{
-    title: "Touching Too Much",
-    file:  "Media/Touching Too Much.mp3",
-    img:   "Media/TouchingTooMuch.jpeg",
-    alt:   "Touching Too Much  - artwork",
-    genre: "Middle Ground Rock",
-    
-    story: "From the Demo Archives from Dirty Deeds Done Dirt Cheap desings."
-  },
-{
-  title: "Catching My Fall",
-  file:  "Media/Catching My Fall.mp3",
-  img:   "Media/CatchingMyFall.jpeg",         
-  alt:   "Catching My Fall — artwork",
-  genre: "Middle Ground Rock",
-  story: "A winner tune from the spike-haired Rebel Yell creator."
-},
-
-    title: "Alexanders Greatness",
-    file:  "Media/Alexanders Greatness.mp3",
-    img:   "Media/AlexandersGreatness.jpeg",
-    alt:   "Alexanders Greatness  - artwork",
-    genre: "Middle Ground Rock",
-    
-    story: "From our friends who built their music on Progress fast paced delivery,  Whose Maiden is Iron"
-  },
-
-
-{
-    title: "Billys Flesh For Fantasy",
-    file:  "Media/Billys Flesh For Fantasy.mp3",
-    img:   "Media/BillysFleshForFantasy.jpeg",
-    alt:   "Billys Flesh For Fantasy  - artwork",
-    genre: "Middle Ground Rock",
-    
-    story: "Another Dance Party Remix originally created by Billy Idol"
-  },
-{
-    title: "She Sells Sanctuary Plots",
-    file:  "Media/She Sells Sanctuary Plots.mp3",
-    img:   "Media/SheSellsSanctuaryPlots.jpeg",
-    alt:   "She Sells Sanctuary Plots  - artwork",
-    genre: "Middle Ground Rock",
-    
-    story: "A great song from a band who went unrecodgnized after the 90s,  The Cult built this melody"
-  },
-
   {
-    title: "The Love Removal Machine from the Manor",
-    file:  "Media/The Love Removal Machine from the Manor.mp3",
-    img:   "Media/The Love Removal Machine.jpeg",
-    alt:   "The Love Removal Machine from the Manor - artwork",
+    title: "Touching Too Much",
+    file: "Media/Touching Too Much.mp3",
+    img: "Media/TouchingTooMuch.jpeg",
+    alt: "Touching Too Much — artwork",
     genre: "Middle Ground Rock",
-    
-    story: "Another classic song from a band who went unrecodgnized after the 90s,  The Cult also built this melody"
+    story: "Chugging riff and big chorus—built to play loud.",
   },
-  
+  {
+    title: "Catching My Fall",
+    file: "Media/Catching My Fall.mp3",
+    img: "Media/CatchingMyFall.jpeg",
+    alt: "Catching My Fall — artwork",
+    genre: "Middle Ground Rock",
+    story: "A winner tune from the spike-haired Rebel Yell creator.",
+  },
+  {
+    title: "Alexanders Greatness",
+    file: "Media/Alexanders Greatness.mp3",
+    img: "Media/AlexandersGreatness.jpeg",
+    alt: "Alexanders Greatness — artwork",
+    genre: "Middle Ground Rock",
+    story: "High-speed progressions—our nod to a certain iron-forged maiden.",
+  },
   {
     title: "Grandios Designs",
-    file:  "Media/Grandios Designs .mp3",
-    img:   "Media/GrandiosDesigns.jpeg",
-    alt:   "Grandios Designs  - artwork",
+    file: "Media/Grandios Designs.mp3",
+    img: "Media/GrandiosDesigns.jpeg",
+    alt: "Grandios Designs — artwork",
     genre: "Middle Ground Rock",
-    
-    story: "A great tune from the great white north."
+    story: "Shimmering arpeggios with a stadium-size hook.",
   },
-
-  {
-    title: "Manhattan Project Revisited",
-    file:  "Media/Manhattan Project Revisited.mp3",
-    img:   "Media/ManhattanProject.jpeg",
-    alt:   "Manhattan Project  - artwork",
-    genre: "Middle Ground Rock",
-    
-    story: "Another great tune from the great white northmen of Toronto and a powerful tune for a powerful device."
-  },
-
-  {
-    title: "Territories Redrawn",
-    file:  "Media/Territories Redrawn.mp3",
-    img:   "Media/TerritoriesRedreawn.jpeg",
-    alt:   "Territories Redreawn  - artwork",
-    genre: "Middle Ground Rock",
-    
-    story: "Another fantastic creaton  from the progressive rock masters."
-  },
-
-  {
-    title: "Eve in Evening",
-    file:  "Media/Eve in the evening.mp3",
-    img:   "Media/EveEvening.jpeg",
-    alt:   "Eve in Evening  - artwork",
-    genre: "Middle Ground Rock",
-    
-    story: "A Remix from a really old demo from Dream Theater in the 90s, recreated and rebasted."
-  },
-
-  {
-    title: "Broons Bane Ressurected",
-    file:  "Media/Broons Bane Resurrected 2.mp3",
-    img:   "Media/BroonsBane.jpeg",
-    alt:   "Broons Bane Resurrected  - artwork",
-    genre: "Middle Ground Rock",
-    
-    story: "A great tune from Alex Lifesons Opening of the Trees, recreated into something new."
-  },
-
-  {
-    title: "Alternative Once in my Lifetime",
-    file:  "Media/Alternative Once in my Lifetime.mp3",
-    img:   "Media/AlternateLifetime.png",
-    alt:   "Alternate Once in a Life time - artwork",
-    genre: "Middle Ground Rock",
-    
-    story: "An original remix from the gang from Providence RI"
-  },
-
-  {
-    title: "Once In A Lifetime a Second Time",
-    file:  "Media/Once In A Lifetime a Second Time.mp3",
-    img:   "Media/OnceLifetime2.jpeg",
-    alt:   "Once in a Life time Second round - artwork",
-    genre: "Middle Ground Rock",
-    
-    story: "A fine AI remix of a great beat and melody from a bunch of artists from Providence RI"
-  },
-
   {
     title: "Paramores Burning Down the House",
-    file:  "Media/Paramores Burning Down the House.mp3",
-    img:   "Media/ParamoreBurning.png",
-    alt:   "Paramores Burning Down the House - artwork",
+    file: "Media/Paramores Burning Down the House.mp3",
+    img: "Media/ParamoreBurning.png",
+    alt: "Paramores Burning Down the House — artwork",
     genre: "Middle Ground Rock",
-    
-    story: "Paramore does this song on her own without her partner Mr. Byrne,  a great remix in studio for this great song."
+    story: "Paramore takes this one solo—tight, bright, dance-ready.",
   },
-
-  {
+{
     title: "My Queen of Spades",
     file:  "Media/My Queen of Spades .mp3",
     img:   "Media/MyQueenSpades.jpeg",
@@ -844,6 +746,6 @@ const PLAYLIST_ROCK = [
     genre: "Middle Ground Rock",
     
     story: DEFAULT_STORY
-  }
+  },
 ];
 export default PLAYLIST_ROCK;

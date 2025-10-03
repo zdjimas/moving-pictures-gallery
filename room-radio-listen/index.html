@@ -108,7 +108,7 @@ input[type=range]{width:100%}
     <button id="toLobby" class="btn">⬅︎ Return to Lobby</button>
     <div id="onAir" class="pill onair"><span class="onair-dot"></span><strong>ON AIR</strong></div>
 <nav class="creator-links" aria-label="Creator links" style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
-  <a href="https://www.tiktok.com/@chrisjmurphy65" class="btn" target="_blank" rel="noopener noreferrer">🎬 Watch This Music on TikTok</a>
+  <a href="https://www.tiktok.com/@chrisjmurphy65" class="btn" target="_blank" rel="noopener noreferrer">🎬 Watch on TikTok (CJ Murphy)</a>
 </nav>
 
 
@@ -2665,7 +2665,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 46; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER = 47; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2898,11 +2898,11 @@ window.addEventListener('load', () => {
 
 
 <script type="module">
-import HEAVY  from './playlist-heavy.js?v=038';
-import ROCK   from './playlist-rock.js?v=038';
-import MELLOW from './playlist-mellow.js?v=038';
+import HEAVY  from './playlist-heavy.js?v=047';
+import ROCK   from './playlist-rock.js?v=047';
+import MELLOW from './playlist-mellow.js?v=047';
 
-/* Bullwinkle-v1.046: capture-level wiring and hard playlist swap */
+/* Bullwinkle-v1.033: capture-level wiring and hard playlist swap */
 const MAP = new Map([
   ['heavy and metal', {list: HEAVY,  label: 'Heavy and Metal'}],
   ['middle ground rock', {list: ROCK, label: 'Middle Ground Rock'}],
@@ -3039,7 +3039,7 @@ document.addEventListener('click', (ev)=>{
 
 <script>
 (function(){
-  const SUBVER = 38;
+  const SUBVER = 47;
   const PAD  = String(SUBVER).padStart(3,'0');
   const VER  = `Bullwinkle-v1.${PAD}`;
   const FILE = `v=bullwinkle-v1-${PAD}`;
@@ -3239,67 +3239,18 @@ document.addEventListener('click', (ev)=>{
   .genre-btn.active{box-shadow:0 0 0 2px rgba(255,255,255,.35), inset 0 0 0 9999px rgba(255,255,255,.08)}
 </style>
 
-<!-- kzak-share-direct-hotfix-046 -->
-<script>
-(function () {
-  try { if (typeof SUBVER === 'undefined') window.SUBVER = 46; } catch(_e) { try { window.SUBVER = 46; } catch(__) {} }
-  function abs(u){ try { return new URL(u, location.href).href; } catch(_) { return u; } }
-  async function shareDirect() {
-    let url = null;
-    try {
-      const a = window.audio || document.querySelector('audio');
-      const s = a && (a.currentSrc || a.src);
-      if (s) url = abs(s);
-    } catch(_) {}
-    if (!url) {
-      try {
-        const i = window.__lastLoadedIndex ?? window.idx ?? window.currentIndex ?? 0;
-        const tr = (window.PLAYLIST && window.PLAYLIST[i]) || null;
-        if (tr) {
-          const key = ['file','src','url','mp3','path','href'].find(k => (k in tr) && tr[k]);
-          if (key) url = abs(tr[key]);
-        }
-      } catch(_) {} 
-    }
-    if (!url) { alert('Sorry — could not determine the direct track link.'); return; }
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: document.title || 'KZAK Track', text: 'Listen to this track', url });
-        return;
-      }
-    } catch(_) {}
-    try { await navigator.clipboard.writeText(url); alert('Track link copied to clipboard:\n' + url); }
-    catch(_) { prompt('Copy this track link:', url); }
-  }
-  function wireShareTrack() {
-    const targets = new Set();
-    const idBtn = document.getElementById('shareTrackBtn');
-    if (idBtn) targets.add(idBtn);
-    document.querySelectorAll("a,button,[role='button']").forEach(el => {
-      const label = ((el.getAttribute('aria-label')||'') + ' ' +
-                     (el.getAttribute('title')||'') + ' ' +
-                     (el.textContent||''))
-        .replace(/\s+/g,' ')
-        .replace(/[^\p{L}\p{N}\s]/gu,'')
-        .trim()
-        .toLowerCase();
-      if (/\bshare\s*track\b/.test(label)) targets.add(el);
-    });
-    targets.forEach(el => {
-      if (el.__wiredKzakShareDirect) return;
-      el.addEventListener('click', function(ev){
-        ev.preventDefault();
-        ev.stopPropagation();
-        ev.stopImmediatePropagation();
-        shareDirect();
-      }, true); // capture
-      el.__wiredKzakShareDirect = true;
-    });
-  }
-  wireShareTrack();
-  new MutationObserver(wireShareTrack).observe(document.body, {childList:true, subtree:true, characterData:true});
-})();
-</script>
-
+        <script>
+        (()=>{
+          const RELEASE='Bullwinkle-v1'; const SUBVER=47;
+          const stamp=`${RELEASE}.${String(SUBVER).padStart(3,'0')}`;
+          const el=document.getElementById('build-stamp'); if(el){ el.textContent=stamp; }
+          const pl=['playlist-rock.js','playlist-heavy.js','playlist-mellow.js'];
+          const scripts=[...document.scripts];
+          pl.forEach(name=>{const t=scripts.find(s=>s.src&&s.src.includes(name));
+            if(t && !/[?&]v=\d{3}\b/.test(t.src)){ t.src = `${t.src}${t.src.includes('?')?'&':'?'}v=${String(SUBVER).padStart(3,'0')}`;}
+          });
+        })();
+        </script>
+        
 </body>
 </html>
