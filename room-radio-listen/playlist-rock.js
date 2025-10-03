@@ -21,7 +21,7 @@ const PLAYLIST_ROCK = [
 {
   title: "Catching My Fall",
   file:  "Media/Catching My Fall.mp3",
-  img:   "Media/CatchingMyFall.jpeg",        // adjust filename if needed
+  img:   "Media/CatchingMyFall.jpeg",         
   alt:   "Catching My Fall — artwork",
   genre: "Middle Ground Rock",
   story: "A winner tune from the spike-haired Rebel Yell creator."
@@ -65,7 +65,6 @@ const PLAYLIST_ROCK = [
     
     story: "Another classic song from a band who went unrecodgnized after the 90s,  The Cult also built this melody"
   },
- 
   
   {
     title: "Grandios Designs",
