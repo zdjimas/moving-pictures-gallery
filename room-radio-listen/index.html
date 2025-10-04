@@ -2665,7 +2665,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER = 54; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER = 55; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2898,9 +2898,9 @@ window.addEventListener('load', () => {
 
 
 <script type="module">
-import HEAVY  from './playlist-heavy.js?v=054';
-import ROCK   from './playlist-rock.js?v=054';
-import MELLOW from './playlist-mellow.js?v=054';
+import HEAVY  from './playlist-heavy.js?v=055';
+import ROCK   from './playlist-rock.js?v=055';
+import MELLOW from './playlist-mellow.js?v=055';
 
 /* Bullwinkle-v1.046: capture-level wiring and hard playlist swap */
 const MAP = new Map([
@@ -3085,38 +3085,50 @@ document.addEventListener('click', async (ev) => {
 
 
 <style>
-  /* KZAK Likes v1.054 */
-  .kzak54-like-btn {
+  /* KZAK v1.055 — scoped styles */
+  .kzak55-like-btn {
     display:inline-flex; align-items:center; gap:.4rem;
     padding:.35rem .6rem; border:1px solid #444; border-radius:6px;
     background:#111; color:#eee; cursor:pointer; font:500 14px/1.1 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif;
   }
-  .kzak54-like-btn:hover { background:#181818; }
-  .kzak54-like-btn .heart { font-size:16px; line-height:1; }
-  .kzak54-like-btn.is-on { border-color:#c33; color:#ffcfcf; background:#2a0f13; }
-  .kzak54-chip {
+  .kzak55-like-btn:hover { background:#181818; }
+  .kzak55-like-btn .heart { font-size:16px; line-height:1; }
+  .kzak55-like-btn.is-on { border-color:#c33; color:#ffcfcf; background:#2a0f13; }
+
+  .kzak55-chip {
     display:inline-flex; align-items:center; gap:.35rem;
     font:600 14px/1.1 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif;
     padding:.25rem .45rem; border-radius:999px; background:#111; color:#eee; border:1px solid #333;
   }
-  .kzak54-likes-cell { text-align:right; white-space:nowrap; }
+
+  /* Playlist likes badge appended at end of row */
+  .kzak55-row-like { margin-left:.5rem; }
+
+  /* Genre button restorers (non-destructive) */
+  .kzak55-genre-btn { border:1px solid transparent; }
+  .kzak55-heavy   { background:#8b0000 !important; color:#fff !important; }
+  .kzak55-rock    { background:#1e3a8a !important; color:#fff !important; }
+  .kzak55-mellow  { background:#0f766e !important; color:#fff !important; }
+  .kzak55-genre-btn[aria-pressed="true"],
+  .kzak55-genre-btn.active,
+  .kzak55-genre-btn.is-active { box-shadow:0 0 0 2px rgba(255,255,255,.15) inset; filter:saturate(1.2); }
 </style>
 
 <script>
-/* KZAK Likes v1.054 — cumulative counts with stable IDs and optional backend */
+/* KZAK Likes v1.055 — cumulative counts, stable IDs, genre scrub + style restore */
 (() => {
-  if (window.__kzakLikes054) return; window.__kzakLikes054 = true;
+  if (window.__kzakLikes055) return; window.__kzakLikes055 = true;
 
   const MAX = 100000;
-  const KEY_COUNTS = 'kzak.likes.v5.counts'; // {id:number}
-  const KEY_DEVICE = 'kzak.likes.device';    // uuid
+  const KEY_COUNTS = 'kzak.likes.v6.counts'; // {id:number}
+  const KEY_DEVICE = 'kzak.likes.device';
   const API = (window.KZAK_LIKES_API && window.KZAK_LIKES_API.baseUrl) ? window.KZAK_LIKES_API : null;
 
-  // ---- Utilities
+  // ---------- utilities ----------
   const clamp = n => Math.max(0, Math.min(MAX, Number(n||0) || 0));
   const read = k => { try { return JSON.parse(localStorage.getItem(k) || '{}'); } catch { return {}; } };
   const write = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
-  const getDevice = () => {
+  const uuid = () => {
     try {
       let id = localStorage.getItem(KEY_DEVICE);
       if (!id) { id = (crypto.randomUUID && crypto.randomUUID()) || (Date.now().toString(36)+Math.random().toString(36).slice(2)); localStorage.setItem(KEY_DEVICE,id); }
@@ -3124,7 +3136,7 @@ document.addEventListener('click', async (ev) => {
     } catch { return 'anon'; }
   };
   const slug = s => String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
-                    .replace(/\.[a-z0-9]{2,4}$/i,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'').toLowerCase();
+                  .replace(/\.[a-z0-9]{2,4}$/i,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'').toLowerCase();
   const idFromEntry = e => e?.id ? slug(e.id)
                          : e?.file ? slug(e.file.split('/').pop())
                          : e?.src||e?.url||e?.path||e?.href ? slug((e.src||e.url||e.path||e.href).split('/').pop())
@@ -3137,12 +3149,9 @@ document.addEventListener('click', async (ev) => {
     if (!src) return null; try { const u=new URL(src,location.href); src=u.pathname.split('/').pop(); } catch { src=src.split('?')[0].split('/').pop(); }
     return slug(src);
   };
-  const idFromRowIndex = i => {
-    if (Array.isArray(window.PLAYLIST) && window.PLAYLIST[i]) return idFromEntry(window.PLAYLIST[i]);
-    return null;
-  };
+  const idFromRowIndex = i => (Array.isArray(window.PLAYLIST) && window.PLAYLIST[i]) ? idFromEntry(window.PLAYLIST[i]) : null;
 
-  // ---- Backend
+  // ---------- backend bridge (optional) ----------
   async function apiGet(ids){
     ids = (ids||[]).filter(Boolean); if (!ids.length) return {};
     if (API) {
@@ -3160,18 +3169,18 @@ document.addEventListener('click', async (ev) => {
     if (API) {
       try {
         const url = API.baseUrl + (API.endpoints?.post || '/like');
-        const body = { track_id:id, device_id:getDevice(), action: (delta>0?'like':'unlike'), delta };
+        const body = { track_id:id, device_id:uuid(), action: (delta>0?'like':'unlike'), delta };
         await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body), credentials:'omit' });
       } catch(e){}
     }
   }
 
-  // ---- UI: Like button
+  // ---------- Like button (cumulative) ----------
   function ensureBtn(){
     let btn = document.getElementById('kzak-like-track-btn');
     if (!btn){
       btn = document.createElement('button');
-      btn.id='kzak-like-track-btn'; btn.type='button'; btn.className='kzak54-like-btn'; btn.setAttribute('aria-pressed','false');
+      btn.id='kzak-like-track-btn'; btn.type='button'; btn.className='kzak55-like-btn'; btn.setAttribute('aria-pressed','false');
       btn.innerHTML = '<span class="heart" aria-hidden="true">♡</span><span class="label">Like Track</span>';
       const host=document.querySelector('#console, .console, #controls, .controls, header .controls, footer .controls') || document.body;
       const share = Array.from(host.querySelectorAll('button,a')).find(el => /share/i.test(el.textContent||''));
@@ -3197,10 +3206,10 @@ document.addEventListener('click', async (ev) => {
     repaintNow(); repaintList(); updateBtn();
   }, { capture:true });
 
-  // ---- UI: Now Playing chip
+  // ---------- Now Playing chip ----------
   function ensureNowChip(){
     let chip = document.getElementById('kzak-like-total'); if (chip) return chip;
-    chip = document.createElement('span'); chip.id='kzak-like-total'; chip.className='kzak54-chip'; chip.textContent='♥ 0';
+    chip = document.createElement('span'); chip.id='kzak-like-total'; chip.className='kzak55-chip'; chip.textContent='♥ 0';
     const title = document.querySelector('.track-title, #track-title, h1.track, h2.track, .now-playing .title');
     const artHost = document.querySelector('.artwork, #artwork, .now-playing .art, .cover, img[alt*="art"]')?.parentElement;
     const host = title?.parentElement || artHost || document.querySelector('#console, .console, header, .header') || document.body;
@@ -3217,62 +3226,63 @@ document.addEventListener('click', async (ev) => {
     node.setAttribute('aria-label', `Likes ${n}`);
   }
 
-  // ---- UI: Playlist badges
+  // ---------- Playlist: hide genre chips & show likes at right ----------
+  function scrubGenre(row){
+    // Hide any obvious genre chips/tags in the row
+    row.querySelectorAll('.genre,[data-genre]').forEach(el => { el.style.display='none'; });
+    // Hide cells that are "Genre:" or equal to common labels
+    Array.from(row.children||[]).forEach(cell => {
+      const t=(cell.textContent||'').trim();
+      if (/^genre\s*:/.test(t.toLowerCase())) cell.style.display='none';
+      if (/^(heavy|rock|mellow|middle ground rock|heavy and metal|mellow tunes)$/i.test(t)) cell.style.display='none';
+    });
+  }
+  function badgeForRow(row){
+    let b = row.querySelector('.kzak55-row-like');
+    if (!b){
+      b = document.createElement('span');
+      b.className='kzak55-chip kzak55-row-like';
+      // append to last cell if exists, else to row
+      const target = row.lastElementChild || row;
+      target.appendChild(document.createTextNode(' '));
+      target.appendChild(b);
+    }
+    return b;
+  }
   async function repaintList(){
     const root = document.getElementById('plist') || document.querySelector('#plist, .playlist, table.playlist, table#plist');
     if (!root) return;
-
-    // try to locate rows
-    const rows = root.querySelectorAll('tbody tr, tr:not(:has(th))');
-    if (!rows.length){
-      // maybe it's a list <li>
-      const lis = root.querySelectorAll('li, .row, .playlist-row');
-      if (lis.length){
-        const ids = Array.from(lis, (_,i)=>idFromRowIndex(i));
-        const counts = await apiGet(ids);
-        Array.from(lis).forEach((row,i)=>paintBadge(row, counts[ids[i]]||0, ids[i]));
-      }
-      return;
-    }
-
-    // table-like
+    // Rows may be table rows or list items
+    let rows = root.querySelectorAll('tbody tr, tr:not(:has(th))');
+    let isTable = true;
+    if (!rows.length){ rows = root.querySelectorAll('li, .row, .playlist-row'); isTable = false; }
     const ids = Array.from(rows, (_,i)=>idFromRowIndex(i));
     const counts = await apiGet(ids);
     Array.from(rows).forEach((row,i)=>{
-      // prefer replacing Genre cell if present
-      let genreCell = null;
-      const ths = row.parentElement?.querySelectorAll('tr:first-child th, thead th') || [];
-      let genreIdx = -1;
-      if (ths.length){
-        ths.forEach((th,ix)=>{ if (/^\s*genre\s*$/i.test((th.textContent||'').trim())) genreIdx = ix; });
-      }
-      if (genreIdx>=0 && row.children && row.children.length>genreIdx) genreCell = row.children[genreIdx];
-      if (genreCell){
-        genreCell.style.display=''; genreCell.classList.add('kzak54-likes-cell');
-        const n = clamp(counts[ids[i]] || 0);
-        genreCell.textContent = `♥ ${n.toLocaleString()}`;
-        return;
-      }
-      // otherwise append a badge at the row end
-      paintBadge(row, counts[ids[i]] || 0, ids[i]);
+      scrubGenre(row);
+      const id = ids[i];
+      const n = clamp(counts[id] || read(KEY_COUNTS)[id] || 0);
+      const b = badgeForRow(row);
+      b.textContent = `♥ ${n.toLocaleString()}`;
+      b.setAttribute('data-for', id||'');
+      b.setAttribute('aria-label', `Likes ${n}`);
     });
   }
-  function paintBadge(row, n, id){
-    let b = row.querySelector('.kzak54-row-like');
-    if (!b){
-      b = document.createElement('span');
-      b.className = 'kzak54-chip kzak54-row-like';
-      // try to append at the end of the row
-      (row.lastElementChild || row).appendChild(document.createTextNode(' '));
-      (row.lastElementChild || row).appendChild(b);
-    }
-    b.textContent = `♥ ${clamp(n).toLocaleString()}`;
-    b.setAttribute('data-for', id||'');
-    b.setAttribute('aria-label', `Likes ${clamp(n)}`);
+
+  // ---------- Genre button style restore ----------
+  function restoreGenreButtons(){
+    const candidates = Array.from(document.querySelectorAll('a,button'));
+    candidates.forEach(el => {
+      const txt=(el.textContent||'').toLowerCase();
+      if (/heavy/.test(txt)){ el.classList.add('kzak55-genre-btn','kzak55-heavy'); }
+      else if (/mellow/.test(txt)){ el.classList.add('kzak55-genre-btn','kzak55-mellow'); }
+      else if (/rock/.test(txt)){ el.classList.add('kzak55-genre-btn','kzak55-rock'); }
+    });
   }
 
-  // ---- lifecycle
+  // ---------- lifecycle ----------
   function init(){
+    restoreGenreButtons();
     ensureBtn(); updateBtn(); repaintNow(); repaintList();
     const a = document.querySelector('audio');
     if (a){
@@ -3280,17 +3290,18 @@ document.addEventListener('click', async (ev) => {
         setTimeout(()=>{ repaintNow(); repaintList(); updateBtn(); }, 0);
       }, { passive:true }));
     }
-    // run after buildList paints
-    const w = window;
-    if (!w.__kzakLikesList154 && typeof w.buildList === 'function'){
-      w.__kzakLikesList154 = true;
-      const orig = w.buildList;
-      w.buildList = function(...args){
-        const ret = orig.apply(this, args);
-        queueMicrotask(repaintList);
-        setTimeout(repaintList, 0);
-        return ret;
-      };
+    // After the app renders playlist
+    if (typeof window.buildList === 'function'){
+      const orig = window.buildList;
+      if (!window.__kzak55_wrapped){
+        window.__kzak55_wrapped = true;
+        window.buildList = function(...args){
+          const ret = orig.apply(this, args);
+          queueMicrotask(()=>{ restoreGenreButtons(); repaintList(); });
+          setTimeout(()=>{ restoreGenreButtons(); repaintList(); }, 0);
+          return ret;
+        };
+      }
     } else {
       let tries=0; const iv=setInterval(()=>{
         if (typeof window.buildList === 'function'){ clearInterval(iv); init(); }
@@ -3299,7 +3310,7 @@ document.addEventListener('click', async (ev) => {
     }
   }
   document.addEventListener('DOMContentLoaded', init);
-  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ repaintNow(); repaintList(); }});
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ repaintNow(); repaintList(); restoreGenreButtons(); }});
 })();
 </script>
 
