@@ -1,4 +1,4 @@
-/* Clean ROCK playlist for Bullwinkle-v1.047 */
+/* Clean ROCK playlist for Bullwinkle-v1.056 (hardened) */
 const PLAYLIST_ROCK = [
   {
     title: "Billys Eyes Without His Face",
@@ -748,4 +748,13 @@ const PLAYLIST_ROCK = [
     story: DEFAULT_STORY
   },
 ];
+// Compatibility + diagnostics for mixed loader environments
+if (typeof window !== 'undefined') {
+  // Expose for older index builds that expect a global
+  window.PLAYLIST_ROCK = (window.PLAYLIST_ROCK || PLAYLIST_ROCK);
+  // Helpful diagnostics
+  window.__KZAK_PLAYLIST_ROCK_VERSION = '056';
+  window.__KZAK_PLAYLIST_ROCK_FIRST5 = (PLAYLIST_ROCK || []).slice(0,5).map(x => x && x.title);
+  try { console.info('[KZAK] playlist-rock v056 loaded; first5 =', window.__KZAK_PLAYLIST_ROCK_FIRST5); } catch(e){}
+}
 export default PLAYLIST_ROCK;

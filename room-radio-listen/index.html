@@ -108,7 +108,7 @@ input[type=range]{width:100%}
     <button id="toLobby" class="btn">⬅︎ Return to Lobby</button>
     <div id="onAir" class="pill onair"><span class="onair-dot"></span><strong>ON AIR</strong></div>
 <nav class="creator-links" aria-label="Creator links" style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
-  <a href="https://www.tiktok.com/@chrisjmurphy65" class="btn" target="_blank" rel="noopener noreferrer">🎬 Watch This Music on TikTok</a>
+  <a href="https://www.tiktok.com/@chrisjmurphy65" class="btn" target="_blank" rel="noopener noreferrer">🎬 Watch on TikTok (CJ Murphy)</a>
 </nav>
 
 
@@ -2665,7 +2665,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER = 48; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER = 56; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2898,11 +2898,11 @@ window.addEventListener('load', () => {
 
 
 <script type="module">
-import HEAVY  from './playlist-heavy.js?v=048';
-import ROCK   from './playlist-rock.js?v=048';
-import MELLOW from './playlist-mellow.js?v=048';
+import HEAVY  from './playlist-heavy.js?v=056';
+import ROCK   from './playlist-rock.js?v=056';
+import MELLOW from './playlist-mellow.js?v=056';
 
-/* Bullwinkle-v1.046: capture-level wiring and hard playlist swap */
+/* Bullwinkle-v1.033: capture-level wiring and hard playlist swap */
 const MAP = new Map([
   ['heavy and metal', {list: HEAVY,  label: 'Heavy and Metal'}],
   ['middle ground rock', {list: ROCK, label: 'Middle Ground Rock'}],
@@ -3039,7 +3039,7 @@ document.addEventListener('click', (ev)=>{
 
 <script>
 (function(){
-  const SUBVER = 48;
+  const SUBVER = 56;
   const PAD  = String(SUBVER).padStart(3,'0');
   const VER  = `Bullwinkle-v1.${PAD}`;
   const FILE = `v=bullwinkle-v1-${PAD}`;
@@ -3239,65 +3239,225 @@ document.addEventListener('click', (ev)=>{
   .genre-btn.active{box-shadow:0 0 0 2px rgba(255,255,255,.35), inset 0 0 0 9999px rgba(255,255,255,.08)}
 </style>
 
-<!-- kzak-share-direct-hotfix-046 -->
+<style>
+  /* KZAK v1.056 */
+  /* Restore genre button colors without altering classes */
+  #genreBar .gbtn[data-genre="Heavy and Metal"]{ background:#8b0000; color:#fff; }
+  #genreBar .gbtn[data-genre="Middle Ground Rock"]{ background:#1e3a8a; color:#fff; }
+  #genreBar .gbtn[data-genre="Mellow Tunes"]{ background:#0f766e; color:#fff; }
+  #genreBar .gbtn.active{ outline:2px solid rgba(255,255,255,.15); }
+
+  /* Like button + chips */
+  .kzak56-like-btn{
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.35rem .6rem; border:1px solid #444; border-radius:6px;
+    background:#111; color:#eee; cursor:pointer; font:500 14px/1.1 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  .kzak56-like-btn .heart{ font-size:16px; line-height:1; }
+  .kzak56-like-btn.is-on{ border-color:#c33; color:#ffcfcf; background:#2a0f13; }
+  .kzak56-chip{ display:inline-flex; align-items:center; gap:.35rem;
+    font:600 14px/1.1 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif;
+    padding:.25rem .45rem; border-radius:999px; background:#111; color:#eee; border:1px solid #333;
+  }
+  /* Ensure any legacy genre block is suppressed when we replace it */
+  #plist .meta-genre.kzak56-replaced{ display:inline; opacity:1; }
+</style>
+
 <script>
-(function () {
-  try { if (typeof SUBVER === 'undefined') window.SUBVER = 46; } catch(_e) { try { window.SUBVER = 46; } catch(__) {} }
-  function abs(u){ try { return new URL(u, location.href).href; } catch(_) { return u; } }
-  async function shareDirect() {
-    let url = null;
-    try {
-      const a = window.audio || document.querySelector('audio');
-      const s = a && (a.currentSrc || a.src);
-      if (s) url = abs(s);
-    } catch(_) {}
-    if (!url) {
-      try {
-        const i = window.__lastLoadedIndex ?? window.idx ?? window.currentIndex ?? 0;
-        const tr = (window.PLAYLIST && window.PLAYLIST[i]) || null;
-        if (tr) {
-          const key = ['file','src','url','mp3','path','href'].find(k => (k in tr) && tr[k]);
-          if (key) url = abs(tr[key]);
-        }
-      } catch(_) {} 
+/* KZAK Likes v1.056 — MutationObserver-based replacement of Genre with ♥ N */
+(function(){
+  if (window.__kzakLikes056) return; window.__kzakLikes056 = true;
+
+  const MAX = 100000;
+  const KEY_COUNTS = 'kzak.likes.v7.counts';  // {id:number}
+  const KEY_DEVICE = 'kzak.likes.device';
+  const API = (window.KZAK_LIKES_API && window.KZAK_LIKES_API.baseUrl) ? window.KZAK_LIKES_API : null;
+
+  // ---------- utilities ----------
+  const clamp = n => Math.max(0, Math.min(MAX, Number(n||0) || 0));
+  const read = k => { try { return JSON.parse(localStorage.getItem(k) || '{}'); } catch { return {}; } };
+  const write = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  const uuid = () => {
+    try{
+      let id = localStorage.getItem(KEY_DEVICE);
+      if (!id){ id = (crypto.randomUUID && crypto.randomUUID()) || (Date.now().toString(36)+Math.random().toString(36).slice(2)); localStorage.setItem(KEY_DEVICE,id); }
+      return id;
+    }catch{ return 'anon'; }
+  };
+  const slug = s => String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
+                   .replace(/\.[a-z0-9]{2,4}$/i,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'').toLowerCase();
+  const idFromEntry = e => e?.id ? slug(e.id)
+                         : e?.file ? slug(e.file.split('/').pop())
+                         : e?.src||e?.url||e?.path||e?.href ? slug((e.src||e.url||e.path||e.href).split('/').pop())
+                         : e?.title ? slug(e.title) : null;
+
+  function currentId(){
+    if (Array.isArray(window.PLAYLIST) && typeof window.currentIndex === 'number') {
+      const e = window.PLAYLIST[window.currentIndex]; const id = idFromEntry(e); if (id) return id;
     }
-    if (!url) { alert('Sorry — could not determine the direct track link.'); return; }
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: document.title || 'KZAK Track', text: 'Listen to this track', url });
-        return;
+    const a = document.querySelector('audio'); let src = a?.currentSrc || a?.src || '';
+    if (!src) return null; try { const u=new URL(src,location.href); src=u.pathname.split('/').pop(); } catch { src=src.split('?')[0].split('/').pop(); }
+    return slug(src);
+  }
+  function idFromRow(row){
+    const i = Number(row.getAttribute('data-i'));
+    const e = Array.isArray(window.PLAYLIST) ? window.PLAYLIST[i] : null;
+    return idFromEntry(e);
+  }
+
+  // ---------- backend bridge (optional) ----------
+  async function apiGet(ids){
+    ids = (ids||[]).filter(Boolean); if (!ids.length) return {};
+    if (API){
+      try{
+        const url = API.baseUrl + (API.endpoints?.get || '/likes?ids=') + encodeURIComponent(ids.join(','));
+        const r = await fetch(url, { method:'GET', headers:{'Accept':'application/json'}, credentials:'omit' });
+        if (r.ok){
+          const data = await r.json();
+          const cache = read(KEY_COUNTS); for (const [k,v] of Object.entries(data)) cache[k]=clamp(v); write(KEY_COUNTS, cache);
+          return data;
+        }
+      }catch(e){}
+    }
+    const cache = read(KEY_COUNTS); const out={}; ids.forEach(id => out[id]=clamp(cache[id]||0)); return out;
+  }
+  async function apiPost(id, delta){
+    if (!id || !delta) return;
+    const cache = read(KEY_COUNTS); cache[id] = clamp((cache[id]||0) + delta); write(KEY_COUNTS, cache);
+    if (API){
+      try{
+        const url = API.baseUrl + (API.endpoints?.post || '/like');
+        const body = { track_id:id, device_id:uuid(), action:(delta>0?'like':'unlike'), delta };
+        await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body), credentials:'omit' });
+      }catch(e){}
+    }
+  }
+
+  // ---------- UI: Like button (cumulative) ----------
+  function ensureBtn(){
+    let btn = document.getElementById('kzak-like-track-btn');
+    if (!btn){
+      btn = document.createElement('button');
+      btn.id = 'kzak-like-track-btn'; btn.type='button'; btn.className='kzak56-like-btn'; btn.setAttribute('aria-pressed','false');
+      btn.innerHTML = '<span class="heart" aria-hidden="true">♡</span><span class="label">Like Track</span>';
+      const host = document.querySelector('#console, .console, #controls, .controls, header .controls, footer .controls') || document.body;
+      const share = Array.from(host.querySelectorAll('button,a')).find(el => /share/i.test(el.textContent||''));
+      if (share && share.parentElement){ share.parentElement.insertBefore(btn, share.nextSibling); share.parentElement.insertBefore(document.createTextNode(' '), share.nextSibling); }
+      else { host.appendChild(btn); }
+    }
+    return btn;
+  }
+  function updateBtn(){
+    const btn = ensureBtn();
+    const id = currentId();
+    const n = clamp(read(KEY_COUNTS)[id] || 0);
+    btn.classList.toggle('is-on', n>0);
+    btn.setAttribute('aria-pressed', n>0 ? 'true' : 'false');
+    const heart = btn.querySelector('.heart'); if (heart) heart.textContent = n>0 ? '♥' : '♡';
+    const label = btn.querySelector('.label'); if (label) label.textContent = 'Like Track';
+  }
+  document.addEventListener('click', async (ev) => {
+    const btn = ev.target?.closest && ev.target.closest('#kzak-like-track-btn'); if (!btn) return;
+    const id = currentId(); if (!id) return;
+    const delta = ev.altKey ? -1 : 1;      // click +1, Alt/Option -1
+    await apiPost(id, delta);
+    repaintNow(); repaintList(); updateBtn();
+  }, { capture:true });
+
+  // ---------- Now Playing chip ----------
+  function ensureNowChip(){
+    let chip = document.getElementById('kzak-like-total'); if (chip) return chip;
+    chip = document.createElement('span'); chip.id='kzak-like-total'; chip.className='kzak56-chip'; chip.textContent='♥ 0';
+    const title = document.querySelector('.track-title, #track-title, h1.track, h2.track, .now-playing .title');
+    const artHost = document.querySelector('.artwork, #artwork, .now-playing .art, .cover, img[alt*="art"]')?.parentElement;
+    const host = title?.parentElement || artHost || document.querySelector('#console, .console, header, .header') || document.body;
+    if (title && title.parentElement){ title.parentElement.insertBefore(chip, title.nextSibling); title.parentElement.insertBefore(document.createTextNode(' '), title.nextSibling); }
+    else { host.appendChild(chip); }
+    return chip;
+  }
+  async function repaintNow(){
+    const node = ensureNowChip();
+    const id = currentId();
+    const data = await apiGet([id].filter(Boolean));
+    const n = clamp(data[id] || read(KEY_COUNTS)[id] || 0);
+    node.textContent = `♥ ${n.toLocaleString()}`;
+    node.setAttribute('aria-label', `Likes ${n}`);
+  }
+
+  // ---------- Playlist: MutationObserver-based scrub + replace ----------
+  function replaceGenreNodeWithLikes(row, id, count){
+    if (!row) return;
+    const n = clamp(count||0);
+    // Candidates: explicit .meta-genre; any element whose text starts with "Genre:"
+    let target = row.querySelector('.meta-genre');
+    if (!target){
+      const all = row.querySelectorAll('*');
+      for (const el of all){
+        const t = (el.textContent||'').replace(/\s+/g,' ').trim();
+        if (/^genre\s*:/i.test(t)){ target = el; break; }
       }
-    } catch(_) {}
-    try { await navigator.clipboard.writeText(url); alert('Track link copied to clipboard:\n' + url); }
-    catch(_) { prompt('Copy this track link:', url); }
+    }
+    if (target){
+      target.textContent = `♥ ${n.toLocaleString()}`;
+      target.classList.add('kzak56-replaced');
+      target.style.display = 'inline';
+      target.style.opacity = '1';
+      return;
+    }
+    // Fallback: append a small chip at the row end
+    let chip = row.querySelector('.kzak56-row-like');
+    if (!chip){
+      chip = document.createElement('span');
+      chip.className = 'kzak56-chip kzak56-row-like';
+      (row.lastElementChild || row).appendChild(document.createTextNode(' '));
+      (row.lastElementChild || row).appendChild(chip);
+    }
+    chip.textContent = `♥ ${n.toLocaleString()}`;
+    chip.setAttribute('data-for', id||'');
   }
-  function wireShareTrack() {
-    const targets = new Set();
-    const idBtn = document.getElementById('shareTrackBtn');
-    if (idBtn) targets.add(idBtn);
-    document.querySelectorAll("a,button,[role='button']").forEach(el => {
-      const label = ((el.getAttribute('aria-label')||'') + ' ' +
-                     (el.getAttribute('title')||'') + ' ' +
-                     (el.textContent||''))
-        .replace(/\s+/g,' ')
-        .replace(/[^\p{L}\p{N}\s]/gu,'')
-        .trim()
-        .toLowerCase();
-      if (/\bshare\s*track\b/.test(label)) targets.add(el);
-    });
-    targets.forEach(el => {
-      if (el.__wiredKzakShareDirect) return;
-      el.addEventListener('click', function(ev){
-        ev.preventDefault();
-        ev.stopPropagation();
-        ev.stopImmediatePropagation();
-        shareDirect();
-      }, true); // capture
-      el.__wiredKzakShareDirect = true;
+
+  async function repaintList(){
+    const body = document.getElementById('plistBody') || document.querySelector('#plist .body, #plist .items, #plist');
+    if (!body) return;
+
+    const rows = Array.from(body.children);
+    const ids = rows.map(r => idFromRow(r));
+    const counts = await apiGet(ids);
+
+    rows.forEach((row, i) => {
+      const id = ids[i];
+      replaceGenreNodeWithLikes(row, id, counts[id] || read(KEY_COUNTS)[id] || 0);
     });
   }
-  wireShareTrack();
-  new MutationObserver(wireShareTrack).observe(document.body, {childList:true, subtree:true, characterData:true});
+
+  function observePlaylist(){
+    const body = document.getElementById('plistBody') || document.querySelector('#plist .body');
+    if (!body) return;
+    // Initial paint
+    repaintList();
+    // Observe mutations (new rows, text changes)
+    const mo = new MutationObserver(() => { repaintList(); });
+    mo.observe(body, { childList:true, subtree:true, characterData:true });
+  }
+
+  // ---------- lifecycle ----------
+  function init(){
+    ensureBtn(); updateBtn(); repaintNow(); observePlaylist();   // repaintList() runs inside observePlaylist
+    const a = document.querySelector('audio');
+    if (a){
+      ['loadedmetadata','play','ended','pause'].forEach(ev => a.addEventListener(ev, () => {
+        setTimeout(()=>{ repaintNow(); repaintList(); updateBtn(); }, 0);
+      }, { passive:true }));
+    }
+    // Also patch buildList to repaint after render, if present
+    if (typeof window.buildList === 'function' && !window.__kzak56_wrapped){
+      window.__kzak56_wrapped = true;
+      const orig = window.buildList;
+      window.buildList = function(){ const ret = orig.apply(this, arguments); queueMicrotask(repaintList); setTimeout(repaintList,0); return ret; };
+    }
+  }
+  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ repaintNow(); repaintList(); }});
 })();
 </script>
 
