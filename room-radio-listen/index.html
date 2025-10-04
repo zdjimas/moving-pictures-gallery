@@ -2665,7 +2665,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER = 49; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER = 50; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2898,11 +2898,11 @@ window.addEventListener('load', () => {
 
 
 <script type="module">
-import HEAVY  from './playlist-heavy.js?v=049';
-import ROCK   from './playlist-rock.js?v=049';
-import MELLOW from './playlist-mellow.js?v=049';
+import HEAVY  from './playlist-heavy.js?v=050';
+import ROCK   from './playlist-rock.js?v=050';
+import MELLOW from './playlist-mellow.js?v=050';
 
-/* Bullwinkle-v1.046: capture-level wiring and hard playlist swap */
+/* Bullwinkle-v1.033: capture-level wiring and hard playlist swap */
 const MAP = new Map([
   ['heavy and metal', {list: HEAVY,  label: 'Heavy and Metal'}],
   ['middle ground rock', {list: ROCK, label: 'Middle Ground Rock'}],
@@ -3039,7 +3039,7 @@ document.addEventListener('click', (ev)=>{
 
 <script>
 (function(){
-  const SUBVER = 49;
+  const SUBVER = 50;
   const PAD  = String(SUBVER).padStart(3,'0');
   const VER  = `Bullwinkle-v1.${PAD}`;
   const FILE = `v=bullwinkle-v1-${PAD}`;
@@ -3239,155 +3239,183 @@ document.addEventListener('click', (ev)=>{
   .genre-btn.active{box-shadow:0 0 0 2px rgba(255,255,255,.35), inset 0 0 0 9999px rgba(255,255,255,.08)}
 </style>
 
-<!-- kzak-share-direct-hotfix-046 -->
-<script>
-(function () {
-  try { if (typeof SUBVER === 'undefined') window.SUBVER = 46; } catch(_e) { try { window.SUBVER = 46; } catch(__) {} }
-  function abs(u){ try { return new URL(u, location.href).href; } catch(_) { return u; } }
-  async function shareDirect() {
-    let url = null;
-    try {
-      const a = window.audio || document.querySelector('audio');
-      const s = a && (a.currentSrc || a.src);
-      if (s) url = abs(s);
-    } catch(_) {}
-    if (!url) {
-      try {
-        const i = window.__lastLoadedIndex ?? window.idx ?? window.currentIndex ?? 0;
-        const tr = (window.PLAYLIST && window.PLAYLIST[i]) || null;
-        if (tr) {
-          const key = ['file','src','url','mp3','path','href'].find(k => (k in tr) && tr[k]);
-          if (key) url = abs(tr[key]);
-        }
-      } catch(_) {} 
-    }
-    if (!url) { alert('Sorry — could not determine the direct track link.'); return; }
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: document.title || 'KZAK Track', text: 'Listen to this track', url });
-        return;
-      }
-    } catch(_) {}
-    try { await navigator.clipboard.writeText(url); alert('Track link copied to clipboard:\n' + url); }
-    catch(_) { prompt('Copy this track link:', url); }
-  }
-  function wireShareTrack() {
-    const targets = new Set();
-    const idBtn = document.getElementById('shareTrackBtn');
-    if (idBtn) targets.add(idBtn);
-    document.querySelectorAll("a,button,[role='button']").forEach(el => {
-      const label = ((el.getAttribute('aria-label')||'') + ' ' +
-                     (el.getAttribute('title')||'') + ' ' +
-                     (el.textContent||''))
-        .replace(/\s+/g,' ')
-        .replace(/[^\p{L}\p{N}\s]/gu,'')
-        .trim()
-        .toLowerCase();
-      if (/\bshare\s*track\b/.test(label)) targets.add(el);
-    });
-    targets.forEach(el => {
-      if (el.__wiredKzakShareDirect) return;
-      el.addEventListener('click', function(ev){
-        ev.preventDefault();
-        ev.stopPropagation();
-        ev.stopImmediatePropagation();
-        shareDirect();
-      }, true); // capture
-      el.__wiredKzakShareDirect = true;
-    });
-  }
-  wireShareTrack();
-  new MutationObserver(wireShareTrack).observe(document.body, {childList:true, subtree:true, characterData:true});
-})();
-</script>
-
-
 <style>
-  .kzak-like-btn {
-    display: inline-flex; align-items: center; gap: .4rem;
-    padding: .35rem .6rem; border: 1px solid #444; border-radius: 6px;
-    background: #111; color: #eee; cursor: pointer; font: 500 14px/1.1 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Likes column and badge styling */
+  .kzak-likes-cell { text-align: right; white-space: nowrap; }
+  .kzak-likes-head { text-align: right; }
+  .kzak-like-chip {
+    display:inline-flex; align-items:center; gap:.35rem;
+    font:600 14px/1.1 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif;
+    padding:.25rem .45rem; border-radius:999px; background:#111; color:#eee; border:1px solid #333;
   }
-  .kzak-like-btn:hover { background: #181818; }
-  .kzak-like-btn .heart { font-size: 16px; line-height: 1; }
-  .kzak-like-btn.is-liked { border-color: #c33; color: #ffcfcf; background: #2a0f13; }
-  .kzak-like-btn.is-liked .heart { filter: drop-shadow(0 0 2px #f55); }
 </style>
-
 <script>
 (() => {
-  const STORAGE_KEY = 'kzak.likes.v1';
-  const BTN_ID      = 'kzak-like-track-btn';
-  const HEART_EMPTY = '♡';
-  const HEART_FULL  = '♥';
+  const LIKES_KEY = 'kzak.likes.v2';
+  const MAX_LIKES = 100000;
 
-  function getAudioEl() { return document.querySelector('audio'); }
-  function findConsoleContainer() {
-    return document.querySelector('#console, .console, #controls, .controls, header .controls, footer .controls') || document.body;
-  }
-  function getCurrentTrackId() {
+  function readLikes(){ try { return JSON.parse(localStorage.getItem(LIKES_KEY) || '{}'); } catch { return {}; } }
+  function writeLikes(m){ try { localStorage.setItem(LIKES_KEY, JSON.stringify(m)); } catch {} }
+
+  // migrate v1 boolean likes → v2 numeric
+  (function migrate(){
     try {
-      const a = getAudioEl();
-      let src = a?.currentSrc || a?.src || '';
-      if (!src && window.PLAYLIST && typeof window.currentIndex === 'number') {
-        const cur = window.PLAYLIST[window.currentIndex] || {};
-        src = cur.file || cur.src || cur.url || cur.path || cur.href || '';
+      const v1 = JSON.parse(localStorage.getItem('kzak.likes.v1') || 'null');
+      if (v1 && typeof v1 === 'object') {
+        const v2 = readLikes();
+        for (const [k,v] of Object.entries(v1)) v2[k] = v ? 1 : 0;
+        writeLikes(v2);
+        localStorage.removeItem('kzak.likes.v1');
       }
-      if (!src) return null;
-      try { const u = new URL(src, location.href); src = u.pathname.split('/').pop(); }
-      catch(_) { src = src.split('?')[0].split('/').pop(); }
-      return decodeURIComponent(src.trim());
-    } catch { return null; }
-  }
-  function readLikes(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; } }
-  function writeLikes(m){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(m)); } catch {} }
-  function isLiked(id){ const m = readLikes(); return !!m[id]; }
-  function toggleLike(id){ const m = readLikes(); if(m[id]){ delete m[id]; } else { m[id]=true; } writeLikes(m); }
+    } catch {}
+  })();
 
-  function ensureLikeButton() {
-    let btn = document.getElementById(BTN_ID);
-    if (!btn) {
-      btn = document.createElement('button');
-      btn.id = BTN_ID; btn.type='button'; btn.className='kzak-like-btn';
-      btn.setAttribute('aria-pressed','false');
-      btn.innerHTML = `<span class="heart" aria-hidden="true">`+HEART_EMPTY+`</span><span class="label">Like Track</span>`;
-      const host = findConsoleContainer();
-      const share = Array.from(host.querySelectorAll('button,a')).find(el => /share/i.test(el.textContent||''));
-      if (share && share.parentElement) {
-        share.parentElement.insertBefore(btn, share.nextSibling);
-        share.parentElement.insertBefore(document.createTextNode(' '), share.nextSibling);
-      } else {
-        host.appendChild(btn);
-      }
-      btn.addEventListener('click', () => {
-        const id = getCurrentTrackId(); if (!id) return;
-        toggleLike(id); updateBtnState();
-      });
+  function lastSeg(src){
+    try { const u = new URL(src, location.href); return decodeURIComponent(u.pathname.split('/').pop()); }
+    catch { return decodeURIComponent((src||'').split('?')[0].split('/').pop()); }
+  }
+  function getCurrentTrackId(){
+    const a = document.querySelector('audio');
+    let src = a?.currentSrc || a?.src || '';
+    if (!src && window.PLAYLIST && typeof window.currentIndex === 'number') {
+      const cur = window.PLAYLIST[window.currentIndex] || {};
+      src = cur.file || cur.src || cur.url || cur.path || cur.href || '';
     }
-    return btn;
+    return src ? lastSeg(src) : null;
+  }
+  function getCount(id){
+    const m = readLikes(); let n = Number(m[id] || 0);
+    if (!Number.isFinite(n) || n < 0) n = 0;
+    return Math.min(n, MAX_LIKES);
   }
 
-  function updateBtnState() {
-    const btn = ensureLikeButton();
-    const id  = getCurrentTrackId();
-    const liked = id ? isLiked(id) : false;
-    btn.classList.toggle('is-liked', liked);
-    btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
-    btn.querySelector('.heart').textContent = liked ? HEART_FULL : HEART_EMPTY;
-    btn.querySelector('.label').textContent = liked ? 'Liked' : 'Like Track';
-    btn.title = liked ? 'Click to remove Like for this track (local to this browser).'
-                      : 'Click to Like this track (stores locally in this browser).';
-  }
+  // === Playlist renderer: replace Genre col with ♥ N and header → Likes ===
+  function renderLikesIntoPlaylist(){
+    const root = document.getElementById('plist') || document.querySelector('#plist, .playlist, table.playlist, table#plist');
+    if (!root) return;
 
-  function wireAudioEvents() {
-    const a = getAudioEl(); if (!a) return;
-    ['loadedmetadata','play','ended','pause','stalled','suspend'].forEach(ev => {
-      a.addEventListener(ev, () => { setTimeout(updateBtnState, 0); }, { passive:true });
+    // header
+    const head = root.querySelectorAll('thead th, tr:first-child th, tr.header th');
+    let genreIdx = -1;
+    head.forEach((th,i) => {
+      if (/^\s*genre\s*$/i.test(th.textContent.trim())) {
+        genreIdx = i;
+        th.textContent = 'Likes';
+        th.classList.add('kzak-likes-head');
+      }
+    });
+
+    // rows
+    const rows = root.querySelectorAll('tbody tr, tr:not(:has(th))');
+    rows.forEach((row, i) => {
+      let cell = null;
+      if (genreIdx >= 0 && row.children && row.children.length > genreIdx) {
+        cell = row.children[genreIdx];
+      }
+      if (!cell) cell = row.querySelector('.genre, [data-genre]');
+      if (!cell) return; // can't place
+
+      cell.style.display='';
+      cell.classList.add('kzak-likes-cell');
+
+      // infer id
+      let id = null;
+      // look for data-file/link inside row
+      const fileish = row.querySelector('[data-file],[data-src],[data-url]');
+      if (fileish) {
+        const val = fileish.getAttribute('data-file') || fileish.getAttribute('data-src') || fileish.getAttribute('data-url') || '';
+        if (val) id = lastSeg(val);
+      }
+      if (!id && Array.isArray(window.PLAYLIST) && window.PLAYLIST[i]) {
+        const it = window.PLAYLIST[i];
+        const guess = it.file || it.src || it.url || it.path || it.href || '';
+        if (guess) id = lastSeg(guess);
+        else if (it.title) id = `title:${it.title}`;
+      }
+
+      const n = id ? getCount(id) : 0;
+      cell.textContent = `♥ ${n.toLocaleString()}`;
+      cell.setAttribute('data-kzak-likes-for', id || '');
+      cell.setAttribute('aria-label', `Likes ${n}`);
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => { ensureLikeButton(); wireAudioEvents(); updateBtnState(); });
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) updateBtnState(); });
+  // === Now-playing badge: show ♥ N in the song info/artwork area ===
+  function ensureNowPlayingBadge(){
+    let badge = document.getElementById('kzak-like-badge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'kzak-like-badge';
+      badge.className = 'kzak-like-chip';
+      badge.textContent = '♥ 0';
+
+      // Try to place near the title; fall back near artwork; else controls header
+      const titleEl = document.querySelector('.track-title, #track-title, h1.track, h2.track, .now-playing .title');
+      const artEl   = document.querySelector('.artwork, #artwork, .now-playing .art, .cover, img[alt*="art"]')?.parentElement;
+      const host    = titleEl?.parentElement || artEl || document.querySelector('#console, .console, header, .header') || document.body;
+
+      // insert after title if possible, else append to host
+      if (titleEl && titleEl.parentElement) {
+        titleEl.parentElement.insertBefore(badge, titleEl.nextSibling);
+        titleEl.parentElement.insertBefore(document.createTextNode(' '), titleEl.nextSibling);
+      } else {
+        host.appendChild(badge);
+      }
+    }
+    return badge;
+  }
+  function renderNowPlayingBadge(){
+    const badge = ensureNowPlayingBadge();
+    const id = getCurrentTrackId();
+    const n = id ? getCount(id) : 0;
+    badge.textContent = `♥ ${n.toLocaleString()}`;
+    badge.setAttribute('aria-label', `Likes ${n}`);
+    badge.title = `Total likes for this track (local count; capped at ${MAX_LIKES.toLocaleString()})`;
+  }
+
+  // === Wire into lifecycle without touching core functions ===
+  (function wireBuildList(){
+    const w = window;
+    if (!w.__kzakLikesListPatched && typeof w.buildList === 'function') {
+      w.__kzakLikesListPatched = true;
+      const orig = w.buildList;
+      w.buildList = function(...args){
+        const ret = orig.apply(this, args);
+        queueMicrotask(renderLikesIntoPlaylist);
+        setTimeout(renderLikesIntoPlaylist, 0);
+        return ret;
+      };
+    } else {
+      let tries = 0;
+      const iv = setInterval(() => {
+        if (typeof window.buildList === 'function') {
+          clearInterval(iv); wireBuildList(); renderLikesIntoPlaylist();
+        } else if (++tries > 40) { clearInterval(iv); }
+      }, 100);
+    }
+  })();
+
+  // Update both views on audio events
+  const a = document.querySelector('audio');
+  if (a) {
+    ['loadedmetadata','play','ended','pause'].forEach(ev => a.addEventListener(ev, () => {
+      setTimeout(() => { renderNowPlayingBadge(); renderLikesIntoPlaylist(); }, 0);
+    }, { passive:true }));
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => { renderNowPlayingBadge(); renderLikesIntoPlaylist(); }, 0);
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) { renderNowPlayingBadge(); renderLikesIntoPlaylist(); }
+  });
+
+  // Bridge Like button clicks to refresh counts (if your Like button exists)
+  document.addEventListener('click', (ev) => {
+    const el = ev.target?.closest && ev.target.closest('#kzak-like-track-btn');
+    if (!el) return;
+    // Delay repaint so the toggle logic in your existing handler completes.
+    setTimeout(() => { renderNowPlayingBadge(); renderLikesIntoPlaylist(); }, 0);
+  }, { capture: true });
 })();
 </script>
 
