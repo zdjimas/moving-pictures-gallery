@@ -2665,7 +2665,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER = 51; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER = 52; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2898,9 +2898,9 @@ window.addEventListener('load', () => {
 
 
 <script type="module">
-import HEAVY  from './playlist-heavy.js?v=051';
-import ROCK   from './playlist-rock.js?v=051';
-import MELLOW from './playlist-mellow.js?v=051';
+import HEAVY  from './playlist-heavy.js?v=052';
+import ROCK   from './playlist-rock.js?v=052';
+import MELLOW from './playlist-mellow.js?v=052';
 
 /* Bullwinkle-v1.046: capture-level wiring and hard playlist swap */
 const MAP = new Map([
@@ -3039,7 +3039,7 @@ document.addEventListener('click', (ev)=>{
 
 <script>
 (function(){
-  const SUBVER = 51;
+  const SUBVER = 52;
   const PAD  = String(SUBVER).padStart(3,'0');
   const VER  = `Bullwinkle-v1.${PAD}`;
   const FILE = `v=bullwinkle-v1-${PAD}`;
@@ -3322,74 +3322,124 @@ document.addEventListener('click', (ev)=>{
 </style>
 
 <script>
+/* KZAK Likes (v1.052): stable track_id + optional backend + local fallback
+   To enable global counts, set this before the script runs:
+     window.KZAK_LIKES_API = {
+       baseUrl: 'https://YOUR-WORKER.your-account.workers.dev',
+       endpoints: { get: '/likes?ids=', post: '/like' }
+     };
+*/
 (() => {
-  const MAX_LIKES = 100000;
-  const LOCAL_KEY   = 'kzak.likes.v3.counts'; // id -> number
-  const LOCAL_LIKED = 'kzak.likes.v3.user';   // id -> true
+  if (window.__kzakLikes052) return; window.__kzakLikes052 = true;
 
-  // Optional backend endpoints; leave undefined for local-only
-  // window.KZAK_LIKES_API = { baseUrl:'https://your-worker.example.workers.dev', endpoints:{ get:'/likes?ids=', post:'/like' } };
+  const MAX_LIKES = 100000;
+  const LOCAL_COUNTS = 'kzak.likes.v4.counts'; // id -> number
+  const LOCAL_USER   = 'kzak.likes.v4.user';   // id -> true/false
+  const LOCAL_DEVICE = 'kzak.likes.device';    // persistent UUID (per browser)
   const API = (window.KZAK_LIKES_API && window.KZAK_LIKES_API.baseUrl) ? window.KZAK_LIKES_API : null;
 
-  function clamp(n){ n = Number(n||0); if(!Number.isFinite(n)) n=0; if(n<0)n=0; if(n>MAX_LIKES)n=MAX_LIKES; return n; }
+  // --- device id ---
+  function getDeviceId(){
+    try {
+      let id = localStorage.getItem(LOCAL_DEVICE);
+      if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now(); localStorage.setItem(LOCAL_DEVICE, id); }
+      return id;
+    } catch { return 'anon'; }
+  }
+
+  // --- helpers ---
+  function clamp(n){ n = Number(n||0); if(!Number.isFinite(n)) n=0; return Math.max(0, Math.min(MAX_LIKES, n)); }
   function readMap(k){ try { return JSON.parse(localStorage.getItem(k) || '{}'); } catch { return {}; } }
   function writeMap(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 
-  function lastSeg(src){
-    try { const u = new URL(src, location.href); return decodeURIComponent(u.pathname.split('/').pop()); }
-    catch { return decodeURIComponent((src||'').split('?')[0].split('/').pop()); }
+  // Stable track_id resolver:
+  // 1) Prefer explicit id if present on the PLAYLIST entry (id/title/file keys)
+  // 2) Else derive slug from file name (sans extension) or title
+  function slugify(s){
+    return String(s||'')
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g,'')       // remove diacritics
+      .replace(/\.[a-z0-9]{2,4}$/i,'')      // drop extension
+      .replace(/[^a-z0-9]+/gi,'-')          // non-alnum to dash
+      .replace(/^-+|-+$/g,'')               // trim dashes
+      .toLowerCase();
+  }
+  function idFromEntry(entry){
+    if (!entry) return null;
+    if (entry.id) return slugify(entry.id);
+    if (entry.file) return slugify(entry.file.split('/').pop());
+    if (entry.src||entry.url||entry.path||entry.href) return slugify((entry.src||entry.url||entry.path||entry.href).split('/').pop());
+    if (entry.title) return slugify(entry.title);
+    return null;
   }
   function currentTrackId(){
+    // Try PLAYLIST/currentIndex first for stability
+    if (Array.isArray(window.PLAYLIST) && typeof window.currentIndex === 'number') {
+      const e = window.PLAYLIST[window.currentIndex];
+      const id = idFromEntry(e);
+      if (id) return id;
+    }
+    // Fallback to audio URL parsing
     const a = document.querySelector('audio');
     let src = a?.currentSrc || a?.src || '';
-    if (!src && window.PLAYLIST && typeof window.currentIndex === 'number') {
-      const cur = window.PLAYLIST[window.currentIndex] || {};
-      src = cur.file || cur.src || cur.url || cur.path || cur.href || '';
+    if (!src) return null;
+    try { const u = new URL(src, location.href); src = u.pathname.split('/').pop(); }
+    catch { src = src.split('?')[0].split('/').pop(); }
+    return slugify(src);
+  }
+  function idFromRow(i){
+    if (Array.isArray(window.PLAYLIST) && window.PLAYLIST[i]) {
+      const id = idFromEntry(window.PLAYLIST[i]);
+      if (id) return id;
     }
-    return src ? lastSeg(src) : null;
+    return null;
   }
 
-  async function getCounts(ids){
-    ids = (ids||[]).filter(Boolean); if(!ids.length) return {};
+  // --- API ---
+  async function fetchCounts(ids){
+    ids = (ids||[]).filter(Boolean);
+    if (!ids.length) return {};
+    // Backend
     if (API) {
       try {
         const url = API.baseUrl + (API.endpoints?.get || '/likes?ids=') + encodeURIComponent(ids.join(','));
-        const r = await fetch(url, { method:'GET', headers:{'Accept':'application/json'}});
+        const r = await fetch(url, { method:'GET', headers:{'Accept':'application/json'}, credentials:'omit' });
         if (r.ok) {
-          const data = await r.json();
-          const cache = readMap(LOCAL_KEY);
-          for (const k in data) cache[k] = clamp(data[k]);
-          writeMap(LOCAL_KEY, cache);
-          return data;
+          const json = await r.json();
+          // Cache locally
+          const cache = readMap(LOCAL_COUNTS);
+          for (const [k,v] of Object.entries(json)) cache[k] = clamp(v);
+          writeMap(LOCAL_COUNTS, cache);
+          return json;
         }
-      } catch(e){}
+      } catch(e){ /* fall back */ }
     }
-    const cache = readMap(LOCAL_KEY);
-    const out = {};
-    ids.forEach(id => out[id] = clamp(cache[id] || 0));
+    // Local fallback
+    const cache = readMap(LOCAL_COUNTS);
+    const out = {}; ids.forEach(id => out[id] = clamp(cache[id] || 0));
     return out;
   }
-
-  async function postToggle(id, like){
-    if(!id) return;
-    // optimistic local update
-    const counts = readMap(LOCAL_KEY);
+  async function sendToggle(id, like){
+    if (!id) return;
+    // Optimistic local update
+    const counts = readMap(LOCAL_COUNTS);
     counts[id] = clamp((counts[id]||0) + (like?1:-1));
-    writeMap(LOCAL_KEY, counts);
-    const liked = readMap(LOCAL_LIKED);
-    if (like) liked[id]=true; else delete liked[id];
-    writeMap(LOCAL_LIKED, liked);
+    writeMap(LOCAL_COUNTS, counts);
+    const liked = readMap(LOCAL_USER);
+    if (like) liked[id] = true; else delete liked[id];
+    writeMap(LOCAL_USER, liked);
 
+    // Backend post
     if (API) {
       try {
         const url = API.baseUrl + (API.endpoints?.post || '/like');
-        await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ track_id:id, action:(like?'like':'unlike') })});
-      } catch(e){}
+        const body = { track_id:id, device_id:getDeviceId(), action: (like?'like':'unlike') };
+        await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body), credentials:'omit' });
+      } catch(e){ /* ignore */ }
     }
   }
 
-  // Ensure Like button (as in v1.049)
+  // --- UI wiring ---
   function ensureLikeBtn(){
     const BTN_ID='kzak-like-track-btn';
     if (document.getElementById(BTN_ID)) return;
@@ -3398,29 +3448,30 @@ document.addEventListener('click', (ev)=>{
     btn.setAttribute('aria-pressed','false');
     btn.innerHTML = '<span class="heart" aria-hidden="true">♡</span><span class="label">Like Track</span>';
     const host=document.querySelector('#console, .console, #controls, .controls, header .controls, footer .controls') || document.body;
-    const share = Array.from(host.querySelectorAll('button,a')).find(el => /share/i.test(el.textContent||''));
+    const share=Array.from(host.querySelectorAll('button,a')).find(el => /share/i.test(el.textContent||''));
     if (share && share.parentElement){ share.parentElement.insertBefore(btn, share.nextSibling); share.parentElement.insertBefore(document.createTextNode(' '), share.nextSibling); }
     else { host.appendChild(btn); }
   }
-  function wireLikeBtn(){
-    document.addEventListener('click', async (ev) => {
-      const el = ev.target?.closest && ev.target.closest('#kzak-like-track-btn'); if(!el) return;
-      const id = currentTrackId(); if (!id) return;
-      const liked = !!readMap(LOCAL_LIKED)[id];
-      await postToggle(id, !liked);
-      updateLikeBtn(); repaintNowPlaying(); repaintPlaylist();
-    }, { capture:true });
-  }
   function updateLikeBtn(){
-    const btn=document.getElementById('kzak-like-track-btn'); if(!btn) return;
-    const id=currentTrackId(); const liked=id ? !!readMap(LOCAL_LIKED)[id] : false;
+    const BTN_ID='kzak-like-track-btn';
+    const btn=document.getElementById(BTN_ID); if(!btn) return;
+    const id=currentTrackId();
+    const liked = id ? !!readMap(LOCAL_USER)[id] : false;
     btn.classList.toggle('is-liked', liked);
-    btn.setAttribute('aria-pressed', liked?'true':'false');
-    const heart=btn.querySelector('.heart'); if(heart) heart.textContent = liked ? '♥' : '♡';
-    const label=btn.querySelector('.label'); if(label) label.textContent = liked ? 'Liked' : 'Like Track';
+    btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+    const heart=btn.querySelector('.heart'); if (heart) heart.textContent = liked ? '♥' : '♡';
+    const label=btn.querySelector('.label'); if (label) label.textContent = liked ? 'Liked' : 'Like Track';
   }
+  document.addEventListener('click', async (ev)=>{
+    const el=ev.target?.closest && ev.target.closest('#kzak-like-track-btn');
+    if (!el) return;
+    const id=currentTrackId(); if (!id) return;
+    const liked = !!readMap(LOCAL_USER)[id];
+    await sendToggle(id, !liked);
+    updateLikeBtn(); repaintNowPlaying(); repaintPlaylist();
+  }, { capture:true });
 
-  // Replace Genre column with Likes (♥ N)
+  // Playlist: replace Genre column with Likes (♥ N)
   async function repaintPlaylist(){
     const root = document.getElementById('plist') || document.querySelector('#plist, .playlist, table.playlist, table#plist');
     if (!root) return;
@@ -3432,26 +3483,12 @@ document.addEventListener('click', (ev)=>{
 
     const rows = root.querySelectorAll('tbody tr, tr:not(:has(th))');
     const ids = [];
-    rows.forEach((row,i)=>{
-      let id=null;
-      const fileish=row.querySelector('[data-file],[data-src],[data-url]');
-      if (fileish){
-        const val=fileish.getAttribute('data-file')||fileish.getAttribute('data-src')||fileish.getAttribute('data-url')||'';
-        if (val) id=lastSeg(val);
-      }
-      if (!id && Array.isArray(window.PLAYLIST) && window.PLAYLIST[i]){
-        const it=window.PLAYLIST[i];
-        const guess=it.file||it.src||it.url||it.path||it.href||'';
-        if (guess) id=lastSeg(guess);
-        else if (it.title) id='title:'+it.title;
-      }
-      ids.push(id);
-    });
+    rows.forEach((row,i)=>{ ids.push(idFromRow(i)); });
 
-    const counts = await getCounts(ids);
+    const counts = await fetchCounts(ids);
     rows.forEach((row,i)=>{
-      let cell = null;
-      if (genreIdx >= 0 && row.children && row.children.length > genreIdx) cell = row.children[genreIdx];
+      let cell=null;
+      if (genreIdx>=0 && row.children && row.children.length>genreIdx) cell=row.children[genreIdx];
       if (!cell) cell = row.querySelector('.genre, [data-genre]');
       if (!cell) return;
       const id = ids[i];
@@ -3464,7 +3501,7 @@ document.addEventListener('click', (ev)=>{
     });
   }
 
-  // Show current track’s count near the title/art (no header badge)
+  // Now Playing: ♥ N near title/art
   function ensureNowNode(){
     let node=document.getElementById('kzak-like-total'); if (node) return node;
     node=document.createElement('span'); node.id='kzak-like-total'; node.className='kzak-like-chip'; node.textContent='♥ 0';
@@ -3478,7 +3515,7 @@ document.addEventListener('click', (ev)=>{
   async function repaintNowPlaying(){
     const node=ensureNowNode();
     const id=currentTrackId();
-    const counts=await getCounts([id].filter(Boolean));
+    const counts=await fetchCounts([id].filter(Boolean));
     const n=clamp(counts[id]||0);
     node.textContent = `♥ ${n.toLocaleString()}`;
     node.setAttribute('aria-label', `Likes ${n}`);
@@ -3514,7 +3551,7 @@ document.addEventListener('click', (ev)=>{
   }
 
   document.addEventListener('DOMContentLoaded', ()=>{
-    ensureLikeBtn(); wireLikeBtn(); updateLikeBtn();
+    ensureLikeBtn(); updateLikeBtn();
     setTimeout(()=>{ repaintNowPlaying(); repaintPlaylist(); },0);
   });
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ repaintNowPlaying(); repaintPlaylist(); } });
