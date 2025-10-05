@@ -68,6 +68,11 @@ input[type=range]{width:100%}
   #plist .items { max-height: 460px; overflow-y: auto; overscroll-behavior: contain; }
 </style>
 
+
+<style>
+  .build-badge, [data-build-badge], .uncle-build, [data-uncle] { display:none !important; }
+</style>
+
 </head>
 <body>
 
@@ -2666,7 +2671,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  \1 SUBVER = 58; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  \1 SUBVER = 59; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -2899,9 +2904,9 @@ window.addEventListener('load', () => {
 
 
 <script type="module">
-import HEAVY  from './\1?v=058';
-import ROCK   from './\1?v=058';
-import MELLOW from './\1?v=058';
+import HEAVY  from './\1?v=059';
+import ROCK   from './\1?v=059';
+import MELLOW from './\1?v=059';
 
 /* Bullwinkle-v1.046: capture-level wiring and hard playlist swap */
 const MAP = new Map([
@@ -3040,7 +3045,7 @@ document.addEventListener('click', (ev)=>{
 
 <script>
 (function(){
-  \1 SUBVER = 58;
+  \1 SUBVER = 59;
   const PAD  = String(SUBVER).padStart(3,'0');
   const VER  = `Bullwinkle-v1.${PAD}`;
   const FILE = `v=bullwinkle-v1-${PAD}`;
