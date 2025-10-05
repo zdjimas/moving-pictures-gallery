@@ -91,6 +91,32 @@ input[type=range]{width:100%}
 
 </head>
 <body>
+
+  <!-- KZAK playlists must load BEFORE app init -->
+<script src="playlist-rock.js"></script>
+<script src="playlist-heavy.js"></script>
+<script src="playlist-mellow.js"></script>
+
+<!-- Preflight: fail loudly if any playlist fails to parse or load -->
+<script>
+(function(){
+  function ok(a){ return Array.isArray(a) && a.length>0; }
+  const report = {
+    rock:   ok(window.PLAYLIST_ROCK),
+    heavy:  ok(window.PLAYLIST_HEAVY),
+    mellow: ok(window.PLAYLIST_MELLOW)
+  };
+  if (!report.rock || !report.heavy || !report.mellow) {
+    console.error("[KZAK] Playlist readiness:", report,
+      "\nIf any value is false, open Network tab and check 404/syntax for that playlist-*.js");
+  }
+  // Provide a default list so the UI can boot even before choosing a genre.
+  if (!Array.isArray(window.PLAYLIST) || window.PLAYLIST.length === 0) {
+    window.PLAYLIST = window.PLAYLIST_ROCK || window.PLAYLIST_HEAVY || window.PLAYLIST_MELLOW || [];
+  }
+})();
+</script>
+
 <script>try{window.PLAYLIST = window.PLAYLIST || [];}catch(e){}</script>
 
 <!-- WELCOME OVERLAY -->
