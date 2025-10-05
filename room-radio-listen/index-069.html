@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <base href="/moving-pictures-gallery/room-radio-listen/">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>KZAK • Frasier-Style Radio</title>
+  <meta name="color-scheme" content="dark light"/>
+
+  <style>
+    :root{--ink:#e6e9ef;--muted:#9aa4b2;--line:#24324c;--bg:#0b1220;--glass:rgba(14,22,40,.82)}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{color:var(--ink);background:#0b1220 url('Media/RadioMusicListening.jpg') center/cover fixed no-repeat;
+         font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .wrap{max-width:1200px;margin:0 auto;padding:20px}
+    header{display:flex;gap:14px;align-items:center}
+    h1{margin:0;font-size:28px}
+    .muted{color:var(--muted)}
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+    .btn{background:#0f1728;border:1px solid var(--line);color:var(--ink);padding:10px 14px;border-radius:10px;cursor:pointer}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0f1728}
+    .onair .dot{width:10px;height:10px;border-radius:50%;background:#404f65}
+    .onair.on .dot{background:#ff4747;box-shadow:0 0 12px #ff4747}
+    .row{display:flex;gap:10px;align-items:center}
+    .grid{display:grid;grid-template-columns:1fr 380px;gap:20px}
+    @media (max-width:1000px){.grid{grid-template-columns:1fr}}
+    .panel{background:var(--glass);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:14px}
+    .panel .head{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid var(--line)}
+    .panel .body{padding:12px}
+    .track{display:grid;grid-template-columns:170px 1fr;gap:14px}
+    @media (max-width:640px){.track{grid-template-columns:1fr}}
+    .art{width:170px;height:170px;border-radius:12px;border:1px solid var(--line);overflow:hidden;background:#0f1728}
+    .art img{width:100%;height:100%;object-fit:cover}
+    input[type=range]{width:160px}
+    .playlist .body{max-height:470px;overflow:auto}
+    .item{padding:10px 12px;border-top:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;cursor:pointer}
+    .item:hover{background:rgba(255,255,255,.05)}
+    .item.active{background:rgba(168,200,255,.10)}
+    .tiny{font-size:12px;color:var(--muted)}
+    /* Welcome */
+    .overlay{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.35);z-index:50}
+    .overlay.show{display:grid}
+    .frame{max-width:720px;margin:0 16px;background:rgba(0,0,0,.6);border:1px solid var(--line);border-radius:14px;padding:18px}
+    /* Toast */
+    #toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0f1728;border:1px solid var(--line);
+           padding:8px 12px;border-radius:10px;display:none;z-index:60}
+    #toast.show{display:block}
+    /* About badge */
+    #aboutBox{position:fixed;right:10px;bottom:10px;z-index:40;background:rgba(0,0,0,.7);border:1px solid var(--line);
+              border-radius:10px;padding:10px 12px;font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    #aboutBtn{position:fixed;top:10px;right:10px;z-index:41}
+    /* kill any legacy “UNCLE” badges that might be left in the DOM */
+    .build-badge,[data-build-badge],.uncle-build,[data-uncle]{display:none!important}
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <img src="Media/frasier.png" alt="" width="120" height="72" style="border-radius:12px;border:1px solid var(--line)">
+    <div>
+      <h1>KZAK • Frasier-Style Fun Radio without the talking</h1>
+      <div class="muted"><span id="tcount">0</span> Song Playlist • <span class="tiny">ON AIR lamp • Deep-link sharing</span></div>
+    </div>
+  </header>
+
+  <div class="toolbar" id="toolbar">
+    <button class="btn" id="toLobby">⬅︎ Return to Lobby</button>
+    <div id="onAir" class="pill onair"><span class="dot"></span><strong>ON AIR</strong></div>
+
+    <div style="flex-basis:100%"></div>
+
+    <div id="genreCallout" class="pill">♪ Select the <strong>Genre</strong> you want the station to play for this session</div>
+    <div id="genreBar" class="row" style="flex-wrap:wrap">
+      <button class="btn gbtn active" data-genre="Middle Ground Rock">Middle Ground Rock</button>
+      <button class="btn gbtn" data-genre="Heavy and Metal">Heavy and Metal</button>
+      <button class="btn gbtn" data-genre="Mellow Tunes">Mellow Tunes</button>
+    </div>
+
+    <button id="startBtn" class="btn">▶︎ Start Station</button>
+    <button id="pauseBtn" class="btn" disabled>⏸ Pause Station</button>
+    <button id="loopBtn" class="btn">⟲ Loop</button>
+    <button id="shuffleBtn" class="btn">🔀 Shuffle</button>
+    <button id="muteBtn" class="btn">🔇 Mute</button>
+    <button id="breaksBtn" class="btn">📻 Station Breaks: On</button>
+    <button id="shareBtn" class="btn">🔗 Share</button>
+    <button id="shareTrackBtn" class="btn">📤 Share Track</button>
+    <button id="likeBtn" class="btn">❤ Like Track</button>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="head">
+        <div class="row">
+          <button id="prevBtn" class="btn">⟸ Prev</button>
+          <button id="nextBtn" class="btn">Next ⟹</button>
+        </div>
+        <div class="row">
+          <div>Vol</div>
+          <input id="vol" type="range" min="0" max="1" step="0.01" value="0.86">
+        </div>
+      </div>
+      <div class="body">
+        <div class="row tiny" style="justify-content:space-between;margin-bottom:8px">
+          <div>TRACK <span id="tpos">0</span> / <span id="tmax">0</span></div>
+          <div>Status: <span id="meta">Stopped</span></div>
+        </div>
+
+        <div class="track">
+          <div class="art"><img id="art" src="Media/default.jpg" alt=""></div>
+          <div>
+            <div id="genreNow" class="tiny muted" style="margin-bottom:4px">Genre: —</div>
+            <h3 id="title" style="margin:0 0 6px 0">—</h3>
+            <div id="story" class="muted">Under Construction: a special write-up about this specific music creation…</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;gap:12px">
+          <div id="elapsed">0:00</div>
+          <input id="seek" type="range" min="0" max="1000" value="0">
+          <div id="remaining">-0:00</div>
+        </div>
+
+        <div class="tiny muted" style="margin-top:8px">Tip: The ON AIR pill lights only when music plays.</div>
+      </div>
+    </section>
+
+    <aside class="panel playlist" id="plist">
+      <div class="head">
+        <strong>Playlist</strong>
+        <div class="tiny"><span id="countRight">0 items</span></div>
+      </div>
+      <div class="body" id="plistBody"></div>
+    </aside>
+  </div>
+
+  <!-- credits -->
+  <section class="panel" style="margin-top:16px">
+    <div style="display:flex;gap:10px;align-items:center;padding:12px">
+      <img src="Media/ZachArt.jpeg" alt="" width="44" height="44" style="border-radius:10px">
+      <div><div style="font-weight:600">zdjimas</div><div class="tiny">Concept, curation, engineering — suno.com/@zdjimas</div></div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;padding:12px;border-top:1px solid var(--line)">
+      <img src="Media/CJMURPHY.png" alt="" width="44" height="44" style="border-radius:10px">
+      <div><div style="font-weight:600">cjmurphy</div><div class="tiny">Composition, arrangement, sound design</div></div>
+    </div>
+  </section>
+</div>
+
+<!-- audio elements -->
+<audio id="audio" preload="none" crossorigin="anonymous"></audio>
+<audio id="introAudio" preload="auto" src="Media/KZAK-Welcome.mp3"></audio>
+<audio id="breakAudio" preload="auto"></audio>
+
+<!-- welcome -->
+<div id="welcome" class="overlay show">
+  <div class="frame">
+    <h2 style="margin:0 0 8px 0;color:#ffeb7a;text-shadow:0 0 14px rgba(255,200,80,.55)">🎙️ Welcome to KZAK</h2>
+    <p class="muted" style="margin:0 0 12px 0">Quick intro or jump straight to the set. ON AIR lights when music plays.</p>
+    <div class="row" style="justify-content:flex-end">
+      <button id="playWelcome" class="btn">▶︎ Play Welcome</button>
+      <button id="skipWelcome" class="btn">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- about -->
+<button id="aboutBtn" class="btn">ABOUT</button>
+<div id="aboutBox" aria-live="polite"></div>
+
+<div id="toast"></div>
+
+<!-- playlists (classic globals) -->
+<script src="playlist-rock.js" defer></script>
+<script src="playlist-heavy.js" defer></script>
+<script src="playlist-mellow.js" defer></script>
+<!-- optional likes -->
+<script src="kzak-likes-059.js" defer></script>
+
+<script>
+/* ------------------ small helpers ------------------ */
+const $=s=>document.querySelector(s);
+const onAir=$('#onAir'), audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
+const startBtn=$('#startBtn'), pauseBtn=$('#pauseBtn'), nextBtn=$('#nextBtn'), prevBtn=$('#prevBtn');
+const loopBtn=$('#loopBtn'), shuffleBtn=$('#shuffleBtn'), muteBtn=$('#muteBtn');
+const vol=$('#vol'), seek=$('#seek'); const plistBody=$('#plistBody');
+const tpos=$('#tpos'), tmax=$('#tmax'), tcount=$('#tcount'), countRight=$('#countRight');
+const meta=$('#meta'), art=$('#art'), titleEl=$('#title'), story=$('#story'), genreNow=$('#genreNow');
+const toastEl=$('#toast'); function toast(m){toastEl.textContent=m;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),1500)}
+function fmt(t){t|=0;const m=(t/60)|0,s=(t%60)|0;return m+':'+(s<10?'0':'')+s}
+function pathToUrl(p){return String(p||'').split('/').map(encodeURIComponent).join('/')}
+
+/* ------------------ state ------------------ */
+const LISTS = {
+  'Middle Ground Rock': ()=> (window.PLAYLIST_ROCK   || []),
+  'Heavy and Metal'   : ()=> (window.PLAYLIST_HEAVY  || []),
+  'Mellow Tunes'      : ()=> (window.PLAYLIST_MELLOW || []),
+};
+let GENRE = 'Middle Ground Rock';
+let PLAYLIST = [];
+let idx = 0, isPlaying=false, isLoading=false, isLoop=false, isShuffle=false;
+let shuffleOrder=[], shufflePos=0;
+let metaTimer=null, autoSkipTimer=null;
+
+/* ------------------ binder ------------------ */
+function normalizeTrack(t){
+  const n = Object.assign({ title:'Untitled', file:'', image:'', genre:GENRE }, t||{});
+  if (!n.file && n.title) n.file = 'Media/' + n.title + '.mp3';
+  return n;
+}
+function bindFromGenre(g){
+  GENRE = g;
+  const src = (LISTS[g] ? LISTS[g]() : []).map(normalizeTrack);
+  PLAYLIST = src;
+  idx = 0;
+  tmax.textContent = PLAYLIST.length;
+  tcount.textContent = PLAYLIST.length;
+  countRight.textContent = PLAYLIST.length + ' items';
+  buildList();
+  updateGenreNow();
+}
+function updateGenreNow(){
+  const tr = PLAYLIST[idx]; genreNow.textContent = 'Genre: ' + (tr?.genre || GENRE);
+}
+
+/* ------------------ UI list ------------------ */
+function buildList(){
+  plistBody.innerHTML = '';
+  PLAYLIST.forEach((tr,i)=>{
+    const row = document.createElement('div');
+    row.className = 'item'; row.dataset.i=i;
+    row.innerHTML = `<div><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}
+                      <div class="tiny">${tr.file}</div></div>
+                     <a class="tiny" href="javascript:void(0)" data-share="${i}">Share</a>`;
+    row.addEventListener('click',e=>{
+      if (e.target && e.target.getAttribute('data-share')) return;
+      load(i,true);
+    });
+    row.querySelector('[data-share]').addEventListener('click',e=>{
+      e.stopPropagation(); shareTrack(i);
+    });
+    plistBody.appendChild(row);
+  });
+  markActive();
+}
+function markActive(){
+  [...plistBody.children].forEach(n=>n.classList.toggle('active', Number(n.dataset.i)===idx));
+}
+
+/* ------------------ shuffle helpers ------------------ */
+function makeShuffle(anchor){
+  const n=PLAYLIST.length; const arr=Array.from({length:n},(_,i)=>i);
+  for(let i=n-1;i>0;i--){const j=(Math.random()*(i+1))|0; [arr[i],arr[j]]=[arr[j],arr[i]]}
+  shuffleOrder = arr; shufflePos = arr.indexOf(anchor>=0?anchor:idx); if (shufflePos<0) shufflePos=0;
+}
+function nextShuffled(){ if(!shuffleOrder.length) makeShuffle(idx); shufflePos=(shufflePos+1)%shuffleOrder.length; return shuffleOrder[shufflePos] }
+function prevShuffled(){ if(!shuffleOrder.length) makeShuffle(idx); shufflePos=(shufflePos-1+shuffleOrder.length)%shuffleOrder.length; return shuffleOrder[shufflePos] }
+
+/* ------------------ load / play ------------------ */
+function refreshTime(){
+  const d=isFinite(audio.duration)?audio.duration:0, ct=isFinite(audio.currentTime)?audio.currentTime:0;
+  $('#elapsed').textContent=fmt(ct|0); $('#remaining').textContent=d?('-'+fmt(Math.max(d-ct,0)|0)):'-0:00';
+  if (d) seek.value=Math.round((ct/d)*1000);
+}
+function clearTimers(){ if(metaTimer){clearTimeout(metaTimer);metaTimer=null} if(autoSkipTimer){clearTimeout(autoSkipTimer);autoSkipTimer=null} }
+function autoSkip(msg='Problem playing file'){ clearTimers(); meta.textContent=msg+' — skipping'; autoSkipTimer=setTimeout(()=>next(), 1500) }
+
+async function load(i, autoplay=false){
+  if (!PLAYLIST.length) return;
+  clearTimers();
+  isLoading=true;
+  idx = (i+PLAYLIST.length)%PLAYLIST.length;
+  const tr = PLAYLIST[idx];
+
+  titleEl.textContent = tr.title;
+  story.textContent = tr.story || '';
+  art.src = tr.image || 'Media/default.jpg';
+  tpos.textContent = idx+1; markActive(); updateGenreNow();
+  meta.textContent = 'Queued';
+
+  // update deep link
+  try{ const u=new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u) }catch{}
+
+  // choose candidate file
+  const candidates = [];
+  if (tr.file) candidates.push(tr.file);
+  // common fallbacks derived from title
+  if (tr.title){ candidates.push('Media/'+tr.title+'.mp3'); }
+  // try first that loads
+  let chosen=null;
+  for (const c of candidates){
+    try{
+      const r = await fetch(pathToUrl(c), {method:'HEAD', cache:'no-store'});
+      if (r.ok){ chosen=c; break; }
+    }catch{}
+  }
+  if (!chosen){ isLoading=false; return autoSkip('Audio not found'); }
+
+  // load/play
+  seek.value=0; $('#elapsed').textContent='0:00'; $('#remaining').textContent='-0:00';
+  audio.src = pathToUrl(chosen);
+  audio.load();
+  metaTimer = setTimeout(()=>autoSkip('Timeout waiting for media'), 12000);
+  audio.onceLoaded = ()=>{
+    clearTimers(); isLoading=false; meta.textContent='Ready'; if(autoplay) play();
+  };
+}
+function play(){
+  if (isLoading) return;
+  audio.play().then(()=>{
+    isPlaying=true; onAir.classList.add('on'); startBtn.disabled=true; pauseBtn.disabled=false; meta.textContent='Playing';
+    requestAnimationFrame(function tick(){ if(isPlaying) { refreshTime(); requestAnimationFrame(tick); } });
+    // push to MediaSession/CarPlay if available
+    try{ navigator.mediaSession && (document.title = PLAYLIST[idx]?.title+' — KZAK'); }catch{}
+  }).catch(()=>toast('Playback blocked — tap Start Station'));
+}
+function pause(){ audio.pause(); isPlaying=false; onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; meta.textContent='Paused' }
+function next(){ load(isShuffle? nextShuffled(): idx+1, true) }
+function prev(){ load(isShuffle? prevShuffled(): idx-1, true) }
+
+/* ------------------ events ------------------ */
+audio.addEventListener('loadedmetadata', ()=>{ audio.onceLoaded && audio.onceLoaded(); audio.onceLoaded=null });
+audio.addEventListener('error', ()=>autoSkip('Audio error'));
+audio.addEventListener('timeupdate', refreshTime);
+audio.addEventListener('ended', ()=>{ if(isLoop){ audio.currentTime=0; play(); } else { next(); } });
+
+startBtn.addEventListener('click', async ()=>{
+  if ($('#welcome').classList.contains('show')) { $('#welcome').classList.remove('show'); await load(idx,true); return; }
+  if (!isPlaying){ if (!audio.src) await load(idx,true); else play(); }
+});
+pauseBtn.addEventListener('click', pause);
+nextBtn.addEventListener('click', next);
+prevBtn.addEventListener('click', prev);
+
+vol.addEventListener('input', ()=> audio.volume = Number(vol.value));
+muteBtn.addEventListener('click', ()=>{ audio.muted=!audio.muted; muteBtn.textContent = audio.muted ? '🔈 Unmute' : '🔇 Mute' });
+loopBtn.addEventListener('click', ()=>{ isLoop=!isLoop; loopBtn.textContent = isLoop ? '⟲ Loop: On' : '⟲ Loop' });
+shuffleBtn.addEventListener('click', ()=>{ isShuffle=!isShuffle; if(isShuffle) makeShuffle(idx); shuffleBtn.textContent = isShuffle? '🔀 Shuffle: On':'🔀 Shuffle' });
+
+seek.addEventListener('input', e=>{ const d=audio.duration||0; if(d){ audio.currentTime = (Number(e.target.value)/1000)*d; refreshTime(); } });
+
+/* genre buttons */
+$('#genreBar').addEventListener('click', ev=>{
+  const b = ev.target.closest('.gbtn'); if(!b) return;
+  $('#genreBar').querySelectorAll('.gbtn').forEach(x=>x.classList.toggle('active', x===b));
+  bindFromGenre(b.dataset.genre);
+  load(0,false); // don’t auto-play until user hits Start (welcome flow)
+});
+
+/* welcome buttons */
+$('#playWelcome').addEventListener('click', async ()=>{
+  try{ startBtn.disabled=true; prevBtn.disabled=true; nextBtn.disabled=true; await intro.play();
+       intro.addEventListener('ended', async ()=>{ $('#welcome').classList.remove('show'); startBtn.disabled=false; prevBtn.disabled=false; nextBtn.disabled=false; await load(0,true) }, {once:true});
+  }catch{ $('#welcome').classList.remove('show'); await load(0,true); }
+});
+$('#skipWelcome').addEventListener('click', async ()=>{ $('#welcome').classList.remove('show'); await load(0,true) });
+
+/* share */
+async function shareStation(){ const u=new URL(location); u.searchParams.set('t', idx); const link=u.toString();
+  if(navigator.share){ try{ await navigator.share({title:'KZAK station', url:link}); return; }catch{} }
+  try{ await navigator.clipboard.writeText(link); toast('Station link copied'); }catch{ prompt('Copy link:', link); }
+}
+async function shareTrack(i){ const u=new URL(location); u.searchParams.set('t', i); const link=u.toString();
+  const tr=PLAYLIST[i]; if(navigator.share){ try{ await navigator.share({title:tr.title, url:link}); return;}catch{} }
+  try{ await navigator.clipboard.writeText(link); toast('Track link copied'); }catch{ prompt('Copy link:', link); }
+}
+$('#shareBtn').addEventListener('click', shareStation);
+$('#shareTrackBtn').addEventListener('click', ()=>shareTrack(idx));
+
+/* likes (optional) */
+$('#likeBtn').addEventListener('click', ()=>{
+  const tr = PLAYLIST[idx]; if (!tr) return;
+  if (window.KZAK_LIKES && typeof window.KZAK_LIKES.like === 'function'){
+    window.KZAK_LIKES.like(tr.title, tr.file, tr.image||'');
+    toast('Liked ♥');
+  } else {
+    toast('Likes module not present');
+  }
+});
+
+/* lobby exit (no heavy overlay to avoid hangs) */
+$('#toLobby').addEventListener('click', ()=>{
+  try{ audio.pause(); }catch{}; location.href = '../index.html';
+});
+
+/* About badge (single, clean) */
+(function(){
+  const sub = 69; // <-- bump this for each new build
+  const rel = 'Bullwinkle-v1';
+  const stamp = new Date().toLocaleString();
+  const box = $('#aboutBox');
+  const btn = $('#aboutBtn');
+  box.innerHTML = `<div><b>Release:</b> ${rel}.${String(sub).padStart(3,'0')}</div>
+                   <div class="tiny">${stamp}</div>
+                   <div class="tiny">${location.pathname.replace(/.*\//,'')}</div>`;
+  let visible = true; btn.addEventListener('click', ()=>{ visible=!visible; box.style.display = visible?'block':'none'; });
+})();
+
+/* boot: bind default genre & deep link */
+document.addEventListener('DOMContentLoaded', ()=>{
+  bindFromGenre('Middle Ground Rock');
+  const t = Number(new URLSearchParams(location.search).get('t'));
+  if (Number.isFinite(t) && t>=0 && t<PLAYLIST.length) idx=t|0;
+  buildList(); markActive(); updateGenreNow();
+});
+</script>
+</body>
+</html>
+
