@@ -1,7 +1,3 @@
-/* Safety defaults for classic script loads */
-var DEFAULT_IMG   = (typeof DEFAULT_IMG   !== "undefined") ? DEFAULT_IMG   : "";
-var DEFAULT_STORY = (typeof DEFAULT_STORY !== "undefined") ? DEFAULT_STORY : "";
-
 /* Auto-generated from songlist2.txt */
 var PLAYLIST_HEAVY = [
  
@@ -142,7 +138,7 @@ var PLAYLIST_HEAVY = [
     alt:   "01 Vicarious (Remix) 1 — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -152,7 +148,7 @@ var PLAYLIST_HEAVY = [
     alt:   "01. The Grudge (Remastered) — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -162,7 +158,7 @@ var PLAYLIST_HEAVY = [
     alt:   "08 Rosetta Stoned (Cover) take 1 — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -172,7 +168,7 @@ var PLAYLIST_HEAVY = [
     alt:   "10 Right In Two (Remastered) (Cover) (1) — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -182,7 +178,7 @@ var PLAYLIST_HEAVY = [
     alt:   "10 Right In Two (Remastered) (Cover) — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -192,7 +188,7 @@ var PLAYLIST_HEAVY = [
     alt:   "11. Pushit (Cover) v2 — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -202,7 +198,7 @@ var PLAYLIST_HEAVY = [
     alt:   "46 & 3 — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -212,7 +208,7 @@ var PLAYLIST_HEAVY = [
     alt:   "A Spec of a Blue Dot — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -222,7 +218,7 @@ var PLAYLIST_HEAVY = [
     alt:   "As I Am (Instrumental Demo 2003) (cover zz2) — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -232,7 +228,7 @@ var PLAYLIST_HEAVY = [
     alt:   "Bolotone Metal Edition (Remastered) — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -242,7 +238,7 @@ var PLAYLIST_HEAVY = [
     alt:   "Cover of Tool - 7empest 1 — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -252,7 +248,7 @@ var PLAYLIST_HEAVY = [
     alt:   "Cover of Tool - 7empest 2 — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -262,7 +258,7 @@ var PLAYLIST_HEAVY = [
     alt:   "Cover. The Grudge (v2) — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -272,7 +268,7 @@ var PLAYLIST_HEAVY = [
     alt:   "Fear Inoculum (Cover) v1 — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -282,7 +278,7 @@ var PLAYLIST_HEAVY = [
     alt:   "Fear Inoculum - Hip Beat Remix — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -292,7 +288,7 @@ var PLAYLIST_HEAVY = [
     alt:   "Fear Inoculum - Intro remix — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -302,7 +298,7 @@ var PLAYLIST_HEAVY = [
     alt:   "Flood an AI Tool Cover — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -312,7 +308,7 @@ var PLAYLIST_HEAVY = [
     alt:   "Hiding the Pot (1) — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -322,7 +318,7 @@ var PLAYLIST_HEAVY = [
     alt:   "Home Again.. — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -332,7 +328,7 @@ var PLAYLIST_HEAVY = [
     alt:   "My Broken Illusion (1) — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -342,7 +338,7 @@ var PLAYLIST_HEAVY = [
     alt:   "Rosetta must be Stoned — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -352,7 +348,7 @@ var PLAYLIST_HEAVY = [
     alt:   "S2N an AI Cover of Dream Theater (Remix) — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -362,7 +358,7 @@ var PLAYLIST_HEAVY = [
     alt:   "Schism (Cover)v1 — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -372,7 +368,7 @@ var PLAYLIST_HEAVY = [
     alt:   "The Greatest Debate Ever — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -382,7 +378,7 @@ var PLAYLIST_HEAVY = [
     alt:   "X11 10,000 Days Live (Cover ZZ) (Remastered) — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -392,8 +388,8 @@ var PLAYLIST_HEAVY = [
     alt:   "ozzy osbourne diary of a madman rare live (Remix) — default artwork",
     genre: "Heavy and Metal",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   }
 ];
 
-if (typeof window !== "undefined") window.PLAYLIST_HEAVY = PLAYLIST_HEAVY;
+if (typeof window!=="undefined") window.PLAYLIST_HEAVY = PLAYLIST_HEAVY;

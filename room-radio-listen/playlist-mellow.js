@@ -1,7 +1,3 @@
-/* Safety defaults for classic script loads */
-var DEFAULT_IMG   = (typeof DEFAULT_IMG   !== "undefined") ? DEFAULT_IMG   : "";
-var DEFAULT_STORY = (typeof DEFAULT_STORY !== "undefined") ? DEFAULT_STORY : "";
-
 /* Auto-generated from songlist2.txt */
 var PLAYLIST_MELLOW = [
  
@@ -64,7 +60,7 @@ var PLAYLIST_MELLOW = [
     alt:   "08 4 Degrees (Cover)2 — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -74,7 +70,7 @@ var PLAYLIST_MELLOW = [
     alt:   "08 4 Degrees (Cover)v1 — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -84,7 +80,7 @@ var PLAYLIST_MELLOW = [
     alt:   "11. Reflection (Cover) V2 — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -94,7 +90,7 @@ var PLAYLIST_MELLOW = [
     alt:   "A Classical Aspect of X  — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -104,7 +100,7 @@ var PLAYLIST_MELLOW = [
     alt:   "A Madman Plays Seville — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -114,7 +110,7 @@ var PLAYLIST_MELLOW = [
     alt:   "All that glitters is gold Acoustic Blend — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -124,7 +120,7 @@ var PLAYLIST_MELLOW = [
     alt:   "All that glitters is gold — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -134,7 +130,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Continuum - an Octavarium Remix and Cover — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -144,7 +140,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Cover Of Wings For Marie (Part 1) v1 — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -154,7 +150,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Cover Wings For Marie (Part 1) (Spanish acoustic ) (1) — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -164,7 +160,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Cover of Wings For Marie (Part 1) v2 — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -174,7 +170,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Culling Voices Gathered in Flocks — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -184,7 +180,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Culling Voices Gathering Alone — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -194,7 +190,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Degrees (Cover)3 (Spanish guitar quartet) — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -204,7 +200,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Degrees as Spanish guitar quartet — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -214,7 +210,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Labyrinths of Coral Caves  — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -224,7 +220,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Leaving You — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -234,7 +230,7 @@ var PLAYLIST_MELLOW = [
     alt:   "More Guitars at Luna Park — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -244,7 +240,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Octavarium en Quartet — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -254,7 +250,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Our Waiting for Sleep, an instrumental — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -264,7 +260,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Pigs three different ones Solo (Cover)2b — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -274,7 +270,7 @@ var PLAYLIST_MELLOW = [
     alt:   "Surfacing Tensions — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -284,7 +280,7 @@ var PLAYLIST_MELLOW = [
     alt:   "The Embracing Circle Cover- Take One — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -304,7 +300,7 @@ var PLAYLIST_MELLOW = [
     alt:   "The Embracing Circle Cover - Take Two — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -314,7 +310,7 @@ var PLAYLIST_MELLOW = [
     alt:   "The Embracing Circle Cover - Take Five — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -324,7 +320,7 @@ var PLAYLIST_MELLOW = [
     alt:   "The Embracing Circle Cover - Take Three — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -334,7 +330,7 @@ var PLAYLIST_MELLOW = [
     alt:   "The Madman Plays in Cancun — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -344,7 +340,7 @@ var PLAYLIST_MELLOW = [
     alt:   "The Spirit Carries On (Live Rehearsal 2) (Remix) — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -354,7 +350,7 @@ var PLAYLIST_MELLOW = [
     alt:   "The X Aspect Symphony Remix — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -364,7 +360,7 @@ var PLAYLIST_MELLOW = [
     alt:   "The X Aspect shortened — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -374,7 +370,7 @@ var PLAYLIST_MELLOW = [
     alt:   "TheHumblingRiver = a Cover — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -384,8 +380,8 @@ var PLAYLIST_MELLOW = [
     alt:   "Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ) — default artwork",
     genre: "Mellow Tunes",
     
-    story: DEFAULT_STORY
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   }
 ];
 
-if (typeof window !== "undefined") window.PLAYLIST_MELLOW = PLAYLIST_MELLOW;
+if (typeof window!=="undefined") window.PLAYLIST_MELLOW = PLAYLIST_MELLOW;
