@@ -1,3 +1,4 @@
+<!-- KZAK index-059-fixed generated 2025-10-05T01:59:36.882242Z -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -1740,6 +1741,32 @@ document.addEventListener('click', (ev)=>{
     font-family:Georgia,"Times New Roman",Times,serif;font-weight:600;letter-spacing:.02em}
   .genre-btn.active{box-shadow:0 0 0 2px rgba(255,255,255,.35), inset 0 0 0 9999px rgba(255,255,255,.08)}
 </style>
+
+
+<script>
+/* KZAK primer: default PLAYLIST from external lists (no core rewrites) */
+(function(){
+  function chooseDefault(){
+    try {
+      var cand = window.PLAYLIST;
+      var picks = [
+        window.PLAYLIST_ROCK, window.ROCK, window.rock, 
+        (window.PLAYLISTS && (window.PLAYLISTS.rock || window.PLAYLISTS.Rock)),
+        window.PLAYLIST_HEAVY, window.HEAVY, 
+        window.PLAYLIST_MELLOW, window.MELLOW
+      ].filter(function(x){ return Array.isArray(x) && x.length; });
+      if (!Array.isArray(cand) || !cand.length) cand = picks[0] || [];
+      if (Array.isArray(cand) && cand.length){ window.PLAYLIST = cand; }
+      if (typeof window.buildList === 'function') { try { window.buildList(); } catch(e){} }
+    } catch(e){}
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(chooseDefault, 0); });
+  } else {
+    setTimeout(chooseDefault, 0);
+  }
+})();
+</script>
 
 <script src="./kzak-likes-059.js?v=059" defer></script>
 </body>
