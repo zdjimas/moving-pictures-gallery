@@ -68,10 +68,30 @@ input[type=range]{width:100%}
   #plist .items { max-height: 460px; overflow-y: auto; overscroll-behavior: contain; }
 </style>
 
+
 <style>.build-badge,[data-build-badge],.uncle-build,[data-uncle]{display:none!important}</style>
-<style>.build-badge,[data-build-badge],.uncle-build,[data-uncle]{display:none!important}</style>
+<script>
+// Remove legacy "UNCLE" badges or injectors if present
+(function(){
+  try {
+    // remove DOM nodes that display that label
+    document.addEventListener('DOMContentLoaded', function(){
+      document.querySelectorAll('body *').forEach(function(n){
+        var t = (n.textContent||'').trim();
+        if (/UNCLE/i.test(t) && /Build:|Release:/i.test(t)) { n.remove(); }
+      });
+      // remove script tags whose inline text mentions UNCLE
+      document.querySelectorAll('script').forEach(function(s){
+        if (!s.src && /UNCLE/i.test(s.textContent||'')) s.remove();
+      });
+    }, {once:true});
+  } catch(e){}
+})();
+</script>
+
 </head>
 <body>
+<script>try{window.PLAYLIST = window.PLAYLIST || [];}catch(e){}</script>
 
 <!-- WELCOME OVERLAY -->
 <div id="welcomeOverlay" class="overlay show" aria-modal="true" role="dialog">
@@ -246,7 +266,7 @@ let breakEvery=1;
 
 /* ===== Playlist (short sample — replace with your full list) ===== */
 
- /* removed embedded PLAYLIST (using external JS playlists) */
+ /* removed embedded PLAYLIST (external only) */
 var PLAYLIST = window.PLAYLIST;
 
 
@@ -1168,7 +1188,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  \1 SUBVER = 59; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  var SUBVER = 48; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -1401,11 +1421,11 @@ window.addEventListener('load', () => {
 
 
 <script type="module">
-import HEAVY  from './playlist-heavy.js?v=038';
-import ROCK   from './playlist-rock.js?v=038';
-import MELLOW from './playlist-mellow.js?v=038';
+import HEAVY  from './playlist-heavy.js?v=048';
+import ROCK   from './playlist-rock.js?v=048';
+import MELLOW from './playlist-mellow.js?v=048';
 
-/* Bullwinkle-v1.033: capture-level wiring and hard playlist swap */
+/* Bullwinkle-v1.046: capture-level wiring and hard playlist swap */
 const MAP = new Map([
   ['heavy and metal', {list: HEAVY,  label: 'Heavy and Metal'}],
   ['middle ground rock', {list: ROCK, label: 'Middle Ground Rock'}],
@@ -1415,7 +1435,7 @@ const MAP = new Map([
 function norm(s){ return String(s||'').toLowerCase().replace(/\s+/g,' ').trim(); }
 
 function mutate(list){
-  const dst = Array.isArray(window.PLAYLIST) ? window.PLAYLIST : (/* removed embedded PLAYLIST */
+  const dst = Array.isArray(window.PLAYLIST) ? window.PLAYLIST : (/* removed embedded PLAYLIST (external only) */
     const g = (t && t.genre) ? String(t.genre).replace(/\s+/g,' ').trim() : '';
     if (g) el.textContent = 'Genre: ' + g;
   }catch{}
@@ -1526,7 +1546,7 @@ document.addEventListener('click', (ev)=>{
 
 <script>
 (function(){
-  \1 SUBVER = 59;
+  var SUBVER = 48;
   const PAD  = String(SUBVER).padStart(3,'0');
   const VER  = `Bullwinkle-v1.${PAD}`;
   const FILE = `v=bullwinkle-v1-${PAD}`;
@@ -1726,13 +1746,150 @@ document.addEventListener('click', (ev)=>{
   .genre-btn.active{box-shadow:0 0 0 2px rgba(255,255,255,.35), inset 0 0 0 9999px rgba(255,255,255,.08)}
 </style>
 
+<!-- kzak-share-direct-hotfix-046 -->
+<script>
+(function () {
+  try { if (typeof SUBVER === 'undefined') window.SUBVER = 46; } catch(_e) { try { window.SUBVER = 46; } catch(__) {} }
+  function abs(u){ try { return new URL(u, location.href).href; } catch(_) { return u; } }
+  async function shareDirect() {
+    let url = null;
+    try {
+      const a = window.audio || document.querySelector('audio');
+      const s = a && (a.currentSrc || a.src);
+      if (s) url = abs(s);
+    } catch(_) {}
+    if (!url) {
+      try {
+        const i = window.__lastLoadedIndex ?? window.idx ?? window.currentIndex ?? 0;
+        const tr = (window.PLAYLIST && window.PLAYLIST[i]) || null;
+        if (tr) {
+          const key = ['file','src','url','mp3','path','href'].find(k => (k in tr) && tr[k]);
+          if (key) url = abs(tr[key]);
+        }
+      } catch(_) {} 
+    }
+    if (!url) { alert('Sorry — could not determine the direct track link.'); return; }
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: document.title || 'KZAK Track', text: 'Listen to this track', url });
+        return;
+      }
+    } catch(_) {}
+    try { await navigator.clipboard.writeText(url); alert('Track link copied to clipboard:\n' + url); }
+    catch(_) { prompt('Copy this track link:', url); }
+  }
+  function wireShareTrack() {
+    const targets = new Set();
+    const idBtn = document.getElementById('shareTrackBtn');
+    if (idBtn) targets.add(idBtn);
+    document.querySelectorAll("a,button,[role='button']").forEach(el => {
+      const label = ((el.getAttribute('aria-label')||'') + ' ' +
+                     (el.getAttribute('title')||'') + ' ' +
+                     (el.textContent||''))
+        .replace(/\s+/g,' ')
+        .replace(/[^\p{L}\p{N}\s]/gu,'')
+        .trim()
+        .toLowerCase();
+      if (/\bshare\s*track\b/.test(label)) targets.add(el);
+    });
+    targets.forEach(el => {
+      if (el.__wiredKzakShareDirect) return;
+      el.addEventListener('click', function(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+        ev.stopImmediatePropagation();
+        shareDirect();
+      }, true); // capture
+      el.__wiredKzakShareDirect = true;
+    });
+  }
+  wireShareTrack();
+  new MutationObserver(wireShareTrack).observe(document.body, {childList:true, subtree:true, characterData:true});
+})();
+</script>
+
+
 
 <script>
-  (function(){
-    const RELEASE='Bullwinkle-v1'; const SUBVER=49;
-    const el=document.getElementById('build-stamp');
-    if (el) el.textContent = RELEASE + '.' + String(SUBVER).padStart(3,'0');
-  })();
+
+
+
+<script>
+
+
+
+<script>
+// KZAK 064 binder: exhaustive detection + logging
+(function(){
+  function isTrackList(x){
+    return Array.isArray(x) && x.length && typeof x[0] === 'object' &&
+           ('title' in x[0] || 'file' in x[0] || 'src' in x[0] || 'url' in x[0]);
+  }
+  function mapLegacy(){
+    try{
+      if (typeof PLAYLIST_ROCK   === 'undefined' && isTrackList(window.ROCK))    window.PLAYLIST_ROCK = window.ROCK;
+      if (typeof PLAYLIST_HEAVY  === 'undefined' && isTrackList(window.HEAVY))   window.PLAYLIST_HEAVY = window.HEAVY;
+      if (typeof PLAYLIST_MELLOW === 'undefined' && isTrackList(window.MELLOW))  window.PLAYLIST_MELLOW = window.MELLOW;
+      if (typeof PLAYLIST_ROCK   === 'undefined' && isTrackList(window.rock))    window.PLAYLIST_ROCK = window.rock;
+      if (typeof PLAYLIST_HEAVY  === 'undefined' && isTrackList(window.heavy))   window.PLAYLIST_HEAVY = window.heavy;
+      if (typeof PLAYLIST_MELLOW === 'undefined' && isTrackList(window.mellow))  window.PLAYLIST_MELLOW = window.mellow;
+      if (typeof PLAYLIST_ROCK   === 'undefined' && isTrackList(window.PLAYLIST)) window.PLAYLIST_ROCK = window.PLAYLIST;
+    }catch(e){}
+  }
+  function bind(){
+    try{
+      mapLegacy();
+      var active = isTrackList(window.PLAYLIST_ROCK)   ? window.PLAYLIST_ROCK :
+                   isTrackList(window.PLAYLIST_HEAVY)  ? window.PLAYLIST_HEAVY :
+                   isTrackList(window.PLAYLIST_MELLOW) ? window.PLAYLIST_MELLOW : null;
+      if (active) window.PLAYLIST = active;
+      var len = Array.isArray(window.PLAYLIST) ? window.PLAYLIST.length : 0;
+      console.log('[KZAK] binder resolved PLAYLIST length =', len);
+      if (len && typeof window.buildList === 'function') { try{ window.buildList(); }catch(e){} }
+    }catch(e){ console.warn('[KZAK] binder error', e); }
+  }
+  function start(){
+    bind();
+    var attempts = 8;
+    var iv = setInterval(function(){
+      if (Array.isArray(window.PLAYLIST) && window.PLAYLIST.length){ clearInterval(iv); }
+      else { bind(); if (--attempts <= 0) clearInterval(iv); }
+    }, 500);
+  }
+  if (document.readyState === 'complete') start();
+  else window.addEventListener('load', start, {once:true});
+})();
+</script>
+<script>
+(function(){
+  var SUBVER = 61, RELEASE='Bullwinkle-v1';
+  document.addEventListener('DOMContentLoaded', function(){
+    var b = document.createElement('div');
+    b.id = 'kzak-release-badge';
+    b.style.cssText='position:fixed;right:16px;bottom:16px;background:rgba(0,0,0,.85);color:#fff;padding:10px 12px;border-radius:12px;font:600 12px/1.25 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,.4)';
+    var ts = new Date().toLocaleString();
+    b.innerHTML = '<div>Release: '+RELEASE+'.0'+SUBVER+'</div><div style="opacity:.75">'+ts+'</div>';
+    document.body.appendChild(b);
+  }, {once:true});
+})();
+</script>
+
+
+<script>
+(function(){
+  function bindAndRender(){
+    try{
+      var active = (typeof PLAYLIST_ROCK   !== 'undefined' && Array.isArray(PLAYLIST_ROCK)   && PLAYLIST_ROCK.length)   ? PLAYLIST_ROCK
+                 : (typeof PLAYLIST_HEAVY  !== 'undefined' && Array.isArray(PLAYLIST_HEAVY)  && PLAYLIST_HEAVY.length)  ? PLAYLIST_HEAVY
+                 : (typeof PLAYLIST_MELLOW !== 'undefined' && Array.isArray(PLAYLIST_MELLOW) && PLAYLIST_MELLOW.length) ? PLAYLIST_MELLOW
+                 : null;
+      if (active){ window.PLAYLIST = active; }
+      if (typeof window.buildList === 'function'){ try{ window.buildList(); }catch(e){} }
+    }catch(e){ console.warn('[KZAK] chooser error', e); }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(bindAndRender, 0); });
+  else setTimeout(bindAndRender, 0);
+})();
 </script>
 
 </body>
