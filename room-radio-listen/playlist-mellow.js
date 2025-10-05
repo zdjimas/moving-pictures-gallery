@@ -1,52 +1,13 @@
- /* KZAK — MELLOW playlist (classic-script + ESM compatible) */
-
-/* Safe fallbacks if not defined by index.html */
+/* KZAK — MELLOW playlist (classic-script only, no ESM export) */
 var DEFAULT_IMG   = (typeof DEFAULT_IMG   !== 'undefined') ? DEFAULT_IMG   : 'Media/cover-default.png';
 var DEFAULT_STORY = (typeof DEFAULT_STORY !== 'undefined') ? DEFAULT_STORY : 'Under Construction: a brief write-up about this track.';
 
 const PLAYLIST_MELLOW = [
-  {
-    title: "You Don't Need A Gun - Sitar Version",
-    file:  "Media/You Don't Need A Gun - Sitar Version.mp3",
-    img:   "Media/YouDontNeedAGun.jpeg",
-    alt:   "You Dont Need A Gun - Cover Art",
-    genre: "Mellow Tunes",
-    story: "The melody here is from a well known groove from Billy Idol, turned into something unique and interesting."
-  },
-  {
-    title: "Silent Sucidity Silenced",
-    file:  "Media/Silent Lucidity Silenced.mp3",
-    img:   "Media/Lucidity.jpeg",
-    alt:   "Cover art for KZAK",
-    genre: "Mellow Tunes",
-    story: "The lyrics for this original composition are amazing…"
-  },
-  {
-    title: "My Last Rose of Summer",
-    file:  "Media/My Last Rose of Summer .mp3",
-    img:   "Media/RoseSummerMine.jpeg",
-    alt:   "Cover art for My Last Rose of Summer",
-    genre: "Mellow Tunes",
-    story: DEFAULT_STORY
-  },
-  {
-    title: "Your Last Rose of Summer",
-    file:  "Media/Your Last Rose of Summer .mp3",
-    img:   "Media/RoseSummerYours.jpeg",
-    alt:   "Cover art for Your Last Rose of Summer",
-    genre: "Mellow Tunes",
-    story: DEFAULT_STORY
-  },
-  {
-    title: "Cactus Rose",
-    file:  "Media/Cactus Rose.mp3",
-    img:   "Media/CactusRose.jpeg",
-    alt:   "JailBreak artwork",
-    genre: "Mellow Tunes",
-    story: "An Original Creation by zdjimas"
-  },
-
-  /* --- keep remaining items, normalizing image->img and DEFAULT_* --- */
+  { title: "You Don't Need A Gun - Sitar Version", file: "Media/You Don't Need A Gun - Sitar Version.mp3", img: "Media/YouDontNeedAGun.jpeg", alt: "You Dont Need A Gun - Cover Art", genre: "Mellow Tunes", story: "The melody here is from a well known groove from Billy Idol, turned into something unique and interesting." },
+  { title: "Silent Sucidity Silenced", file: "Media/Silent Lucidity Silenced.mp3", img: "Media/Lucidity.jpeg", alt: "Cover art for KZAK", genre: "Mellow Tunes", story: "The lyrics for this original composition are amazing…" },
+  { title: "My Last Rose of Summer", file: "Media/My Last Rose of Summer .mp3", img: "Media/RoseSummerMine.jpeg", alt: "Cover art for My Last Rose of Summer", genre: "Mellow Tunes", story: DEFAULT_STORY },
+  { title: "Your Last Rose of Summer", file: "Media/Your Last Rose of Summer .mp3", img: "Media/RoseSummerYours.jpeg", alt: "Cover art for Your Last Rose of Summer", genre: "Mellow Tunes", story: DEFAULT_STORY },
+  { title: "Cactus Rose", file: "Media/Cactus Rose.mp3", img: "Media/CactusRose.jpeg", alt: "JailBreak artwork", genre: "Mellow Tunes", story: "An Original Creation by zdjimas" },
   { title: "08 4 Degrees (Cover)2", file: "Media/08 4 Degrees (Cover)2.mp3", img: DEFAULT_IMG, alt: "08 4 Degrees (Cover)2 — default artwork", genre: "Mellow Tunes", story: DEFAULT_STORY },
   { title: "08 4 Degrees (Cover)v1", file: "Media/08 4 Degrees (Cover)v1.mp3", img: DEFAULT_IMG, alt: "08 4 Degrees (Cover)v1 — default artwork", genre: "Mellow Tunes", story: DEFAULT_STORY },
   { title: "11. Reflection (Cover) V2", file: "Media/11. Reflection (Cover) V2.mp3", img: DEFAULT_IMG, alt: "11. Reflection (Cover) V2 — default artwork", genre: "Mellow Tunes", story: DEFAULT_STORY },
@@ -82,7 +43,5 @@ const PLAYLIST_MELLOW = [
   { title: "Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ)", file: "Media/Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ).mp3", img: DEFAULT_IMG, alt: "Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ) — default artwork", genre: "Mellow Tunes", story: DEFAULT_STORY }
 ];
 
-/* Make available in classic script environments */
+/* expose for classic <script> */
 if (typeof window !== 'undefined') window.PLAYLIST_MELLOW = PLAYLIST_MELLOW;
-/* Keep ESM compatibility */
-export default PLAYLIST_MELLOW;

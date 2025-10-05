@@ -1,116 +1,21 @@
- /* KZAK — HEAVY playlist (classic-script + ESM compatible) */
-
-/* Safe fallbacks if not defined by index.html */
+/* KZAK — HEAVY playlist (classic-script only, no ESM export) */
 var DEFAULT_IMG   = (typeof DEFAULT_IMG   !== 'undefined') ? DEFAULT_IMG   : 'Media/cover-default.png';
 var DEFAULT_STORY = (typeof DEFAULT_STORY !== 'undefined') ? DEFAULT_STORY : 'Under Construction: a brief write-up about this track.';
 
 const PLAYLIST_HEAVY = [
-  {
-    title: "Divesting From Space",
-    file:  "Media/Divesting from Space - an AI tribute to Dream Theater.mp3",
-    img:   "Media/DivestSpace.jpeg",
-    alt:   "Divesting From Space - artwork",
-    genre: "Heavy and Metal",
-    story: "A Song from the Awake Album, Calm and Soothing"
-  },
-  {
-    title: "Jambi Lambi",
-    file:  "Media/Jambi Lambi.mp3",
-    img:   "Media/JambiLambi.jpeg",
-    alt:   "Jambi Lambi  - artwork",
-    genre: "Heavy and Metal",
-    story: "A song from 10000 days album recreated and expanded.."
-  },
-  {
-    title: "The Ressurection of Fear Inoculum",
-    file:  "Media/The Ressurection of Fear Inoculum .mp3",
-    img:   "Media/RessurectionFear.jpeg",
-    alt:   "Ressurection of Fear  - artwork",
-    genre: "Heavy and Metal",
-    story: "A Song the album with the same name, Translated into something a little unique."
-  },
-  {
-    title: "Living Forever",
-    file:  "Media/Living Forever.mp3",
-    img:   "Media/LivingForever.jpeg",
-    alt:   "Living Forever  - artwork",
-    genre: "Heavy and Metal",
-    story: "A wonderful melody from the early days of Dream Theater"
-  },
-  {
-    title: "Poles Apart an AI Symphony Cover",
-    file:  "Media/Poles Apart an AI Symphony Cover.mp3",
-    img:   "Media/PolesApart.jpeg",
-    alt:   "Poles Apart - artwork",
-    genre: "Heavy and Metal",
-    story: "A Song the 1990s album from creator David Gilmour, revisited in a Symphony Orchestra Manner."
-  },
-  {
-    title: "A Trippy Nightmare to Remember",
-    file:  "Media/A Trippy Nightmare to Remember.mp3",
-    img:   "Media/Trippy.jpeg",
-    alt:   "A Trippy Nightmare  - artwork",
-    genre: "Heavy and Metal",
-    story: "A instrumental song from the band that brought you The Count of Tuscany."
-  },
-  {
-    title: "A Greener Manalishi",
-    file:  "Media/A Greener Manalishi.mp3",
-    img:   "Media/AGreenerManalishi.jpeg",
-    alt:   "A Greener Manalishi  - artwork",
-    genre: "Heavy and Metal",
-    story: "A Song from Unleashed in the East, revisited and remaked."
-  },
-  {
-    title: "An Alternate Planet Caravan",
-    file:  "Media/An Alternate Planet Caravan.mp3",
-    img:   "Media/AlternatePlanet.png",
-    alt:   "An Alternate Planet Caravan  - artwork",
-    genre: "Heavy and Metal",
-    story: "A hidden gem I found on internet that is one original from this band in the 70s as a practice demo."
-  },
-  {
-    title: "ACDC - Riff Raff at Glasgow, April 1978",
-    file:  "Media/ACDC - Riff Raff at Glasgow, April 1978.mp3",
-    img:   "Media/ACDCRiffRaff.jpeg",
-    alt:   "ACDC - Riff Raff  - artwork",
-    genre: "Heavy and Metal",
-    story: "I had to do one,  Here is a simple raw load of a song that is too good in this form to not play the original here."
-  },
-  {
-    title: "Riff's Raff",
-    file:  "Media/Riffs Raff.mp3",
-    img:   "Media/RiffsRaff1.jpeg",
-    alt:   "Riffs Raff - artwork",
-    genre: "Heavy and Metal",
-    story: "Taking the beloved song that got me hooked on early music from singer Bon Scott and giving it a twist."
-  },
-  {
-    title: "Killing Rock and Roll with New Words",
-    file:  "Media/Killing Rock and Roll with New Words.mp3",
-    img:   "Media/KillingRock.jpeg",
-    alt:   "Killing Rock and Roll - artwork",
-    genre: "Heavy and Metal",
-    story: "A great Melody by another great guitarist who died in a plane crash in the early 80s, RIP Randy"
-  },
-  {
-    title: "If You Want Blood Now",
-    file:  "Media/If You Want Blood Now.mp3",
-    img:   "Media/BloodNow.jpeg",
-    alt:   "Cover art for KZAK",
-    genre: "Heavy and Metal",
-    story: "One of the best music ever created from this band and the great singer Bon Scott… Rock On!"
-  },
-  {
-    title: "Lateralus Rising",
-    file:  "Media/LateralusRising.mp3",
-    img:   "Media/Lateralus.jpeg",
-    alt:   "Lateralus Rising — default artwork",
-    genre: "Heavy and Metal",
-    story: "This song represents strong beats and rythms and is part of a most excellent set…"
-  },
-
-  /* --- keep remaining items, replacing image->img and DEFAULT_* where present --- */
+  { title: "Divesting From Space", file: "Media/Divesting from Space - an AI tribute to Dream Theater.mp3", img: "Media/DivestSpace.jpeg", alt: "Divesting From Space - artwork", genre: "Heavy and Metal", story: "A Song from the Awake Album, Calm and Soothing" },
+  { title: "Jambi Lambi", file: "Media/Jambi Lambi.mp3", img: "Media/JambiLambi.jpeg", alt: "Jambi Lambi  - artwork", genre: "Heavy and Metal", story: "A song from 10000 days album recreated and expanded.." },
+  { title: "The Ressurection of Fear Inoculum", file: "Media/The Ressurection of Fear Inoculum .mp3", img: "Media/RessurectionFear.jpeg", alt: "Ressurection of Fear  - artwork", genre: "Heavy and Metal", story: "A Song the album with the same name, Translated into something a little unique." },
+  { title: "Living Forever", file: "Media/Living Forever.mp3", img: "Media/LivingForever.jpeg", alt: "Living Forever  - artwork", genre: "Heavy and Metal", story: "A wonderful melody from the early days of Dream Theater" },
+  { title: "Poles Apart an AI Symphony Cover", file: "Media/Poles Apart an AI Symphony Cover.mp3", img: "Media/PolesApart.jpeg", alt: "Poles Apart - artwork", genre: "Heavy and Metal", story: "A Song the 1990s album from creator David Gilmour, revisited in a Symphony Orchestra Manner." },
+  { title: "A Trippy Nightmare to Remember", file: "Media/A Trippy Nightmare to Remember.mp3", img: "Media/Trippy.jpeg", alt: "A Trippy Nightmare  - artwork", genre: "Heavy and Metal", story: "A instrumental song from the band that brought you The Count of Tuscany." },
+  { title: "A Greener Manalishi", file: "Media/A Greener Manalishi.mp3", img: "Media/AGreenerManalishi.jpeg", alt: "A Greener Manalishi  - artwork", genre: "Heavy and Metal", story: "A Song from Unleashed in the East, revisited and remaked." },
+  { title: "An Alternate Planet Caravan", file: "Media/An Alternate Planet Caravan.mp3", img: "Media/AlternatePlanet.png", alt: "An Alternate Planet Caravan  - artwork", genre: "Heavy and Metal", story: "A hidden gem I found on internet that is one original from this band in the 70s as a practice demo." },
+  { title: "ACDC - Riff Raff at Glasgow, April 1978", file: "Media/ACDC - Riff Raff at Glasgow, April 1978.mp3", img: "Media/ACDCRiffRaff.jpeg", alt: "ACDC - Riff Raff  - artwork", genre: "Heavy and Metal", story: "I had to do one,  Here is a simple raw load of a song that is too good in this form to not play the original here." },
+  { title: "Riff's Raff", file: "Media/Riffs Raff.mp3", img: "Media/RiffsRaff1.jpeg", alt: "Riffs Raff - artwork", genre: "Heavy and Metal", story: "Taking the beloved song that got me hooked on early music from singer Bon Scott and giving it a twist." },
+  { title: "Killing Rock and Roll with New Words", file: "Media/Killing Rock and Roll with New Words.mp3", img: "Media/KillingRock.jpeg", alt: "Killing Rock and Roll - artwork", genre: "Heavy and Metal", story: "A great Melody by another great guitarist who died in a plane crash in the early 80s, RIP Randy" },
+  { title: "If You Want Blood Now", file: "Media/If You Want Blood Now.mp3", img: "Media/BloodNow.jpeg", alt: "Cover art for KZAK", genre: "Heavy and Metal", story: "One of the best music ever created from this band and the great singer Bon Scott… Rock On!" },
+  { title: "Lateralus Rising", file: "Media/LateralusRising.mp3", img: "Media/Lateralus.jpeg", alt: "Lateralus Rising — default artwork", genre: "Heavy and Metal", story: "This song represents strong beats and rythms and is part of a most excellent set…" },
   { title: "01 Vicarious (Remix) 1", file: "Media/01 Vicarious (Remix) 1.mp3", img: DEFAULT_IMG, alt: "01 Vicarious (Remix) 1 — default artwork", genre: "Heavy and Metal", story: DEFAULT_STORY },
   { title: "01. The Grudge (Remastered)", file: "Media/01. The Grudge (Remastered).mp3", img: DEFAULT_IMG, alt: "01. The Grudge (Remastered) — default artwork", genre: "Heavy and Metal", story: DEFAULT_STORY },
   { title: "08 Rosetta Stoned (Cover) take 1", file: "Media/08 Rosetta Stoned (Cover) take 1.mp3", img: DEFAULT_IMG, alt: "08 Rosetta Stoned (Cover) take 1 — default artwork", genre: "Heavy and Metal", story: DEFAULT_STORY },
@@ -139,7 +44,5 @@ const PLAYLIST_HEAVY = [
   { title: "ozzy osbourne diary of a madman rare live (Remix)", file: "Media/ozzy osbourne diary of a madman rare live (Remix).mp3", img: DEFAULT_IMG, alt: "ozzy osbourne diary of a madman rare live (Remix) — default artwork", genre: "Heavy and Metal", story: DEFAULT_STORY }
 ];
 
-/* Make available in classic script environments */
+/* expose for classic <script> */
 if (typeof window !== 'undefined') window.PLAYLIST_HEAVY = PLAYLIST_HEAVY;
-/* Keep ESM compatibility */
-export default PLAYLIST_HEAVY;
