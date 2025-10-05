@@ -1421,9 +1421,9 @@ window.addEventListener('load', () => {
 
 
 <script type="module">
-import HEAVY  from './playlist-heavy.js?v=048';
-import ROCK   from './playlist-rock.js?v=048';
-import MELLOW from './playlist-mellow.js?v=048';
+import HEAVY  from './playlist-heavy.js?v=064';
+import ROCK   from './playlist-rock.js?v=064';
+import MELLOW from './playlist-mellow.js?v=064';
 
 /* Bullwinkle-v1.046: capture-level wiring and hard playlist swap */
 const MAP = new Map([
@@ -1819,38 +1819,45 @@ document.addEventListener('click', (ev)=>{
 
 
 <script>
-// KZAK 064 binder: exhaustive detection + logging
+
+
+
+<!-- External playlists (no cache-busting params) --><script>
+// KZAK 065 binder: exhaustive detection + single clean badge
 (function(){
   function isTrackList(x){
-    return Array.isArray(x) && x.length && typeof x[0] === 'object' &&
-           ('title' in x[0] || 'file' in x[0] || 'src' in x[0] || 'url' in x[0]);
+    return Array.isArray(x) && x.length && typeof x[0] === 'object';
   }
   function mapLegacy(){
     try{
-      if (typeof PLAYLIST_ROCK   === 'undefined' && isTrackList(window.ROCK))    window.PLAYLIST_ROCK = window.ROCK;
-      if (typeof PLAYLIST_HEAVY  === 'undefined' && isTrackList(window.HEAVY))   window.PLAYLIST_HEAVY = window.HEAVY;
-      if (typeof PLAYLIST_MELLOW === 'undefined' && isTrackList(window.MELLOW))  window.PLAYLIST_MELLOW = window.MELLOW;
-      if (typeof PLAYLIST_ROCK   === 'undefined' && isTrackList(window.rock))    window.PLAYLIST_ROCK = window.rock;
-      if (typeof PLAYLIST_HEAVY  === 'undefined' && isTrackList(window.heavy))   window.PLAYLIST_HEAVY = window.heavy;
-      if (typeof PLAYLIST_MELLOW === 'undefined' && isTrackList(window.mellow))  window.PLAYLIST_MELLOW = window.mellow;
-      if (typeof PLAYLIST_ROCK   === 'undefined' && isTrackList(window.PLAYLIST)) window.PLAYLIST_ROCK = window.PLAYLIST;
+      var w = window;
+      if (typeof w.PLAYLIST_ROCK   === 'undefined' && isTrackList(w.ROCK))    w.PLAYLIST_ROCK = w.ROCK;
+      if (typeof w.PLAYLIST_HEAVY  === 'undefined' && isTrackList(w.HEAVY))   w.PLAYLIST_HEAVY = w.HEAVY;
+      if (typeof w.PLAYLIST_MELLOW === 'undefined' && isTrackList(w.MELLOW))  w.PLAYLIST_MELLOW = w.MELLOW;
+      if (typeof w.PLAYLIST_ROCK   === 'undefined' && isTrackList(w.rock))    w.PLAYLIST_ROCK = w.rock;
+      if (typeof w.PLAYLIST_HEAVY  === 'undefined' && isTrackList(w.heavy))   w.PLAYLIST_HEAVY = w.heavy;
+      if (typeof w.PLAYLIST_MELLOW === 'undefined' && isTrackList(w.mellow))  w.PLAYLIST_MELLOW = w.mellow;
+      if (typeof w.PLAYLIST_ROCK   === 'undefined' && isTrackList(w.PLAYLIST)) w.PLAYLIST_ROCK = w.PLAYLIST;
     }catch(e){}
   }
   function bind(){
     try{
       mapLegacy();
-      var active = isTrackList(window.PLAYLIST_ROCK)   ? window.PLAYLIST_ROCK :
-                   isTrackList(window.PLAYLIST_HEAVY)  ? window.PLAYLIST_HEAVY :
-                   isTrackList(window.PLAYLIST_MELLOW) ? window.PLAYLIST_MELLOW : null;
-      if (active) window.PLAYLIST = active;
-      var len = Array.isArray(window.PLAYLIST) ? window.PLAYLIST.length : 0;
-      console.log('[KZAK] binder resolved PLAYLIST length =', len);
-      if (len && typeof window.buildList === 'function') { try{ window.buildList(); }catch(e){} }
+      var w = window;
+      var active = isTrackList(w.PLAYLIST_ROCK)   ? w.PLAYLIST_ROCK :
+                   isTrackList(w.PLAYLIST_HEAVY)  ? w.PLAYLIST_HEAVY :
+                   isTrackList(w.PLAYLIST_MELLOW) ? w.PLAYLIST_MELLOW : null;
+      if (active) w.PLAYLIST = active;
+      var len = Array.isArray(w.PLAYLIST) ? w.PLAYLIST.length : 0;
+      console.log('[KZAK] 065 binder resolved PLAYLIST length =', len);
+      if (len && typeof w.buildList === 'function') { try{ w.buildList(); }catch(e){} }
     }catch(e){ console.warn('[KZAK] binder error', e); }
   }
   function start(){
+    // Ensure PLAYLIST exists to avoid early .length crashes
+    window.PLAYLIST = Array.isArray(window.PLAYLIST) ? window.PLAYLIST : [];
     bind();
-    var attempts = 8;
+    var attempts = 10;
     var iv = setInterval(function(){
       if (Array.isArray(window.PLAYLIST) && window.PLAYLIST.length){ clearInterval(iv); }
       else { bind(); if (--attempts <= 0) clearInterval(iv); }
@@ -1891,6 +1898,29 @@ document.addEventListener('click', (ev)=>{
   else setTimeout(bindAndRender, 0);
 })();
 </script>
+
+
+<style>
+  .kzak-release-badge{position:fixed;right:16px;bottom:16px;background:rgba(0,0,0,.85);color:#fff;
+  padding:10px 12px;border-radius:12px;font:600 12px/1.25 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  z-index:2147483647;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+</style>
+<script>
+(function(){
+  // remove prior/legacy badges
+  try{document.querySelectorAll('#kzak-release-badge,.kzak-release-badge,.build-badge,[data-build-badge],.uncle-build,[data-uncle]').forEach(n=>n.remove());}catch(e){}
+  var sub = (typeof SUBVER!=='undefined'?('00'+SUBVER).slice(-3):'???');
+  var b = document.createElement('div');
+  b.id='kzak-release-badge'; b.className='kzak-release-badge'; b.setAttribute('role','status');
+  b.innerHTML='<div>Release: Bullwinkle-v1.'+sub+'</div><div style="opacity:.75">'+new Date().toLocaleString()+'</div>';
+  document.body.appendChild(b);
+})();
+</script>
+
+
+<script src="./playlist-rock.js"></script>
+<script src="./playlist-heavy.js"></script>
+<script src="./playlist-mellow.js"></script>
 
 </body>
 </html>
