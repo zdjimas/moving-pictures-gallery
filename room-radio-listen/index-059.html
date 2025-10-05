@@ -1,4 +1,3 @@
-<!-- KZAK index-059-fixed generated 2025-10-05T01:59:36.882242Z -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -1742,32 +1741,50 @@ document.addEventListener('click', (ev)=>{
   .genre-btn.active{box-shadow:0 0 0 2px rgba(255,255,255,.35), inset 0 0 0 9999px rgba(255,255,255,.08)}
 </style>
 
+<script src="./kzak-likes-059.js?v=059" defer></script>
 
 <script>
-/* KZAK primer: default PLAYLIST from external lists (no core rewrites) */
 (function(){
-  function chooseDefault(){
-    try {
-      var cand = window.PLAYLIST;
-      var picks = [
-        window.PLAYLIST_ROCK, window.ROCK, window.rock, 
-        (window.PLAYLISTS && (window.PLAYLISTS.rock || window.PLAYLISTS.Rock)),
-        window.PLAYLIST_HEAVY, window.HEAVY, 
-        window.PLAYLIST_MELLOW, window.MELLOW
-      ].filter(function(x){ return Array.isArray(x) && x.length; });
-      if (!Array.isArray(cand) || !cand.length) cand = picks[0] || [];
-      if (Array.isArray(cand) && cand.length){ window.PLAYLIST = cand; }
-      if (typeof window.buildList === 'function') { try { window.buildList(); } catch(e){} }
-    } catch(e){}
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(chooseDefault, 0); });
-  } else {
-    setTimeout(chooseDefault, 0);
-  }
+  // Remove any legacy "UNCLE" build bubble
+  try{
+    var nodes = Array.from(document.querySelectorAll('body *'));
+    nodes.forEach(function(n){
+      var t = (n.textContent||'').trim();
+      if (/UNCLE/i.test(t) && /Build:|Release:/i.test(t)) { n.remove(); }
+    });
+  }catch(e){}
+  // Inject a fresh release badge
+  try{
+    var SUBVER = 59, RELEASE='Bullwinkle-v1';
+    var b = document.createElement('div');
+    b.id = 'kzak-release-badge';
+    b.style.cssText = 'position:fixed;right:16px;bottom:16px;background:rgba(0,0,0,.85);color:#fff;padding:10px 12px;border-radius:12px;font:600 12px/1.25 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,.4)';
+    var ts = new Date().toLocaleString();
+    b.innerHTML = '<div>Release: '+RELEASE+'.0'+SUBVER+'</div><div style="opacity:.75">'+ts+'</div>';
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(b); }, {once:true});
+  }catch(e){}
 })();
 </script>
 
-<script src="./kzak-likes-059.js?v=059" defer></script>
+
+<script>
+(function(){
+  function pick(){
+    var cand = (window && window.PLAYLIST) || [];
+    var picks = [
+      window.PLAYLIST_ROCK, window.ROCK, window.rock,
+      (window.PLAYLISTS && (window.PLAYLISTS.rock || window.PLAYLISTS.Rock)),
+      window.PLAYLIST_HEAVY, window.HEAVY,
+      window.PLAYLIST_MELLOW, window.MELLOW
+    ].filter(function(x){return Array.isArray(x)&&x.length;});
+    if (!Array.isArray(cand) || !cand.length) cand = picks[0] || [];
+    if (Array.isArray(cand) && cand.length) { window.PLAYLIST = cand; }
+    if (typeof window.buildList === 'function') { try{ window.buildList(); }catch(e){} }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(pick,0); });
+  else setTimeout(pick,0);
+})();
+</script>
+
 </body>
 </html>
