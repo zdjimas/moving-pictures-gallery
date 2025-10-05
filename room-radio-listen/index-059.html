@@ -1167,7 +1167,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER = 60; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  \1 SUBVER = 60; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -1525,7 +1525,7 @@ document.addEventListener('click', (ev)=>{
 
 <script>
 (function(){
-  const SUBVER = 60;
+  \1 SUBVER = 60;
   const PAD  = String(SUBVER).padStart(3,'0');
   const VER  = `Bullwinkle-v1.${PAD}`;
   const FILE = `v=bullwinkle-v1-${PAD}`;
@@ -1775,6 +1775,30 @@ document.addEventListener('click', (ev)=>{
     });
     setTimeout(pickAndRender, 2500); // fallback
   });
+})();
+</script>
+
+
+<script src="./playlist-rock.js?v=060" defer></script>
+
+<script src="./playlist-mellow.js?v=060" defer></script>
+
+<script src="./playlist-heavy.js?v=060" defer></script>
+
+<script>
+/* KZAK 060 chooser: bind PLAYLIST to the first defined external list */
+(function(){
+  function pick(){
+    var cand = [];
+    try { if (Array.isArray(PLAYLIST_ROCK)   && PLAYLIST_ROCK.length)   cand.push(PLAYLIST_ROCK); } catch(e){}
+    try { if (Array.isArray(PLAYLIST_HEAVY)  && PLAYLIST_HEAVY.length)  cand.push(PLAYLIST_HEAVY); } catch(e){}
+    try { if (Array.isArray(PLAYLIST_MELLOW) && PLAYLIST_MELLOW.length) cand.push(PLAYLIST_MELLOW); } catch(e){}
+    if (!cand.length){ console.warn('[KZAK] No global PLAYLIST_* arrays yet.'); return; }
+    try { window.PLAYLIST = cand[0]; } catch(e){}
+    if (typeof window.buildList === 'function'){ try { window.buildList(); } catch(e){} }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(pick, 0); });
+  else setTimeout(pick, 0);
 })();
 </script>
 
