@@ -1,7 +1,9 @@
- /* KZAK — ROCK playlist (clean) */
-/* Compatible with: classic <script> (global) and ES module (export default) */
+/* KZAK — ROCK playlist (classic script, global only)
+   This version removes ES-module syntax to work in <script> without type="module".
+   It exposes window.PLAYLIST_ROCK. */
 
-const PLAYLIST_ROCK = [
+// Use var (not const) to avoid 'already been declared' if the file is included twice.
+var PLAYLIST_ROCK = [
   {
     title: "Billys Eyes Without His Face",
     file:  "Media/Billys Eyes without His Face.mp3",
@@ -54,7 +56,7 @@ const PLAYLIST_ROCK = [
   /* ---- keep the rest of your tracks here (e.g., Grandios Designs, etc.) ---- */
   {
     title: "Grandios Designs",
-    file:  "Media/Grandios Designs .mp3",
+    file:  "Media/Grandios Designs.mp3",   // fixed stray space before .mp3
     img:   "Media/GrandiosDesigns.jpeg",
     alt:   "Grandios Designs — artwork",
     genre: "Middle Ground Rock",
@@ -70,7 +72,5 @@ const PLAYLIST_ROCK = [
   }
 ];
 
-/* Expose globally (classic script) */
-if (typeof window !== 'undefined') window.PLAYLIST_ROCK = PLAYLIST_ROCK;
-/* Export for ES module imports */
-export default PLAYLIST_ROCK;
+// Expose globally (classic script)
+if (typeof window !== "undefined") window.PLAYLIST_ROCK = PLAYLIST_ROCK;
