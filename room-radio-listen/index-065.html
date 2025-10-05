@@ -1951,6 +1951,56 @@ document.addEventListener('click', (ev)=>{
   document.body.appendChild(b);
 })();
 </script>
+<script>
+/* KZAK compat shim — safe post-init fix (no core rewrites) */
+(function () {
+  // 1) Normalize any known playlist names into the expected globals.
+  //    (Some older files used PLAYLIST or different variables.)
+  try {
+    var anyRock   = window.PLAYLIST_ROCK   || window.ROCK   || window.PLAYLIST;
+    var anyHeavy  = window.PLAYLIST_HEAVY  || window.HEAVY;
+    var anyMellow = window.PLAYLIST_MELLOW || window.MELLOW;
+
+    if (!Array.isArray(window.PLAYLIST_ROCK)   && Array.isArray(anyRock))   window.PLAYLIST_ROCK   = anyRock;
+    if (!Array.isArray(window.PLAYLIST_HEAVY)  && Array.isArray(anyHeavy))  window.PLAYLIST_HEAVY  = anyHeavy;
+    if (!Array.isArray(window.PLAYLIST_MELLOW) && Array.isArray(anyMellow)) window.PLAYLIST_MELLOW = anyMellow;
+  } catch (e) { console.warn('[KZAK] normalize error:', e); }
+
+  // 2) Choose a default PLAYLIST so the UI has something to show.
+  try {
+    function ok(a){ return Array.isArray(a) && a.length > 0; }
+    if (!ok(window.PLAYLIST)) {
+      // Prefer the most populated list, falling back in order.
+      var candidates = [
+        window.PLAYLIST_ROCK   || [],
+        window.PLAYLIST_HEAVY  || [],
+        window.PLAYLIST_MELLOW || []
+      ];
+      candidates.sort(function(a,b){ return b.length - a.length; });
+      window.PLAYLIST = candidates[0] || [];
+    }
+  } catch (e) { console.warn('[KZAK] default selection error:', e); }
+
+  // 3) If the list builder exists, ask it to render once.
+  //    (No double calls to load(...), we only re-paint the list.)
+  try {
+    if (typeof buildList === 'function') {
+      // buildList uses window.PLAYLIST; this is a safe repaint
+      buildList();
+    }
+  } catch (e) { console.warn('[KZAK] buildList error:', e); }
+
+  // 4) Loud diagnostic to console so we can see readiness at a glance.
+  try {
+    console.info('[KZAK] playlists ready?', {
+      rock:   Array.isArray(window.PLAYLIST_ROCK)   && window.PLAYLIST_ROCK.length,
+      heavy:  Array.isArray(window.PLAYLIST_HEAVY)  && window.PLAYLIST_HEAVY.length,
+      mellow: Array.isArray(window.PLAYLIST_MELLOW) && window.PLAYLIST_MELLOW.length,
+      active: Array.isArray(window.PLAYLIST)        && window.PLAYLIST.length
+    });
+  } catch (_) {}
+})();
+</script>
 
 </body>
 </html>
