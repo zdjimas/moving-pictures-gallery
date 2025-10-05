@@ -110,7 +110,7 @@ input[type=range]{width:100%}
     <button id="toLobby" class="btn">⬅︎ Return to Lobby</button>
     <div id="onAir" class="pill onair"><span class="onair-dot"></span><strong>ON AIR</strong></div>
 <nav class="creator-links" aria-label="Creator links" style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
-  <a href="https://www.tiktok.com/@chrisjmurphy65" class="btn" target="_blank" rel="noopener noreferrer">🎬 Watch on TikTok (CJ Murphy)</a>
+  <a href="https://www.tiktok.com/@chrisjmurphy65" class="btn" target="_blank" rel="noopener noreferrer">🎬 Watch This Music on TikTok</a>
 </nav>
 
 
@@ -245,7 +245,7 @@ let breakEvery=1;
 
 /* ===== Playlist (short sample — replace with your full list) ===== */
 
- /* removed embedded PLAYLIST (using external JS playlists) */
+ /* removed embedded PLAYLIST (external lists only) */
 var PLAYLIST = window.PLAYLIST;
 
 
@@ -1167,7 +1167,7 @@ window.addEventListener('load', () => {
 (function(){
   // === Release constants (bump SUBVER each test build) ===
   const RELEASE   = 'Bullwinkle-v1';
-  \1 SUBVER = 59; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
+  const SUBVER = 60; // -> 1 shows ".001", 2 -> ".002", ... up to 100 -> ".100"
   const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
 
   // Optional query overrides for verification (do not change committed values)
@@ -1414,23 +1414,7 @@ const MAP = new Map([
 function norm(s){ return String(s||'').toLowerCase().replace(/\s+/g,' ').trim(); }
 
 function mutate(list){
-  const dst = Array.isArray(window.PLAYLIST) ? window.PLAYLIST : (window.PLAYLIST = []);
-  dst.splice(0, dst.length, ...list);
-}
-
-function setHeader(label){
-  try{
-    const strong = document.querySelector('#plist .head strong');
-    const count  = document.getElementById('countRight');
-    if (strong) strong.textContent = 'Playlist — ' + label;
-    if (count)  count.textContent  = (window.PLAYLIST?.length || 0) + ' items';
-  }catch{}
-}
-
-function updateNowGenre(i=0){
-  try{
-    const el = document.getElementById('genreNow'); if (!el) return;
-    const t = window.PLAYLIST?.[i|0];
+  const dst = Array.isArray(window.PLAYLIST) ? window.PLAYLIST : (/* removed embedded PLAYLIST (external lists only) */
     const g = (t && t.genre) ? String(t.genre).replace(/\s+/g,' ').trim() : '';
     if (g) el.textContent = 'Genre: ' + g;
   }catch{}
@@ -1541,7 +1525,7 @@ document.addEventListener('click', (ev)=>{
 
 <script>
 (function(){
-  \1 SUBVER = 59;
+  const SUBVER = 60;
   const PAD  = String(SUBVER).padStart(3,'0');
   const VER  = `Bullwinkle-v1.${PAD}`;
   const FILE = `v=bullwinkle-v1-${PAD}`;
@@ -1745,44 +1729,52 @@ document.addEventListener('click', (ev)=>{
 
 <script>
 (function(){
-  // Remove any legacy "UNCLE" build bubble
-  try{
-    var nodes = Array.from(document.querySelectorAll('body *'));
-    nodes.forEach(function(n){
-      var t = (n.textContent||'').trim();
-      if (/UNCLE/i.test(t) && /Build:|Release:/i.test(t)) { n.remove(); }
-    });
-  }catch(e){}
-  // Inject a fresh release badge
-  try{
-    var SUBVER = 59, RELEASE='Bullwinkle-v1';
-    var b = document.createElement('div');
-    b.id = 'kzak-release-badge';
-    b.style.cssText = 'position:fixed;right:16px;bottom:16px;background:rgba(0,0,0,.85);color:#fff;padding:10px 12px;border-radius:12px;font:600 12px/1.25 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,.4)';
+  try {
+    var SUBVER = 60, RELEASE='Bullwinkle-v1';
+    var old = document.getElementById('kzak-release-badge'); if (old) old.remove();
+    var b = document.createElement('div'); b.id='kzak-release-badge';
+    b.style.cssText='position:fixed;right:16px;bottom:16px;background:rgba(0,0,0,.85);color:#fff;padding:10px 12px;border-radius:12px;font:600 12px/1.25 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,.4)';
     var ts = new Date().toLocaleString();
     b.innerHTML = '<div>Release: '+RELEASE+'.0'+SUBVER+'</div><div style="opacity:.75">'+ts+'</div>';
     document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(b); }, {once:true});
-  }catch(e){}
+  } catch(e){}
 })();
 </script>
 
 
 <script>
+/* KZAK 060: force-load playlists (cache-busted) and select a default list */
 (function(){
-  function pick(){
-    var cand = (window && window.PLAYLIST) || [];
-    var picks = [
-      window.PLAYLIST_ROCK, window.ROCK, window.rock,
-      (window.PLAYLISTS && (window.PLAYLISTS.rock || window.PLAYLISTS.Rock)),
-      window.PLAYLIST_HEAVY, window.HEAVY,
-      window.PLAYLIST_MELLOW, window.MELLOW
-    ].filter(function(x){return Array.isArray(x)&&x.length;});
-    if (!Array.isArray(cand) || !cand.length) cand = picks[0] || [];
-    if (Array.isArray(cand) && cand.length) { window.PLAYLIST = cand; }
-    if (typeof window.buildList === 'function') { try{ window.buildList(); }catch(e){} }
+  var FILES = ['./playlist-rock.js','./playlist-mellow.js','./playlist-heavy.js'];
+
+  function pickAndRender(){
+    try{
+      var picks = [
+        window.PLAYLIST_ROCK, window.ROCK, window.rock,
+        (window.PLAYLISTS && (window.PLAYLISTS.rock || window.PLAYLISTS.Rock)),
+        window.PLAYLIST_HEAVY, window.HEAVY,
+        window.PLAYLIST_MELLOW, window.MELLOW
+      ].filter(function(a){ return Array.isArray(a) && a.length; });
+      if (picks.length){
+        window.PLAYLIST = picks[0];
+        if (typeof window.buildList === 'function'){ try{ window.buildList(); }catch(e){} }
+      } else {
+        console.warn('[KZAK] No external playlists detected after load.');
+      }
+    }catch(e){ console.warn('[KZAK] pickAndRender error', e); }
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(pick,0); });
-  else setTimeout(pick,0);
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var remaining = FILES.length;
+    function done(){ if (--remaining <= 0) setTimeout(pickAndRender, 0); }
+    FILES.forEach(function(src){
+      var s = document.createElement('script');
+      s.src = src + '?v=060&cb=' + Date.now();
+      s.defer = true; s.onload = done; s.onerror = function(){ console.warn('[KZAK] failed to load', src); done(); };
+      document.body.appendChild(s);
+    });
+    setTimeout(pickAndRender, 2500); // fallback
+  });
 })();
 </script>
 
