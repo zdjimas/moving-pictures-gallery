@@ -1596,6 +1596,123 @@ document.addEventListener('click', (ev)=>{
 })();
 </script>
 <script src="kzak-hotfix-069.js?v=069" defer></script>
+<!-- ===== KZAK: inline, safe post-render patch (no core rewrites) ===== -->
+<script>
+(() => {
+  const SUBVER = 70; // drives the "Bullwinkle-v1.0XX" badge
+
+  // 0) One-time SW/cache cleanup so this HTML truly runs
+  try {
+    if (!sessionStorage.getItem('kzak_sw_cleared')) {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
+      }
+      if (window.caches?.keys) {
+        caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).catch(()=>{});
+      }
+      sessionStorage.setItem('kzak_sw_cleared','1');
+    }
+  } catch(e) {}
+
+  // 1) Kill any legacy badges and styles that re-append themselves
+  const killCSS = document.createElement('style');
+  killCSS.textContent = `
+    .build-badge,[data-build-badge],[data-uncle],.uncle-build { display:none !important; }
+    #kzak-build-pill {
+      position: fixed; right: 16px; bottom: 16px; z-index: 9999;
+      background: rgba(0,0,0,.80); color: #fff; border-radius: 14px;
+      padding: 10px 14px; font: 600 13px/1.25 system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      box-shadow: 0 4px 14px rgba(0,0,0,.35); letter-spacing: .2px;
+    }
+    #kzak-build-pill small { display:block; opacity:.75; font-weight:500; margin-top:2px; }
+  `;
+  document.head.appendChild(killCSS);
+
+  function renderBuildPill() {
+    if (document.getElementById('kzak-build-pill')) return;
+    const pill = document.createElement('div');
+    pill.id = 'kzak-build-pill';
+    const v = String(SUBVER).padStart(3,'0');
+    const ts = new Date().toLocaleString();
+    pill.innerHTML = `Release: Bullwinkle-v1.${v}<small>${ts}</small>`;
+    document.body.appendChild(pill);
+  }
+
+  // 2) Playlist bridge (prefer external lists; don’t touch core functions)
+  function resolveLists() {
+    const ROCK   = window.PLAYLIST_ROCK   || window.ROCK   || [];
+    const HEAVY  = window.PLAYLIST_HEAVY  || window.HEAVY  || [];
+    const MELLOW = window.PLAYLIST_MELLOW || window.MELLOW || [];
+    return { ROCK, HEAVY, MELLOW };
+  }
+
+  // Tries until external playlist scripts have populated globals
+  function waitForPlaylists(tries = 0) {
+    const { ROCK, HEAVY, MELLOW } = resolveLists();
+    const ready = [ROCK, HEAVY, MELLOW].some(a => Array.isArray(a) && a.length);
+    if (!ready) {
+      if (tries > 60) return;           // ~12s safety cap
+      return setTimeout(() => waitForPlaylists(tries+1), 200);
+    }
+    bindGenres(ROCK, HEAVY, MELLOW);
+  }
+
+  // 3) Single, idempotent genre wiring + default list selection
+  let wired = false;
+  function bindGenres(ROCK, HEAVY, MELLOW) {
+    if (wired) return; wired = true;
+
+    // Make the lists available under canonical names (non-destructive)
+    if (Array.isArray(ROCK))   window.PLAYLIST_ROCK   = ROCK;
+    if (Array.isArray(HEAVY))  window.PLAYLIST_HEAVY  = HEAVY;
+    if (Array.isArray(MELLOW)) window.PLAYLIST_MELLOW = MELLOW;
+
+    // Pick a sane default and render once
+    window.PLAYLIST =
+      (Array.isArray(ROCK)   && ROCK.length)   ? ROCK :
+      (Array.isArray(HEAVY)  && HEAVY.length)  ? HEAVY :
+      (Array.isArray(MELLOW) && MELLOW.length) ? MELLOW : [];
+
+    try { typeof window.buildList === 'function' && window.buildList(); } catch(_) {}
+    try { typeof window.activate  === 'function' && window.activate();  } catch(_) {}
+
+    // Helper that swaps the active list then refreshes UI
+    const swapTo = (which) => {
+      if (which === 'rock'   && window.PLAYLIST_ROCK)   window.PLAYLIST = window.PLAYLIST_ROCK;
+      if (which === 'heavy'  && window.PLAYLIST_HEAVY)  window.PLAYLIST = window.PLAYLIST_HEAVY;
+      if (which === 'mellow' && window.PLAYLIST_MELLOW) window.PLAYLIST = window.PLAYLIST_MELLOW;
+      try { typeof window.buildList === 'function' && window.buildList(); } catch(_) {}
+      try { typeof window.activate  === 'function' && window.activate();  } catch(_) {}
+    };
+
+    // 4) Bind the three Genre buttons once, robustly (text-based lookup)
+    const pickBtn = (label) =>
+      [...document.querySelectorAll('button, a')]
+        .find(el => el.textContent.trim().toLowerCase() === label.toLowerCase());
+
+    const map = [
+      ['heavy',  'Heavy and Metal'],
+      ['rock',   'Middle Ground Rock'],
+      ['mellow', 'Mellow Tunes'],
+    ];
+
+    map.forEach(([key, label]) => {
+      const btn = pickBtn(label);
+      if (btn && !btn.dataset.kzakBound) {
+        btn.dataset.kzakBound = '1';
+        btn.addEventListener('click', () => swapTo(key), { passive:true });
+      }
+    });
+  }
+
+  // Run after DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    renderBuildPill();
+    waitForPlaylists();
+  });
+})();
+</script>
+<!-- ===== end KZAK inline patch ===== -->
 
 </body>
 </html>
