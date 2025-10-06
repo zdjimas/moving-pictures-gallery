@@ -3301,5 +3301,92 @@ document.addEventListener('click', (ev)=>{
 })();
 </script>
 
+
+<style>
+#releaseBadge{position:fixed;right:12px;bottom:12px;z-index:99999;background:rgba(0,0,0,.65);
+  color:#fff;border:1px solid rgba(255,255,255,.25);padding:6px 10px;border-radius:10px;
+  font:12px/1 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+</style>
+<div id="releaseBadge">Release: Bullwinkle-v1.055</div>
+
+<script>
+// === Bullwinkle-v1.055 • Fixes: playlist loads on startup; genre click refreshes list; adds ALL ===
+(function(){
+  function byId(id){return document.getElementById(id)}
+  // Preserve original embedded list as the master source
+  if (Array.isArray(window.PLAYLIST) && !Array.isArray(window.PLAYLIST_MASTER)){
+    window.PLAYLIST_MASTER = window.PLAYLIST.slice();
+  }
+
+  // Build list function fallback if missing
+  if (typeof window.buildList !== 'function') {
+    window.buildList = function(){
+      var body = document.getElementById('plistBody');
+      if(!body) return;
+      body.innerHTML = '';
+      (window.PLAYLIST || []).forEach(function(tr, i){
+        var row = document.createElement('div');
+        row.className = 'item' + (i===window.index?' active':'');
+        row.dataset.idx = i;
+        row.innerHTML = '<div><div>' + String(i+1).padStart(3,'0') + ' ' + (tr.title||'—') + '</div>' +
+                        '<div class="meta-genre tiny">' + (tr.genre||'') + '</div>' +
+                        '<div class="tiny muted">' + (tr.file||'') + '</div></div>' +
+                        '<div class="tiny right"></div>';
+        row.addEventListener('click', function(){
+          if (typeof window.load === 'function') window.load(i, true);
+        });
+        body.appendChild(row);
+      });
+      var tmax = byId('tmax'); if (tmax) tmax.textContent = (window.PLAYLIST||[]).length;
+      var tcount = byId('tcount'); if (tcount) tcount.textContent = (window.PLAYLIST||[]).length;
+      var countRight = byId('countRight'); if (countRight) countRight.textContent = ((window.PLAYLIST||[]).length)+' items';
+    };
+  }
+
+  // Apply filter by genre and rebuild
+  window.applyGenre = function(name){
+    var src = Array.isArray(window.PLAYLIST_MASTER) ? window.PLAYLIST_MASTER : (window.PLAYLIST||[]);
+    var list = name && name !== 'ALL' ? src.filter(function(t){ return (t.genre||'')===name; }) : src.slice();
+    window.PLAYLIST = list;
+    if (typeof window.buildList === 'function') window.buildList();
+    // reset to first track but don't autoplay
+    if (typeof window.load === 'function') window.load(0, false);
+    // UI state
+    try {
+      var gNow = byId('genreNow'); if (gNow) gNow.textContent = 'Genre: ' + (name||'ALL');
+      document.querySelectorAll('#genreBar .gbtn').forEach(function(b){
+        b.classList.toggle('active', b.dataset.genre === (name||'ALL'));
+      });
+    } catch(e){}
+  };
+
+  // Bind genre buttons (including new ALL)
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('.gbtn');
+    if (!btn || !btn.dataset.genre) return;
+    e.preventDefault();
+    window.applyGenre(btn.dataset.genre);
+  });
+
+  // Startup: ensure ALL is present; initialize to ALL and render
+  var bar = document.getElementById('genreBar');
+  if (bar && !bar.querySelector('[data-genre="ALL"]')){
+    var all = document.createElement('button');
+    all.className = 'gbtn active';
+    all.type = 'button';
+    all.dataset.genre = 'ALL';
+    all.textContent = 'ALL';
+    bar.insertBefore(all, bar.firstChild);
+  }
+
+  // Initialize on first paint
+  window.addEventListener('load', function(){
+    try {
+      window.applyGenre('ALL');
+    } catch(e){ console.warn('startup genre init failed', e); }
+  });
+})();
+</script>
+
 </body>
 </html>
