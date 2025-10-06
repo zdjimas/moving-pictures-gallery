@@ -1,5 +1,5 @@
-/* Auto-generated from songlist2.txt */
-var PLAYLIST_MELLOW = [
+// Auto-generated stable playlist file (dual export: global + ESM)
+const PLAYLIST_MELLOW = [
  
   {
   title: "You Don't Need A Gun - Sitar Version",
@@ -383,5 +383,5 @@ var PLAYLIST_MELLOW = [
     story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   }
 ];
-
-if (typeof window!=="undefined") window.PLAYLIST_MELLOW = PLAYLIST_MELLOW;
+if (typeof window !== 'undefined') window.PLAYLIST_MELLOW = PLAYLIST_MELLOW;
+export default PLAYLIST_MELLOW;

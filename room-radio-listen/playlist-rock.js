@@ -1,5 +1,5 @@
-/* PLAYLIST_ROCK — classic global, inline fallbacks (no globals declared) */
-var PLAYLIST_ROCK = [
+// Auto-generated stable playlist file (dual export: global + ESM)
+const PLAYLIST_ROCK = [
   {
     title: "Alternative Once in my Lifetime",
     file:  "Media/Alternative Once in my Lifetime.mp3",
@@ -666,4 +666,5 @@ var PLAYLIST_ROCK = [
     story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   }
 ];
-if (typeof window!=="undefined") window.PLAYLIST_ROCK = PLAYLIST_ROCK;
+if (typeof window !== 'undefined') window.PLAYLIST_ROCK = PLAYLIST_ROCK;
+export default PLAYLIST_ROCK;

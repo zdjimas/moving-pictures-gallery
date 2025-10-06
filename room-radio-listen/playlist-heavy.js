@@ -1,5 +1,5 @@
-/* Auto-generated from songlist2.txt */
-var PLAYLIST_HEAVY = [
+// Auto-generated stable playlist file (dual export: global + ESM)
+const PLAYLIST_HEAVY = [
  
 
 {
@@ -391,5 +391,5 @@ var PLAYLIST_HEAVY = [
     story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   }
 ];
-
-if (typeof window!=="undefined") window.PLAYLIST_HEAVY = PLAYLIST_HEAVY;
+if (typeof window !== 'undefined') window.PLAYLIST_HEAVY = PLAYLIST_HEAVY;
+export default PLAYLIST_HEAVY;
