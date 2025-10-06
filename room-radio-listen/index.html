@@ -423,59 +423,184 @@ window.addEventListener('load', ()=>{
     background:rgba(0,0,0,.70);color:#fff;border-radius:10px;padding:10px 12px;backdrop-filter:blur(3px)}
   #kzakStamp b{font-weight:700} #kzakStamp small{opacity:.8}
 </style>
+<div id="kzakStamp" role="status" aria-live="polite">
+  <div><b>Release:</b> Bullwinkle-v1.050</div>
+  <div><small id="stampTime"></small></div>
+  <div><small>index-048-restore.html</small></div>
+</div>
+<script>document.getElementById('stampTime').textContent=new Date().toLocaleString();</script>
 
-<!-- === STARTUP DEFAULT + SAFETY FALLBACK (v049) === -->
+
 <script>
+// === Bullwinkle-v1.050 startup safety ===
 window.addEventListener('load', () => {
-  // 1) Provide buildListForGenre if compat helper is missing
-  if (typeof window.buildListForGenre !== 'function') {
-    window.buildListForGenre = function(name) {
-      const rock   = window.PLAYLIST_ROCK   || [];
-      const heavy  = window.PLAYLIST_HEAVY  || [];
-      const mellow = window.PLAYLIST_MELLOW || [];
-      const all    = rock.concat(heavy, mellow);
-      switch (name) {
-        case 'Heavy and Metal':    return heavy;
-        case 'Middle Ground Rock': return rock;  // default bucket
-        case 'Mellow Tunes':       return mellow;
-        case 'ALL':
-        default:                   return all;
-      }
-    };
-  }
-
-  // 2) Initialize default genre on first paint if list is empty
-  if (!Array.isArray(window.PLAYLIST) || !window.PLAYLIST.length) {
-    const defaultGenre = 'Middle Ground Rock';
-    window.PLAYLIST = window.buildListForGenre(defaultGenre);
-    window.PLAYLIST && (PLAYLIST = window.PLAYLIST);
-
-    // Reflect active state in UI
-    const bar = document.getElementById('genreBar');
-    if (bar) {
-      [...bar.querySelectorAll('.gbtn')].forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.genre === defaultGenre);
-      });
+  try {
+    if (typeof window.buildListForGenre !== 'function') {
+      window.buildListForGenre = function(name) {
+        const rock   = window.PLAYLIST_ROCK   || [];
+        const heavy  = window.PLAYLIST_HEAVY  || [];
+        const mellow = window.PLAYLIST_MELLOW || [];
+        const all    = [...rock, ...heavy, ...mellow];
+        switch (name) {
+          case 'Heavy and Metal':    return heavy;
+          case 'Middle Ground Rock': return rock;
+          case 'Mellow Tunes':       return mellow;
+          case 'ALL':
+          default:                   return all;
+        }
+      };
     }
-    const gNow = document.getElementById('genreNow');
-    if (gNow) gNow.textContent = 'Genre: ' + defaultGenre;
-
-    // Build list and honor deep-link ?t=N if valid
-    try { buildList(); } catch(e){}
-    const p = new URLSearchParams(location.search);
-    const ti = parseInt(p.get('t'), 10);
-    const startIdx = Number.isFinite(ti) && ti >= 0 && ti < (window.PLAYLIST?.length||0) ? ti : 0;
-    try { load(startIdx, false); } catch(e){}
+    // Initialize if empty
+    if (!Array.isArray(window.PLAYLIST) || !window.PLAYLIST.length) {
+      const defaultGenre = 'Middle Ground Rock';
+      window.PLAYLIST = window.buildListForGenre(defaultGenre);
+      // Back-compat if code uses bare PLAYLIST
+      try { window.PLAYLIST && (window.PLAYLIST.length >= 0) && (window.PLAYLIST === (window.PLAYLIST)); } catch(e) {}
+      if (typeof window.buildList === 'function') window.buildList();
+      // Deep link support (?t=N)
+      const p = new URLSearchParams(location.search);
+      const ti = parseInt(p.get('t'), 10);
+      const startIdx = Number.isFinite(ti) && ti >= 0 && ti < window.PLAYLIST.length ? ti : 0;
+      if (typeof window.load === 'function') window.load(startIdx, false);
+      // UI highlight if present
+      try {
+        document.querySelectorAll('#genreBar .gbtn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.genre === defaultGenre);
+        });
+        const gNow = document.getElementById('genreNow');
+        if (gNow) gNow.textContent = 'Genre: ' + defaultGenre;
+      } catch(e){}
+    }
+  } catch(e) {
+    console.error('Startup safety failed', e);
   }
 });
 </script>
-<!-- === END STARTUP DEFAULT + SAFETY FALLBACK === -->
-<div id="kzakStamp" role="status" aria-live="polite">
-  <div><b>Release:</b> Bullwinkle-v1.049</div>
-  <div><small id="stampTime"></small></div>
-  <div><small>index-049.html</small></div>
-</div>
-<script>document.getElementById('stampTime').textContent=new Date().toLocaleString();</script>
+
+
+<script>
+// === Bullwinkle-v1.050 • Station Breaks (Snappy1–10) ===
+(function(){
+  const toolbar = document.getElementById('toolbar') || document.body;
+  // Create controls if not present
+  if (!document.getElementById('stationBreaksBtn')) {
+    const sb = document.createElement('button');
+    sb.id='stationBreaksBtn'; sb.className='btn'; sb.textContent='Station Breaks: On';
+    const fb = document.createElement('button');
+    fb.id='forceBreakBtn'; fb.className='btn'; fb.textContent='Force Break';
+    const ob = document.createElement('span');
+    ob.id='onBreakPill'; ob.className='pill'; ob.style.marginLeft='6px'; ob.style.display='none';
+    ob.textContent='ON BREAK';
+    toolbar.appendChild(sb);
+    toolbar.appendChild(fb);
+    toolbar.appendChild(ob);
+  }
+
+  const audio = document.getElementById('audio');
+  const sbBtn = document.getElementById('stationBreaksBtn');
+  const fbBtn = document.getElementById('forceBreakBtn');
+  const onBreakPill = document.getElementById('onBreakPill');
+  const meta = document.getElementById('meta');
+
+  // External state shared with player
+  window.KZAK_BREAKS = window.KZAK_BREAKS || {
+    enabled: true,
+    every: 2,
+    isOnBreak: false,
+    nextBreakIdx: 0,
+    playCount: 0,
+    resume: { src:'', time:0, wasPlaying:false }
+  };
+
+  // Known break files
+  const BREAK_FILES = Array.from({length:10}, (_,i)=>`MediaBreaks/Snappy${i+1}.mp3`);
+
+  function pickBreak(){
+    const i = window.KZAK_BREAKS.nextBreakIdx % BREAK_FILES.length;
+    window.KZAK_BREAKS.nextBreakIdx++;
+    return BREAK_FILES[i];
+  }
+
+  function uiOnBreak(on){
+    window.KZAK_BREAKS.isOnBreak = on;
+    if (on) {
+      onBreakPill.style.display='inline-flex';
+      if (meta) meta.textContent='Station Break';
+    } else {
+      onBreakPill.style.display='none';
+    }
+  }
+
+  function playBreak({immediate=false}={}){
+    if (!window.KZAK_BREAKS.enabled) return false;
+    try {
+      // cache resume state
+      window.KZAK_BREAKS.resume.src = audio.currentSrc || audio.src;
+      window.KZAK_BREAKS.resume.time = audio.currentTime || 0;
+      window.KZAK_BREAKS.resume.wasPlaying = !audio.paused;
+    } catch(e){}
+    const file = pickBreak();
+    if (!file) return false;
+    uiOnBreak(true);
+    audio.pause();
+    audio.src = file;
+    audio.currentTime = 0;
+    audio.play().catch(()=>{});
+    return true;
+  }
+
+  // Toggle button
+  sbBtn.addEventListener('click', () => {
+    window.KZAK_BREAKS.enabled = !window.KZAK_BREAKS.enabled;
+    sbBtn.textContent = 'Station Breaks: ' + (window.KZAK_BREAKS.enabled ? 'On' : 'Off');
+  });
+
+  // Force Break now
+  fbBtn.addEventListener('click', () => {
+    playBreak({immediate:true});
+  });
+
+  // Hook audio ended to insert breaks between songs
+  audio.addEventListener('ended', () => {
+    // If we just finished a break, resume previous track (continue playback)
+    if (window.KZAK_BREAKS.isOnBreak) {
+      uiOnBreak(false);
+      // restore previous track
+      const src = window.KZAK_BREAKS.resume.src;
+      const t = window.KZAK_BREAKS.resume.time;
+      const was = window.KZAK_BREAKS.resume.wasPlaying;
+      if (src) {
+        audio.src = src;
+        audio.currentTime = t;
+        if (was) { audio.play().catch(()=>{}); }
+      }
+      return;
+    }
+    // A normal song just ended
+    window.KZAK_BREAKS.playCount++;
+    if (window.KZAK_BREAKS.enabled && window.KZAK_BREAKS.playCount % window.KZAK_BREAKS.every === 0) {
+      // play a break; normal "next" will be triggered after break completes (see resume above)
+      playBreak();
+      return;
+    }
+  }, {capture:false});
+
+  // Also guard against user clicking Next during a break — resume to the next song
+  document.getElementById('nextBtn')?.addEventListener('click', () => {
+    if (window.KZAK_BREAKS.isOnBreak) {
+      uiOnBreak(false);
+    }
+  });
+  document.getElementById('prevBtn')?.addEventListener('click', () => {
+    if (window.KZAK_BREAKS.isOnBreak) {
+      uiOnBreak(false);
+    }
+  });
+
+  // Ensure initial button label reflects state
+  sbBtn.textContent = 'Station Breaks: ' + (window.KZAK_BREAKS.enabled ? 'On' : 'Off');
+})();
+</script>
 
 </body>
 </html>
