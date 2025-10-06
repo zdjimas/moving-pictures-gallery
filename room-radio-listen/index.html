@@ -424,7 +424,7 @@ window.addEventListener('load', ()=>{
   #kzakStamp b{font-weight:700} #kzakStamp small{opacity:.8}
 </style>
 <div id="kzakStamp" role="status" aria-live="polite">
-  <div><b>Release:</b> Bullwinkle-v1.052</div>
+  <div><b>Release:</b> Bullwinkle-v1.053</div>
   <div><small id="stampTime"></small></div>
   <div><small>index-048-restore.html</small></div>
 </div>
@@ -433,7 +433,7 @@ window.addEventListener('load', ()=>{
 
 
 <script>
-// === Bullwinkle-v1.052 • Station Breaks: indicator-only, safe sequencing ===
+// === Bullwinkle-v1.053 • Station Breaks: indicator-only, safe sequencing ===
 (function(){
   const audio = document.getElementById('audio');
   if (!audio) return;
@@ -500,6 +500,53 @@ window.addEventListener('load', ()=>{
     // Otherwise let existing logic advance naturally
   }, {capture:false});
 
+})();
+</script>
+
+
+<script>
+// === Bullwinkle-v1.053 • Respect Pause (no auto-resume, no auto-advance while paused) ===
+(function(){
+  const audio = document.getElementById('audio');
+  if (!audio) return;
+
+  // Track whether the user explicitly paused
+  window.KZAK_USER_HOLDS = !!window.KZAK_USER_HOLDS;
+
+  audio.addEventListener('pause', () => {
+    // If paused by user interaction, set hold
+    window.KZAK_USER_HOLDS = true;
+  });
+
+  audio.addEventListener('play', () => {
+    // Clearing hold when user intentionally plays (Start/Resume)
+    window.KZAK_USER_HOLDS = false;
+  });
+
+  // Intercept any automatic attempts to start playback while on hold
+  // If some other script calls audio.play(), immediately pause it.
+  audio.addEventListener('playing', () => {
+    if (window.KZAK_USER_HOLDS) {
+      setTimeout(() => { try { audio.pause(); } catch(e){} }, 0);
+    }
+  });
+
+  // Patch next() to respect holds if it exists
+  if (typeof window.next === 'function' && !window.next.__kzak_patched__) {
+    const _next = window.next;
+    window.next = function(){
+      if (window.KZAK_USER_HOLDS) return; // don't advance while paused
+      return _next.apply(this, arguments);
+    };
+    window.next.__kzak_patched__ = true;
+  }
+
+  // Also guard our station-break auto-advance if present
+  document.addEventListener('kzak:advanceIfAllowed', (e) => {
+    if (window.KZAK_USER_HOLDS) {
+      e.stopImmediatePropagation();
+    }
+  }, true);
 })();
 </script>
 
