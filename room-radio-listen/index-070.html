@@ -9,13 +9,11 @@
 
   <style>
     :root{--ink:#e6e9ef;--muted:#9aa4b2;--line:#24324c;--bg:#0b1220;--glass:rgba(14,22,40,.82)}
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0}
+    *{box-sizing:border-box} html,body{height:100%;margin:0}
     body{color:var(--ink);background:#0b1220 url('Media/RadioMusicListening.jpg') center/cover fixed no-repeat;
          font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
     .wrap{max-width:1200px;margin:0 auto;padding:20px}
-    header{display:flex;gap:14px;align-items:center}
-    h1{margin:0;font-size:28px}
+    header{display:flex;gap:14px;align-items:center} h1{margin:0;font-size:28px}
     .muted{color:var(--muted)}
     .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
     .btn{background:#0f1728;border:1px solid var(--line);color:var(--ink);padding:10px 14px;border-radius:10px;cursor:pointer}
@@ -46,16 +44,15 @@
     #toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0f1728;border:1px solid var(--line);
            padding:8px 12px;border-radius:10px;display:none;z-index:60}
     #toast.show{display:block}
-    /* About badge */
+    /* About badge (single, clean) */
     #aboutBox{position:fixed;right:10px;bottom:10px;z-index:40;background:rgba(0,0,0,.7);border:1px solid var(--line);
               border-radius:10px;padding:10px 12px;font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
     #aboutBtn{position:fixed;top:10px;right:10px;z-index:41}
-    /* kill any legacy “UNCLE” badges that might be left in the DOM */
-    .build-badge,[data-build-badge],.uncle-build,[data-uncle]{display:none!important}
+    /* nuke ANY legacy badges/pills the old builds injected */
+    .build-badge,[data-build-badge],.uncle-build,[data-uncle],.release-badge{display:none!important}
   </style>
 </head>
 <body>
-
 <div class="wrap">
   <header>
     <img src="Media/frasier.png" alt="" width="120" height="72" style="border-radius:12px;border:1px solid var(--line)">
@@ -148,10 +145,9 @@
   </section>
 </div>
 
-<!-- audio elements -->
+<!-- audio -->
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
 <audio id="introAudio" preload="auto" src="Media/KZAK-Welcome.mp3"></audio>
-<audio id="breakAudio" preload="auto"></audio>
 
 <!-- welcome -->
 <div id="welcome" class="overlay show">
@@ -171,184 +167,151 @@
 
 <div id="toast"></div>
 
-<!-- playlists (classic globals) -->
+<!-- playlists (external) -->
 <script src="playlist-rock.js" defer></script>
 <script src="playlist-heavy.js" defer></script>
 <script src="playlist-mellow.js" defer></script>
-<!-- optional likes -->
+<!-- likes (optional) -->
 <script src="kzak-likes-059.js" defer></script>
 
 <script>
-/* ------------------ small helpers ------------------ */
+/* ===== helpers ===== */
 const $=s=>document.querySelector(s);
-const onAir=$('#onAir'), audio=$('#audio'), intro=$('#introAudio'), breakAudio=$('#breakAudio');
+const onAir=$('#onAir'), audio=$('#audio'), intro=$('#introAudio');
 const startBtn=$('#startBtn'), pauseBtn=$('#pauseBtn'), nextBtn=$('#nextBtn'), prevBtn=$('#prevBtn');
 const loopBtn=$('#loopBtn'), shuffleBtn=$('#shuffleBtn'), muteBtn=$('#muteBtn');
 const vol=$('#vol'), seek=$('#seek'); const plistBody=$('#plistBody');
 const tpos=$('#tpos'), tmax=$('#tmax'), tcount=$('#tcount'), countRight=$('#countRight');
 const meta=$('#meta'), art=$('#art'), titleEl=$('#title'), story=$('#story'), genreNow=$('#genreNow');
-const toastEl=$('#toast'); function toast(m){toastEl.textContent=m;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),1500)}
+const toastEl=$('#toast'); function toast(m){toastEl.textContent=m;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),1400)}
 function fmt(t){t|=0;const m=(t/60)|0,s=(t%60)|0;return m+':'+(s<10?'0':'')+s}
 function pathToUrl(p){return String(p||'').split('/').map(encodeURIComponent).join('/')}
 
-/* ------------------ state ------------------ */
+/* ===== state ===== */
 const LISTS = {
   'Middle Ground Rock': ()=> (window.PLAYLIST_ROCK   || []),
   'Heavy and Metal'   : ()=> (window.PLAYLIST_HEAVY  || []),
   'Mellow Tunes'      : ()=> (window.PLAYLIST_MELLOW || []),
 };
-let GENRE = 'Middle Ground Rock';
-let PLAYLIST = [];
-let idx = 0, isPlaying=false, isLoading=false, isLoop=false, isShuffle=false;
-let shuffleOrder=[], shufflePos=0;
-let metaTimer=null, autoSkipTimer=null;
+let GENRE='Middle Ground Rock';
+let PLAYLIST=[]; let idx=0, isPlaying=false, isLoading=false, isLoop=false, isShuffle=false;
+let shuffleOrder=[], shufflePos=0; let metaTimer=null, autoSkipTimer=null;
 
-/* ------------------ binder ------------------ */
+/* ===== legacy badge cleanup (DOM) ===== */
+(function(){
+  document.querySelectorAll('.build-badge,[data-build-badge],.uncle-build,[data-uncle],.release-badge')
+    .forEach(n=>{ try{ n.remove(); }catch{} });
+})();
+
+/* ===== binder & UI ===== */
 function normalizeTrack(t){
-  const n = Object.assign({ title:'Untitled', file:'', image:'', genre:GENRE }, t||{});
-  if (!n.file && n.title) n.file = 'Media/' + n.title + '.mp3';
+  const n=Object.assign({ title:'Untitled', file:'', image:'', genre:GENRE, story:'' }, t||{});
+  if (!n.file && n.title) n.file='Media/'+n.title+'.mp3';
   return n;
 }
 function bindFromGenre(g){
-  GENRE = g;
-  const src = (LISTS[g] ? LISTS[g]() : []).map(normalizeTrack);
-  PLAYLIST = src;
-  idx = 0;
-  tmax.textContent = PLAYLIST.length;
-  tcount.textContent = PLAYLIST.length;
-  countRight.textContent = PLAYLIST.length + ' items';
-  buildList();
-  updateGenreNow();
+  GENRE=g;
+  const src=(LISTS[g]?LISTS[g]():[]).map(normalizeTrack);
+  PLAYLIST=src; idx=0;
+  tmax.textContent=PLAYLIST.length;
+  tcount.textContent=PLAYLIST.length;
+  countRight.textContent=PLAYLIST.length+' items';
+  buildList(); updateGenreNow();
 }
-function updateGenreNow(){
-  const tr = PLAYLIST[idx]; genreNow.textContent = 'Genre: ' + (tr?.genre || GENRE);
-}
+function updateGenreNow(){ const tr=PLAYLIST[idx]; genreNow.textContent='Genre: '+(tr?.genre||GENRE); }
 
-/* ------------------ UI list ------------------ */
 function buildList(){
-  plistBody.innerHTML = '';
+  plistBody.innerHTML='';
   PLAYLIST.forEach((tr,i)=>{
-    const row = document.createElement('div');
-    row.className = 'item'; row.dataset.i=i;
-    row.innerHTML = `<div><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}
-                      <div class="tiny">${tr.file}</div></div>
-                     <a class="tiny" href="javascript:void(0)" data-share="${i}">Share</a>`;
-    row.addEventListener('click',e=>{
-      if (e.target && e.target.getAttribute('data-share')) return;
-      load(i,true);
-    });
-    row.querySelector('[data-share]').addEventListener('click',e=>{
-      e.stopPropagation(); shareTrack(i);
-    });
+    const row=document.createElement('div'); row.className='item'; row.dataset.i=i;
+    row.innerHTML=`<div><strong>${String(i+1).padStart(3,'0')}</strong> ${tr.title}
+                    <div class="tiny">${tr.file}</div></div>
+                   <a class="tiny" href="javascript:void(0)" data-share="${i}">Share</a>`;
+    row.addEventListener('click',e=>{ if(e.target && e.target.getAttribute('data-share')) return; load(i,true); });
+    row.querySelector('[data-share]').addEventListener('click',e=>{ e.stopPropagation(); shareTrack(i); });
     plistBody.appendChild(row);
   });
   markActive();
 }
-function markActive(){
-  [...plistBody.children].forEach(n=>n.classList.toggle('active', Number(n.dataset.i)===idx));
-}
+function markActive(){ [...plistBody.children].forEach(n=>n.classList.toggle('active', Number(n.dataset.i)===idx)); }
 
-/* ------------------ shuffle helpers ------------------ */
-function makeShuffle(anchor){
-  const n=PLAYLIST.length; const arr=Array.from({length:n},(_,i)=>i);
+/* shuffle helpers */
+function makeShuffle(anchor){ const n=PLAYLIST.length; const arr=Array.from({length:n},(_,i)=>i);
   for(let i=n-1;i>0;i--){const j=(Math.random()*(i+1))|0; [arr[i],arr[j]]=[arr[j],arr[i]]}
-  shuffleOrder = arr; shufflePos = arr.indexOf(anchor>=0?anchor:idx); if (shufflePos<0) shufflePos=0;
+  shuffleOrder=arr; shufflePos=arr.indexOf(anchor>=0?anchor:idx); if(shufflePos<0) shufflePos=0;
 }
 function nextShuffled(){ if(!shuffleOrder.length) makeShuffle(idx); shufflePos=(shufflePos+1)%shuffleOrder.length; return shuffleOrder[shufflePos] }
 function prevShuffled(){ if(!shuffleOrder.length) makeShuffle(idx); shufflePos=(shufflePos-1+shuffleOrder.length)%shuffleOrder.length; return shuffleOrder[shufflePos] }
 
-/* ------------------ load / play ------------------ */
-function refreshTime(){
-  const d=isFinite(audio.duration)?audio.duration:0, ct=isFinite(audio.currentTime)?audio.currentTime:0;
+/* ===== load / play ===== */
+function refreshTime(){ const d=isFinite(audio.duration)?audio.duration:0, ct=isFinite(audio.currentTime)?audio.currentTime:0;
   $('#elapsed').textContent=fmt(ct|0); $('#remaining').textContent=d?('-'+fmt(Math.max(d-ct,0)|0)):'-0:00';
-  if (d) seek.value=Math.round((ct/d)*1000);
+  if(d) seek.value=Math.round((ct/d)*1000);
 }
 function clearTimers(){ if(metaTimer){clearTimeout(metaTimer);metaTimer=null} if(autoSkipTimer){clearTimeout(autoSkipTimer);autoSkipTimer=null} }
-function autoSkip(msg='Problem playing file'){ clearTimers(); meta.textContent=msg+' — skipping'; autoSkipTimer=setTimeout(()=>next(), 1500) }
+function autoSkip(msg='Problem playing file'){ clearTimers(); meta.textContent=msg+' — skipping'; autoSkipTimer=setTimeout(()=>next(),1200) }
 
-async function load(i, autoplay=false){
-  if (!PLAYLIST.length) return;
-  clearTimers();
-  isLoading=true;
-  idx = (i+PLAYLIST.length)%PLAYLIST.length;
-  const tr = PLAYLIST[idx];
+async function load(i,autoplay=false){
+  if(!PLAYLIST.length) return;
+  clearTimers(); isLoading=true; idx=(i+PLAYLIST.length)%PLAYLIST.length;
+  const tr=PLAYLIST[idx];
 
-  titleEl.textContent = tr.title;
-  story.textContent = tr.story || '';
-  art.src = tr.image || 'Media/default.jpg';
-  tpos.textContent = idx+1; markActive(); updateGenreNow();
-  meta.textContent = 'Queued';
+  titleEl.textContent=tr.title; story.textContent=tr.story||''; art.src=tr.image||'Media/default.jpg';
+  tpos.textContent=idx+1; markActive(); updateGenreNow(); meta.textContent='Queued';
 
-  // update deep link
-  try{ const u=new URL(location); u.searchParams.set('t', idx); history.replaceState({},'',u) }catch{}
+  try{ const u=new URL(location); u.searchParams.set('t',idx); history.replaceState({},'',u) }catch{}
 
-  // choose candidate file
-  const candidates = [];
-  if (tr.file) candidates.push(tr.file);
-  // common fallbacks derived from title
-  if (tr.title){ candidates.push('Media/'+tr.title+'.mp3'); }
-  // try first that loads
-  let chosen=null;
-  for (const c of candidates){
-    try{
-      const r = await fetch(pathToUrl(c), {method:'HEAD', cache:'no-store'});
-      if (r.ok){ chosen=c; break; }
-    }catch{}
-  }
-  if (!chosen){ isLoading=false; return autoSkip('Audio not found'); }
+  // No HEAD probe; try declared file then title-derived fallback.
+  const candidates=[]; if(tr.file) candidates.push(tr.file);
+  if(tr.title) candidates.push('Media/'+tr.title+'.mp3');
+  const chosen=candidates.find(Boolean) || '';
+  if(!chosen){ isLoading=false; return autoSkip('No audio path'); }
 
-  // load/play
   seek.value=0; $('#elapsed').textContent='0:00'; $('#remaining').textContent='-0:00';
-  audio.src = pathToUrl(chosen);
-  audio.load();
-  metaTimer = setTimeout(()=>autoSkip('Timeout waiting for media'), 12000);
-  audio.onceLoaded = ()=>{
-    clearTimers(); isLoading=false; meta.textContent='Ready'; if(autoplay) play();
-  };
+  audio.src=pathToUrl(chosen); audio.load();
+  metaTimer=setTimeout(()=>autoSkip('Timeout waiting for media'),12000);
+  audio.onceLoaded=()=>{ clearTimers(); isLoading=false; meta.textContent='Ready'; if(autoplay) play(); };
 }
 function play(){
-  if (isLoading) return;
-  audio.play().then(()=>{
-    isPlaying=true; onAir.classList.add('on'); startBtn.disabled=true; pauseBtn.disabled=false; meta.textContent='Playing';
-    requestAnimationFrame(function tick(){ if(isPlaying) { refreshTime(); requestAnimationFrame(tick); } });
-    // push to MediaSession/CarPlay if available
-    try{ navigator.mediaSession && (document.title = PLAYLIST[idx]?.title+' — KZAK'); }catch{}
+  if(isLoading) return;
+  audio.play().then(()=>{ isPlaying=true; onAir.classList.add('on'); startBtn.disabled=true; pauseBtn.disabled=false; meta.textContent='Playing';
+    requestAnimationFrame(function tick(){ if(isPlaying){ refreshTime(); requestAnimationFrame(tick); } });
+    try{ navigator.mediaSession && (document.title=(PLAYLIST[idx]?.title||'KZAK')+' — KZAK'); }catch{}
   }).catch(()=>toast('Playback blocked — tap Start Station'));
 }
 function pause(){ audio.pause(); isPlaying=false; onAir.classList.remove('on'); startBtn.disabled=false; pauseBtn.disabled=true; meta.textContent='Paused' }
 function next(){ load(isShuffle? nextShuffled(): idx+1, true) }
 function prev(){ load(isShuffle? prevShuffled(): idx-1, true) }
 
-/* ------------------ events ------------------ */
+/* ===== events ===== */
 audio.addEventListener('loadedmetadata', ()=>{ audio.onceLoaded && audio.onceLoaded(); audio.onceLoaded=null });
 audio.addEventListener('error', ()=>autoSkip('Audio error'));
 audio.addEventListener('timeupdate', refreshTime);
 audio.addEventListener('ended', ()=>{ if(isLoop){ audio.currentTime=0; play(); } else { next(); } });
 
 startBtn.addEventListener('click', async ()=>{
-  if ($('#welcome').classList.contains('show')) { $('#welcome').classList.remove('show'); await load(idx,true); return; }
-  if (!isPlaying){ if (!audio.src) await load(idx,true); else play(); }
+  if($('#welcome').classList.contains('show')){ $('#welcome').classList.remove('show'); await load(idx,true); return; }
+  if(!isPlaying){ if(!audio.src) await load(idx,true); else play(); }
 });
 pauseBtn.addEventListener('click', pause);
 nextBtn.addEventListener('click', next);
 prevBtn.addEventListener('click', prev);
 
-vol.addEventListener('input', ()=> audio.volume = Number(vol.value));
-muteBtn.addEventListener('click', ()=>{ audio.muted=!audio.muted; muteBtn.textContent = audio.muted ? '🔈 Unmute' : '🔇 Mute' });
-loopBtn.addEventListener('click', ()=>{ isLoop=!isLoop; loopBtn.textContent = isLoop ? '⟲ Loop: On' : '⟲ Loop' });
-shuffleBtn.addEventListener('click', ()=>{ isShuffle=!isShuffle; if(isShuffle) makeShuffle(idx); shuffleBtn.textContent = isShuffle? '🔀 Shuffle: On':'🔀 Shuffle' });
+vol.addEventListener('input', ()=> audio.volume=Number(vol.value));
+muteBtn.addEventListener('click', ()=>{ audio.muted=!audio.muted; muteBtn.textContent= audio.muted?'🔈 Unmute':'🔇 Mute' });
+loopBtn.addEventListener('click', ()=>{ isLoop=!isLoop; loopBtn.textContent= isLoop?'⟲ Loop: On':'⟲ Loop' });
+shuffleBtn.addEventListener('click', ()=>{ isShuffle=!isShuffle; if(isShuffle) makeShuffle(idx); shuffleBtn.textContent= isShuffle?'🔀 Shuffle: On':'🔀 Shuffle' });
 
-seek.addEventListener('input', e=>{ const d=audio.duration||0; if(d){ audio.currentTime = (Number(e.target.value)/1000)*d; refreshTime(); } });
+seek.addEventListener('input', e=>{ const d=audio.duration||0; if(d){ audio.currentTime=(Number(e.target.value)/1000)*d; refreshTime(); } });
 
-/* genre buttons */
 $('#genreBar').addEventListener('click', ev=>{
-  const b = ev.target.closest('.gbtn'); if(!b) return;
+  const b=ev.target.closest('.gbtn'); if(!b) return;
   $('#genreBar').querySelectorAll('.gbtn').forEach(x=>x.classList.toggle('active', x===b));
   bindFromGenre(b.dataset.genre);
-  load(0,false); // don’t auto-play until user hits Start (welcome flow)
+  load(0,false);
 });
 
-/* welcome buttons */
+/* welcome */
 $('#playWelcome').addEventListener('click', async ()=>{
   try{ startBtn.disabled=true; prevBtn.disabled=true; nextBtn.disabled=true; await intro.play();
        intro.addEventListener('ended', async ()=>{ $('#welcome').classList.remove('show'); startBtn.disabled=false; prevBtn.disabled=false; nextBtn.disabled=false; await load(0,true) }, {once:true});
@@ -368,43 +331,54 @@ async function shareTrack(i){ const u=new URL(location); u.searchParams.set('t',
 $('#shareBtn').addEventListener('click', shareStation);
 $('#shareTrackBtn').addEventListener('click', ()=>shareTrack(idx));
 
-/* likes (optional) */
+/* likes */
 $('#likeBtn').addEventListener('click', ()=>{
-  const tr = PLAYLIST[idx]; if (!tr) return;
-  if (window.KZAK_LIKES && typeof window.KZAK_LIKES.like === 'function'){
-    window.KZAK_LIKES.like(tr.title, tr.file, tr.image||'');
-    toast('Liked ♥');
-  } else {
-    toast('Likes module not present');
-  }
+  const tr=PLAYLIST[idx]; if(!tr) return;
+  if(window.KZAK_LIKES && typeof window.KZAK_LIKES.like==='function'){
+    window.KZAK_LIKES.like(tr.title, tr.file, tr.image||''); toast('Liked ♥');
+  }else{ toast('Likes module not present'); }
 });
 
-/* lobby exit (no heavy overlay to avoid hangs) */
-$('#toLobby').addEventListener('click', ()=>{
-  try{ audio.pause(); }catch{}; location.href = '../index.html';
-});
-
-/* About badge (single, clean) */
+/* ===== About — single badge ===== */
 (function(){
-  const sub = 69; // <-- bump this for each new build
-  const rel = 'Bullwinkle-v1';
-  const stamp = new Date().toLocaleString();
-  const box = $('#aboutBox');
-  const btn = $('#aboutBtn');
-  box.innerHTML = `<div><b>Release:</b> ${rel}.${String(sub).padStart(3,'0')}</div>
-                   <div class="tiny">${stamp}</div>
-                   <div class="tiny">${location.pathname.replace(/.*\//,'')}</div>`;
-  let visible = true; btn.addEventListener('click', ()=>{ visible=!visible; box.style.display = visible?'block':'none'; });
+  const sub=70, rel='Bullwinkle-v1';
+  const stamp=new Date().toLocaleString(); const box=$('#aboutBox'); const btn=$('#aboutBtn');
+  box.innerHTML=`<div><b>Release:</b> ${rel}.${String(sub).padStart(3,'0')}</div>
+                 <div class="tiny">${stamp}</div>
+                 <div class="tiny">${location.pathname.replace(/.*\//,'')}</div>`;
+  let visible=true; btn.addEventListener('click', ()=>{ visible=!visible; box.style.display=visible?'block':'none'; });
 })();
 
-/* boot: bind default genre & deep link */
-document.addEventListener('DOMContentLoaded', ()=>{
+/* ===== boot: wait for playlists, then bind ===== */
+async function ensurePlaylists(timeoutMs=8000){
+  const start=performance.now();
+  while(performance.now()-start < timeoutMs){
+    const ok = Array.isArray(window.PLAYLIST_ROCK) ||
+               Array.isArray(window.PLAYLIST_HEAVY)||
+               Array.isArray(window.PLAYLIST_MELLOW)||
+               Array.isArray(window.PLAYLIST);
+    if(ok) return true;
+    await new Promise(r=>setTimeout(r,50));
+  }
+  return false;
+}
+
+document.addEventListener('DOMContentLoaded', async ()=>{
+  // Hide any legacy badges for good measure
+  document.querySelectorAll('.build-badge,[data-build-badge],.uncle-build,[data-uncle],.release-badge')
+    .forEach(n=>{ try{ n.remove(); }catch{} });
+
+  const ready = await ensurePlaylists();
+  if(!ready){
+    console.warn('[KZAK] Playlist scripts not detected – check 404s/network.');
+  }
   bindFromGenre('Middle Ground Rock');
+
   const t = Number(new URLSearchParams(location.search).get('t'));
-  if (Number.isFinite(t) && t>=0 && t<PLAYLIST.length) idx=t|0;
+  if(Number.isFinite(t) && t>=0 && t<PLAYLIST.length) idx=t|0;
+
   buildList(); markActive(); updateGenreNow();
 });
 </script>
 </body>
 </html>
-
