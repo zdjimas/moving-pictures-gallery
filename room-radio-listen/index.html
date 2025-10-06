@@ -423,10 +423,57 @@ window.addEventListener('load', ()=>{
     background:rgba(0,0,0,.70);color:#fff;border-radius:10px;padding:10px 12px;backdrop-filter:blur(3px)}
   #kzakStamp b{font-weight:700} #kzakStamp small{opacity:.8}
 </style>
+
+<!-- === STARTUP DEFAULT + SAFETY FALLBACK (v049) === -->
+<script>
+window.addEventListener('load', () => {
+  // 1) Provide buildListForGenre if compat helper is missing
+  if (typeof window.buildListForGenre !== 'function') {
+    window.buildListForGenre = function(name) {
+      const rock   = window.PLAYLIST_ROCK   || [];
+      const heavy  = window.PLAYLIST_HEAVY  || [];
+      const mellow = window.PLAYLIST_MELLOW || [];
+      const all    = rock.concat(heavy, mellow);
+      switch (name) {
+        case 'Heavy and Metal':    return heavy;
+        case 'Middle Ground Rock': return rock;  // default bucket
+        case 'Mellow Tunes':       return mellow;
+        case 'ALL':
+        default:                   return all;
+      }
+    };
+  }
+
+  // 2) Initialize default genre on first paint if list is empty
+  if (!Array.isArray(window.PLAYLIST) || !window.PLAYLIST.length) {
+    const defaultGenre = 'Middle Ground Rock';
+    window.PLAYLIST = window.buildListForGenre(defaultGenre);
+    window.PLAYLIST && (PLAYLIST = window.PLAYLIST);
+
+    // Reflect active state in UI
+    const bar = document.getElementById('genreBar');
+    if (bar) {
+      [...bar.querySelectorAll('.gbtn')].forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.genre === defaultGenre);
+      });
+    }
+    const gNow = document.getElementById('genreNow');
+    if (gNow) gNow.textContent = 'Genre: ' + defaultGenre;
+
+    // Build list and honor deep-link ?t=N if valid
+    try { buildList(); } catch(e){}
+    const p = new URLSearchParams(location.search);
+    const ti = parseInt(p.get('t'), 10);
+    const startIdx = Number.isFinite(ti) && ti >= 0 && ti < (window.PLAYLIST?.length||0) ? ti : 0;
+    try { load(startIdx, false); } catch(e){}
+  }
+});
+</script>
+<!-- === END STARTUP DEFAULT + SAFETY FALLBACK === -->
 <div id="kzakStamp" role="status" aria-live="polite">
-  <div><b>Release:</b> Bullwinkle-v1.048</div>
+  <div><b>Release:</b> Bullwinkle-v1.049</div>
   <div><small id="stampTime"></small></div>
-  <div><small>index-048-restore.html</small></div>
+  <div><small>index-049.html</small></div>
 </div>
 <script>document.getElementById('stampTime').textContent=new Date().toLocaleString();</script>
 
