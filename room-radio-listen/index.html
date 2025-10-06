@@ -3307,7 +3307,7 @@ document.addEventListener('click', (ev)=>{
   color:#fff;border:1px solid rgba(255,255,255,.25);padding:6px 10px;border-radius:10px;
   font:12px/1 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
 </style>
-<div id="releaseBadge">Release: Bullwinkle-v1.055</div>
+<div id="releaseBadge">Release: Bullwinkle-v1.056</div>
 
 <script>
 // === Bullwinkle-v1.055 • Fixes: playlist loads on startup; genre click refreshes list; adds ALL ===
@@ -3384,6 +3384,147 @@ document.addEventListener('click', (ev)=>{
     try {
       window.applyGenre('ALL');
     } catch(e){ console.warn('startup genre init failed', e); }
+  });
+})();
+</script>
+
+
+<script>
+// === Bullwinkle-v1.056 • ALL button logic, robust genre matching, correct counts, single ABOUT/Release badge ===
+(function(){
+  function $(sel, root){ return (root||document).querySelector(sel); }
+  function $all(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
+  function byId(id){ return document.getElementById(id); }
+
+  // 1) Ensure only one Release/ABOUT badge shows (remove older duplicates if any)
+  try {
+    $all('#releaseBadge').slice(1).forEach(el => el.remove());
+    // Remove very old "Release: Bullwinkle-v1.038" overlays if present
+    $all('.release, .about, [data-release-badge]').forEach(el => {
+      if (el !== byId('releaseBadge') && /Bullwinkle-v1\.(0)?38/.test(el.textContent||'')) el.remove();
+    });
+  } catch(e){}
+
+  // 2) Source resolver: prefer external lists if present, else fall back to MASTER/PLAYLIST
+  function getSources(){
+    const rock   = Array.isArray(window.PLAYLIST_ROCK)   ? window.PLAYLIST_ROCK   : [];
+    const heavy  = Array.isArray(window.PLAYLIST_HEAVY)  ? window.PLAYLIST_HEAVY  : [];
+    const mellow = Array.isArray(window.PLAYLIST_MELLOW) ? window.PLAYLIST_MELLOW : [];
+    const master = Array.isArray(window.PLAYLIST_MASTER) ? window.PLAYLIST_MASTER :
+                   (Array.isArray(window.PLAYLIST) ? window.PLAYLIST.slice() : []);
+    // If any externals exist, prefer them; else use master
+    const anyExternal = rock.length || heavy.length || mellow.length;
+    return anyExternal ? {rock, heavy, mellow, all:[...rock, ...heavy, ...mellow]} :
+                         {rock:master, heavy:master.filter(t=>/heavy/i.test(t.genre||'')),
+                          mellow:master.filter(t=>/mellow/i.test(t.genre||'')), all:master};
+  }
+
+  // 3) Robust genre matcher (handles synonyms/spacing)
+  function norm(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,''); }
+  function genreMatches(trackGenre, targetName){
+    const tg = norm(trackGenre);
+    const tn = norm(targetName);
+    if (!tn || tn==='all') return true;
+    const synonyms = {
+      'heavyandmetal': ['heavy','metal','heavymetal','heavyandmetal'],
+      'middlegroundrock': ['middlegroundrock','rock','altrock','classicrock','modernrock'],
+      'mellowtunes': ['mellow','mellowtunes','chill','softrock']
+    };
+    for (const [canon, list] of Object.entries(synonyms)){
+      if (list.includes(tn)) return list.includes(tg) || tg.includes(list[0]) || tg.includes(canon);
+    }
+    return tg===tn || tg.includes(tn);
+  }
+
+  function updateCounts(len){
+    const tmax = byId('tmax'); if (tmax) tmax.textContent = len;
+    const tcount = byId('tcount'); if (tcount) tcount.textContent = len;
+    const countRight = byId('countRight'); if (countRight) countRight.textContent = (len)+' items';
+    // Common header counter patterns
+    $all('.count, .playlist-count, [data-count-target="playlist"]').forEach(el => {
+      // Avoid overwriting unrelated counters
+      if (/track/i.test(el.textContent||'') || /item/i.test(el.textContent||'')) {
+        el.textContent = (String(len)+' tracks');
+      }
+    });
+    // If there's a header like "Playlist 0 tracks"
+    const hd = $('.card .hd .title, .playlist .hd, .card .hd'); 
+    if (hd) {
+      const txt = hd.textContent||'';
+      if (/Playlist/i.test(txt)) {
+        hd.textContent = 'Playlist   ' + len + ' tracks';
+      }
+    }
+  }
+
+  // 4) Build list fallback if missing (keeps your styling)
+  if (typeof window.buildList !== 'function') {
+    window.buildList = function(){
+      const body = byId('plistBody');
+      if(!body) return;
+      body.innerHTML = '';
+      (window.PLAYLIST || []).forEach(function(tr, i){
+        const row = document.createElement('div');
+        row.className = 'item' + (i===window.index?' active':'');
+        row.dataset.idx = i;
+        row.innerHTML = '<div><div>' + String(i+1).padStart(3,'0') + ' ' + (tr.title||'—') + '</div>' +
+                        '<div class="meta-genre tiny">' + (tr.genre||'') + '</div>' +
+                        '<div class="tiny muted">' + (tr.file||'') + '</div></div>' +
+                        '<div class="tiny right"></div>';
+        row.addEventListener('click', function(){
+          if (typeof window.load === 'function') window.load(i, true);
+        });
+        body.appendChild(row);
+      });
+      updateCounts((window.PLAYLIST||[]).length);
+    };
+  }
+
+  // 5) Apply genre with external lists + robust match + counts
+  window.applyGenre = function(name){
+    const srcs = getSources();
+    let list;
+    if (!name || name==='ALL') {
+      list = srcs.all.slice();
+    } else if (norm(name).startsWith('heavy')) {
+      list = (srcs.heavy.length ? srcs.heavy : srcs.all.filter(t=>genreMatches(t.genre, 'heavy')));
+    } else if (norm(name).includes('mellow')) {
+      list = (srcs.mellow.length ? srcs.mellow : srcs.all.filter(t=>genreMatches(t.genre, 'mellow')));
+    } else {
+      // middle ground / rock bucket
+      list = (srcs.rock.length ? srcs.rock : srcs.all.filter(t=>genreMatches(t.genre, 'middlegroundrock')));
+    }
+    window.PLAYLIST = list;
+    if (typeof window.buildList === 'function') window.buildList();
+    if (typeof window.load === 'function') window.load(0, false);
+    // UI state
+    try {
+      const gNow = byId('genreNow'); if (gNow) gNow.textContent = 'Genre: ' + (name||'ALL');
+      $all('#genreBar .gbtn').forEach(b=>b.classList.toggle('active', b.dataset.genre === (name||'ALL')));
+    } catch(e){}
+  };
+
+  // 6) Ensure ALL button exists and is wired
+  const bar = byId('genreBar');
+  if (bar && !bar.querySelector('[data-genre="ALL"]')){
+    const allBtn = document.createElement('button');
+    allBtn.className = 'gbtn';
+    allBtn.type = 'button';
+    allBtn.dataset.genre = 'ALL';
+    allBtn.textContent = 'ALL';
+    bar.insertBefore(allBtn, bar.firstChild);
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.gbtn');
+    if (!btn || !btn.dataset.genre) return;
+    e.preventDefault();
+    window.applyGenre(btn.dataset.genre);
+  });
+
+  // 7) Initialize to ALL on first paint so the list is never empty
+  window.addEventListener('load', () => {
+    try { window.applyGenre('ALL'); } catch(e){ console.warn('init ALL failed', e); }
   });
 })();
 </script>
