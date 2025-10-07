@@ -69,13 +69,7 @@
     #genreCallout{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;justify-content:flex-start}
   </style>
 
-  <script>window.DEFAULT_IMG = 'Media/default.jpg';function updateShuffleLabel(){
-    try {
-      const btn = document.querySelector('[data-role="shuffle"]') || document.getElementById('shuffle') || document.querySelector('.btn-shuffle');
-      if (btn) btn.textContent = isShuffle ? 'Shuffle: On' : 'Shuffle: Off';
-    } catch {}
-  }
-</script>
+  <script>window.DEFAULT_IMG = 'Media/default.jpg';</script>
   <script src="playlist-heavy.classic.js?v=081"></script>
   <script src="playlist-mellow.classic.js?v=081"></script>
   <script src="playlist-rock.classic.js?v=081"></script>
@@ -244,8 +238,7 @@ const countRight = document.getElementById('countRight');
 let idx = 0;
 let isPlaying = false;
 let isLoop = false;
-let \1
-  updateShuffleLabel();
+let isShuffle = false;
 let breaksEnabled = true;
 
 function updateCounts(){
@@ -333,20 +326,40 @@ function pause(){
   pauseBtn.disabled = true;
   metaEl.textContent = 'Paused';
 }
-function pickRandomIndexDifferentFrom(current, listLen){
-    if (listLen <= 1) return current;
-    let i;
-    do { i = (Math.random() * listLen) | 0; } while (i === current);
-    return i;
-  }
 
-function next() {
-if (isShuffle){
-      const i = pickRandomIndexDifferentFrom(idx, LIST.length);
-      load(i, true);
-    } else {
-      load(idx + 1, true);
-    }
+function pickRandomIndexDifferentFrom(current, listLen){
+  if (!Number.isFinite(listLen) || listLen <= 1) return current;
+  let i;
+  do { i = (Math.random() * listLen) | 0; } while (i === current);
+  return i;
+}
+function next(){
+  if (isShuffle){
+    const i = pickRandomIndexDifferentFrom(idx, LIST.length);
+    load(i, true);
+  } else {
+    load(idx + 1, true);
+  }
+}
+function prev(){
+  if (isShuffle){
+    const i = pickRandomIndexDifferentFrom(idx, LIST.length);
+    load(i, true);
+  } else {
+    load(idx - 1, true);
+  }
+}
+
+
+audio.addEventListener('timeupdate', refreshTime);
+audio.addEventListener('ended', () => {
+  onAir.classList.remove('on'); isPlaying=false;
+  if (isLoop){ audio.currentTime=0; play(); return; }
+  if (breaksEnabled){
+    playBreakThen(() => next());
+  }else{
+    next();
+  }
 });
 
 startBtn.addEventListener('click', () => {
@@ -369,8 +382,7 @@ loopBtn.addEventListener('click', () => {
   loopBtn.textContent = isLoop ? '⟲ Loop: On' : '⟲ Loop';
 });
 shuffleBtn.addEventListener('click', () => {
-  \1
-  updateShuffleLabel();
+  isShuffle = !isShuffle;
   shuffleBtn.textContent = isShuffle ? '🔀 Shuffle: On' : '🔀 Shuffle';
 });
 seek.addEventListener('input', e => {
@@ -553,5 +565,79 @@ load(0, false);
   }catch{}
 })();
 </script>
+
+<!-- ABOUT / Release Stamp (Bullwinkle-v1 with 3-digit subversion) -->
+<style>
+  #kzakTestBox{position:fixed;right:10px;bottom:10px;z-index:9999;
+    font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:rgba(0,0,0,.70);color:#fff;border-radius:10px;padding:10px 12px;backdrop-filter:blur(3px)}
+  #kzakTestBox b{font-weight:700}
+  #kzakTestBox small{opacity:.8}
+  .kzak-about-btn{font:600 12px/1 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    letter-spacing:.02em;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.25);
+    background:rgba(0,0,0,.6);color:#fff;cursor:pointer}
+  .kzak-about-fallback{position:fixed;top:10px;right:10px;z-index:10000}
+</style>
+
+<div id="kzakTestBox" aria-live="polite" aria-label="Build stamp"></div>
+
+<script>
+(function(){
+  // === Release constants (bump SUBVER each build) ===
+  const RELEASE   = 'Bullwinkle-v1';
+  const SUBVER    = 95; // -> shows ".095"
+  const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
+
+  // Format 3-digit subversion
+  const subStr = String(Math.max(0, Math.min(999, SUBVER))).padStart(3, '0');
+  const releaseId = `${RELEASE}.${subStr}`;
+
+  // Render box (create if missing)
+  let box = document.getElementById('kzakTestBox');
+  if (!box) { box = document.createElement('div'); box.id='kzakTestBox'; document.body.appendChild(box); }
+  box.innerHTML =
+    `<div><b>Release:</b> ${releaseId}</div>
+     <div><small>${new Date(BUILD_UTC).toLocaleString()}</small></div>
+     <div><small>${location.pathname.replace(/.*\//,'')}</small></div>`;
+
+  // Ensure ABOUT button exists; mount if missing
+  (function ensureAboutButton(){
+    if (document.getElementById('kzakAboutBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'kzakAboutBtn';
+    btn.className = 'kzak-about-btn';
+    btn.type = 'button';
+    btn.textContent = 'ABOUT';
+
+    const targets = [
+      document.getElementById('toolbar'),
+      document.getElementById('controls'),
+      document.querySelector('.toolbar'),
+      document.querySelector('.controls'),
+      document.querySelector('header'),
+    ];
+    const host = targets.find(Boolean);
+    if (host) { btn.style.marginLeft = '8px'; host.appendChild(btn); }
+    else { btn.classList.add('kzak-about-fallback'); document.body.appendChild(btn); }
+
+    // Toggle behavior with persistence
+    const KEY = 'kzak.about.visible';
+    function apply(show){
+      box.style.display = show ? 'block' : 'none';
+      btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+      try { localStorage.setItem(KEY, show ? '1' : '0'); } catch(_){}
+    }
+    let saved = null; try { saved = localStorage.getItem(KEY); } catch(_){}
+    apply(saved !== '0'); // default visible
+    btn.addEventListener('click', () => apply(btn.getAttribute('aria-pressed') !== 'true'));
+  })();
+
+  // Also mirror into document.title for quick tab recognition
+  if (!document.title.includes(releaseId)) {
+    document.title = `${document.title} — ${releaseId}`;
+  }
+})();
+</script>
+
 </body>
 </html>
