@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KZAK • Bullwinkle‑v1.091</title>
+  <style>
+    :root{
+      --bg:#0b0f16;--panel:#121827;--ink:#e8edf7;--muted:#9fb0c8;--accent:#82cfff;
+      --ok:#27d07d;--warn:#ffb74d;--danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:var(--bg);color:var(--ink);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
+      line-height:1.4;
+    }
+    header{
+      display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #1d2433;
+      background:linear-gradient(180deg,#0d1422,transparent);
+    }
+    header img.banner{width:56px;height:56px;object-fit:cover;border-radius:10px;box-shadow:0 4px 16px #0007}
+    header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
+    header .sub{font-size:12px;color:var(--muted)}
+    #statusRow{display:flex;align-items:center;gap:10px;margin-left:auto}
+    .lamp{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-weight:600;font-size:12px;border:1px solid #22314a}
+    .onair{background:#10241d;color:#9ff0c6;border-color:#1d3d32}
+    .break{background:#2a1d0c;color:#ffd59e;border-color:#4a311d}
+    .hidden{display:none!important}
+    main{display:grid;grid-template-columns:340px 1fr;gap:16px;padding:16px}
+    aside, section.panel{background:var(--panel);border:1px solid #1d2433;border-radius:14px;box-shadow:0 8px 24px #0006}
+    aside{display:flex;flex-direction:column;overflow:hidden;min-height:520px}
+    .artwrap{position:relative}
+    .artwrap img{width:100%;height:220px;object-fit:cover;border-bottom:1px solid #1d2433}
+    .meta{padding:12px 12px 6px}
+    .title{font-weight:700}
+    .meta .small{color:var(--muted);font-size:12px;margin-top:2px}
+    .transport{display:flex;flex-wrap:wrap;gap:8px;padding:12px;border-top:1px solid #1d2433}
+    .transport button,.toolbar button{
+      appearance:none;background:#0f1524;color:var(--ink);border:1px solid #22314a;border-radius:10px;
+      padding:8px 12px;font-weight:600;font-size:13px;cursor:pointer;
+    }
+    .transport button:hover,.toolbar button:hover{background:#111a2e;border-color:#2c4468}
+    .rows{flex:1;overflow:auto}
+    .row{display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid #1b2332;cursor:pointer}
+    .row.active{background:#0f1626}
+    .row .rtitle{flex:1}
+    .row .rmeta{font-size:12px;color:var(--muted)}
+    .ranges{display:flex;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid #1d2433}
+    input[type=range]{width:100%}
+    section.panel{padding:12px;display:flex;flex-direction:column;min-height:520px}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+    .counts{margin-left:auto;color:var(--muted);font-size:12px}
+    .genrebar{display:flex;gap:8px;align-items:center;margin:6px 0 10px}
+    .genrebar .label{font-size:12px;color:var(--muted);font-weight:600;margin-right:4px}
+    .genrebar button{padding:6px 10px}
+    .sharebar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .welcomeOverlay{
+      position:fixed;inset:0;background:linear-gradient(180deg,#0c1220cc,#0c1220f0),url('Media/RadioMusicListening.jpg') center/cover no-repeat;
+      display:flex;align-items:center;justify-content:center;z-index:9999;
+    }
+    .wcard{background:#10192b;border:1px solid #22314a;border-radius:16px;padding:20px;max-width:520px;width:92%;
+      box-shadow:0 10px 30px #0008;text-align:center}
+    .wcard h2{margin:6px 0 12px}
+    .wbuttons{display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+    .muted{color:var(--muted)}
+    footer{padding:12px 16px;border-top:1px solid #1d2433;color:var(--muted);font-size:12px}
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="welcomeOverlay" id="welcome">
+    <div class="wcard">
+      <h2>KZAK • Frasier‑Style Free Radio</h2>
+      <p class="muted">Welcome to Bullwinkle‑v1.091. Start by playing the short welcome or skip straight to the station.</p>
+      <div class="wbuttons">
+        <button id="btnPlayWelcome">Play Welcome</button>
+        <button id="btnSkipWelcome">Skip</button>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <img class="banner" id="banner" src="Media/frasier.jpg" alt="Frasier" onerror="this.onerror=null;this.src='Media/frasier.png'">
+    <div>
+      <h1>KZAK • Bullwinkle‑v1</h1>
+      <div class="sub">v0.91 — Classic playlists • Media Session • Station breaks</div>
+    </div>
+    <div id="statusRow">
+      <span id="lampOnAir" class="lamp onair hidden">● ON AIR</span>
+      <span id="lampBreak" class="lamp break hidden">● STATION BREAK</span>
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <div class="artwrap">
+        <img id="art" src="Media/default.jpg" alt="Artwork">
+      </div>
+      <div class="meta">
+        <div class="title" id="songTitle">—</div>
+        <div class="small" id="songInfo">—</div>
+      </div>
+      <div class="transport">
+        <button id="btnStart">Start Station</button>
+        <button id="btnPause">Pause Station</button>
+        <button id="btnPrev">◀︎ Prev</button>
+        <button id="btnNext">Next ▶︎</button>
+        <button id="btnBreak">Force Break</button>
+      </div>
+      <div class="ranges">
+        <span id="posLabel" class="muted" style="min-width:72px;display:inline-block">0:00</span>
+        <input type="range" id="seek" min="0" max="1000" value="0" step="1" />
+        <span id="durLabel" class="muted" style="min-width:72px;display:inline-block">0:00</span>
+      </div>
+      <div class="ranges">
+        <button id="btnMute" data-role="toggle">Mute: Off</button>
+        <input type="range" id="vol" min="0" max="1" step="0.01" value="0.9" />
+        <button id="btnLoop" data-role="toggle">Loop: Off</button>
+        <button id="btnShuffle" data-role="toggle">Shuffle: Off</button>
+      </div>
+      <div class="sharebar" style="padding:10px 12px 14px">
+        <button id="btnShare">Share Station</button>
+        <button id="btnShareTrack" data-role="share-track">Share Track</button>
+      </div>
+    </aside>
+
+    <section class="panel">
+      <div class="toolbar">
+        <div class="genrebar">
+          <span class="label">Select Genre:</span>
+          <button class="gbtn" data-genre="ALL">ALL</button>
+          <button class="gbtn" data-genre="HEAVY">Heavy and Metal</button>
+          <button class="gbtn" data-genre="ROCK">Middle Ground Rock</button>
+          <button class="gbtn" data-genre="MELLOW">Mellow Tunes</button>
+        </div>
+        <div class="counts"><span id="countLabel">Track — / —</span></div>
+      </div>
+      <div id="rows" class="rows" role="listbox" aria-label="Playlist"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span>About: Bullwinkle‑v1.091 • External classic playlists • © 2025 zdjimas &amp; cjmurphy</span>
+    &nbsp;•&nbsp;<a href="../index.html">Return to Lobby</a>
+  </footer>
+
+  <!-- Guardrail: define DEFAULT_IMG before playlist scripts -->
+  <script>window.DEFAULT_IMG='Media/default.jpg';</script>
+  <script src="kzak-fallback-1087.js"></script>
+  <!-- Classic external playlists (must declare var PLAYLIST_ROCK/HEAVY/MELLOW) -->
+  <script src="playlist-rock.classic.js"></script>
+  <script src="playlist-heavy.classic.js"></script>
+  <script src="playlist-mellow.classic.js"></script>
+
+  <script>
+  (function(){
+    'use strict';
+
+    // ===== State =====
+    const audio = new Audio();
+    let LIST_ALL = [];
+    let LIST = [];
+    let idx = 0;
+    let isLoop = false;
+    let isShuffle = false;
+    let isMuted = false;
+    let breaksEnabled = true;
+    let inBreak = false;
+    let userGesture = false;
+
+    const els = {
+      art: byId('art'),
+      title: byId('songTitle'),
+      info: byId('songInfo'),
+      rows: byId('rows'),
+      count: byId('countLabel'),
+      btnPrev: byId('btnPrev'),
+      btnNext: byId('btnNext'),
+      btnStart: byId('btnStart'),
+      btnPause: byId('btnPause'),
+      btnBreak: byId('btnBreak'),
+      btnMute: byId('btnMute'),
+      btnLoop: byId('btnLoop'),
+      btnShuffle: byId('btnShuffle'),
+      vol: byId('vol'),
+      seek: byId('seek'),
+      pos: byId('posLabel'),
+      dur: byId('durLabel'),
+      lampOn: byId('lampOnAir'),
+      lampBreak: byId('lampBreak'),
+      banner: byId('banner'),
+      welcome: byId('welcome'),
+      playWelcome: byId('btnPlayWelcome'),
+      skipWelcome: byId('btnSkipWelcome'),
+      btnShare: byId('btnShare'),
+      btnShareTrack: byId('btnShareTrack'),
+    };
+
+    // Fallback banner .jpg -> .png already in markup.
+
+    // Build ALL list from classic globals
+    function normalizeEntry(e){
+      if(!e) return null;
+      return {
+        title: e.title || 'Untitled',
+        src: e.src || e.url || '',
+        art: e.art || e.cover || window.DEFAULT_IMG,
+        genre: e.genre || e.tag || '',
+        meta: e.meta || ''
+      };
+    }
+    function buildAll(){
+      LIST_ALL = []
+        .concat((window.PLAYLIST_HEAVY||[]).map(normalizeEntry).map(x=>({...x, _genre:'HEAVY'})))
+        .concat((window.PLAYLIST_ROCK||[]).map(normalizeEntry).map(x=>({...x, _genre:'ROCK'})))
+        .concat((window.PLAYLIST_MELLOW||[]).map(normalizeEntry).map(x=>({...x, _genre:'MELLOW'})))
+        .filter(x=>x && x.src);
+    }
+
+    // UI helpers
+    function byId(id){ return document.getElementById(id); }
+    function fmtTime(s){ s|=0; const m=(s/60)|0; const r=(s%60)|0; return m+':'+(r<10?'0':'')+r; }
+    function setLamp(on, breaking){
+      els.lampOn.classList.toggle('hidden', !(on && !breaking));
+      els.lampBreak.classList.toggle('hidden', !breaking);
+    }
+    function updateToggles(){
+      els.btnLoop.textContent = 'Loop: ' + (isLoop ? 'On' : 'Off');
+      els.btnShuffle.textContent = 'Shuffle: ' + (isShuffle ? 'On' : 'Off');
+      els.btnMute.textContent = 'Mute: ' + (isMuted ? 'On' : 'Off');
+    }
+
+    // Build rows
+    function renderList(){
+      els.rows.innerHTML='';
+      LIST.forEach((t,i)=>{
+        const d=document.createElement('div');
+        d.className='row'; d.setAttribute('role','option');
+        d.innerHTML = `<div class="rtitle">${escapeHtml(t.title)}</div>
+                       <div class="rmeta">${t._genre||t.genre||''}</div>`;
+        d.addEventListener('click', ()=>load(i, true));
+        els.rows.appendChild(d);
+      });
+      updateCount();
+      highlight();
+    }
+    function updateCount(){
+      const total = LIST.length;
+      els.count.textContent = `Track ${total? (idx+1):'—'} / ${total||'—'}`;
+    }
+    function highlight(){
+      [...els.rows.children].forEach((n,i)=>n.classList.toggle('active', i===idx));
+    }
+    function escapeHtml(s){ return (s||'').replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+
+    // Genre switching
+    let currentGenre = 'ALL';
+    function setGenre(g){
+      currentGenre = g;
+      if(g==='ALL') LIST = LIST_ALL.slice();
+      else LIST = LIST_ALL.filter(x=>x._genre===g);
+      if(!LIST.length){ idx = 0; }
+      renderList();
+    }
+
+    // Loading & playback
+    function applyTrackMeta(t){
+      els.title.textContent = t.title || 'Untitled';
+      els.info.textContent = `${t._genre||t.genre||''}`;
+      els.art.src = t.art || window.DEFAULT_IMG;
+      els.art.onerror = ()=>{ els.art.onerror=null; els.art.src = window.DEFAULT_IMG; };
+      // Media Session
+      if('mediaSession' in navigator){
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: t.title || 'Untitled',
+          artist: (t._genre||t.genre||'KZAK'),
+          album: 'Bullwinkle‑v1',
+          artwork: [
+            { src: t.art || window.DEFAULT_IMG, sizes: '512x512', type: 'image/jpeg' }
+          ]
+        });
+        // Position state (duration may not be ready yet; set when metadata loads)
+      }
+    }
+    function load(i, autoplay){
+      if(!LIST.length) return;
+      // wrap
+      if(i<0) i = LIST.length-1;
+      if(i>=LIST.length) i = 0;
+      idx = i;
+      const t = LIST[idx];
+      applyTrackMeta(t);
+      audio.src = t.src;
+      audio.loop = isLoop;
+      audio.muted = isMuted;
+      highlight();
+      updateCount();
+      if(autoplay){ audio.play().catch(()=>{}); }
+      setLamp(true, false);
+      updateDeepLink();
+    }
+
+    // Shuffle helper (v0.91 fix)
+    function pickRandomIndexDifferentFrom(current, listLen){
+      if (listLen <= 1) return current;
+      let k;
+      do { k = (Math.random() * listLen) | 0; } while (k === current);
+      return k;
+    }
+    function next(){
+      if (isShuffle){
+        const i = pickRandomIndexDifferentFrom(idx, LIST.length);
+        load(i, true);
+      } else {
+        load(idx + 1, true);
+      }
+    }
+    function prev(){
+      if (isShuffle){
+        const i = pickRandomIndexDifferentFrom(idx, LIST.length);
+        load(i, true);
+      } else {
+        load(idx - 1, true);
+      }
+    }
+
+    // Station breaks
+    const BREAKS = [
+      'MediaBreaks/Snappy1.mp3','MediaBreaks/Snappy2.mp3','MediaBreaks/Snappy3.mp3',
+      'MediaBreaks/Snappy4.mp3','MediaBreaks/Snappy5.mp3','MediaBreaks/Snappy6.mp3',
+      'MediaBreaks/Snappy7.mp3','MediaBreaks/Snappy8.mp3','MediaBreaks/Snappy9.mp3','MediaBreaks/Snappy10.mp3'
+    ];
+    let breakAudio = null;
+    function playBreak(){
+      if(!breaksEnabled) return;
+      if(inBreak) return;
+      inBreak = true;
+      setLamp(false, true);
+      // MediaSession metadata for break
+      if('mediaSession' in navigator){
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title:'Station Break', artist:'KZAK', album:'', artwork:[{src:window.DEFAULT_IMG,sizes:'512x512',type:'image/jpeg'}]
+        });
+      }
+      const pick = BREAKS[(Math.random()*BREAKS.length)|0];
+      breakAudio = new Audio(pick);
+      breakAudio.onended = ()=>{
+        inBreak = false;
+        setLamp(true,false);
+        // restore track metadata
+        const t = LIST[idx] || {};
+        applyTrackMeta(t);
+        if(!audio.paused) audio.play().catch(()=>{});
+      };
+      // duck main
+      audio.pause();
+      breakAudio.play().catch(()=>{ inBreak=false; setLamp(true,false); });
+    }
+
+    // Deep link (?t=N)
+    function getIndexFromQuery(){
+      const p=new URLSearchParams(location.search);
+      const t = parseInt(p.get('t'),10);
+      return isFinite(t) ? t : null;
+    }
+    function updateDeepLink(){
+      const u=new URL(location.href);
+      u.searchParams.set('t', idx);
+      history.replaceState(null, '', u.toString());
+      els.btnShareTrack.dataset.href = u.toString();
+    }
+
+    // Media Session actions
+    function initMediaSession(){
+      if(!('mediaSession' in navigator)) return;
+      navigator.mediaSession.setActionHandler('play', ()=>audio.play().catch(()=>{}));
+      navigator.mediaSession.setActionHandler('pause', ()=>audio.pause());
+      navigator.mediaSession.setActionHandler('previoustrack', prev);
+      navigator.mediaSession.setActionHandler('nexttrack', next);
+      navigator.mediaSession.setActionHandler('seekto', (d)=>{
+        if(typeof d.seekTime === 'number') { audio.currentTime = d.seekTime; }
+      });
+      navigator.mediaSession.setActionHandler('seekbackward', (d)=>{
+        const step = (d.seekOffset||10); audio.currentTime = Math.max(0, audio.currentTime - step);
+      });
+      navigator.mediaSession.setActionHandler('seekforward', (d)=>{
+        const step = (d.seekOffset||10); audio.currentTime = Math.min(audio.duration||1e9, audio.currentTime + step);
+      });
+    }
+
+    // Wire controls
+    els.btnPrev.addEventListener('click', prev);
+    els.btnNext.addEventListener('click', next);
+    els.btnStart.addEventListener('click', ()=>{
+      if(inBreak && breakAudio){ breakAudio.pause(); inBreak=false; }
+      setLamp(true,false);
+      audio.play().catch(()=>{});
+    });
+    els.btnPause.addEventListener('click', ()=>{ audio.pause(); setLamp(false,false); });
+
+    els.btnBreak.addEventListener('click', playBreak);
+
+    els.btnLoop.addEventListener('click', ()=>{ isLoop = !isLoop; audio.loop = isLoop; updateToggles(); });
+    els.btnShuffle.addEventListener('click', ()=>{
+      isShuffle = !isShuffle; updateToggles();
+      // Optional: jump immediately when turning Shuffle on (commented for now)
+      // if(isShuffle) next();
+    });
+    els.btnMute.addEventListener('click', ()=>{ isMuted = !isMuted; audio.muted = isMuted; updateToggles(); });
+
+    els.vol.addEventListener('input', ()=>{ audio.volume = parseFloat(els.vol.value||'0.9'); });
+
+    // Seek
+    els.seek.addEventListener('input', ()=>{
+      if(!isFinite(audio.duration)) return;
+      const t = (parseInt(els.seek.value,10)/1000) * audio.duration;
+      audio.currentTime = t;
+    });
+
+    // Share buttons
+    async function doShare(url, title){
+      if(navigator.share){
+        try{ await navigator.share({ title, url }); }catch(e){/* ignore */}
+      }else{
+        try{
+          await navigator.clipboard.writeText(url);
+          alert('Link copied to clipboard.');
+        }catch(e){
+          prompt('Copy this link:', url);
+        }
+      }
+    }
+    els.btnShare.addEventListener('click', ()=>{
+      const u = new URL(location.href); // station root + ?t
+      doShare(u.toString(), 'KZAK • Bullwinkle‑v1');
+    });
+    els.btnShareTrack.addEventListener('click', ()=>{
+      const u = new URL(location.href);
+      // For direct MP3 link as well (secondary copy)
+      const t = LIST[idx]; const direct = t?.src || '';
+      doShare(u.toString(), 'KZAK • '+(t?.title||'Track'));
+      // Also put direct link on clipboard as a courtesy (non-fatal if blocked)
+      if(direct){ navigator.clipboard?.writeText?.(direct).catch(()=>{}); }
+    });
+
+    // Playlist click selection handled in renderList()
+
+    // Audio events
+    audio.addEventListener('timeupdate', ()=>{
+      if(!isFinite(audio.duration)) return;
+      const p = audio.currentTime / audio.duration;
+      els.seek.value = (p*1000)|0;
+      els.pos.textContent = fmtTime(audio.currentTime);
+      els.dur.textContent = fmtTime(audio.duration);
+      if('mediaSession' in navigator){
+        try{
+          navigator.mediaSession.setPositionState({
+            duration: audio.duration||0,
+            playbackRate: 1,
+            position: audio.currentTime||0
+          });
+        }catch(_){}
+      }
+    });
+    audio.addEventListener('play', ()=>{ setLamp(true,false); updateToggles(); });
+    audio.addEventListener('pause', ()=>{ setLamp(false,false); });
+    audio.addEventListener('ended', ()=>{
+      // If looping a single, Audio will handle it. Only advance when not looping.
+      if(audio.loop){ audio.play().catch(()=>{}); return; }
+      // Respect station breaks before advancing
+      if(breaksEnabled){ playBreak(); breakAudio && (breakAudio.onended = ()=>{ inBreak=false; setLamp(true,false); next(); }); }
+      else { next(); }
+    });
+    audio.addEventListener('loadedmetadata', ()=>{
+      els.dur.textContent = fmtTime(audio.duration||0);
+      if('mediaSession' in navigator){
+        const t = LIST[idx] || {};
+        try{
+          navigator.mediaSession.setPositionState({
+            duration: audio.duration||0, playbackRate:1, position: audio.currentTime||0
+          });
+          navigator.mediaSession.metadata && applyTrackMeta(t);
+        }catch(_){}
+      }
+    });
+
+    // Welcome flow (user gesture for iOS)
+    let welcomeAudio = null;
+    function startAfterWelcome(){
+      userGesture = true;
+      els.welcome.classList.add('hidden');
+      // Choose track from deep link or first
+      const q = getIndexFromQuery();
+      load( isFinite(q)? q : 0, true );
+    }
+    els.playWelcome.addEventListener('click', ()=>{
+      userGesture = true;
+      if(welcomeAudio){ welcomeAudio.pause(); }
+      welcomeAudio = new Audio('Media/KZAK-Welcome.mp3');
+      welcomeAudio.onended = startAfterWelcome;
+      welcomeAudio.play().catch(()=>{ /* if blocked, still proceed */ startAfterWelcome(); });
+    });
+    els.skipWelcome.addEventListener('click', startAfterWelcome);
+
+    // Genre buttons
+    document.querySelectorAll('.gbtn').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        setGenre(b.dataset.genre);
+        // reset index to 0 for new list
+        load(0, false);
+      });
+    });
+
+    // Boot
+    buildAll();
+    setGenre('ALL');
+    renderList();
+    updateToggles();
+    initMediaSession();
+
+    // Honor ?t=N selection (autoplay will occur after welcome/skip)
+    const qIndex = getIndexFromQuery();
+    if(isFinite(qIndex)){ idx = Math.max(0, Math.min(LIST.length-1, qIndex)); }
+
+    // Utilities possibly provided by kzak-fallback-1087.js are optional; this file is self-sufficient.
+
+  })();
+  </script>
+</body>
+</html>
