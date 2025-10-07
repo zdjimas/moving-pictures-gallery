@@ -73,7 +73,6 @@
   <script src="playlist-heavy.classic.js?v=081"></script>
   <script src="playlist-mellow.classic.js?v=081"></script>
   <script src="playlist-rock.classic.js?v=081"></script>
-  <script src="kzak-fallback-1087.js?v=1"></script>
 </head>
 <body>
 <!-- Welcome overlay -->
@@ -91,8 +90,7 @@
 <div class="wrap">
   <header>
     <div class="thumb">
-      <img id="frasierImg" src="Media/frasier.jpg" alt="Frasier"
-           onerror="this.onerror=null; this.src='Media/frasier.png';">
+      <img id="frasierImg" src="Media/frasier.png" alt="Frasier">
     </div>
     <div>
       <h1>KZAK • Frasier-Style Fun Radio without the talking</h1>
@@ -565,8 +563,86 @@ load(0, false);
   }catch{}
 })();
 </script>
+<!-- Media Session: Lock Screen–first (keep last song during breaks) -->
+<script>
+(function kzakLockScreenKeepSong(){
+  if (!('mediaSession' in navigator)) return;
+  if (window.__kzakMS96) return; window.__kzakMS96 = true;
+  const ms = navigator.mediaSession;
 
-<!-- ABOUT / Release Stamp (Bullwinkle-v1 with 3-digit subversion) -->
+  function musicAudio(){
+    return document.getElementById('audio') ||
+           document.querySelector('audio[data-role="music"]') ||
+           document.querySelector('audio:not([id*="break" i]):not([class*="break" i])');
+  }
+  function abs(u){ try{ return new URL((typeof pathToUrl==='function')?pathToUrl(u):u, location.href).href; }catch{ return u; } }
+  function currentTrack(){
+    try{ if (typeof idx === 'number' && Array.isArray(LIST || PLAYLIST)) return (LIST||PLAYLIST)[idx]; }catch{}
+    const a = musicAudio(); if (!a) return null;
+    const file = (a.currentSrc||a.src||'').split('/').pop().split('?')[0];
+    return { title: decodeURIComponent(file.replace(/\.[a-z0-9]+$/i,'')) || 'KZAK',
+             image:'Media/default.jpg',
+             artist:'KZAK • Frasier-Style Free Radio' };
+  }
+  function publishTrack(track){
+    const a = musicAudio(); if (!a) return;
+    const t = track || currentTrack() || {};
+    const title  = t.title || 'KZAK';
+    const artist = t.artist || 'KZAK • Frasier-Style Free Radio';
+    const album  = 'KZAK';
+    const artSrc = abs(t.image || t.img || 'Media/default.jpg');
+    try{
+      ms.metadata = new MediaMetadata({
+        title, artist, album,
+        artwork: [
+          { src: artSrc, sizes: '192x192', type: 'image/jpeg' },
+          { src: artSrc, sizes: '512x512', type: 'image/jpeg' }
+        ]
+      });
+    }catch(e){}
+    try{ document.title = `${title} — KZAK`; }catch(e){}
+    updatePositionState(a);
+  }
+  function updatePositionState(a){
+    if (!a || !('setPositionState' in ms)) return;
+    try{
+      ms.setPositionState({
+        duration: isFinite(a.duration) ? a.duration : 0,
+        position: isFinite(a.currentTime) ? a.currentTime : 0,
+        playbackRate: a.playbackRate || 1
+      });
+    }catch(e){}
+  }
+
+  // Keep last song during station breaks: DO NOT overwrite metadata when breakAudio plays.
+  const main = musicAudio();
+  const brk = document.getElementById('breakAudio');
+  if (main){
+    ['loadedmetadata','playing'].forEach(ev=> main.addEventListener(ev, ()=>publishTrack(currentTrack()), {passive:true}));
+    ['timeupdate','seeked'].forEach(ev=> main.addEventListener(ev, ()=>updatePositionState(main), {passive:true}));
+  }
+  if (brk){
+    brk.addEventListener('playing', ()=>{ /* intentionally do nothing to metadata */ }, {passive:true});
+    brk.addEventListener('ended',   ()=>{ publishTrack(currentTrack()); }, {passive:true});
+    brk.addEventListener('pause',   ()=>{ publishTrack(currentTrack()); }, {passive:true});
+  }
+
+  // Hardware controls
+  const STEP=15;
+  ms.setActionHandler('play',    async()=>{ if(main && main.paused){ try{ await main.play(); }catch(e){} } });
+  ms.setActionHandler('pause',   ()=>{ try{ main && main.pause(); }catch(e){} });
+  ms.setActionHandler('previoustrack', ()=>{ try{ typeof prev==='function' && prev(); setTimeout(()=>publishTrack(currentTrack()),0);}catch(e){} });
+  ms.setActionHandler('nexttrack',     ()=>{ try{ typeof next==='function' && next(); setTimeout(()=>publishTrack(currentTrack()),0);}catch(e){} });
+  ms.setActionHandler('seekbackward',  (d)=>{ if(!main) return; const s=(d&&d.seekOffset)||STEP; main.currentTime=Math.max(0,(main.currentTime||0)-s); updatePositionState(main); });
+  ms.setActionHandler('seekforward',   (d)=>{ if(!main) return; const s=(d&&d.seekOffset)||STEP; main.currentTime=Math.min((main.duration||Infinity),(main.currentTime||0)+s); updatePositionState(main); });
+  ms.setActionHandler('seekto', (d)=>{ if(!main||!d||typeof d.seekTime!=='number') return; if(d.fastSeek&&'fastSeek'in main){try{main.fastSeek(d.seekTime)}catch(e){main.currentTime=d.seekTime}} else {main.currentTime=d.seekTime} updatePositionState(main); });
+
+  // Initial publish once user has interacted
+  document.addEventListener('click', ()=>{ if(main && !main.paused) publishTrack(currentTrack()); }, {once:true});
+})();
+</script>
+
+<!-- ABOUT / Release Stamp (Bullwinkle-v1.096) -->
 <style>
   #kzakTestBox{position:fixed;right:10px;bottom:10px;z-index:9999;
     font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
@@ -578,64 +654,22 @@ load(0, false);
     background:rgba(0,0,0,.6);color:#fff;cursor:pointer}
   .kzak-about-fallback{position:fixed;top:10px;right:10px;z-index:10000}
 </style>
-
 <div id="kzakTestBox" aria-live="polite" aria-label="Build stamp"></div>
-
 <script>
 (function(){
-  // === Release constants (bump SUBVER each build) ===
-  const RELEASE   = 'Bullwinkle-v1';
-  const SUBVER    = 95; // -> shows ".095"
-  const BUILD_UTC = new Date().toISOString().slice(0,19) + 'Z';
-
-  // Format 3-digit subversion
-  const subStr = String(Math.max(0, Math.min(999, SUBVER))).padStart(3, '0');
-  const releaseId = `${RELEASE}.${subStr}`;
-
-  // Render box (create if missing)
-  let box = document.getElementById('kzakTestBox');
-  if (!box) { box = document.createElement('div'); box.id='kzakTestBox'; document.body.appendChild(box); }
-  box.innerHTML =
-    `<div><b>Release:</b> ${releaseId}</div>
-     <div><small>${new Date(BUILD_UTC).toLocaleString()}</small></div>
-     <div><small>${location.pathname.replace(/.*\//,'')}</small></div>`;
-
-  // Ensure ABOUT button exists; mount if missing
-  (function ensureAboutButton(){
-    if (document.getElementById('kzakAboutBtn')) return;
-    const btn = document.createElement('button');
-    btn.id = 'kzakAboutBtn';
-    btn.className = 'kzak-about-btn';
-    btn.type = 'button';
-    btn.textContent = 'ABOUT';
-
-    const targets = [
-      document.getElementById('toolbar'),
-      document.getElementById('controls'),
-      document.querySelector('.toolbar'),
-      document.querySelector('.controls'),
-      document.querySelector('header'),
-    ];
-    const host = targets.find(Boolean);
-    if (host) { btn.style.marginLeft = '8px'; host.appendChild(btn); }
-    else { btn.classList.add('kzak-about-fallback'); document.body.appendChild(btn); }
-
-    // Toggle behavior with persistence
-    const KEY = 'kzak.about.visible';
-    function apply(show){
-      box.style.display = show ? 'block' : 'none';
-      btn.setAttribute('aria-pressed', show ? 'true' : 'false');
-      try { localStorage.setItem(KEY, show ? '1' : '0'); } catch(_){}
-    }
-    let saved = null; try { saved = localStorage.getItem(KEY); } catch(_){}
-    apply(saved !== '0'); // default visible
-    btn.addEventListener('click', () => apply(btn.getAttribute('aria-pressed') !== 'true'));
-  })();
-
-  // Also mirror into document.title for quick tab recognition
-  if (!document.title.includes(releaseId)) {
-    document.title = `${document.title} — ${releaseId}`;
+  const RELEASE='Bullwinkle-v1', SUBVER=96;
+  const subStr=String(SUBVER).padStart(3,'0');
+  const releaseId=`${RELEASE}.${subStr}`;
+  const box=document.getElementById('kzakTestBox');
+  if(box){
+    box.innerHTML = `<div><b>Release:</b> ${releaseId}</div>
+                     <div><small>${new Date().toLocaleString()}</small></div>
+                     <div><small>${location.pathname.replace(/.*\//,'')}</small></div>`;
   }
+  function makeBtn(){ const b=document.createElement('button'); b.id='kzakAboutBtn'; b.className='kzak-about-btn'; b.type='button'; b.textContent='ABOUT'; b.setAttribute('aria-pressed','true'); return b; }
+  function mountBtn(btn){ const hosts=[document.getElementById('toolbar'),document.getElementById('controls'),document.querySelector('.toolbar'),document.querySelector('.controls'),document.querySelector('header')]; const h=hosts.find(Boolean); if(h){ btn.style.marginLeft='8px'; h.appendChild(btn);} else { btn.classList.add('kzak-about-fallback'); document.body.appendChild(btn);} }
+  function wireBtn(btn){ const KEY='kzak.about.visible'; function apply(show){ if(box) box.style.display=show?'block':'none'; btn.setAttribute('aria-pressed', show?'true':'false'); try{ localStorage.setItem(KEY, show?'1':'0'); }catch(_){ } } let saved=null; try{ saved=localStorage.getItem(KEY) }catch(_){ } apply(saved!=='0'); btn.addEventListener('click', ()=>{ const cur=btn.getAttribute('aria-pressed')==='true'; apply(!cur); }); }
+  const b=makeBtn(); mountBtn(b); wireBtn(b);
 })();
 </script>
 
