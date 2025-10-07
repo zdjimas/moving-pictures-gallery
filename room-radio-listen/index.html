@@ -470,29 +470,8 @@ document.getElementById('playWelcome').addEventListener('click', async () => {
   }
 });
 
-toLobby.addEventListener('click', (e) => {
-  e.preventDefault();
-
-  // Compute Lobby URL safely
-  const LOBBY_URL = (function () {
-    try { return new URL('../index.html', location.href).href; }
-    catch { return '../index.html'; }
-  })();
-
-  // Pause anything that might be playing
-  try { audio && audio.pause(); } catch {}
-  try { breakAudio && breakAudio.pause(); } catch {}
-
-  // Play the EXIT sting, then navigate
-  const exitAudio = new Audio('Media/FrasierExit.mp3');   // <- your EXIT MP3
-  let done = false;
-  const nav = () => { if (!done) { done = true; window.location.href = LOBBY_URL; } };
-
-  exitAudio.addEventListener('ended', nav,  { once: true });
-  exitAudio.addEventListener('error', nav,  { once: true });
-
-  // iOS: this click is a user gesture, so play() should be allowed
-  exitAudio.play().catch(nav);
+toLobby.addEventListener('click', () => {
+  try{ window.location.href = '../index.html'; }catch{}
 });
 
 updateCounts();
@@ -584,9 +563,65 @@ load(0, false);
   }catch{}
 })();
 </script>
-<!-- Media Session: Lock Screen–first (keep last song during breaks) -->
+
+<!-- EXIT OVERLAY (visible full video) -->
+<div id="exitOverlay" class="overlay" aria-hidden="true" style="display:none">
+  <video id="exitVideo" playsinline preload="auto"
+         style="max-width:min(100vw,1200px);max-height:100vh;width:100%;
+                border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000;">
+    <source src="Media/FrasierExit.mp4" type="video/mp4" />
+  </video>
+  <div class="overlay-ui" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:1rem 1.25rem;pointer-events:none;">
+    <div style="color:#e6e9ef;opacity:.85;text-shadow:0 2px 14px rgba(0,0,0,.7);">Leaving the Radio Room…</div>
+    <button id="skipExit" class="btn" style="pointer-events:auto;">Skip</button>
+  </div>
+</div>
+
+
 <script>
-(function kzakLockScreenKeepSong(){
+function computeLobbyURL(){
+  try{
+    const href = location.href;
+    if (/\/room-radio-listen\//.test(href)) return href.replace(/\/room-radio-listen\/.*/,'/index.html');
+    return new URL('../index.html', href).href;
+  }catch(e){ return '../index.html'; }
+}
+function showExitAndReturn(){
+  const LOBBY_URL = computeLobbyURL();
+  try{ audio && audio.pause(); }catch(e){}
+  try{ breakAudio && breakAudio.pause(); }catch(e){}
+  try{ onAir && onAir.classList.remove('on'); }catch(e){}
+
+  const exitOverlay = document.getElementById('exitOverlay');
+  const exitVideo = document.getElementById('exitVideo');
+  const skipExit = document.getElementById('skipExit');
+
+  exitOverlay.style.display = 'grid';
+  exitOverlay.setAttribute('aria-hidden','false');
+  try{ exitVideo.currentTime = 0; }catch(e){}
+
+  function cleanup(){
+    try{ exitVideo.pause(); }catch(e){}
+    exitOverlay.style.display = 'none';
+    exitOverlay.setAttribute('aria-hidden','true');
+    exitVideo.removeEventListener('ended', ended);
+    exitVideo.removeEventListener('error', error);
+  }
+  function ended(){ cleanup(); location.href = LOBBY_URL; }
+  function error(){ cleanup(); location.href = LOBBY_URL; }
+
+  exitVideo.addEventListener('ended', ended, { once:true });
+  exitVideo.addEventListener('error', error, { once:true });
+  skipExit.addEventListener('click', (e)=>{ e.preventDefault(); cleanup(); location.href = LOBBY_URL; }, { once:true });
+
+  exitVideo.play().catch(()=>{ /* user can tap play or click Skip */ });
+}
+</script>
+
+
+<!-- Media Session: keep song on lock screen during breaks -->
+<script>
+(function kzakMS96(){
   if (!('mediaSession' in navigator)) return;
   if (window.__kzakMS96) return; window.__kzakMS96 = true;
   const ms = navigator.mediaSession;
@@ -598,7 +633,7 @@ load(0, false);
   }
   function abs(u){ try{ return new URL((typeof pathToUrl==='function')?pathToUrl(u):u, location.href).href; }catch{ return u; } }
   function currentTrack(){
-    try{ if (typeof idx === 'number' && Array.isArray(LIST || PLAYLIST)) return (LIST||PLAYLIST)[idx]; }catch{}
+    try{ if (typeof idx === 'number' && Array.isArray(LIST||PLAYLIST)) return (LIST||PLAYLIST)[idx]; }catch{}
     const a = musicAudio(); if (!a) return null;
     const file = (a.currentSrc||a.src||'').split('/').pop().split('?')[0];
     return { title: decodeURIComponent(file.replace(/\.[a-z0-9]+$/i,'')) || 'KZAK',
@@ -635,7 +670,6 @@ load(0, false);
     }catch(e){}
   }
 
-  // Keep last song during station breaks: DO NOT overwrite metadata when breakAudio plays.
   const main = musicAudio();
   const brk = document.getElementById('breakAudio');
   if (main){
@@ -643,7 +677,7 @@ load(0, false);
     ['timeupdate','seeked'].forEach(ev=> main.addEventListener(ev, ()=>updatePositionState(main), {passive:true}));
   }
   if (brk){
-    brk.addEventListener('playing', ()=>{ /* intentionally do nothing to metadata */ }, {passive:true});
+    brk.addEventListener('playing', ()=>{/* keep last song metadata */}, {passive:true});
     brk.addEventListener('ended',   ()=>{ publishTrack(currentTrack()); }, {passive:true});
     brk.addEventListener('pause',   ()=>{ publishTrack(currentTrack()); }, {passive:true});
   }
@@ -658,7 +692,6 @@ load(0, false);
   ms.setActionHandler('seekforward',   (d)=>{ if(!main) return; const s=(d&&d.seekOffset)||STEP; main.currentTime=Math.min((main.duration||Infinity),(main.currentTime||0)+s); updatePositionState(main); });
   ms.setActionHandler('seekto', (d)=>{ if(!main||!d||typeof d.seekTime!=='number') return; if(d.fastSeek&&'fastSeek'in main){try{main.fastSeek(d.seekTime)}catch(e){main.currentTime=d.seekTime}} else {main.currentTime=d.seekTime} updatePositionState(main); });
 
-  // Initial publish once user has interacted
   document.addEventListener('click', ()=>{ if(main && !main.paused) publishTrack(currentTrack()); }, {once:true});
 })();
 </script>
