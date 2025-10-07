@@ -470,9 +470,31 @@ document.getElementById('playWelcome').addEventListener('click', async () => {
   }
 });
 
-toLobby.addEventListener('click', () => {
-  try{ window.location.href = '../index.html'; }catch{}
+toLobby.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  // Compute Lobby URL safely
+  const LOBBY_URL = (function () {
+    try { return new URL('../index.html', location.href).href; }
+    catch { return '../index.html'; }
+  })();
+
+  // Pause anything that might be playing
+  try { audio && audio.pause(); } catch {}
+  try { breakAudio && breakAudio.pause(); } catch {}
+
+  // Play the EXIT sting, then navigate
+  const exitAudio = new Audio('Media/FrasierExit.mp3');   // <- your EXIT MP3
+  let done = false;
+  const nav = () => { if (!done) { done = true; window.location.href = LOBBY_URL; } };
+
+  exitAudio.addEventListener('ended', nav,  { once: true });
+  exitAudio.addEventListener('error', nav,  { once: true });
+
+  // iOS: this click is a user gesture, so play() should be allowed
+  exitAudio.play().catch(nav);
 });
+
 
 updateCounts();
 buildList();
