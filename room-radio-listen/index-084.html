@@ -1,0 +1,423 @@
+ <!doctype html>
+<html lang="en">
+<head>
+  <base href="/moving-pictures-gallery/room-radio-listen/">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>KZAK • Frasier-Style Fun Radio without the talking</title>
+  <meta name="color-scheme" content="dark light">
+  <style>
+    :root{--ink:#e6e9ef;--muted:#9aa4b2;--brand:#89b4fa;--line:#22324d;--shadow:0 18px 50px rgba(0,0,0,.45)}
+    html,body{height:100%;margin:0}
+    body{color:var(--ink);background:#0b1220 url('Media/RadioMusicListening.jpg') center/cover fixed no-repeat;
+         font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .wrap{position:relative;z-index:1;padding:24px;max-width:1200px;margin:0 auto}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:10px}
+    .thumb{width:120px;height:72px;border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    h1{font-size:32px;line-height:1.15;margin:0;text-shadow:0 2px 10px rgba(0,0,0,.45)}
+    .sub{color:var(--muted);font-size:14px;margin-top:4px}
+
+    .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .btn{background:#101a2d;border:1px solid var(--line);color:var(--ink);padding:10px 14px;border-radius:12px;
+         cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:8px;box-shadow:var(--shadow)}
+    .btn[disabled]{opacity:.5;cursor:not-allowed}
+    .pill{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:#0e1628;
+          display:inline-flex;align-items:center;gap:8px}
+    .lamp-dot{width:12px;height:12px;border-radius:50%;background:#384a63}
+    #onAir.on .lamp-dot{background:#ff3b3b;box-shadow:0 0 16px rgba(255,59,59,.9)}
+    #breakLamp.on .lamp-dot{background:#ffcf4d;box-shadow:0 0 14px rgba(255,207,77,.8)}
+
+    .player{display:grid;grid-template-columns:1fr 380px;gap:22px;margin-top:16px}
+    @media(max-width:1000px){.player{grid-template-columns:1fr}}
+    .panel{background:rgba(14,22,40,.82);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(6px);box-shadow:var(--shadow)}
+    .panel .head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
+    .panel .body{padding:14px}
+    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .row.sep{border-top:1px dashed var(--line);padding-top:12px;margin-top:12px}
+    .scrub{display:grid;grid-template-columns:52px 1fr 56px;align-items:center;gap:10px;margin:6px 0 12px}
+    input[type=range]{width:100%}
+    .track{display:grid;grid-template-columns:170px 1fr;gap:16px;align-items:flex-start}
+    @media(max-width:640px){.track{grid-template-columns:1fr}}
+    .art{width:170px;height:170px;border-radius:14px;overflow:hidden;background:#0e1628;border:1px solid var(--line)}
+    .art img{width:100%;height:100%;object-fit:cover}
+    .muted{color:var(--muted)}
+    .playlist .body{max-height:472px;overflow:auto}
+    .playlist .item{padding:10px 12px;border-top:1px solid rgba(255,255,255,.04);cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+    .playlist .item:hover{background:rgba(255,255,255,.04)}
+    .playlist .item.active{background:rgba(168,200,255,.09)}
+    .tiny{font-size:12px;color:var(--muted)}
+    .right{text-align:right}
+    .build-badge,[data-build-badge],.uncle-build,[data-uncle]{display:none!important}
+
+    /* overlays */
+    .overlay{position:fixed;inset:0;z-index:9999;display:none;place-items:center;background:radial-gradient(1200px 600px at 50% 10%,rgba(0,0,0,.10),rgba(0,0,0,.20)),rgba(0,0,0,.20)}
+    .overlay.show{display:grid}
+    .frame{max-width:720px;margin:0 16px;border-radius:16px;padding:18px;background:rgba(0,0,0,.60);border:1px solid var(--line);box-shadow:var(--shadow)}
+  </style>
+</head>
+<body>
+
+<!-- Welcome -->
+<div id="welcomeOverlay" class="overlay show" role="dialog" aria-modal="true">
+  <div class="frame">
+    <h2 style="margin:0 0 6px 0;color:#ffeb7a;text-shadow:0 0 10px rgba(255,200,80,.6),0 0 18px rgba(255,120,64,.3)">🎙️ Welcome to KZAK</h2>
+    <p>Quick intro or jump straight to the set. ON AIR lights when music plays.</p>
+    <div class="row" style="justify-content:flex-end">
+      <button id="playWelcome" class="btn">▶︎ Play Welcome</button>
+      <button id="skipWelcome" class="btn">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- Exit video -->
+<div id="exitOverlay" class="overlay" aria-hidden="true" style="display:none">
+  <video id="exitVideo" playsinline preload="auto"
+         style="max-width:min(100vw,1200px);max-height:100vh;width:100%;
+                border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000;">
+    <source src="Media/FrasierExit.mp4" type="video/mp4" />
+  </video>
+  <div class="overlay-ui" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:1rem 1.25rem;pointer-events:none;">
+    <div style="color:#e6e9ef;opacity:.85;text-shadow:0 2px 14px rgba(0,0,0,.7);">Leaving the Radio Room…</div>
+    <button id="skipExit" class="btn" style="pointer-events:auto;">Skip</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="thumb"><img src="Media/frasier.png" alt=""></div>
+    <div>
+      <h1>KZAK • Frasier-Style Fun Radio without the talking</h1>
+      <div class="sub"><span id="tcount">0</span> Song Playlist • <span class="tiny">ON AIR lamp • Deep-link sharing</span></div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button id="toLobby" class="btn">⬅︎ Return to Lobby</button>
+
+    <div id="onAir" class="pill"><span class="lamp-dot"></span><strong>ON AIR</strong></div>
+    <div id="breakLamp" class="pill"><span class="lamp-dot"></span><strong>STATION BREAK</strong></div>
+
+    <a class="btn" target="_blank" rel="noopener" href="https://www.tiktok.com/@chrisjmurphy65">🎬 Watch This Music on TikTok</a>
+
+    <div class="btn" style="margin-left:auto;background:linear-gradient(180deg,#2a3f68 0%,#1f3154 100%);border-color:rgba(255,255,255,.18)">
+      ♪&nbsp; Select the <u>Genre</u> you want the station to play for this session
+    </div>
+
+    <div id="genreBar" class="row" style="width:100%;gap:8px;margin-top:6px">
+      <button class="btn gbtn active" data-genre="ALL">ALL</button>
+      <button class="btn gbtn" data-genre="Heavy and Metal">Heavy and Metal</button>
+      <button class="btn gbtn" data-genre="Middle Ground Rock">Middle Ground Rock</button>
+      <button class="btn gbtn" data-genre="Mellow Tunes">Mellow Tunes</button>
+    </div>
+
+    <button id="startBtn" class="btn" style="background:#1a9b57;color:#fff">▶︎ Start Station</button>
+    <button id="pauseBtn" class="btn" disabled style="background:#cc6a13;color:#fff">⏸ Pause Station</button>
+    <div id="loopBtn" class="btn">⟲ Loop</div>
+    <div id="shuffleBtn" class="btn">🔀 Shuffle</div>
+    <div id="muteBtn" class="btn">🔇 Mute</div>
+    <div id="breaksBtn" class="btn">📻 Station Breaks: On</div>
+    <div id="breakTestBtn" class="btn">🧪 Force Break</div>
+
+    <button id="shareBtn" class="btn">🔗 Share</button>
+    <button id="shareTrackBtn" class="btn">📤 Share Track</button>
+  </div>
+
+  <div class="player">
+    <section class="panel">
+      <div class="head">
+        <div class="row">
+          <button id="prevBtn" class="btn">⟸ Prev</button>
+          <button id="nextBtn" class="btn">Next ⟹</button>
+        </div>
+        <div class="row">
+          <div>Vol</div>
+          <input id="vol" type="range" min="0" max="1" step="0.01" value="0.86" style="width:160px"/>
+        </div>
+      </div>
+      <div class="body">
+        <div class="scrub">
+          <div id="elapsed">0:00</div>
+          <input id="seek" type="range" min="0" max="1000" value="0" step="1"/>
+          <div id="remaining">-0:00</div>
+        </div>
+        <div class="row tiny">
+          <div>TRACK <span id="tpos">0</span> / <span id="tmax">0</span></div>
+          <div class="right" style="margin-left:auto">Status: <span id="meta">Stopped</span></div>
+        </div>
+        <div class="row sep track">
+          <div class="art"><img id="art" src="Media/default.jpg" alt=""></div>
+          <div class="info">
+            <div id="genreNow" class="muted" style="font-size:12px;opacity:.85;margin:0 0 2px 0;">Genre: —</div>
+            <h3 id="title">—</h3>
+            <div class="muted" id="story">Under Construction: a special write-up about this specific music creation…</div>
+          </div>
+        </div>
+        <div class="tiny muted" style="margin-top:8px">Tip: The ON AIR pill lights only when music plays.</div>
+      </div>
+    </section>
+
+    <aside class="panel playlist" id="plist">
+      <div class="head">
+        <div><strong>Playlist</strong></div>
+        <div class="tiny right"><span id="countRight"></span></div>
+      </div>
+      <div class="body" id="plistBody"></div>
+    </aside>
+  </div>
+
+  <section class="panel" style="margin-top:16px">
+    <div class="bio">
+      <img src="Media/ZachArt.jpeg" alt="">
+      <div><div class="name">zdjimas</div><div class="role">Concept, curation, engineering, visit his music page at suno.com: https://suno.com/@zdjimas</div></div>
+    </div>
+    <div class="bio" style="border-top:1px solid var(--line)">
+      <img src="Media/CJMURPHY.png" alt="">
+      <div><div class="name">cjmurphy</div><div class="role">Composition, arrangement, sound design</div></div>
+    </div>
+  </section>
+</div>
+
+<!-- audio elements -->
+<audio id="audio" preload="none" crossorigin="anonymous"></audio>
+<audio id="introAudio" preload="auto" src="Media/KZAK-Welcome.mp3"></audio>
+<audio id="breakAudio" preload="auto"></audio>
+
+<!-- Playlists (classic, non-module) -->
+<script src="playlist-rock.classic.js?v=084"></script>
+<script src="playlist-heavy.classic.js?v=084"></script>
+<script src="playlist-mellow.classic.js?v=084"></script>
+
+<script>
+/* ========= Core player wiring (index-084) ========= */
+
+/* --- Config & helpers --- */
+const DEFAULT_IMG = "Media/default.jpg";
+const DEFAULT_STORY = "Under Construction: a special write-up about this specific music creation…";
+const BREAK_CANDIDATES = [
+  "MediaBreaks/Radio-Id-Two.mp3","MediaBreaks/Radio-Id-Five.mp3","MediaBreaks/Snappy3.mp3",
+  "MediaBreaks/en-US-News-NThisisK-Z-A-Kbringingyou.mp3","MediaBreaks/Snappy21.mp3","MediaBreaks/Snappy8.mp3",
+  "MediaBreaks/Radio-ID-Six.mp3","MediaBreaks/Radio-ID-Seven.mp3","MediaBreaks/Snappy17.mp3",
+  "MediaBreaks/Snappy11.mp3","MediaBreaks/Radio-Id-Ad-workforce1.mp3","MediaBreaks/Snappy1.mp3"
+];
+const $ = s => document.querySelector(s);
+const fmt = t => { t|=0; const m=(t/60)|0, s=(t%60)|0; return m+":"+(s<10?"0":"")+s; };
+const pathToUrl = p => p.split('/').map(seg => encodeURIComponent(seg)).join('/');
+
+/* Try common key variants and normalize a track */
+function normalizeTrack(t){
+  return {
+    title: t.title || t.name || "Untitled",
+    file:  t.file  || t.src || t.url || "",
+    img:   t.img   || t.image || t.art || DEFAULT_IMG,
+    genre: t.genre || t.category || "ALL",
+    story: t.story || t.description || DEFAULT_STORY
+  };
+}
+
+/* Resolve playlists from various shapes loaded by the three JS files */
+function gatherPlaylists(){
+  const w = window;
+  const rock   = (w.PLAYLIST_ROCK   || (w.PLAYLISTS && w.PLAYLISTS.rock)   || []).map(normalizeTrack);
+  const heavy  = (w.PLAYLIST_HEAVY  || (w.PLAYLISTS && w.PLAYLISTS.heavy)  || []).map(normalizeTrack);
+  const mellow = (w.PLAYLIST_MELLOW || (w.PLAYLISTS && w.PLAYLISTS.mellow) || []).map(normalizeTrack);
+  const all = [...rock, ...heavy, ...mellow].map(normalizeTrack);
+  return {all, rock, heavy, mellow};
+}
+
+/* --- State --- */
+let LIB = {all:[], rock:[], heavy:[], mellow:[]};
+let genre = "ALL";
+let list = [];         // current filtered list
+let idx = 0;           // index within list
+let shuffle=false, loop=false, stationBreaks=true;
+let resumingAfterBreak=false;
+
+/* --- Elements --- */
+const audio = $("#audio"), intro=$("#introAudio"), breakAudio=$("#breakAudio");
+const onAir=$("#onAir"), breakLamp=$("#breakLamp");
+const startBtn=$("#startBtn"), pauseBtn=$("#pauseBtn");
+const nextBtn=$("#nextBtn"), prevBtn=$("#prevBtn");
+const loopBtn=$("#loopBtn"), shuffleBtn=$("#shuffleBtn"), muteBtn=$("#muteBtn");
+const breaksBtn=$("#breaksBtn"), breakTestBtn=$("#breakTestBtn");
+const vol=$("#vol"), seek=$("#seek"), elapsed=$("#elapsed"), remaining=$("#remaining"), meta=$("#meta");
+const art=$("#art"), titleEl=$("#title"), storyEl=$("#story"), genreNow=$("#genreNow");
+const tpos=$("#tpos"), tmax=$("#tmax"), tcount=$("#tcount"), countRight=$("#countRight"), plistBody=$("#plistBody");
+
+/* --- UI helpers --- */
+function setOnAir(on){ on ? onAir.classList.add("on") : onAir.classList.remove("on"); }
+function setBreakLamp(on){ on ? breakLamp.classList.add("on") : breakLamp.classList.remove("on"); }
+function setMeta(txt){ meta.textContent = txt; }
+
+/* Build right-hand playlist */
+function buildList(){
+  plistBody.innerHTML = "";
+  countRight.textContent = list.length + " items";
+  tcount.textContent = LIB.all.length;
+
+  list.forEach((tr,i)=>{
+    const row = document.createElement("div");
+    row.className = "item";
+    row.innerHTML = `
+      <div>
+        <div>${String(i+1).padStart(3,"0")} ${tr.title}</div>
+        <div class="tiny">${tr.genre}</div>
+      </div>
+      <div class="tiny right">▶︎</div>`;
+    row.addEventListener("click", ()=> playAt(i));
+    plistBody.appendChild(row);
+  });
+  highlight(i => i===idx);
+}
+
+/* highlight helper */
+function highlight(predicate){
+  [...plistBody.children].forEach((el,k)=>{
+    el.classList.toggle("active", predicate(k));
+  });
+}
+
+/* Load track source with some lenient fallbacks for names/spaces */
+async function setAudioSrc(tr){
+  const candidates = [tr.file];
+  if(!tr.file.startsWith("Media/")) candidates.push("Media/"+tr.file);
+  const spaced = tr.title.replace(/([a-z])([A-Z])/g,"$1 $2").trim();
+  candidates.push("Media/"+tr.title+".mp3","Media/"+spaced+".mp3");
+  for(const c of candidates){
+    try{
+      const url = pathToUrl(c);
+      const res = await fetch(url,{method:"HEAD",cache:"no-store"});
+      if(res.ok){ audio.src = url; return true; }
+    }catch(e){}
+  }
+  audio.src = pathToUrl(tr.file); // last resort
+  return true;
+}
+
+/* Update left panel from a track (no autoplay) */
+function updateNow(tr){
+  art.src = tr.img || DEFAULT_IMG;
+  titleEl.textContent = tr.title || "—";
+  storyEl.textContent = tr.story || DEFAULT_STORY;
+  genreNow.textContent = "Genre: " + (tr.genre || "—");
+  tpos.textContent = (idx+1);
+  tmax.textContent = list.length;
+}
+
+/* Play track at index (or current idx) */
+async function playAt(i=idx){
+  if(list.length===0) return;
+  idx = ((i%list.length)+list.length)%list.length;
+  const tr = list[idx];
+  updateNow(tr);
+  setMeta("Loading…");
+  await setAudioSrc(tr);
+  audio.play().catch(()=>{ /* user gesture might be needed */ });
+}
+
+/* Next/prev logic (respects shuffle & loop) */
+function next(){
+  if(shuffle){ idx = (Math.random()*list.length)|0; }
+  else { idx++; if(idx>=list.length) idx = loop ? 0 : list.length-1; }
+  playAt(idx);
+}
+function prev(){
+  if(shuffle){ idx = (Math.random()*list.length)|0; }
+  else { idx--; if(idx<0) idx = loop ? list.length-1 : 0; }
+  playAt(idx);
+}
+
+/* Station break playback */
+function pickBreak(){ return BREAK_CANDIDATES[(Math.random()*BREAK_CANDIDATES.length)|0] }
+async function playBreak(thenResume=true){
+  setBreakLamp(true);
+  breakAudio.src = pickBreak();
+  await breakAudio.play();
+  resumingAfterBreak = thenResume;
+}
+
+/* --- Wire controls --- */
+document.addEventListener("DOMContentLoaded", ()=>{
+  // gather library
+  LIB = gatherPlaylists();
+  list = LIB.all.slice(); // default = ALL
+  idx = 0;
+  buildList();
+  if(list.length){ updateNow(list[0]); }
+
+  // genre buttons
+  document.querySelectorAll(".gbtn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".gbtn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      genre = btn.dataset.genre;
+      list =
+        genre==="ALL" ? LIB.all.slice() :
+        genre==="Heavy and Metal" ? LIB.heavy.slice() :
+        genre==="Middle Ground Rock" ? LIB.rock.slice() :
+        LIB.mellow.slice();
+      idx = 0;
+      buildList();
+      if(list.length){ updateNow(list[0]); }
+    });
+  });
+
+  // transport
+  startBtn.addEventListener("click", ()=>{ if(!list.length) return;
+    if(audio.paused){ playAt(idx); }
+  });
+  pauseBtn.addEventListener("click", ()=>{ audio.pause(); });
+
+  nextBtn.addEventListener("click", next);
+  prevBtn.addEventListener("click", prev);
+
+  loopBtn.addEventListener("click", ()=>{ loop = !loop; loopBtn.classList.toggle("on", loop); });
+  shuffleBtn.addEventListener("click", ()=>{ shuffle = !shuffle; shuffleBtn.classList.toggle("on", shuffle); });
+  muteBtn.addEventListener("click", ()=>{ audio.muted = !audio.muted; muteBtn.classList.toggle("on", audio.muted); });
+
+  breaksBtn.addEventListener("click", ()=>{
+    stationBreaks = !stationBreaks;
+    breaksBtn.textContent = stationBreaks ? "📻 Station Breaks: On" : "📻 Station Breaks: Off";
+  });
+  breakTestBtn.addEventListener("click", ()=>{ if(!audio.paused){ audio.pause(); } playBreak(true); });
+
+  vol.addEventListener("input", ()=>{ audio.volume = +vol.value; });
+  seek.addEventListener("input", ()=>{ if(audio.duration) audio.currentTime = (seek.value/1000)*audio.duration; });
+
+  // welcome
+  $("#playWelcome").addEventListener("click", ()=>{ intro.currentTime=0; intro.play(); });
+  $("#skipWelcome").addEventListener("click", ()=>{ $("#welcomeOverlay").classList.remove("show"); intro.pause(); });
+  intro.addEventListener("ended", ()=>{ $("#welcomeOverlay").classList.remove("show"); });
+
+  // audio lifecycle
+  audio.addEventListener("play", ()=>{ setOnAir(true); pauseBtn.disabled=false; setMeta("Playing"); });
+  audio.addEventListener("pause", ()=>{ setOnAir(false); setMeta("Stopped"); });
+  audio.addEventListener("timeupdate", ()=>{
+    if(!isFinite(audio.duration)) return;
+    elapsed.textContent = fmt(audio.currentTime);
+    remaining.textContent = "-"+fmt(audio.duration-audio.currentTime);
+    seek.value = Math.floor((audio.currentTime / audio.duration) * 1000);
+  });
+  audio.addEventListener("ended", async ()=>{
+    if(stationBreaks){ await playBreak(true); }
+    else { next(); }
+  });
+
+  // break lifecycle
+  breakAudio.addEventListener("play", ()=>{ setBreakLamp(true); setMeta("Station break"); });
+  breakAudio.addEventListener("ended", ()=>{ setBreakLamp(false); if(resumingAfterBreak){ resumingAfterBreak=false; next(); } });
+
+  // lobby / exit video
+  $("#toLobby").addEventListener("click", (e)=>{
+    e.preventDefault();
+    const ov = $("#exitOverlay");
+    ov.style.display="grid";
+    const vid = $("#exitVideo");
+    vid.currentTime=0; vid.play();
+    vid.addEventListener("ended", ()=>{ window.location.href="../index.html"; }, {once:true});
+    $("#skipExit").onclick = ()=> window.location.href="../index.html";
+  });
+});
+</script>
+</body>
+</html>
