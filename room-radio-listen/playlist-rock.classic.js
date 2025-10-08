@@ -665,5 +665,15 @@ const PLAYLIST_ROCK = [
     genre: "Middle Ground Rock",
     story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   }
+,
+  {
+    title: "My Confessor",
+    file:  "Media/My Confessor",
+    img:   "Media/MyConfessor.jpeg",
+    image: "Media/MyConfessor.jpeg",
+    alt:   "Cover art for My Confessor",
+    genre: "Middle Ground Rock",
+    story: "A great tune recreated from one of the leading members solo work from the Eagles."
+  }
 ];
 if (typeof window !== 'undefined') window.PLAYLIST_ROCK = PLAYLIST_ROCK;
