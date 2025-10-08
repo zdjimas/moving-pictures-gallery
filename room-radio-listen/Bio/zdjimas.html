@@ -1,1 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>zdjimas • Bio</title>
+  <meta name="description" content="Bio for Zachary Djimas (zdjimas): concept, curation, engineering behind Moving Pictures, KZAK Radio, and The Human Workforce." />
+  <style>
+    :root {
+      --bg: #0b0b0c; --fg: #f2f2f2; --sub: #b7b7b7; --line: #2a2a2a;
+      --accent: #7dd3fc; --card: #151518;
+    }
+    html,body { margin:0; padding:0; background:var(--bg); color:var(--fg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+    .wrap { max-width: 980px; margin: 40px auto; padding: 0 20px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+    .crumb { font-size:14px; color:var(--sub); }
+    .card { display:grid; grid-template-columns: 360px 1fr; gap: 28px;
+      background: var(--card); border:1px solid var(--line); border-radius: 16px; padding: 24px; }
+    @media (max-width: 860px) { .card { grid-template-columns: 1fr; } }
+    figure { margin:0; }
+    img.portrait { display:block; width:100%; max-width:360px; height:auto;
+      border-radius: 12px; border:1px solid var(--line); }
+    h1 { margin:0 0 6px 0; font-size: clamp(28px, 3.4vw, 36px); }
+    .role { color: var(--sub); margin-bottom: 16px; }
+    .bio { line-height: 1.6; font-size: 1.02rem; }
+    .links { display:flex; flex-wrap:wrap; gap:12px; margin-top:18px; }
+    .tag { display:inline-block; font-size:12px; color:var(--sub);
+      border:1px solid var(--line); padding:4px 8px; border-radius:999px; }
+    .footer { margin-top:28px; font-size:14px; color:var(--sub);
+      border-top:1px solid var(--line); padding-top:12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="crumb"><a href="../index.html">← Back</a></div>
+    </header>
+
+    <div class="card">
+      <figure>
+        <img class="portrait" src="../Media/ZachArt.jpeg" alt="Portrait of Zachary Djimas (zdjimas)">
+      </figure>
+      <section>
+        <h1>zdjimas</h1>
+        <div class="role">Concept • Curation • Engineering</div>
+
+        <p class="bio">
+          Zachary Djimas is the systems mind behind this project’s “Moving Pictures” ecosystem—the person who
+          turns loose ideas into reliable, repeatable experiences. He blends enterprise-grade resiliency thinking
+          with creative tooling, building the pipelines that power KZAK radio, gallery rooms, and
+          week-over-week experiments in AI music, video, and interaction. His bias is practical: ship it, measure it,
+          make it smoother for the next release.
+        </p>
+        <p class="bio">
+          Professionally, Zach works at the intersection of automation, continuity, and human-centered operations,
+          a philosophy captured in <em>The Last Job You’ll Ever Hate</em> and his Human Workforce work: people first,
+          tools in service of outcomes, and craftsmanship over chaos. On this site, that shows up as clean paths,
+          robust fallbacks, “it just plays” audio, and thoughtful constraints that hold under real-world use.
+        </p>
+
+        <div class="links">
+          <span class="tag">Builder</span>
+          <span class="tag">Human Workforce</span>
+          <span class="tag">AI + Music</span>
+        </div>
+
+        <div class="footer">
+          Learn more:
+          <a href="https://thehumanworkforce.com/about" target="_blank" rel="noopener">thehumanworkforce.com/about</a> •
+          Music:
+          <a href="https://suno.com/@zdjimas" target="_blank" rel="noopener">suno.com/@zdjimas</a>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
 
