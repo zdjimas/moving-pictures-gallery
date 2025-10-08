@@ -726,6 +726,42 @@ function showExitAndReturn(){
   const b=makeBtn(); mountBtn(b); wireBtn(b);
 })();
 </script>
+<!-- Strong exit override: ensure exit video plays before navigating -->
+<script>
+(function kzakExitOverride096(){
+  function ready(fn){
+    if(document.readyState==='loading'){
+      document.addEventListener('DOMContentLoaded', fn, { once:true });
+    } else { fn(); }
+  }
+  ready(function(){
+    var el = document.getElementById('toLobby');
+    if(!el) return;
 
+    // Clone to drop any earlier listeners bound to #toLobby
+    var clone = el.cloneNode(true);
+    try { clone.removeAttribute('href'); } catch(e){}
+    if (el.parentNode) el.parentNode.replaceChild(clone, el);
+
+    // Capture-phase handler beats any bubbling nav code
+    clone.addEventListener('click', function(ev){
+      try { ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation(); } catch(e){}
+      if (typeof showExitAndReturn === 'function') {
+        showExitAndReturn();
+      } else {
+        // Fallback: audio sting if overlay/video isn’t present
+        try{
+          var a = new Audio('Media/FrasierExit.mp3');
+          a.addEventListener('ended', function(){ location.href = '../index.html'; }, { once:true });
+          a.addEventListener('error', function(){ location.href = '../index.html'; }, { once:true });
+          a.play().catch(function(){ location.href = '../index.html'; });
+        }catch(_){ location.href = '../index.html'; }
+      }
+    }, { capture:true });
+  });
+})();
+</script>
+
+  
 </body>
 </html>
