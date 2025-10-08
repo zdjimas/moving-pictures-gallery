@@ -668,7 +668,7 @@ const PLAYLIST_ROCK = [
 ,
   {
     title: "My Confessor",
-    file:  "Media/My Confessor",
+    file:  "Media/My Confessor.mp3",
     img:   "Media/MyConfessor.jpeg",
     image: "Media/MyConfessor.jpeg",
     alt:   "Cover art for My Confessor",
