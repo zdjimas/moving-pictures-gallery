@@ -406,12 +406,38 @@ function shareStation(){
     const u = new URL(location.href);
     u.searchParams.set('t', idx);
     const link = u.toString();
-    if (navigator.share) return navigator.share({title:'KZAK station', text:'Listen with me', url: link});
+    if (navigator.share) return navigator.share({title:'KZAK station', text:'Listen with me', url: link}
+
+function shareCurrentTrack(i=null){
+  try{
+    const k = (i==null) ? idx : i;
+    // LIST is the active filtered list in 096
+    const list = (typeof LIST !== 'undefined' && Array.isArray(LIST)) ? LIST : [];
+    if (!list.length || k<0 || k>=list.length) return;
+    const tr = list[k] || {};
+    const src = tr.src || tr.file || tr.url || tr.path;
+    if (!src) return;
+    const link = (function(u){
+      try {
+        // Respect pathToUrl if defined, then absolutize
+        const p = (typeof pathToUrl==='function') ? pathToUrl(u) : u;
+        return new URL(p, location.href).href;
+      } catch { return u; }
+    })(src);
+
+    if (navigator.share) {
+      return navigator.share({ title: (tr.title || 'KZAK Track'), url: link });
+    }
+    // Desktop fallback — copy to clipboard if available
+    try { return navigator.clipboard.writeText(link); } catch {}
+  }catch{}
+}
+);
     return navigator.clipboard.writeText(link);
   }catch{}
 }
 shareBtn.addEventListener('click', shareStation);
-shareTrackBtn.addEventListener('click', () => shareStation());
+shareTrackBtn.addEventListener('click', () => shareCurrentTrack());
 
 let BREAKS = [
   "MediaBreaks/Radio-Id-Two.mp3","MediaBreaks/Radio-Id-Five.mp3","MediaBreaks/Snappy3.mp3","MediaBreaks/Snappy8.mp3",
@@ -761,85 +787,25 @@ function showExitAndReturn(){
   });
 })();
 </script>
-<!-- Share fixes: station vs. track (Bullwinkle-v1.097) -->
 <script>
-(function kzakShare097(){
-  function abs(u){
-    try { return new URL((typeof pathToUrl==='function') ? pathToUrl(u) : u, location.href).href; }
-    catch { return u; }
-  }
-  function getCurrentTrack(){
-    try {
-      const list = (typeof LIST !== 'undefined' && Array.isArray(LIST)) ? LIST
-                  : (typeof PLAYLIST !== 'undefined' && Array.isArray(PLAYLIST)) ? PLAYLIST : [];
-      const i = (typeof idx === 'number') ? idx : -1;
-      return (i >= 0 && i < list.length) ? list[i] : null;
-    } catch { return null; }
-  }
+(function initShareHrefs097(){
   function stationUrl(){
-    try{
-      const url = new URL(location.href);
-      url.searchParams.set('t', String((typeof idx==='number')? idx : 0));
-      url.hash = '';
-      return url.href;
-    }catch{ return location.href; }
+    try{ const u=new URL(location.href); u.searchParams.set('t', (typeof idx==='number')? idx: 0); u.hash=''; return u.href; }catch{ return location.href; }
   }
   function trackUrl(){
-    const t = getCurrentTrack();
-    if (!t) return stationUrl();
-    const src = t.src || t.file || t.url || t.path;
-    return abs(src || '');
+    try{
+      const list = (typeof LIST!=='undefined' && Array.isArray(LIST)) ? LIST : [];
+      if (!list.length || typeof idx!=='number') return stationUrl();
+      const tr = list[idx] || {}; const src = tr.src || tr.file || tr.url || tr.path;
+      if (!src) return stationUrl();
+      const p = (typeof pathToUrl==='function') ? pathToUrl(src) : src;
+      try{ return new URL(p, location.href).href; }catch{ return p; }
+    }catch{ return stationUrl(); }
   }
-  function findEl(){
-    const shareStation = document.getElementById('share') || document.querySelector('[data-role="share"]');
-    const shareTrack   = document.getElementById('shareTrack') || document.querySelector('[data-role="share-track"]');
-    return { shareStation, shareTrack };
-  }
-  function updateShareLinks(){
-    const { shareStation, shareTrack } = findEl();
-    if (shareStation){
-      const u = stationUrl();
-      shareStation.setAttribute('href', u);
-      shareStation.dataset.href = u;
-    }
-    if (shareTrack){
-      const tu = trackUrl();
-      shareTrack.setAttribute('href', tu);
-      shareTrack.dataset.href = tu;
-    }
-  }
-  function wireShareClicks(){
-    const { shareStation, shareTrack } = findEl();
-    function onClickFactory(getUrl){
-      return function(ev){
-        try {
-          if (navigator.share) {
-            ev.preventDefault();
-            const url = getUrl();
-            navigator.share({ title: document.title || 'KZAK', url }).catch(()=>{ location.href = url; });
-          }
-        } catch {}
-      };
-    }
-    if (shareStation) shareStation.addEventListener('click', onClickFactory(stationUrl));
-    if (shareTrack)   shareTrack.addEventListener('click',   onClickFactory(trackUrl));
-  }
-  (function wrapLoad(){
-    if (typeof window.load !== 'function') return;
-    const _load = window.load;
-    window.load = function(i, auto){
-      const r = _load.apply(this, arguments);
-      try { updateShareLinks(); } catch {}
-      return r;
-    };
-  })();
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){
-      try { updateShareLinks(); wireShareClicks(); } catch {}
-    }, { once:true });
-  } else {
-    try { updateShareLinks(); wireShareClicks(); } catch {}
-  }
+  const s = document.getElementById('shareBtn');
+  const t = document.getElementById('shareTrackBtn');
+  if (s) s.setAttribute('href', stationUrl());
+  if (t) t.setAttribute('href', trackUrl());
 })();
 </script>
 
