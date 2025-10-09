@@ -1,5 +1,4 @@
-
-name: Deploy room-radio-listen to Pages
+ name: Deploy room-radio-listen to Pages
 
 on:
   push:
@@ -23,11 +22,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # ⬇️ Only publish this folder to keep artifact << 1 GB
+
+      # Build a *small* publish dir that excludes heavy audio
+      - name: Prepare publish dir (_site)
+        run: |
+          set -e
+          rm -rf _site
+          mkdir -p _site/Media
+          # core app
+          cp room-radio-listen/index-098.html _site/
+          # if your page uses these assets, copy them; ignore if they don't exist
+          cp room-radio-listen/content.css _site/ || true
+          cp room-radio-listen/main.js _site/ || true
+          # playlists (classic globals)
+          cp room-radio-listen/playlist-*.classic.js _site/
+          # small images used by the UI
+          cp room-radio-listen/Media/default.jpg _site/Media/ || true
+          cp room-radio-listen/Media/frasier.png _site/Media/ || true
+
       - name: Upload Pages artifact (room-radio-listen only)
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./room-radio-listen
+          path: _site
 
   deploy:
     environment:
