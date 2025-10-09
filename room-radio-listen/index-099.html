@@ -448,28 +448,8 @@ function shareStation(){
     return navigator.clipboard.writeText(link);
   }catch{}
 }
-function shareTrack(){
-  try{
-    const tr = (window.LIST && typeof idx !== 'undefined') ? LIST[idx] : null;
-    let href = (typeof audio !== 'undefined' && audio && audio.src) ? audio.src : null;
-    if(!href && tr){
-      try{
-        const c = audioCandidates(tr);
-        if (c && c.length) href = pathToUrl(c[0]);
-      }catch{}
-    }
-    if(!href){ return shareStation(); } // fall back gracefully
-
-    if (navigator.share){
-      return navigator.share({title: tr ? tr.title : document.title, text: 'Listen with me', url: href});
-    }
-    try{ navigator.clipboard.writeText(href); }catch{}
-    alert('Track link copied to clipboard');
-  }catch(e){ console.warn('shareTrack failed', e); }
-}
-
 shareBtn.addEventListener('click', shareStation);
-shareTrackBtn.addEventListener('click', shareTrack);
+shareTrackBtn.addEventListener('click', () => shareStation());
 
 let BREAKS = [
   "MediaBreaks/Radio-Id-Two.mp3","MediaBreaks/Radio-Id-Five.mp3","MediaBreaks/Snappy3.mp3","MediaBreaks/Snappy8.mp3",
@@ -769,7 +749,7 @@ function showExitAndReturn(){
 <div id="kzakTestBox" aria-live="polite" aria-label="Build stamp"></div>
 <script>
 (function(){
-  const RELEASE='Bullwinkle-v1', SUBVER=99;
+  const RELEASE='Bullwinkle-v1', SUBVER=98;
   const subStr=String(SUBVER).padStart(3,'0');
   const releaseId=`${RELEASE}.${subStr}`;
   const box=document.getElementById('kzakTestBox');
@@ -883,12 +863,163 @@ function showExitAndReturn(){
 </script>
 
 
+
+<!-- 099 media-resolver + share-track patch -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  try{ const f=document.getElementById('frasierImg'); if(f) f.src = pathToUrl('Media/frasier.png'); }catch{}
-  try{ const a=document.getElementById('art'); if(a) a.src = pathToUrl(window.DEFAULT_IMG || 'Media/default.jpg'); }catch{}
-  try{ document.body.style.backgroundImage = `url('${pathToUrl('Media/RadioMusicListening.jpg')}')`; }catch{}
-});
+(function(){
+  const RELEASE = 'Bullwinkle-v1', SUBVER = 99;
+
+  // Raw content base (stream assets directly from repo)
+  window.MEDIA_BASE = 'https://raw.githubusercontent.com/zdjimas/moving-pictures-gallery/main/room-radio-listen/';
+
+  // Resolve relative Media paths to absolute raw URLs
+  window.pathToUrl = function(p){
+    try{
+      if(!p) return p;
+      if(/^https?:\/\//i.test(p)) return p;
+      var clean = String(p).replace(/^(\.\/)+/,''); // strip leading ./
+      // Normalize bare filenames that used to be in Media/ (e.g., 'default.jpg', 'frasier.png')
+      if(!/^Media\//i.test(clean) && /(?:^|\/)(default\.jpg|frasier\.png|KZAK-Welcome\.mp3|FrasierExit\.mp4)$/i.test(clean)){
+        clean = 'Media/' + clean;
+      }
+      return new URL(clean, window.MEDIA_BASE).href;
+    }catch(e){ return p; }
+  };
+
+  // Absolutize DEFAULT_IMG once
+  try { if (window.DEFAULT_IMG) window.DEFAULT_IMG = pathToUrl(window.DEFAULT_IMG); } catch(e){}
+
+  // Intercept media src so any future assignments are absolutized
+  (function patchMediaSrc(){
+    var d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'src');
+    if (!d || !d.set) return;
+    Object.defineProperty(HTMLMediaElement.prototype, 'src', {
+      configurable: true,
+      enumerable: d.enumerable,
+      get: d.get,
+      set: function(v){
+        try { d.set.call(this, window.pathToUrl ? pathToUrl(v) : v); }
+        catch(e){ d.set.call(this, v); }
+      }
+    });
+  })();
+
+  // After DOM is ready, rewrite <img>/<source> and any CSS background-image that points to Media/
+  function fixExistingDomMedia(){
+    try{
+      // Fix <img> and <source> elements
+      document.querySelectorAll('img[src],source[src]').forEach(function(el){
+        var s = el.getAttribute('src') || '';
+        if (/Media\//i.test(s) || /(default\.jpg|frasier\.png)$/i.test(s)) {
+          el.setAttribute('src', pathToUrl(s));
+        }
+      });
+      // Fix inline/background images coming from external CSS
+      var all = document.querySelectorAll('*');
+      for (var i=0;i<all.length;i++){
+        var el = all[i];
+        var bg = getComputedStyle(el).backgroundImage; // url("...")
+        if (bg && /Media\//i.test(bg)) {
+          var m = bg.match(/url\(["']?(.*?)["']?\)/i);
+          if (m && m[1]) {
+            el.style.backgroundImage = 'url("' + pathToUrl(m[1]) + '")';
+          }
+        }
+      }
+    }catch(e){ console.warn('099: fixExistingDomMedia error', e); }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fixExistingDomMedia);
+  else fixExistingDomMedia();
+
+  // Wrap load() to ensure artwork and Media Session use resolved URLs
+  (function wrapLoad(){
+    var originalLoad = window.load;
+    window.load = function(i, fromUser){
+      if (typeof originalLoad === 'function') originalLoad.call(this, i, fromUser);
+
+      try {
+        var L = (window.LIST && window.LIST.length) || 0;
+        if (typeof i === 'number' && L) {
+          window.idx = ((i % L) + L) % L;
+        }
+        var tr  = (window.LIST && window.LIST[window.idx]) || null;
+        var mp3 = tr && (tr.src || tr.file || tr.url || tr.path);
+        var art = (tr && (tr.img || tr.art || tr.cover)) || window.DEFAULT_IMG;
+
+        var audio = document.querySelector('audio');
+        if (audio && mp3) audio.src = pathToUrl(mp3);
+
+        var artEl = document.querySelector('#art') ||
+                    document.querySelector('[data-role="art"]') ||
+                    document.querySelector('.track-art img') ||
+                    document.querySelector('.track-art');
+        var artUrl = pathToUrl(art || 'Media/default.jpg');
+        if (artEl){
+          if ('src' in artEl) artEl.src = artUrl;
+          else artEl.style.backgroundImage = 'url("' + artUrl + '")';
+        }
+
+        if ('mediaSession' in navigator && tr) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: tr.title || '',
+            artist: tr.artist || '',
+            album: tr.genre || '',
+            artwork: [{ src: artUrl, sizes: '512x512', type: 'image/png' }]
+          });
+        }
+      } catch (e) {
+        console.warn('099 load patch error:', e);
+      }
+    };
+  })();
+
+  // Share Track: share the actual mp3 URL
+  function attachShareTrack(){
+    // find a Share Track control by common selectors or button text
+    var btn = document.querySelector('[data-share-track], #shareTrackBtn, .btn-share-track');
+    if (!btn) {
+      btn = Array.from(document.querySelectorAll('button,a')).find(function(n){
+        return /share\s*track/i.test((n.textContent || '').trim());
+      });
+    }
+    if (!btn) return;
+
+    btn.addEventListener('click', async function(){
+      try{
+        // Prefer the live audio element's src (already absolutized)
+        var audio = document.querySelector('audio');
+        var url = audio && audio.currentSrc ? audio.currentSrc : '';
+        if (!url) {
+          var tr  = (window.LIST && window.LIST[window.idx]) || null;
+          var mp3 = tr && (tr.src || tr.file || tr.url || tr.path);
+          if (mp3) url = pathToUrl(mp3);
+        }
+        if (!url) { alert('No track selected.'); return; }
+
+        var title = (window.LIST && window.LIST[window.idx] && window.LIST[window.idx].title) || 'KZAK Track';
+        if (navigator.share) {
+          await navigator.share({ title: title, text: title, url: url });
+        } else {
+          await navigator.clipboard.writeText(url);
+          alert('Track URL copied to clipboard:\n' + url);
+        }
+      }catch(e){ console.warn('Share Track failed:', e); }
+    }, { once:true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attachShareTrack);
+  else attachShareTrack();
+
+  // Update any visible release badge to .099
+  try {
+    var pad = function(n){return String(n).padStart(3,'0');}
+    var el =
+      document.querySelector('[data-release-badge]') ||
+      document.querySelector('#release-badge') ||
+      document.querySelector('.release-badge') ||
+      document.querySelector('.release') || null;
+    if (el) el.textContent = 'Release: ' + RELEASE + '.' + pad(SUBVER);
+  } catch(e){}
+})();
 </script>
 </body>
 </html>
