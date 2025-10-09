@@ -1,63 +1,187 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KZAK • Bullwinkle v1.104 (loader)</title>
-
-  <!-- No-cache headers to avoid stale GitHub Pages content -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-
-  <style>
-    /* Tiny splash while we fetch the current app */
-    html,body{height:100%;margin:0;background:#0b1220;color:#cbd5e1;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-    .wrap{display:flex;height:100%;align-items:center;justify-content:center;flex-direction:column;gap:0.5rem}
-    .spinner{width:22px;height:22px;border-radius:50%;border:3px solid #334155;border-top-color:#fff;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .small{opacity:.7;font-size:.9rem}
-  </style>
-
-  <script>
-    (async function load() {
-      try {
-        const base = new URL('./index-103.html', location.href).toString();
-        const res  = await fetch(base + (base.includes('?') ? '&' : '?') + 'nocache=104', { cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        let html = await res.text();
-
-        // 1) Bump any visible release text to v1.104
-        html = html.replace(/Bullwinkle-v1\.\d+/g, 'Bullwinkle-v1.104');
-
-        // 2) Add cache-busting to css and js that don't already have a query
-        html = html
-          .replace(/(\.(?:css))(?![?\w])/g, '$1?v=104')
-          .replace(/(\.(?:js))(?![?\w])/g, '$1?v=104');
-
-        // 3) Also try to bump a JS constant if present (RELEASE or stampBuild calls)
-        html = html
-          .replace(/(const\s+RELEASE\s*=\s*['"]Bullwinkle-v1\.)\d+(['"])/, '$1' + '104' + '$2')
-          .replace(/stampBuild\(['"]Bullwinkle-v1\.)\d+(\b)/, 'stampBuild(\'Bullwinkle-v1.' + '104\')');
-
-        // Inject a tiny meta tag to discourage caching inside the loaded doc as well
-        html = html.replace('<head>', '<head>\n<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">\n<meta http-equiv="Pragma" content="no-cache">\n<meta http-equiv="Expires" content="0">');
-
-        document.open();
-        document.write(html);
-        document.close();
-      } catch (err) {
-        const msg = document.getElementById('msg');
-        msg.textContent = 'Failed to load index-103.html (' + err.message + ').';
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KZAK • Frasier‑Style Fun Radio</title>
+    <link rel="stylesheet" href="./content.css" />
+    <style>
+      /* Small, safe tweaks only */
+      .version-badge {
+        position: fixed;
+        right: .75rem;
+        bottom: .75rem;
+        z-index: 99999;
+        background: rgba(0,0,0,.7);
+        color: #eee;
+        font: 12px/1.25 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+        padding: .5rem .6rem;
+        border-radius: .5rem;
+        box-shadow: 0 4px 18px rgba(0,0,0,.45);
+        pointer-events: none;
+        white-space: nowrap;
       }
-    })();
-  </script>
-</head>
-<body>
-  <div class="wrap">
-    <div class="spinner" role="presentation" aria-hidden="true"></div>
-    <div>Loading radio…</div>
-    <div id="msg" class="small">Pulling current build, please wait.</div>
-  </div>
-</body>
+      .sr-only {position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;}
+    </style>
+  </head>
+  <body>
+    <!-- Your app mounts itself (main.js) -->
+    <div id="app"></div>
+
+    <!-- Welcome audio we can trigger without touching your bundler -->
+    <audio id="__welcomeAudio" src="./Media/KZAK-Welcome.mp3" preload="auto" class="sr-only"></audio>
+
+    <script type="module" src="./main.js"></script>
+
+    <!-- Inline hot‑fixes that don’t modify your bundled app. Safe to remove later. -->
+    <script>
+      (function () {
+        const byText = (root, text) => {
+          text = String(text).toLowerCase().trim();
+          const nodes = root.querySelectorAll('button, a, [role="button"]');
+          for (const n of nodes) {
+            const t = n.textContent.replace(/\\s+/g, ' ').toLowerCase().trim();
+            if (t === text || t.includes(text)) return n;
+          }
+          return null;
+        };
+
+        const nowFile = (function () {
+          const parts = location.pathname.split('/');
+          return parts[parts.length - 1] || 'index.html';
+        })();
+
+        const versionFromFilename = (fname) => {
+          const m = /index[-_]?([0-9]{2,4})\\.html/i.exec(fname);
+          return m ? 'Bullwinkle-v1.' + m[1] : 'Bullwinkle-v1.x';
+        };
+
+        const version = versionFromFilename(nowFile);
+
+        // 1) Replace any stale “Release: …” badge and About text
+        try {
+          // Hide any existing badge that contains old Release text
+          const all = document.querySelectorAll('body *');
+          for (const el of all) {
+            const txt = (el.textContent || '').trim();
+            if (txt.startsWith('Release:') && txt.includes('Bullwinkle-v1.')) {
+              el.style.display = 'none';
+            }
+          }
+          // Inject our correct badge
+          const badge = document.createElement('div');
+          badge.className = 'version-badge';
+          badge.id = '__versionBadge';
+          badge.textContent = 'Release: ' + version + '  •  ' + nowFile;
+          document.body.appendChild(badge);
+
+          // Best-effort: update About/version blurb if present
+          const aboutTargets = [
+            '#about-version',        // custom id
+            '[data-about-version]',  // data attr
+          ];
+          for (const sel of aboutTargets) {
+            const n = document.querySelector(sel);
+            if (n) n.textContent = version;
+          }
+        } catch (e) { /* swallow */ }
+
+        // 2) Fix Share / Share Track buttons to use THIS file name
+        function shareUrl(url, title) {
+          if (navigator.share) {
+            navigator.share({ title: title || document.title, url }).catch(()=>{});
+          } else {
+            // Fallback: copy to clipboard & open
+            try { navigator.clipboard.writeText(url); } catch {}
+            window.open(url, '_blank', 'noopener');
+          }
+        }
+
+        function currentPageUrl() {
+          return location.href.split('#')[0].split('?')[0] + location.search;
+        }
+
+        function guessCurrentTrackIndex() {
+          // Try a few heuristics without relying on app internals
+          // A) Look for "TRACK N /" text
+          const all = document.querySelectorAll('body *');
+          for (const el of all) {
+            const t = (el.textContent || '').trim();
+            const m = /^TRACK\\s+(\\d+)\\s*\\//i.exec(t);
+            if (m) return parseInt(m[1], 10);
+          }
+          // B) Fallback: look for highlighted/selected row number at start, like "001  "
+          const rows = Array.from(document.querySelectorAll('li, .row, .track, [role="listitem"]'));
+          for (const r of rows) {
+            const t = (r.textContent || '').trim();
+            const m = /^(\\d{1,3})\\D/.exec(t);
+            if (m && (r.getAttribute('aria-selected') === 'true' || r.className.match(/active|current|selected/i))) {
+              return parseInt(m[1], 10);
+            }
+          }
+          return undefined;
+        }
+
+        function buildTrackShareUrl() {
+          const base = location.href.split('#')[0].split('?')[0];
+          const idx = guessCurrentTrackIndex();
+          if (idx) return base + '?track=' + idx;
+          return base; // fallback to station
+        }
+
+        function wireShares() {
+          const shareBtn = byText(document, 'share');
+          const shareTrackBtn = byText(document, 'share track');
+
+          if (shareBtn) {
+            shareBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              shareUrl(currentPageUrl(), document.title);
+            }, { once: true });
+          }
+          if (shareTrackBtn) {
+            shareTrackBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              shareUrl(buildTrackShareUrl(), document.title + ' • Track');
+            }, { once: true });
+          }
+        }
+
+        // 3) Make “Play Welcome” actually play welcome audio, then start
+        function wireWelcome() {
+          const welcomeBtn = byText(document, 'play welcome');
+          if (!welcomeBtn) return;
+
+          const audio = document.getElementById('__welcomeAudio');
+          if (!audio) return;
+
+          const startBtn = byText(document, 'start station');
+
+          welcomeBtn.addEventListener('click', (e) => {
+            try { e.preventDefault(); } catch {}
+            audio.currentTime = 0;
+            audio.play().catch(() => {
+              // If autoplay blocks, user gesture already happened; retry shortly
+              setTimeout(() => audio.play().catch(()=>{}), 50);
+            });
+            audio.onended = () => {
+              if (typeof window.startStation === 'function') window.startStation();
+              else if (startBtn) startBtn.click();
+            };
+          }, { once: true });
+        }
+
+        function applyAll() {
+          wireShares();
+          wireWelcome();
+        }
+
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          setTimeout(applyAll, 0);
+        } else {
+          document.addEventListener('DOMContentLoaded', applyAll);
+        }
+      })();
+    </script>
+  </body>
 </html>
