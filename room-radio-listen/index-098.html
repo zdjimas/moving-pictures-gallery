@@ -73,6 +73,22 @@
   <script>window.DEFAULT_IMG = 'Media/default.jpg';</script>
 
   <script>
+  // Fetch audio/art directly from the repo at runtime
+  window.MEDIA_BASE =
+    'https://raw.githubusercontent.com/zdjimas/moving-pictures-gallery/main/room-radio-listen/';
+
+  window.pathToUrl = function (p) {
+    try {
+      if (!p) return p;
+      if (/^https?:\/\//i.test(p)) return p;          // already absolute
+      const clean = String(p).replace(/^(\.\/)+/, '');
+      return new URL(clean, window.MEDIA_BASE).href;  // e.g., Media/x.mp3 → raw URL
+    } catch (e) { return p; }
+  };
+</script>
+
+
+  <script>
   // Absolute base to fetch audio/art directly from the repo:
   // Adjust only if you move the folder or branch.
   window.MEDIA_BASE =
