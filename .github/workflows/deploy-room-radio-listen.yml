@@ -28,15 +28,20 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf _site
-          mkdir -p _site/Media
-          cp room-radio-listen/index-098.html _site/
-          cp room-radio-listen/content.css _site/ 2>/dev/null || true
-          cp room-radio-listen/main.js _site/ 2>/dev/null || true
-          # playlists (required)
-          cp room-radio-listen/playlist-*.classic.js _site/
-          # small images (optional)
-          cp room-radio-listen/Media/default.jpg _site/Media/ 2>/dev/null || true
-          cp room-radio-listen/Media/frasier.png _site/Media/ 2>/dev/null || true
+          mkdir -p _site/room-radio-listen/Media
+          # HTML(s) you want available
+          cp room-radio-listen/index-098.html _site/room-radio-listen/
+          # keep other versions if you want them reachable too
+          cp room-radio-listen/index-096.html _site/room-radio-listen/ 2>/dev/null || true
+          cp room-radio-listen/index.html     _site/room-radio-listen/ 2>/dev/null || true
+          # optional app assets
+          cp room-radio-listen/content.css _site/room-radio-listen/ 2>/dev/null || true
+          cp room-radio-listen/main.js     _site/room-radio-listen/ 2>/dev/null || true
+          # playlists (classic globals)
+          cp room-radio-listen/playlist-*.classic.js _site/room-radio-listen/
+          # small images used by the UI (not audio)
+          cp room-radio-listen/Media/default.jpg _site/room-radio-listen/Media/ 2>/dev/null || true
+          cp room-radio-listen/Media/frasier.png _site/room-radio-listen/Media/ 2>/dev/null || true
 
       - name: Upload Pages artifact (room-radio-listen only)
         uses: actions/upload-pages-artifact@v3
