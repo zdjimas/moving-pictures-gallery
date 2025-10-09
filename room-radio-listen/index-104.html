@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KZAK • Bullwinkle v1.104 (loader)</title>
+
+  <!-- No-cache headers to avoid stale GitHub Pages content -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <style>
+    /* Tiny splash while we fetch the current app */
+    html,body{height:100%;margin:0;background:#0b1220;color:#cbd5e1;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .wrap{display:flex;height:100%;align-items:center;justify-content:center;flex-direction:column;gap:0.5rem}
+    .spinner{width:22px;height:22px;border-radius:50%;border:3px solid #334155;border-top-color:#fff;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .small{opacity:.7;font-size:.9rem}
+  </style>
+
+  <script>
+    (async function load() {
+      try {
+        const base = new URL('./index-103.html', location.href).toString();
+        const res  = await fetch(base + (base.includes('?') ? '&' : '?') + 'nocache=104', { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        let html = await res.text();
+
+        // 1) Bump any visible release text to v1.104
+        html = html.replace(/Bullwinkle-v1\.\d+/g, 'Bullwinkle-v1.104');
+
+        // 2) Add cache-busting to css and js that don't already have a query
+        html = html
+          .replace(/(\.(?:css))(?![?\w])/g, '$1?v=104')
+          .replace(/(\.(?:js))(?![?\w])/g, '$1?v=104');
+
+        // 3) Also try to bump a JS constant if present (RELEASE or stampBuild calls)
+        html = html
+          .replace(/(const\s+RELEASE\s*=\s*['"]Bullwinkle-v1\.)\d+(['"])/, '$1' + '104' + '$2')
+          .replace(/stampBuild\(['"]Bullwinkle-v1\.)\d+(\b)/, 'stampBuild(\'Bullwinkle-v1.' + '104\')');
+
+        // Inject a tiny meta tag to discourage caching inside the loaded doc as well
+        html = html.replace('<head>', '<head>\n<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">\n<meta http-equiv="Pragma" content="no-cache">\n<meta http-equiv="Expires" content="0">');
+
+        document.open();
+        document.write(html);
+        document.close();
+      } catch (err) {
+        const msg = document.getElementById('msg');
+        msg.textContent = 'Failed to load index-103.html (' + err.message + ').';
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="spinner" role="presentation" aria-hidden="true"></div>
+    <div>Loading radio…</div>
+    <div id="msg" class="small">Pulling current build, please wait.</div>
+  </div>
+</body>
+</html>
