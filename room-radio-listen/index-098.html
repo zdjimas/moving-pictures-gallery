@@ -71,6 +71,27 @@
   </style>
 
   <script>window.DEFAULT_IMG = 'Media/default.jpg';</script>
+
+  <script>
+  // Absolute base to fetch audio/art directly from the repo:
+  // Adjust only if you move the folder or branch.
+  window.MEDIA_BASE =
+    'https://raw.githubusercontent.com/zdjimas/moving-pictures-gallery/main/room-radio-listen/';
+
+  // Map relative playlist paths to absolute URLs (keeps existing playlists unchanged)
+  window.pathToUrl = function(p){
+    try{
+      if(!p) return p;
+      if(/^https?:\/\//i.test(p)) return p;           // already absolute
+      // Keep local small images if they exist; everything else from raw
+      const clean = String(p).replace(/^(\.\/)+/,'');
+      return new URL(clean, window.MEDIA_BASE).href;  // e.g., Media/track.mp3 → raw URL
+    }catch(e){ return p; }
+  };
+</script>
+
+  
+  
   <script src="playlist-heavy.classic.js?v=081"></script>
   <script src="playlist-mellow.classic.js?v=081"></script>
   <script src="playlist-rock.classic.js?v=081"></script>
