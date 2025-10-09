@@ -713,7 +713,7 @@ function showExitAndReturn(){
 <div id="kzakTestBox" aria-live="polite" aria-label="Build stamp"></div>
 <script>
 (function(){
-  const RELEASE='Bullwinkle-v1', SUBVER=96;
+  const RELEASE='Bullwinkle-v1', SUBVER=98;
   const subStr=String(SUBVER).padStart(3,'0');
   const releaseId=`${RELEASE}.${subStr}`;
   const box=document.getElementById('kzakTestBox');
@@ -763,19 +763,19 @@ function showExitAndReturn(){
   });
 })();
 </script>
-<!-- Share overrides (Bullwinkle-v1.098): ensure correct URLs and Web Share objects -->
+
+<!-- Share overrides (Bullwinkle-v1.098): ensure correct URLs, use anchors for proper share objects -->
 <script>
-(function kzakShareOverride098(){
+(function kzakShareOverride098a(){
   function ready(fn){
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', fn, { once:true });
-    } else { fn(); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once:true });
+    else fn();
   }
   function abs(u){
-    try {
+    try{
       const p = (typeof window.pathToUrl === 'function') ? window.pathToUrl(u) : u;
       return new URL(p, location.href).href;
-    } catch { return u; }
+    }catch{ return u; }
   }
   function stationUrl(){
     try{ const u = new URL(location.href); u.searchParams.set('t', (typeof idx==='number')? idx : 0); u.hash=''; return u.toString(); }
@@ -791,54 +791,41 @@ function showExitAndReturn(){
       return src ? abs(src) : '';
     }catch{ return ''; }
   }
+  function swapButtonForAnchor(btn, computeHref){
+    if (!btn) return null;
+    const a = document.createElement('a');
+    a.id = btn.id || '';
+    a.className = btn.className || '';
+    a.textContent = btn.textContent || 'Share';
+    a.setAttribute('role','button');
+    a.href = computeHref() || '#';
+    if (btn.parentNode) btn.parentNode.replaceChild(a, btn);
+    ['pointerdown','touchstart','focus'].forEach(ev => a.addEventListener(ev, ()=>{ try{ a.href = computeHref() || '#'; }catch{} }, {passive:true}));
+    a.addEventListener('click', function(ev){
+      try{
+        const url = computeHref();
+        if (!url) return;
+        a.href = url;
+        if (navigator.share){
+          ev.preventDefault();
+          const list = Array.isArray(window.LIST) ? window.LIST : [];
+          const t = (typeof idx==='number' && list[idx]) ? list[idx] : {};
+          const title = (t && t.title) ? t.title : (document.title || 'KZAK');
+          navigator.share({ title, url }).catch(()=>{ location.href = url; });
+        }
+      }catch{ }
+    }, {capture:true});
+    return a;
+  }
   ready(function(){
-    /* Share Station: replace node to drop previous listeners */
     var sb = document.getElementById('shareBtn') || document.querySelector('[data-role="share"]');
-    if (sb){
-      var sClone = sb.cloneNode(true);
-      if (sb.parentNode) sb.parentNode.replaceChild(sClone, sb);
-      sClone.addEventListener('click', function(ev){
-        try{
-          ev.preventDefault();
-          const link = stationUrl();
-          if (navigator.share){
-            navigator.share({ title: document.title || 'KZAK Station', text: 'Listen with me', url: link })
-                     .catch(function(){ try{ navigator.clipboard.writeText(link); }catch(e){} });
-          } else {
-            try{ navigator.clipboard.writeText(link); }catch(e){ location.href = link; }
-          }
-        }catch(e){}
-      }, { capture:true });
-    }
-
-    /* Share Track: replace node to drop previous listeners */
+    swapButtonForAnchor(sb, stationUrl);
     var tb = document.getElementById('shareTrackBtn') || document.querySelector('[data-role="share-track"]');
-    if (tb){
-      var tClone = tb.cloneNode(true);
-      if (tb.parentNode) tb.parentNode.replaceChild(tClone, tb);
-      tClone.addEventListener('click', function(ev){
-        try{
-          ev.preventDefault();
-          const url = trackUrl();
-          if (!url){ return; }
-          // Update href for long-press/copy
-          try{ tClone.setAttribute('href', url); }catch(e){}
-          if (navigator.share){
-            // Include a title so iOS renders a proper share object in Messages
-            var list = Array.isArray(window.LIST) ? window.LIST : [];
-            var tr = (typeof idx==='number' && list[idx]) ? list[idx] : {};
-            var title = tr && tr.title ? tr.title : 'KZAK Track';
-            navigator.share({ title: title, text: 'Listen to this track', url: url })
-                     .catch(function(){ location.href = url; });
-          } else {
-            location.href = url;
-          }
-        }catch(e){}
-      }, { capture:true });
-    }
+    swapButtonForAnchor(tb, trackUrl);
   });
 })();
 </script>
+
 
 </body>
 </html>
