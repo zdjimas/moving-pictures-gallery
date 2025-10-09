@@ -1,1 +1,40 @@
 
+name: Deploy room-radio-listen to Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'room-radio-listen/**'
+      - '.github/workflows/deploy-room-radio-listen.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # ⬇️ Only publish this folder to keep artifact << 1 GB
+      - name: Upload Pages artifact (room-radio-listen only)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./room-radio-listen
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
