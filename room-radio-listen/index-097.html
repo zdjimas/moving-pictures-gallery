@@ -406,38 +406,12 @@ function shareStation(){
     const u = new URL(location.href);
     u.searchParams.set('t', idx);
     const link = u.toString();
-    if (navigator.share) return navigator.share({title:'KZAK station', text:'Listen with me', url: link}
-
-function shareCurrentTrack(i=null){
-  try{
-    const k = (i==null) ? idx : i;
-    // LIST is the active filtered list in 096
-    const list = (typeof LIST !== 'undefined' && Array.isArray(LIST)) ? LIST : [];
-    if (!list.length || k<0 || k>=list.length) return;
-    const tr = list[k] || {};
-    const src = tr.src || tr.file || tr.url || tr.path;
-    if (!src) return;
-    const link = (function(u){
-      try {
-        // Respect pathToUrl if defined, then absolutize
-        const p = (typeof pathToUrl==='function') ? pathToUrl(u) : u;
-        return new URL(p, location.href).href;
-      } catch { return u; }
-    })(src);
-
-    if (navigator.share) {
-      return navigator.share({ title: (tr.title || 'KZAK Track'), url: link });
-    }
-    // Desktop fallback — copy to clipboard if available
-    try { return navigator.clipboard.writeText(link); } catch {}
-  }catch{}
-}
-);
+    if (navigator.share) return navigator.share({title:'KZAK station', text:'Listen with me', url: link});
     return navigator.clipboard.writeText(link);
   }catch{}
 }
 shareBtn.addEventListener('click', shareStation);
-shareTrackBtn.addEventListener('click', () => shareCurrentTrack());
+shareTrackBtn.addEventListener('click', () => shareStation());
 
 let BREAKS = [
   "MediaBreaks/Radio-Id-Two.mp3","MediaBreaks/Radio-Id-Five.mp3","MediaBreaks/Snappy3.mp3","MediaBreaks/Snappy8.mp3",
@@ -787,25 +761,36 @@ function showExitAndReturn(){
   });
 })();
 </script>
+<!-- Share Track fix (append-only, minimal) -->
 <script>
-(function initShareHrefs097(){
-  function stationUrl(){
-    try{ const u=new URL(location.href); u.searchParams.set('t', (typeof idx==='number')? idx: 0); u.hash=''; return u.href; }catch{ return location.href; }
+(function kzakShareTrack097(){
+  function ready(fn){
+    if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', fn, {once:true}); }
+    else { fn(); }
   }
-  function trackUrl(){
-    try{
-      const list = (typeof LIST!=='undefined' && Array.isArray(LIST)) ? LIST : [];
-      if (!list.length || typeof idx!=='number') return stationUrl();
-      const tr = list[idx] || {}; const src = tr.src || tr.file || tr.url || tr.path;
-      if (!src) return stationUrl();
-      const p = (typeof pathToUrl==='function') ? pathToUrl(src) : src;
-      try{ return new URL(p, location.href).href; }catch{ return p; }
-    }catch{ return stationUrl(); }
-  }
-  const s = document.getElementById('shareBtn');
-  const t = document.getElementById('shareTrackBtn');
-  if (s) s.setAttribute('href', stationUrl());
-  if (t) t.setAttribute('href', trackUrl());
+  ready(function(){
+    var btn = document.getElementById('shareTrackBtn') || document.querySelector('[data-role="share-track"]');
+    if(!btn) return;
+    btn.addEventListener('click', function(ev){
+      try{
+        var list = Array.isArray(window.LIST) ? window.LIST
+                 : (Array.isArray(window.PLAYLIST) ? window.PLAYLIST : []);
+        var k = (typeof window.idx === 'number') ? window.idx : -1;
+        var tr = (k>=0 && k<list.length) ? list[k] : null;
+        var src = tr && (tr.src || tr.file || tr.url || tr.path);
+        if(!src){ return; } // fall back to whatever the page already does
+        var p = (typeof window.pathToUrl === 'function') ? window.pathToUrl(src) : src;
+        var abs; try{ abs = new URL(p, location.href).href; } catch(_){ abs = p; }
+        // Ensure long-press/copy has the right href
+        btn.setAttribute('href', abs);
+        // Use Web Share API if available; else let anchor open the URL
+        if (navigator.share){
+          ev.preventDefault();
+          navigator.share({ title: (tr.title || 'KZAK Track'), url: abs }).catch(function(){ location.href = abs; });
+        }
+      }catch(e){ /* no-op: let default handler run */ }
+    }, {capture:true});
+  });
 })();
 </script>
 
