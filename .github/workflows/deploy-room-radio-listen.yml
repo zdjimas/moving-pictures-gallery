@@ -2,7 +2,7 @@ name: Deploy room-radio-listen to Pages
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
     paths:
       - "room-radio-listen/**"
       - ".github/workflows/deploy-room-radio-listen.yml"
@@ -23,27 +23,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare publish dir (_site)
-        shell: bash
+      - name: Prepare publish dir (_site/room-radio-listen)
         run: |
-          set -euo pipefail
+          set -e
           rm -rf _site
-          mkdir -p _site/room-radio-listen/Media
-          # HTML(s) you want available
-          cp room-radio-listen/index-098.html _site/room-radio-listen/
-          # keep other versions if you want them reachable too
-          cp room-radio-listen/index-096.html _site/room-radio-listen/ 2>/dev/null || true
-          cp room-radio-listen/index.html     _site/room-radio-listen/ 2>/dev/null || true
-          # optional app assets
-          cp room-radio-listen/content.css _site/room-radio-listen/ 2>/dev/null || true
-          cp room-radio-listen/main.js     _site/room-radio-listen/ 2>/dev/null || true
-          # playlists (classic globals)
-          cp room-radio-listen/playlist-*.classic.js _site/room-radio-listen/
-          # small images used by the UI (not audio)
-          cp room-radio-listen/Media/default.jpg _site/room-radio-listen/Media/ 2>/dev/null || true
-          cp room-radio-listen/Media/frasier.png _site/room-radio-listen/Media/ 2>/dev/null || true
+          mkdir -p _site/room-radio-listen
+          # publish ALL numbered builds (096/097/098/099...) and the plain index.html if present
+          cp room-radio-listen/index-*.html _site/room-radio-listen/ 2>/dev/null || true
+          cp room-radio-listen/index.html    _site/room-radio-listen/ 2>/dev/null || true
+          # styles + classic playlists your player needs
+          cp room-radio-listen/content.css              _site/room-radio-listen/ 2>/dev/null || true
+          cp room-radio-listen/playlist-*.classic.js    _site/room-radio-listen/ 2>/dev/null || true
+          # keep artifact small: do NOT publish Media/*
+          echo "Files to publish:" && find _site -maxdepth 3 -type f | sort
 
-      - name: Upload Pages artifact (room-radio-listen only)
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
@@ -51,6 +45,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
