@@ -4,15 +4,15 @@ on:
   push:
     branches: [ "main" ]
     paths:
+      # Root / lobby
       - "index.html"
       - "content.css"
       - "rooms_manifest.js"
       - "lobby-rooms.js"
       - "assets/**"
-      - "room-*/**.html"
-      - "room-*/**.css"
-      - "room-*/**.js"
-      - "room-*/Media/*.mp4"
+      # Any room subsite
+      - "room-*/**"
+      # Workflow itself
       - ".github/workflows/deploy-room-radio-listen.yml"
   workflow_dispatch:
 
@@ -41,36 +41,51 @@ jobs:
           mkdir -p _site
 
           echo "=== 1) Root site ==="
+          # Required entry
           [[ -f index.html ]] && cp -v index.html _site/
+
+          # Common root assets (copy if present)
           for f in content.css rooms_manifest.js lobby-rooms.js main.css main.js \
                    RadioMusicListening.jpg Wings.png "Wings For Marie.mp4" IMG_*.jpg; do
             [[ -f "$f" ]] && cp -v "$f" _site/ || true
           done
+
+          # Copy small files from assets/ (skip anything >= 200MB)
           if [[ -d assets ]]; then
-            # copy small assets only (keeps artifact under 1 GB)
-            find assets -type f -size -200M -print0 | while IFS= read -r -d '' p; do
+            while IFS= read -r -d '' p; do
               install -D -m 0644 "$p" "_site/$p"
-            done
+            done < <(find assets -type f -size -200M -print0)
           fi
 
-          echo "=== 2) room-radio-listen subsite ==="
-          mkdir -p _site/room-radio-listen
-          cp -v room-radio-listen/index*.html _site/room-radio-listen/ 2>/dev/null || true
-          for f in content.css main.js playlist-*.js radio-room-entry.mp4 \
-                   frasier.png default.jpg RadioMusicListening.jpg; do
-            [[ -f "room-radio-listen/$f" ]] && cp -v "room-radio-listen/$f" _site/room-radio-listen/ || true
+          echo "=== 2) All room-* subsites ==="
+          for room in room-*; do
+            [[ -d "$room" ]] || continue
+            echo "--- Staging $room ---"
+
+            # HTML, CSS, JS
+            while IFS= read -r -d '' p; do
+              install -D -m 0644 "$p" "_site/$p"
+            done < <(find "$room" -maxdepth 1 -type f \( -name "index*.html" -o -name "*.css" -o -name "*.js" \) -size -200M -print0)
+
+            # Small images/artwork commonly referenced by pages
+            while IFS= read -r -d '' p; do
+              install -D -m 0644 "$p" "_site/$p"
+            done < <(find "$room" -maxdepth 1 -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" -o -iname "*.svg" \) -size -200M -print0)
+
+            # Media: only allow intros / welcome clips (avoid shipping full catalog)
+            if [[ -d "$room/Media" ]]; then
+              while IFS= read -r -d '' p; do
+                install -D -m 0644 "$p" "_site/$p"
+              done < <(find "$room/Media" -maxdepth 1 -type f \
+                        \( -iname "*welcome*.mp3" -o -iname "KZAK-Welcome.mp3" -o -iname "*intro*.mp3" -o -iname "*entry*.mp4" \) \
+                        -size -200M -print0)
+            fi
           done
-          # allow only small intro/welcome media; do NOT ship the whole mp3 catalog
-          if [[ -d room-radio-listen/Media ]]; then
-            find room-radio-listen/Media -maxdepth 1 -type f \
-                 \( -name "*entry*.mp4" -o -name "*intro*.mp4" -o -name "KZAK-Welcome.mp3" \) \
-                 -size -200M -print0 | while IFS= read -r -d '' p; do
-              install -D -m 0644 "$p" "_site/$p"
-            done
-          fi
 
-          echo "Files staged for publish:"
+          echo "=== Files staged for publish ==="
           find _site -type f | sort
+          echo "Total size:"
+          du -sh _site || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
