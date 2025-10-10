@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KZAK • Frasier-Style Fun Radio — v1.104</title>
+  <!-- Intentionally NOT linking content.css: your bundle loads styles itself -->
+</head>
+<body>
+  <!-- Mount point expected by your app bundle -->
+  <div id="root"></div>
+
+  <!-- Your existing app bundle -->
+  <script defer src="main.js"></script>
+
+  <!-- Page-level hotfixes: version badge, Share/Share Track, and Welcome playback -->
+  <script>
+  (function () {
+    const VERSION = "Bullwinkle-v1.107";
+    const FILENAME = (location.pathname.split("/").pop() || "index.html");
+
+    function ready(fn){ if (document.readyState !== "loading") fn(); else document.addEventListener("DOMContentLoaded", fn); }
+
+    // Small unobtrusive badge (doesn't interfere with your internal one)
+    ready(() => {
+      const badge = document.createElement("div");
+      badge.id = "bw-badge";
+      badge.style.cssText = "position:fixed;right:12px;bottom:12px;background:rgba(0,0,0,.7);color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;z-index:2147483647;pointer-events:none;";
+      badge.textContent = `Release: ${VERSION}  •  ${FILENAME}`;
+      document.body.appendChild(badge);
+    });
+
+    function shareStation() {
+      const url = new URL(location.href);
+      url.hash = "";
+      const data = { title: "KZAK • Frasier‑Style Fun Radio", text: "Tune in to KZAK", url: url.toString() };
+      if (navigator.share) return navigator.share(data).catch(()=>{});
+      prompt("Copy station link", url.toString());
+    }
+
+    function inferTrackNumber() {
+      // Heuristic 1: text like "TRACK 1 / 152"
+      const text = document.body.innerText || "";
+      const m = text.match(/TRACK\s+(\d+)\s*\/\s*\d+/i);
+      if (m) return m[1];
+      // Heuristic 2: highlighted row number at the start of the selected playlist item
+      const active = Array.from(document.querySelectorAll(".playlist, [class*=playlist] li, [class*=playlist] .active")).find(Boolean);
+      if (active) {
+        const t = active.textContent.trim();
+        const m2 = t.match(/^(\d{1,3})\s+/);
+        if (m2) return m2[1];
+      }
+      return null;
+    }
+
+    function shareTrack() {
+      const url = new URL(location.href);
+      url.hash = "";
+      const trackNo = inferTrackNumber();
+      if (trackNo) url.searchParams.set("track", trackNo);
+      const data = { title: "KZAK • Current Track", text: "Check this track on KZAK", url: url.toString() };
+      if (navigator.share) return navigator.share(data).catch(()=>{});
+      prompt("Copy track link", url.toString());
+    }
+
+    function wireShareButtons(root=document) {
+      const all = Array.from(root.querySelectorAll("a,button"));
+      all.forEach(el => {
+        const label = (el.textContent || "").trim().toLowerCase();
+        if (label === "share") {
+          el.onclick = (e) => { e.preventDefault(); e.stopPropagation(); shareStation(); };
+          if (el.tagName === "A") el.setAttribute("href", "#");
+        }
+        if (label === "share track") {
+          el.onclick = (e) => { e.preventDefault(); e.stopPropagation(); shareTrack(); };
+          if (el.tagName === "A") el.setAttribute("href", "#");
+        }
+      });
+    }
+
+    function wireWelcome(root=document) {
+      const btn = Array.from(root.querySelectorAll("a,button")).find(b => /play\s+welcome/i.test(b.textContent || ""));
+      if (!btn) return;
+      let audio;
+      btn.onclick = (e) => {
+        e.preventDefault(); e.stopPropagation();
+        if (!audio) {
+          // File expected at room-radio-listen/Media/KZAK-Welcome.mp3
+          audio = new Audio("Media/KZAK-Welcome.mp3");
+          audio.preload = "auto";
+          audio.addEventListener("ended", () => {
+            const start = Array.from(document.querySelectorAll("button,a")).find(b => /start\s+station/i.test(b.textContent || ""));
+            if (start) start.click();
+          });
+        }
+        audio.currentTime = 0;
+        audio.play().catch(()=>{});
+      };
+    }
+
+    function install() {
+      wireShareButtons();
+      wireWelcome();
+    }
+
+    // Run after the bundle paints; then observe for re-renders
+    setTimeout(install, 1500);
+    const mo = new MutationObserver(() => install());
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+  })();
+  </script>
+</body>
+</html>
