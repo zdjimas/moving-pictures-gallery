@@ -9,6 +9,17 @@ const PLAYLIST_ROCK = [
     story: "An original remix from the gang from Providence RI"
   }
 ,
+
+  {
+    title: "TechnoTrance 7empest",
+    file:  "Media/TechnoTrance 7empest.mp3",
+    img:   "Media/TechnoTrance7empest.jpeg",
+    alt:   "TechnoTrance 7empest - artwork",
+    genre: "Middle Ground Rock",
+    story: "A Techno Dance Club Remix of a melody from Tool"
+  }
+,
+  
   {
     title: "Once In A Lifetime a Second Time",
     file:  "Media/Once In A Lifetime a Second Time.mp3",
