@@ -1,6 +1,24 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script>
+// Remove any legacy or duplicate "Release: Bullwinkle-v1.*" badges
+(function removeLegacyBadges(){
+  try{
+    // remove our known ones first
+    document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
+    // remove any element whose innerText starts with "Release: Bullwinkle-v1"
+    const all = Array.from(document.querySelectorAll('body *'));
+    for (const el of all){
+      const t = (el.innerText || '').trim();
+      if (/^Release:\s*Bullwinkle-v1\./.test(t)) {
+        el.remove();
+      }
+    }
+  }catch(e){}
+})();
+</script>
+
 <!-- KZAK media-path shim v1.103 -->
 <script>
 (function(){
@@ -231,6 +249,40 @@
   <script src="playlist-heavy.classic.js?v=081"></script>
   <script src="playlist-mellow.classic.js?v=081"></script>
   <script src="playlist-rock.classic.js?v=081"></script>
+
+<script>
+(function(){
+  const LS_LAST_IDX = 'kzak:lastIndex';
+
+  // Read t= from URL or fallback to localStorage, clamped to list length later
+  window.__kzakGetStartIndex = function(listLen){
+    let fromUrl = null;
+    try{
+      const m = location.search.match(/[?&]t=(\d+)/);
+      if (m) fromUrl = parseInt(m[1], 10);
+    }catch(e){}
+    if (Number.isFinite(fromUrl)) return Math.max(0, Math.min(listLen-1, fromUrl|0));
+    let fromLS = null;
+    try{
+      const s = localStorage.getItem(LS_LAST_IDX);
+      if (s != null) fromLS = parseInt(s, 10);
+    }catch(e){}
+    if (Number.isFinite(fromLS)) return Math.max(0, Math.min(listLen-1, fromLS|0));
+    return 0;
+  };
+
+  // Hook to persist (?t=) and localStorage on every load() call
+  window.__kzakPersistIndex = function(idx){
+    try{
+      const u = new URL(location.href);
+      u.searchParams.set('t', idx);
+      history.replaceState({}, '', u);
+    }catch(e){}
+    try{ localStorage.setItem(LS_LAST_IDX, String(idx)); }catch(e){}
+  };
+})();
+</script>
+
 </head>
 <body>
 <!-- Welcome overlay -->
@@ -438,6 +490,8 @@ async function firstReachable(urls){
 }
 async function load(i, autoplay=false){
   idx = (i + LIST.length) % LIST.length;
+  
+  try{ window.__kzakPersistIndex && window.__kzakPersistIndex(idx); }catch(e){}
   const tr = LIST[idx];
   titleEl.textContent = tr.title;
   genreNow.textContent = 'Genre: ' + (tr.genre || '—');
@@ -634,7 +688,8 @@ toLobby.addEventListener('click', () => {
 
 updateCounts();
 buildList();
-load(0, false);
+try{ var bootIdx = (window.__kzakGetStartIndex? window.__kzakGetStartIndex(LIST.length): 0); }catch(e){ var bootIdx = 0; }
+load(bootIdx, false);
 </script>
 
 <!-- Media Session (Lock Screen + CarPlay) support -->
@@ -1050,18 +1105,7 @@ function showExitAndReturn(){
       catch { alert(url); }
     }
 
-    async function shareTrack(ev) {
-      if (ev) ev.preventDefault();
-      const idx = detectCurrentTrackIndex();
-      const url = `${location.origin}${baseDir}${fileName}?t=${idx}`;
-      const payload = {
-        title: "Now playing on KZAK",
-        text: "Listen to this exact track:",
-        url
-      };
-      if (navigator.share) {
-        try { await navigator.share(payload); return; } catch (_) {}
-      }
+          }
       try { await navigator.clipboard.writeText(url); toast("Track link copied!"); }
       catch { alert(url); }
     }
@@ -1110,7 +1154,9 @@ function showExitAndReturn(){
     // Remove *any* previous release badges to avoid doubles
     document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
 
-    // Add a single release badge
+    // Remove any residue again just in case
+document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
+// Add a single release badge
     var tag = 'Bullwinkle-v1.108';
     var el = document.createElement('div');
     el.id = 'release-badge';
