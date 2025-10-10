@@ -1,187 +1,113 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>KZAK • Frasier‑Style Fun Radio</title>
-    <link rel="stylesheet" href="./content.css" />
-    <style>
-      /* Small, safe tweaks only */
-      .version-badge {
-        position: fixed;
-        right: .75rem;
-        bottom: .75rem;
-        z-index: 99999;
-        background: rgba(0,0,0,.7);
-        color: #eee;
-        font: 12px/1.25 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-        padding: .5rem .6rem;
-        border-radius: .5rem;
-        box-shadow: 0 4px 18px rgba(0,0,0,.45);
-        pointer-events: none;
-        white-space: nowrap;
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KZAK • Frasier-Style Fun Radio — v1.104</title>
+  <!-- Intentionally NOT linking content.css: your bundle loads styles itself -->
+</head>
+<body>
+  <!-- Mount point expected by your app bundle -->
+  <div id="root"></div>
+
+  <!-- Your existing app bundle -->
+  <script defer src="main.js"></script>
+
+  <!-- Page-level hotfixes: version badge, Share/Share Track, and Welcome playback -->
+  <script>
+  (function () {
+    const VERSION = "Bullwinkle-v1.104";
+    const FILENAME = (location.pathname.split("/").pop() || "index.html");
+
+    function ready(fn){ if (document.readyState !== "loading") fn(); else document.addEventListener("DOMContentLoaded", fn); }
+
+    // Small unobtrusive badge (doesn't interfere with your internal one)
+    ready(() => {
+      const badge = document.createElement("div");
+      badge.id = "bw-badge";
+      badge.style.cssText = "position:fixed;right:12px;bottom:12px;background:rgba(0,0,0,.7);color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;z-index:2147483647;pointer-events:none;";
+      badge.textContent = `Release: ${VERSION}  •  ${FILENAME}`;
+      document.body.appendChild(badge);
+    });
+
+    function shareStation() {
+      const url = new URL(location.href);
+      url.hash = "";
+      const data = { title: "KZAK • Frasier‑Style Fun Radio", text: "Tune in to KZAK", url: url.toString() };
+      if (navigator.share) return navigator.share(data).catch(()=>{});
+      prompt("Copy station link", url.toString());
+    }
+
+    function inferTrackNumber() {
+      // Heuristic 1: text like "TRACK 1 / 152"
+      const text = document.body.innerText || "";
+      const m = text.match(/TRACK\s+(\d+)\s*\/\s*\d+/i);
+      if (m) return m[1];
+      // Heuristic 2: highlighted row number at the start of the selected playlist item
+      const active = Array.from(document.querySelectorAll(".playlist, [class*=playlist] li, [class*=playlist] .active")).find(Boolean);
+      if (active) {
+        const t = active.textContent.trim();
+        const m2 = t.match(/^(\d{1,3})\s+/);
+        if (m2) return m2[1];
       }
-      .sr-only {position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;}
-    </style>
-  </head>
-  <body>
-    <!-- Your app mounts itself (main.js) -->
-    <div id="app"></div>
+      return null;
+    }
 
-    <!-- Welcome audio we can trigger without touching your bundler -->
-    <audio id="__welcomeAudio" src="./Media/KZAK-Welcome.mp3" preload="auto" class="sr-only"></audio>
+    function shareTrack() {
+      const url = new URL(location.href);
+      url.hash = "";
+      const trackNo = inferTrackNumber();
+      if (trackNo) url.searchParams.set("track", trackNo);
+      const data = { title: "KZAK • Current Track", text: "Check this track on KZAK", url: url.toString() };
+      if (navigator.share) return navigator.share(data).catch(()=>{});
+      prompt("Copy track link", url.toString());
+    }
 
-    <script type="module" src="./main.js"></script>
-
-    <!-- Inline hot‑fixes that don’t modify your bundled app. Safe to remove later. -->
-    <script>
-      (function () {
-        const byText = (root, text) => {
-          text = String(text).toLowerCase().trim();
-          const nodes = root.querySelectorAll('button, a, [role="button"]');
-          for (const n of nodes) {
-            const t = n.textContent.replace(/\\s+/g, ' ').toLowerCase().trim();
-            if (t === text || t.includes(text)) return n;
-          }
-          return null;
-        };
-
-        const nowFile = (function () {
-          const parts = location.pathname.split('/');
-          return parts[parts.length - 1] || 'index.html';
-        })();
-
-        const versionFromFilename = (fname) => {
-          const m = /index[-_]?([0-9]{2,4})\\.html/i.exec(fname);
-          return m ? 'Bullwinkle-v1.' + m[1] : 'Bullwinkle-v1.x';
-        };
-
-        const version = versionFromFilename(nowFile);
-
-        // 1) Replace any stale “Release: …” badge and About text
-        try {
-          // Hide any existing badge that contains old Release text
-          const all = document.querySelectorAll('body *');
-          for (const el of all) {
-            const txt = (el.textContent || '').trim();
-            if (txt.startsWith('Release:') && txt.includes('Bullwinkle-v1.')) {
-              el.style.display = 'none';
-            }
-          }
-          // Inject our correct badge
-          const badge = document.createElement('div');
-          badge.className = 'version-badge';
-          badge.id = '__versionBadge';
-          badge.textContent = 'Release: ' + version + '  •  ' + nowFile;
-          document.body.appendChild(badge);
-
-          // Best-effort: update About/version blurb if present
-          const aboutTargets = [
-            '#about-version',        // custom id
-            '[data-about-version]',  // data attr
-          ];
-          for (const sel of aboutTargets) {
-            const n = document.querySelector(sel);
-            if (n) n.textContent = version;
-          }
-        } catch (e) { /* swallow */ }
-
-        // 2) Fix Share / Share Track buttons to use THIS file name
-        function shareUrl(url, title) {
-          if (navigator.share) {
-            navigator.share({ title: title || document.title, url }).catch(()=>{});
-          } else {
-            // Fallback: copy to clipboard & open
-            try { navigator.clipboard.writeText(url); } catch {}
-            window.open(url, '_blank', 'noopener');
-          }
+    function wireShareButtons(root=document) {
+      const all = Array.from(root.querySelectorAll("a,button"));
+      all.forEach(el => {
+        const label = (el.textContent || "").trim().toLowerCase();
+        if (label === "share") {
+          el.onclick = (e) => { e.preventDefault(); e.stopPropagation(); shareStation(); };
+          if (el.tagName === "A") el.setAttribute("href", "#");
         }
-
-        function currentPageUrl() {
-          return location.href.split('#')[0].split('?')[0] + location.search;
+        if (label === "share track") {
+          el.onclick = (e) => { e.preventDefault(); e.stopPropagation(); shareTrack(); };
+          if (el.tagName === "A") el.setAttribute("href", "#");
         }
+      });
+    }
 
-        function guessCurrentTrackIndex() {
-          // Try a few heuristics without relying on app internals
-          // A) Look for "TRACK N /" text
-          const all = document.querySelectorAll('body *');
-          for (const el of all) {
-            const t = (el.textContent || '').trim();
-            const m = /^TRACK\\s+(\\d+)\\s*\\//i.exec(t);
-            if (m) return parseInt(m[1], 10);
-          }
-          // B) Fallback: look for highlighted/selected row number at start, like "001  "
-          const rows = Array.from(document.querySelectorAll('li, .row, .track, [role="listitem"]'));
-          for (const r of rows) {
-            const t = (r.textContent || '').trim();
-            const m = /^(\\d{1,3})\\D/.exec(t);
-            if (m && (r.getAttribute('aria-selected') === 'true' || r.className.match(/active|current|selected/i))) {
-              return parseInt(m[1], 10);
-            }
-          }
-          return undefined;
+    function wireWelcome(root=document) {
+      const btn = Array.from(root.querySelectorAll("a,button")).find(b => /play\s+welcome/i.test(b.textContent || ""));
+      if (!btn) return;
+      let audio;
+      btn.onclick = (e) => {
+        e.preventDefault(); e.stopPropagation();
+        if (!audio) {
+          // File expected at room-radio-listen/Media/KZAK-Welcome.mp3
+          audio = new Audio("Media/KZAK-Welcome.mp3");
+          audio.preload = "auto";
+          audio.addEventListener("ended", () => {
+            const start = Array.from(document.querySelectorAll("button,a")).find(b => /start\s+station/i.test(b.textContent || ""));
+            if (start) start.click();
+          });
         }
+        audio.currentTime = 0;
+        audio.play().catch(()=>{});
+      };
+    }
 
-        function buildTrackShareUrl() {
-          const base = location.href.split('#')[0].split('?')[0];
-          const idx = guessCurrentTrackIndex();
-          if (idx) return base + '?track=' + idx;
-          return base; // fallback to station
-        }
+    function install() {
+      wireShareButtons();
+      wireWelcome();
+    }
 
-        function wireShares() {
-          const shareBtn = byText(document, 'share');
-          const shareTrackBtn = byText(document, 'share track');
-
-          if (shareBtn) {
-            shareBtn.addEventListener('click', (e) => {
-              e.preventDefault();
-              shareUrl(currentPageUrl(), document.title);
-            }, { once: true });
-          }
-          if (shareTrackBtn) {
-            shareTrackBtn.addEventListener('click', (e) => {
-              e.preventDefault();
-              shareUrl(buildTrackShareUrl(), document.title + ' • Track');
-            }, { once: true });
-          }
-        }
-
-        // 3) Make “Play Welcome” actually play welcome audio, then start
-        function wireWelcome() {
-          const welcomeBtn = byText(document, 'play welcome');
-          if (!welcomeBtn) return;
-
-          const audio = document.getElementById('__welcomeAudio');
-          if (!audio) return;
-
-          const startBtn = byText(document, 'start station');
-
-          welcomeBtn.addEventListener('click', (e) => {
-            try { e.preventDefault(); } catch {}
-            audio.currentTime = 0;
-            audio.play().catch(() => {
-              // If autoplay blocks, user gesture already happened; retry shortly
-              setTimeout(() => audio.play().catch(()=>{}), 50);
-            });
-            audio.onended = () => {
-              if (typeof window.startStation === 'function') window.startStation();
-              else if (startBtn) startBtn.click();
-            };
-          }, { once: true });
-        }
-
-        function applyAll() {
-          wireShares();
-          wireWelcome();
-        }
-
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-          setTimeout(applyAll, 0);
-        } else {
-          document.addEventListener('DOMContentLoaded', applyAll);
-        }
-      })();
-    </script>
-  </body>
+    // Run after the bundle paints; then observe for re-renders
+    setTimeout(install, 1500);
+    const mo = new MutationObserver(() => install());
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+  })();
+  </script>
+</body>
 </html>
