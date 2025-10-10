@@ -231,6 +231,49 @@
   <script src="playlist-heavy.classic.js?v=081"></script>
   <script src="playlist-mellow.classic.js?v=081"></script>
   <script src="playlist-rock.classic.js?v=081"></script>
+
+<!-- KZAK 105: media fix for initial markup + CSS background -->
+<script>
+(function(){
+  function isRelMedia(p){
+    try{
+      if(!p) return false;
+      if(/^https?:\/\//i.test(p)) return false;
+      p = String(p).replace(/^\.\/+/, '').replace(/^\//, '');
+      return /^(Media|MediaBreaks|Bio)\//.test(p);
+    }catch(e){ return false; }
+  }
+  function toRaw(p){
+    if (!window.pathToUrl) return p;
+    try{ return window.pathToUrl(p); }catch(e){ return p; }
+  }
+  function rewriteNode(el, attr){
+    try{
+      var v = el.getAttribute(attr);
+      if (isRelMedia(v)) el.setAttribute(attr, toRaw(v));
+    }catch(e){}
+  }
+  function rewriteAll(){
+    try{
+      document.querySelectorAll('img[src],audio[src],video[src],source[src]').forEach(function(el){
+        rewriteNode(el, 'src');
+      });
+      var ico = document.querySelector('link[rel="icon"][href]');
+      if (ico) rewriteNode(ico, 'href');
+      // Override CSS background that points at local Media/
+      try{
+        document.body.style.backgroundImage = 'url(' + toRaw('Media/RadioMusicListening.jpg') + ')';
+      }catch(e){}
+    }catch(e){}
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', rewriteAll, {once:true});
+  } else {
+    rewriteAll();
+  }
+})();
+</script>
+
 </head>
 <body>
 <!-- Welcome overlay -->
@@ -559,18 +602,36 @@ document.getElementById('genreBar').addEventListener('click', e => {
   load(0, false);
 });
 
-function shareStation(){
-  try{
-    const u = new URL(location.href);
+
+function stationUrl(includeTrack){
+  const u = new URL(location.href);
+  // Always share the current file (no redirect to old versions)
+  // Strip prior params/hash
+  u.search = ''; u.hash = '';
+  if (includeTrack){
     u.searchParams.set('t', idx);
-    const link = u.toString();
-    if (navigator.share) return navigator.share({title:'KZAK station', text:'Listen with me', url: link});
-    return navigator.clipboard.writeText(link);
-  }catch{}
+    u.searchParams.set('play', '1');
+    if (LIST && LIST[idx] && LIST[idx].genre) {
+      u.searchParams.set('g', LIST[idx].genre);
+    }
+  }
+  return u.toString();
+}
+async function shareStation(){
+  const link = stationUrl(false);
+  const payload = { title: 'KZAK • Frasier-Style Fun Radio', text: 'Frasier-Style Fun Radio without the talking', url: link };
+  if (navigator.share){ try{ await navigator.share(payload); return; }catch(e){} }
+  try{ await navigator.clipboard.writeText(link); alert('Link copied to clipboard'); }catch(e){}
+}
+async function shareCurrentTrack(){
+  const tr = (LIST && LIST[idx]) || {title:'a track'};
+  const link = stationUrl(true);
+  const payload = { title: tr.title + ' — KZAK', text: 'Listen with me on KZAK: ' + tr.title, url: link };
+  if (navigator.share){ try{ await navigator.share(payload); return; }catch(e){} }
+  try{ await navigator.clipboard.writeText(link); alert('Track link copied to clipboard'); }catch(e){}
 }
 shareBtn.addEventListener('click', shareStation);
-shareTrackBtn.addEventListener('click', () => shareStation());
-
+shareTrackBtn.addEventListener('click', shareCurrentTrack);
 let BREAKS = [
   "MediaBreaks/Radio-Id-Two.mp3","MediaBreaks/Radio-Id-Five.mp3","MediaBreaks/Snappy3.mp3","MediaBreaks/Snappy8.mp3",
   "MediaBreaks/Radio-ID-Six.mp3","MediaBreaks/Radio-ID-Seven.mp3","MediaBreaks/Snappy17.mp3","MediaBreaks/Snappy11.mp3",
@@ -632,9 +693,23 @@ toLobby.addEventListener('click', () => {
   try{ window.location.href = '../index.html'; }catch{}
 });
 
+
 updateCounts();
 buildList();
-load(0, false);
+(function initFromQuery(){
+  const qs = new URLSearchParams(location.search);
+  const g = qs.get('g');
+  if (g){
+    // If a genre is provided, rebuild the list to match
+    LIST = byGenre(g);
+    updateCounts(); buildList();
+  }
+  let t = Number(qs.get('t'));
+  if (!Number.isFinite(t) || t < 0 || t >= LIST.length) t = 0;
+  const auto = qs.get('play') === '1';
+  idx = t;
+  load(idx, auto);
+})();
 </script>
 
 <!-- Media Session (Lock Screen + CarPlay) support -->
