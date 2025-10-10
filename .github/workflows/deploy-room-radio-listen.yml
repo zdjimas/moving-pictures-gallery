@@ -1,4 +1,4 @@
- name: Deploy root + rooms to GitHub Pages
+name: Deploy root + rooms to GitHub Pages
 
 on:
   push:
@@ -6,6 +6,8 @@ on:
     paths:
       - "index.html"
       - "content.css"
+      - "rooms_manifest.js"
+      - "lobby-rooms.js"
       - "assets/**"
       - "room-*/**.html"
       - "room-*/**.css"
@@ -40,13 +42,12 @@ jobs:
 
           echo "=== 1) Root site ==="
           [[ -f index.html ]] && cp -v index.html _site/
-          # Copy small, optional root assets (add/remove as needed)
-          for f in content.css main.css main.js \
-                   RadioMusicListening.jpg Wings.png "Wings For Marie.mp4"; do
+          for f in content.css rooms_manifest.js lobby-rooms.js main.css main.js \
+                   RadioMusicListening.jpg Wings.png "Wings For Marie.mp4" IMG_*.jpg; do
             [[ -f "$f" ]] && cp -v "$f" _site/ || true
           done
-          # Copy small files from /assets if present (keeps artifact lean)
           if [[ -d assets ]]; then
+            # copy small assets only (keeps artifact under 1 GB)
             find assets -type f -size -200M -print0 | while IFS= read -r -d '' p; do
               install -D -m 0644 "$p" "_site/$p"
             done
@@ -54,14 +55,12 @@ jobs:
 
           echo "=== 2) room-radio-listen subsite ==="
           mkdir -p _site/room-radio-listen
-          # Publish index*.html (numbered and plain)
           cp -v room-radio-listen/index*.html _site/room-radio-listen/ 2>/dev/null || true
-          # Supporting assets (no large Media/*)
           for f in content.css main.js playlist-*.js radio-room-entry.mp4 \
                    frasier.png default.jpg RadioMusicListening.jpg; do
             [[ -f "room-radio-listen/$f" ]] && cp -v "room-radio-listen/$f" _site/room-radio-listen/ || true
           done
-          # Allow small intro/welcome media only; DO NOT ship the music library
+          # allow only small intro/welcome media; do NOT ship the whole mp3 catalog
           if [[ -d room-radio-listen/Media ]]; then
             find room-radio-listen/Media -maxdepth 1 -type f \
                  \( -name "*entry*.mp4" -o -name "*intro*.mp4" -o -name "KZAK-Welcome.mp3" \) \
