@@ -1,10 +1,17 @@
-name: Deploy room-radio-listen to Pages
+ name: Deploy root + rooms to GitHub Pages
 
 on:
   push:
     branches: [ main ]
+    # Rebuild whenever root or any room HTML/CSS/JS (and small intro MP4s) change.
     paths:
-      - "room-radio-listen/**"
+      - "index.html"
+      - "content.css"
+      - "assets/**"
+      - "room-*/**.html"
+      - "room-*/**.css"
+      - "room-*/**.js"
+      - "room-*/Media/*.mp4"
       - ".github/workflows/deploy-room-radio-listen.yml"
   workflow_dispatch:
 
@@ -23,19 +30,66 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare publish dir (_site/room-radio-listen)
+      - name: Prepare publish dir (_site)
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
+          shopt -s nullglob
+
           rm -rf _site
+          mkdir -p _site
           mkdir -p _site/room-radio-listen
-          # publish ALL numbered builds (096/097/098/099...) and the plain index.html if present
-          cp room-radio-listen/index-*.html _site/room-radio-listen/ 2>/dev/null || true
-          cp room-radio-listen/index.html    _site/room-radio-listen/ 2>/dev/null || true
-          # styles + classic playlists your player needs
-          cp room-radio-listen/content.css              _site/room-radio-listen/ 2>/dev/null || true
-          cp room-radio-listen/playlist-*.classic.js    _site/room-radio-listen/ 2>/dev/null || true
-          # keep artifact small: do NOT publish Media/*
-          echo "Files to publish:" && find _site -maxdepth 3 -type f | sort
+
+          echo "=== 1) Root site ==="
+          # Root homepage
+          cp -v index.html _site/
+
+          # Small, optional root assets (add/remove as needed)
+          for f in content.css main.css main.js \
+                   RadioMusicListening.jpg \
+                   "Wings For Marie.mp4" Wings.png IMG_*.jpg; do
+            [[ -f "$f" ]] && cp -v "$f" _site/ || true
+          done
+
+          # Copy small assets from /assets if present (cap size to keep artifact lean)
+          if [[ -d assets ]]; then
+            # Recreate directory structure under _site and only copy files < 200 MB
+            find assets -type f \( -name "*.css" -o -name "*.js" -o -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.svg" -o -name "*.webp" -o -name "*.mp4" \) -size -200M -print0 \
+              | while IFS= read -r -d '' p; do
+                  install -D -m 0644 "$p" "_site/$p"
+                done
+          fi
+
+          echo "=== 2) Radio subsite ==="
+          mkdir -p _site/room-radio-listen
+
+          # Publish numbered builds and a plain index.html if present
+          cp -v room-radio-listen/index-*.html _site/room-radio-listen/ 2>/dev/null || true
+          cp -v room-radio-listen/index.html    _site/room-radio-listen/ 2>/dev/null || true
+
+          # If there is no /room-radio-listen/index.html in repo, synthesize it from the latest numbered build
+          if [[ ! -f _site/room-radio-listen/index.html ]]; then
+            latest="$(ls -1 room-radio-listen/index-*.html 2>/dev/null | sort -V | tail -n1 || true)"
+            if [[ -n "${latest}" ]]; then
+              cp -v "${latest}" _site/room-radio-listen/index.html
+            fi
+          fi
+
+          # Supporting assets for the radio app (keep it light; do NOT ship Media mp3)
+          for f in content.css main.js playlist-*.classic.js radio-room-entry.mp4 frasier.png default.jpg RadioMusicListening.jpg; do
+            [[ -f "room-radio-listen/$f" ]] && cp -v "room-radio-listen/$f" _site/room-radio-listen/ || true
+          done
+
+          # OPTIONAL: If intro MP4s live under Media/, allow just small/intros (not music library)
+          if [[ -d room-radio-listen/Media ]]; then
+            find room-radio-listen/Media -maxdepth 1 -type f \( -name "*entry*.mp4" -o -name "*intro*.mp4" -o -name "KZAK-Welcome.mp3" \) -size -200M -print0 \
+              | while IFS= read -r -d '' p; do
+                  install -D -m 0644 "$p" "_site/$p"
+                done
+          fi
+
+          echo "Files staged for publish:"
+          find _site -type f | sort
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
