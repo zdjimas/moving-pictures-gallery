@@ -105,7 +105,7 @@
         });
       } catch(e){}
     }
-    } catch(err){
+  } catch(err){
     console.warn('Media shim init error', err);
   }
 })();
@@ -334,7 +334,7 @@
 
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
 <audio id="breakAudio" preload="auto"></audio>
-<audio id="introAudio" preload="auto"></audio>
+<audio id="introAudio" preload="auto" src="KZAK-Welcome.mp3"></audio>
 
 <script>
 const ROCK   = (window.PLAYLIST_ROCK   || []).map(x => ({...x, genre:'Middle Ground Rock'}));
@@ -1088,7 +1088,7 @@ function showExitAndReturn(){
     window.__KZAK_SHARE_STATION = shareStation;
     window.__KZAK_SHARE_TRACK = shareTrack;
   } catch (err) {
-    console.error("KZAK v109 patch removed:", err);
+    console.error("KZAK v105 patch failed:", err);
   }
 })();
 </script>
@@ -1178,142 +1178,98 @@ function showExitAndReturn(){
   }
 })();
 </script>
-</body>
 
+<!-- KZAK v1.109 purge + exit exclusivity -->
 <script>
 (function(){
   try{
-    // ---------- Repo-aware path resolver ----------
-    function pathToUrl(p){
-      if (!p) return p;
-      if (/^(https?:)?\/\//i.test(p)) return p;
-      const enc = p.split('/').map(seg => encodeURIComponent(seg)).join('/');
-      const parts = location.pathname.split('/').filter(Boolean);
-      const repo = parts.length ? '/' + parts[0] + '/' : '/';
-      const repoAbs = location.origin + repo;
-      const currentAbs = location.href.replace(/[^\/\?#]+(\?.*)?$/, '');
-      if (enc.startsWith('Media/'))       return repoAbs + enc;
-      if (enc.startsWith('MediaBreaks/')) return repoAbs + enc;
-      return new URL(enc, currentAbs).toString();
-    }
-    window.kzakPathToUrl = pathToUrl;
-
-    // ---------- Deep-link boot ----------
-    const deepIdx = (() => {
-      const m = location.search.match(/[?&]t=(\d+)/);
-      return m ? Math.max(0, parseInt(m[1],10)|0) : null;
-    })();
-
-    function tryApplyDeepLink(){
-      if (deepIdx == null) return true;
-      const el = document.querySelector(`[data-idx="${deepIdx}"]`)
-             || Array.from(document.querySelectorAll('[data-idx]'))
-                  .find(e => (e.textContent||'').trim().startsWith(String(deepIdx+1).padStart(3,'0')));
-      if (el){
-        el.click();
-        return true;
-      }
-      return false;
-    }
-
-    // Retry for ~3s while the UI mounts
-    (function waitMount(i=0){
-      if (tryApplyDeepLink() || i>30) return;
-      setTimeout(() => waitMount(i+1), 100);
-    })();
-
-    // ---------- Persist current track index to ?t= and localStorage ----------
-    let lastIdx = -1;
-    function detectCurrentTrackIndex() {
-      if (typeof window.currentTrackIndex === "number") return window.currentTrackIndex;
-      if (typeof window.__KZAK_CURRENT_TRACK === "number") return window.__KZAK_CURRENT_TRACK;
-      const labels = Array.from(document.querySelectorAll("*"))
-        .map(el => el.textContent || "")
-        .filter(t => /TRACK\s*\d+\s*\/\s*\d+/i.test(t));
-      for (const t of labels) {
-        const m = t.match(/TRACK\s*(\d+)\s*\/\s*\d+/i);
-        if (m) return Math.max(1, parseInt(m[1], 10)) - 1;
-      }
-      const active = document.querySelector('[data-idx].active, .playlist .active, [aria-current="true"]');
-      if (active) {
-        const idx = active.getAttribute("data-idx");
-        if (idx && !Number.isNaN(+idx)) return +idx;
-      }
-      return null;
-    }
-
-    function persistIdx(idx){
-      if (idx == null) return;
-      if (idx === lastIdx) return;
-      lastIdx = idx;
-      // URL
+    function purgeLegacyBadges(){
       try{
-        const u = new URL(location.href);
-        u.searchParams.set('t', idx);
-        history.replaceState({}, '', u);
+        // Remove specific known ids/classes first
+        document.querySelectorAll('#release-badge, .__release_badge, .release-badge').forEach(function(el){ el.remove(); });
+        // Remove any element whose visible text starts with "Release: Bullwinkle-v1."
+        Array.from(document.querySelectorAll('body *')).forEach(function(el){
+          var t = (el.innerText || '').trim();
+          if (/^Release:\s*Bullwinkle-v1\./.test(t)) el.remove();
+        });
       }catch(e){}
-      // LS
-      try{ localStorage.setItem('kzak:lastIndex', String(idx)); }catch(e){}
     }
+    // Run immediately and again for late injectors
+    purgeLegacyBadges();
+    setTimeout(purgeLegacyBadges, 200);
+    setTimeout(purgeLegacyBadges, 800);
+    document.addEventListener('DOMContentLoaded', purgeLegacyBadges);
 
-    // Observe changes
-    const mo = new MutationObserver(() => { const i = detectCurrentTrackIndex(); if (i != null) persistIdx(i); });
-    mo.observe(document.documentElement, {subtree:true, childList:true, attributes:true, characterData:true});
-    setInterval(() => { const i = detectCurrentTrackIndex(); if (i != null) persistIdx(i); }, 1000);
+    // Re-purge when About is toggled (catch typical About clicks)
+    document.addEventListener('click', function(ev){
+      var t = (ev.target && ev.target.textContent || '').toLowerCase();
+      if (/\babout\b/.test(t)) { setTimeout(purgeLegacyBadges, 50); }
+    }, true);
 
-    // ---------- Exit overlay: play FrasierExit.mp4 before navigating ----------
-    document.addEventListener('click', (ev) => {
-      const t = ev.target;
-      if (!t) return;
-      const label = (t.textContent||'').toLowerCase();
-      if (/\breturn\s+to\s+lobby\b/.test(label)){
-        ev.preventDefault();
-        try{ (document.getElementById('audio')||{}).pause?.(); }catch{}
-        try{ (document.getElementById('breakAudio')||{}).pause?.(); }catch{}
-        const overlay = document.getElementById('exitOverlay');
-        const video = document.getElementById('exitVideo');
-        const nav = () => { window.location.href = '../index.html'; };
-        if (overlay && video){
-          overlay.style.display = 'grid';
-          try{
-            video.src = pathToUrl('FrasierExit.mp4');
-            video.load();
-            setTimeout(nav, 12000);
-            video.addEventListener('error', nav, {once:true});
-            video.addEventListener('ended', nav, {once:true});
-            video.play().catch(nav);
-          }catch(e){ nav(); }
-        } else { nav(); }
+    // --- Exit exclusivity: pause audio, play FrasierExit.mp4 only, then navigate ---
+    window.__kzakExiting = false;
+    document.addEventListener('play', function(ev){
+      if (window.__kzakExiting && ev && ev.target && ev.target.tagName === 'AUDIO') {
+        try { ev.target.pause(); } catch(e){}
       }
     }, true);
 
-    // ---------- Welcome audio selection ----------
-    document.addEventListener('DOMContentLoaded', async () => {
-      const intro = document.getElementById('introAudio');
-      if (!intro) return;
-      const candidates = ['radio-room-entry.mp4', 'MediaBreaks/KZAK-Welcome.mp3'];
-      for (const c of candidates){
-        try{
-          const r = await fetch(pathToUrl(c), {cache:'no-store'});
-          if (r.ok){
-            intro.src = pathToUrl(c);
-            intro.load();
-            break;
-          }
-        }catch{}
+    function ensureExitOverlay(){
+      var overlay = document.getElementById('exitOverlay');
+      if (!overlay){
+        overlay = document.createElement('div');
+        overlay.id = 'exitOverlay';
+        overlay.style.cssText = 'position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.85);z-index:99999';
+        document.body.appendChild(overlay);
       }
-    });
+      var video = document.getElementById('exitVideo');
+      if (!video){
+        video = document.createElement('video');
+        video.id = 'exitVideo';
+        video.setAttribute('playsinline','');
+        video.setAttribute('preload','auto');
+        video.style.cssText = 'max-width:min(100vw,1200px);max-height:100vh;width:100%;border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000';
+        overlay.appendChild(video);
+      }
+      return {overlay, video};
+    }
 
-    // ---------- Single release badge: remove all others ----------
-    try{
-      document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
-      Array.from(document.querySelectorAll('body *')).forEach(el => {
-        const t=(el.innerText||'').trim(); if(/^Release:\s*Bullwinkle-v1\./.test(t)) el.remove();
-      });
-    }catch(e){}
+    function pauseAllAudio(){
+      try { Array.from(document.querySelectorAll('audio')).forEach(function(a){ try{ a.pause(); a.muted = true; }catch(e){} }); } catch(e){}
+      try { if (window.audio && typeof window.audio.pause === 'function'){ window.audio.pause(); window.audio.muted = true; } } catch(e){}
+      try { if (window.breakAudio && typeof window.breakAudio.pause === 'function'){ window.breakAudio.pause(); window.breakAudio.muted = true; } } catch(e){}
+    }
 
-  }catch(err){ console.warn('v109 shim error', err); }
+    function playExitThenNavigate(){
+      var parts = ensureExitOverlay();
+      var overlay = parts.overlay, video = parts.video;
+      overlay.style.display = 'grid';
+      try { video.src = 'FrasierExit.mp4'; video.load(); } catch(e) {}
+      var navigated = false;
+      function nav(){ if (navigated) return; navigated = true; try{ window.location.href = '../index.html'; }catch(e){} }
+      setTimeout(nav, 12000);
+      video.addEventListener('error', nav, {once:true});
+      video.addEventListener('ended', nav, {once:true});
+      try { var p = video.play(); if (p && p.catch) p.catch(function(){}); } catch(e){}
+    }
+
+    document.addEventListener('click', function(ev){
+      var el = ev.target, label = (el && (el.textContent||'')).toLowerCase();
+      var steps = 0;
+      while (el && steps++ < 3 && (!label || label.trim()==='')){
+        el = el.parentElement;
+        label = (el && (el.textContent||'')) ? el.textContent.toLowerCase() : label;
+      }
+      if (label && /\breturn\s+to\s+lobby\b/.test(label)){
+        ev.preventDefault();
+        window.__kzakExiting = true;
+        pauseAllAudio();
+        playExitThenNavigate();
+      }
+    }, true);
+  }catch(err){ console.warn('v1.109 purge/exit shim error', err); }
 })();
 </script>
 
+</body>
 </html>
