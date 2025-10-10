@@ -4,13 +4,10 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      # Root / lobby files (adjust as needed)
       - "index.html"
       - "content.css"
       - "assets/**"
-      # Any room subsite (including media/art updates)
       - "room-*/**"
-      # Workflow itself
       - ".github/workflows/deploy-room-radio-listen.yml"
   workflow_dispatch:
 
@@ -52,37 +49,36 @@ jobs:
             [[ -d "$room" ]] || continue
             echo "--- Staging $room ---"
 
-            # HTML / CSS / JS at top-level of each room
-            find "$room" -maxdepth 1 -type f \( -name "index*.html" -o -name "*.css" -o -name "*.js" \) -size -200M -print0 \
-              | while IFS= read -r -d '' p; do install -D -m 0644 "$p" "_site/$p"; done
+            # HTML / CSS / JS at room root
+            find "$room" -maxdepth 1 -type f \( -name "index*.html" -o -name "*.css" -o -name "*.js" \) -size -200M -print0               | while IFS= read -r -d '' p; do install -D -m 0644 "$p" "_site/$p"; done
 
-            # Room-root assets commonly referenced by the page
-            for f in frasier.png default.jpg RadioMusicListening.jpg ZachArt.jpeg CJMURPHY.png \
-                     FrasierExit.mp4 radio-room-entry.mp4; do
+            # Room-root assets
+            for f in frasier.png default.jpg RadioMusicListening.jpg ZachArt.jpeg CJMURPHY.png                      FrasierExit.mp4 radio-room-entry.mp4; do
               [[ -f "$room/$f" ]] && install -D -m 0644 "$room/$f" "_site/$room/$f"
             done
 
-            # Include any welcome mp3 variant (Welcome.mp3, KZAK-Welcome.mp3, etc.)
+            # Welcome audio (any *Welcome*.mp3) — covers Welcome.mp3 and KZAK-Welcome.mp3
             for g in "$room"/*Welcome*.mp3; do
               [[ -f "$g" ]] && install -D -m 0644 "$g" "_site/${g#./}"
             done
 
-            # Publish Media and MediaBreaks (audio + images used by playlists), size-capped
+            # Bio pages (HTML + images) under room/Bio/
+            if [[ -d "$room/Bio" ]]; then
+              find "$room/Bio" -type f -size -200M -print0 | while IFS= read -r -d '' p; do
+                install -D -m 0644 "$p" "_site/$p"
+              done
+            fi
+
+            # Media and MediaBreaks
             for sub in Media MediaBreaks; do
               if [[ -d "$room/$sub" ]]; then
-                find "$room/$sub" -type f \
-                     \( -iname "*.mp3" -o -iname "*.m4a" -o -iname "*.wav" -o -iname "*.ogg" -o -iname "*.flac" \
-                        -o -iname "*.mp4" -o -iname "*.m4v" -o -iname "*.webm" \
-                        -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) \
-                     -size -200M -print0 \
-                  | while IFS= read -r -d '' p; do install -D -m 0644 "$p" "_site/$p"; done
+                find "$room/$sub" -type f                      \( -iname "*.mp3" -o -iname "*.m4a" -o -iname "*.wav" -o -iname "*.ogg" -o -iname "*.flac"                         -o -iname "*.mp4" -o -iname "*.m4v" -o -iname "*.webm"                         -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \)                      -size -200M -print0                   | while IFS= read -r -d '' p; do install -D -m 0644 "$p" "_site/$p"; done
               fi
             done
           done
 
           echo "=== Files staged for publish ==="
           find _site -type f | sort
-          echo "Artifact size:"
           du -sh _site || true
 
       - name: Upload Pages artifact
