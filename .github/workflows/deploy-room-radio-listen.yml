@@ -1,4 +1,4 @@
- name: Deploy root + rooms to GitHub Pages
+name: Deploy root + rooms to GitHub Pages
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
       - "rooms_manifest.js"
       - "lobby-rooms.js"
       - "assets/**"
-      # Any room subsite (watch everything to ensure deploys)
+      # Any room subsite
       - "room-*/**"
       # Workflow itself
       - ".github/workflows/deploy-room-radio-listen.yml"
@@ -41,12 +41,15 @@ jobs:
           mkdir -p _site
 
           echo "=== 1) Root site ==="
+          # Required entry
           [[ -f index.html ]] && cp -v index.html _site/
+
           # Common root assets (copy if present)
           for f in content.css rooms_manifest.js lobby-rooms.js main.css main.js \
                    RadioMusicListening.jpg Wings.png "Wings For Marie.mp4" IMG_*.jpg; do
             [[ -f "$f" ]] && cp -v "$f" _site/ || true
           done
+
           # Copy small files from assets/ (skip anything >= 200MB)
           if [[ -d assets ]]; then
             while IFS= read -r -d '' p; do
@@ -68,13 +71,6 @@ jobs:
             while IFS= read -r -d '' p; do
               install -D -m 0644 "$p" "_site/$p"
             done < <(find "$room" -maxdepth 1 -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" -o -iname "*.svg" \) -size -200M -print0)
-
-            # NEW: room-level intro/entry videos (e.g., radio-room-entry.mp4)
-            while IFS= read -r -d '' p; do
-              install -D -m 0644 "$p" "_site/$p"
-            done < <(find "$room" -maxdepth 1 -type f \
-                      \( -iname "radio-room-entry.mp4" -o -iname "*intro*.mp4" -o -iname "*entry*.mp4" \) \
-                      -size -200M -print0)
 
             # Media: only allow intros / welcome clips (avoid shipping full catalog)
             if [[ -d "$room/Media" ]]; then
