@@ -1,15 +1,154 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
 <head>
+<script>
+// Remove any legacy or duplicate "Release: Bullwinkle-v1.*" badges
+(function removeLegacyBadges(){
+  try{
+    // remove our known ones first
+    document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
+    // remove any element whose innerText starts with "Release: Bullwinkle-v1"
+    const all = Array.from(document.querySelectorAll('body *'));
+    for (const el of all){
+      const t = (el.innerText || '').trim();
+      if (/^Release:\s*Bullwinkle-v1\./.test(t)) {
+        el.remove();
+      }
+    }
+  }catch(e){}
+})();
+</script>
+
+<!-- KZAK media-path shim v1.103 -->
+<script>
+(function(){
+  try {
+    var RAW_BASE = "https://raw.githubusercontent.com/zdjimas/moving-pictures-gallery/main/room-radio-listen/";
+    function isMediaPath(u){
+      if(!u || typeof u !== 'string') return false;
+      if(/^https?:\/\//i.test(u)) return false;
+      var p = u.replace(/^\.\/+/,'').replace(/^\//,'');
+      if (/^(Media|MediaBreaks|Bio)\//.test(p)) return true;
+      return /\.(?:mp3|m4a|wav|ogg|flac|mp4|m4v|mov|webm|jpg|jpeg|png|gif|webp|ico)$/i.test(p);
+    }
+    function toRaw(u){
+      if(!u || typeof u !== 'string') return u;
+      if(/^https?:\/\//i.test(u)) return u;
+      var clean = u.replace(/^\.\/+/,'').replace(/^\//,'');
+      return RAW_BASE + clean;
+    }
+    var _fetch = window.fetch;
+    window.fetch = function(input, init){
+      try {
+        if (typeof input === 'string' && isMediaPath(input)) {
+          input = toRaw(input);
+        } else if (input && typeof input === 'object' && 'url' in input) {
+          var url = input.url;
+          if (isMediaPath(url)) {
+            input = new Request(toRaw(url), input);
+          }
+        }
+      } catch(e){}
+      return _fetch.apply(this, arguments);
+    };
+    var _Req = window.Request;
+    window.Request = function(input, init){
+      if (typeof input === 'string' && isMediaPath(input)) {
+        input = toRaw(input);
+      }
+      return new _Req(input, init);
+    };
+    window.Request.prototype = _Req.prototype;
+    var _open = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url){
+      try {
+        if (isMediaPath(url)) url = toRaw(url);
+      } catch(e){}
+      return _open.apply(this, arguments.length === 2 ? [method, url] : arguments);
+    };
+    var _setAttr = Element.prototype.setAttribute;
+    Element.prototype.setAttribute = function(name, value){
+      try {
+        var n = String(name || '').toLowerCase();
+        if ((n === 'src' || n === 'poster') && isMediaPath(value)) {
+          value = toRaw(value);
+        }
+      } catch(e){}
+      return _setAttr.call(this, name, value);
+    };
+    function patchSrcSetter(Ctor){
+      if (!Ctor || !Ctor.prototype) return;
+      var desc = Object.getOwnPropertyDescriptor(Ctor.prototype, 'src');
+      if (desc && desc.set && desc.configurable){
+        Object.defineProperty(Ctor.prototype, 'src', {
+          configurable: true,
+          enumerable: desc.enumerable,
+          get: function(){ return desc.get.call(this); },
+          set: function(v){
+            try { if (isMediaPath(v)) v = toRaw(v); } catch(e){}
+            return desc.set.call(this, v);
+          }
+        });
+      }
+    }
+    patchSrcSetter(HTMLMediaElement);
+    patchSrcSetter(HTMLImageElement);
+    var _Audio = window.Audio;
+    window.Audio = function(src){
+      if (src && isMediaPath(src)) src = toRaw(src);
+      return new _Audio(src);
+    };
+    window.Audio.prototype = _Audio.prototype;
+    function swapFrasier(){
+      try {
+        var link = document.querySelector('link[rel="icon"]');
+        if (!link){
+          link = document.createElement('link');
+          link.rel = 'icon';
+          document.head.appendChild(link);
+        }
+        link.href = toRaw('frasier.png');
+        document.querySelectorAll('img[src*="frasier.png"]').forEach(function(img){
+          img.src = toRaw('frasier.png');
+        });
+      } catch(e){}
+    }
+    if (document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', swapFrasier, {once:true});
+    } else {
+      swapFrasier();
+    }
+    function bumpVersionTag(){
+      try {
+        var nodes = document.querySelectorAll('body *');
+        nodes.forEach(function(n){
+          if(n.childNodes && n.childNodes.length === 1 && n.firstChild.nodeType === 3){
+            var t = n.textContent;
+            if(t && /Release:\s*Bullwinkle-v1\.\d+/.test(t)){
+              n.textContent = t.replace(/Bullwinkle-v1\.\d+/, 'Bullwinkle-v1.105');
+            }
+          }
+        });
+      } catch(e){}
+    }
+    setTimeout(bumpVersionTag, 800);
+    setTimeout(bumpVersionTag, 2500);
+  } catch(err){
+    console.warn('Media shim init error', err);
+  }
+})();
+</script>
+
   <base href="/moving-pictures-gallery/room-radio-listen/">
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>KZAK • Frasier-Style Fun Radio without the talking</title>
   <meta name="color-scheme" content="dark light">
+  
   <style>
     :root{--ink:#e6e9ef;--muted:#9aa4b2;--line:#22324d;--shadow:0 18px 50px rgba(0,0,0,.45)}
     html,body{height:100%;margin:0}
-    body{color:var(--ink);background:#0b1220 url('Media/RadioMusicListening.jpg') center/cover fixed no-repeat;
+    body{color:var(--ink);background:#0b1220 url('RadioMusicListening.jpg') center/cover fixed no-repeat;
          font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
     .wrap{position:relative;z-index:1;padding:22px;max-width:1200px;margin:0 auto}
     header{display:flex;align-items:center;gap:14px;margin-bottom:8px}
@@ -69,10 +208,81 @@
     #genreCallout{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;justify-content:flex-start}
   </style>
 
-  <script>window.DEFAULT_IMG = 'Media/default.jpg';</script>
+  <script>window.DEFAULT_IMG = 'default.jpg';</script>
+
+  <script>
+  // Fetch audio/art directly from the repo at runtime
+  window.MEDIA_BASE =
+    'https://raw.githubusercontent.com/zdjimas/moving-pictures-gallery/main/room-radio-listen/';
+
+  window.pathToUrl = function (p) {
+    try {
+      if (!p) return p;
+      if (/^https?:\/\//i.test(p)) return p;          // already absolute
+      const clean = String(p).replace(/^(\.\/)+/, '');
+      return new URL(clean, window.MEDIA_BASE).href;  // e.g., x.mp3 → raw URL
+    } catch (e) { return p; }
+  };
+</script>
+
+
+  <script>
+  // Absolute base to fetch audio/art directly from the repo:
+  // Adjust only if you move the folder or branch.
+  window.MEDIA_BASE =
+    'https://raw.githubusercontent.com/zdjimas/moving-pictures-gallery/main/room-radio-listen/';
+
+  // Map relative playlist paths to absolute URLs (keeps existing playlists unchanged)
+  window.pathToUrl = function(p){
+    try{
+      if(!p) return p;
+      if(/^https?:\/\//i.test(p)) return p;           // already absolute
+      // Keep local small images if they exist; everything else from raw
+      const clean = String(p).replace(/^(\.\/)+/,'');
+      return new URL(clean, window.MEDIA_BASE).href;  // e.g., track.mp3 → raw URL
+    }catch(e){ return p; }
+  };
+</script>
+
+  
+  
   <script src="playlist-heavy.classic.js?v=081"></script>
   <script src="playlist-mellow.classic.js?v=081"></script>
   <script src="playlist-rock.classic.js?v=081"></script>
+
+<script>
+(function(){
+  const LS_LAST_IDX = 'kzak:lastIndex';
+
+  // Read t= from URL or fallback to localStorage, clamped to list length later
+  window.__kzakGetStartIndex = function(listLen){
+    let fromUrl = null;
+    try{
+      const m = location.search.match(/[?&]t=(\d+)/);
+      if (m) fromUrl = parseInt(m[1], 10);
+    }catch(e){}
+    if (Number.isFinite(fromUrl)) return Math.max(0, Math.min(listLen-1, fromUrl|0));
+    let fromLS = null;
+    try{
+      const s = localStorage.getItem(LS_LAST_IDX);
+      if (s != null) fromLS = parseInt(s, 10);
+    }catch(e){}
+    if (Number.isFinite(fromLS)) return Math.max(0, Math.min(listLen-1, fromLS|0));
+    return 0;
+  };
+
+  // Hook to persist (?t=) and localStorage on every load() call
+  window.__kzakPersistIndex = function(idx){
+    try{
+      const u = new URL(location.href);
+      u.searchParams.set('t', idx);
+      history.replaceState({}, '', u);
+    }catch(e){}
+    try{ localStorage.setItem(LS_LAST_IDX, String(idx)); }catch(e){}
+  };
+})();
+</script>
+
 </head>
 <body>
 <!-- Welcome overlay -->
@@ -90,7 +300,7 @@
 <div class="wrap">
   <header>
     <div class="thumb">
-      <img id="frasierImg" src="Media/frasier.png" alt="Frasier">
+      <img id="frasierImg" src="frasier.png" alt="Frasier">
     </div>
     <div>
       <h1>KZAK • Frasier-Style Fun Radio without the talking</h1>
@@ -152,7 +362,7 @@
           <div class="right" style="margin-left:auto">Status: <span id="meta">Stopped</span></div>
         </div>
         <div class="row track" style="margin-top:10px">
-          <div class="art"><img id="art" src="Media/default.jpg" alt=""></div>
+          <div class="art"><img id="art" src="default.jpg" alt=""></div>
           <div class="info">
             <div id="genreNow" class="muted" style="font-size:12px;opacity:.85;margin:0 0 2px 0;">Genre: —</div>
             <h3 id="title">—</h3>
@@ -174,11 +384,11 @@
 
   <section class="panel" style="margin-top:16px">
     <a class="bio" href="Bio/zdjimas.html">
-      <img src="Media/ZachArt.jpeg" alt="zdjimas">
+      <img src="ZachArt.jpeg" alt="zdjimas">
       <div><div class="name">zdjimas</div><div class="role">Concept, curation, engineering</div></div>
     </a>
     <a class="bio" href="Bio/cjmurphy.html" style="border-top:1px solid var(--line)">
-      <img src="Media/CJMURPHY.png" alt="cjmurphy">
+      <img src="CJMURPHY.png" alt="cjmurphy">
       <div><div class="name">cjmurphy</div><div class="role">Composition, arrangement, sound design</div></div>
     </a>
   </section>
@@ -186,7 +396,7 @@
 
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
 <audio id="breakAudio" preload="auto"></audio>
-<audio id="introAudio" preload="auto" src="Media/KZAK-Welcome.mp3"></audio>
+<audio id="introAudio" preload="auto" src="KZAK-Welcome.mp3"></audio>
 
 <script>
 const ROCK   = (window.PLAYLIST_ROCK   || []).map(x => ({...x, genre:'Middle Ground Rock'}));
@@ -269,7 +479,7 @@ function refreshTime(){
 function pathToUrl(p){ return p.split('/').map(seg => encodeURIComponent(seg)).join('/'); }
 function audioCandidates(tr){
   const c = [tr.file];
-  if (!/\s/.test(tr.file) && /\s/.test(tr.title)) c.push('Media/'+tr.title+'.mp3');
+  if (!/\s/.test(tr.file) && /\s/.test(tr.title)) c.push(''+tr.title+'.mp3');
   return c;
 }
 async function firstReachable(urls){
@@ -280,11 +490,13 @@ async function firstReachable(urls){
 }
 async function load(i, autoplay=false){
   idx = (i + LIST.length) % LIST.length;
+  
+  try{ window.__kzakPersistIndex && window.__kzakPersistIndex(idx); }catch(e){}
   const tr = LIST[idx];
   titleEl.textContent = tr.title;
   genreNow.textContent = 'Genre: ' + (tr.genre || '—');
   story.textContent = tr.story || 'Under Construction: a special write-up about this specific music creation…';
-  art.src = tr.image || tr.img || window.DEFAULT_IMG || 'Media/default.jpg';
+  art.src = tr.image || tr.img || window.DEFAULT_IMG || 'default.jpg';
   tpos.textContent = idx+1;
   metaEl.textContent = 'Queued';
   markActive();
@@ -476,7 +688,8 @@ toLobby.addEventListener('click', () => {
 
 updateCounts();
 buildList();
-load(0, false);
+try{ var bootIdx = (window.__kzakGetStartIndex? window.__kzakGetStartIndex(LIST.length): 0); }catch(e){ var bootIdx = 0; }
+load(bootIdx, false);
 </script>
 
 <!-- Media Session (Lock Screen + CarPlay) support -->
@@ -500,7 +713,7 @@ load(0, false);
   }
   function setTrackMetadata(tr){
     try{
-      const img = tr.image || tr.img || (window.DEFAULT_IMG || 'Media/default.jpg');
+      const img = tr.image || tr.img || (window.DEFAULT_IMG || 'default.jpg');
       const art = [
         {src: abs(img), sizes:'96x96', type:'image/png'},
         {src: abs(img), sizes:'256x256', type:'image/png'},
@@ -518,7 +731,7 @@ load(0, false);
   }
   function setBreakMetadata(){
     try{
-      const img = window.DEFAULT_IMG || 'Media/default.jpg';
+      const img = window.DEFAULT_IMG || 'default.jpg';
       navigator.mediaSession.metadata = new MediaMetadata({
         title: 'Station Break',
         artist: 'KZAK',
@@ -569,7 +782,7 @@ load(0, false);
   <video id="exitVideo" playsinline preload="auto"
          style="max-width:min(100vw,1200px);max-height:100vh;width:100%;
                 border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000;">
-    <source src="Media/FrasierExit.mp4" type="video/mp4" />
+    <source src="FrasierExit.mp4" type="video/mp4" />
   </video>
   <div class="overlay-ui" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:1rem 1.25rem;pointer-events:none;">
     <div style="color:#e6e9ef;opacity:.85;text-shadow:0 2px 14px rgba(0,0,0,.7);">Leaving the Radio Room…</div>
@@ -637,7 +850,7 @@ function showExitAndReturn(){
     const a = musicAudio(); if (!a) return null;
     const file = (a.currentSrc||a.src||'').split('/').pop().split('?')[0];
     return { title: decodeURIComponent(file.replace(/\.[a-z0-9]+$/i,'')) || 'KZAK',
-             image:'Media/default.jpg',
+             image:'default.jpg',
              artist:'KZAK • Frasier-Style Free Radio' };
   }
   function publishTrack(track){
@@ -646,7 +859,7 @@ function showExitAndReturn(){
     const title  = t.title || 'KZAK';
     const artist = t.artist || 'KZAK • Frasier-Style Free Radio';
     const album  = 'KZAK';
-    const artSrc = abs(t.image || t.img || 'Media/default.jpg');
+    const artSrc = abs(t.image || t.img || 'default.jpg');
     try{
       ms.metadata = new MediaMetadata({
         title, artist, album,
@@ -696,7 +909,7 @@ function showExitAndReturn(){
 })();
 </script>
 
-<!-- ABOUT / Release Stamp (Bullwinkle-v1.096) -->
+<!-- ABOUT / Release Stamp (Bullwinkle-v1.105) -->
 <style>
   #kzakTestBox{position:fixed;right:10px;bottom:10px;z-index:9999;
     font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
@@ -711,7 +924,7 @@ function showExitAndReturn(){
 <div id="kzakTestBox" aria-live="polite" aria-label="Build stamp"></div>
 <script>
 (function(){
-  const RELEASE='Bullwinkle-v1', SUBVER=96;
+  const RELEASE='Bullwinkle-v1', SUBVER=98;
   const subStr=String(SUBVER).padStart(3,'0');
   const releaseId=`${RELEASE}.${subStr}`;
   const box=document.getElementById('kzakTestBox');
@@ -751,7 +964,7 @@ function showExitAndReturn(){
       } else {
         // Fallback: audio sting if overlay/video isn’t present
         try{
-          var a = new Audio('Media/FrasierExit.mp3');
+          var a = new Audio('FrasierExit.mp3');
           a.addEventListener('ended', function(){ location.href = '../index.html'; }, { once:true });
           a.addEventListener('error', function(){ location.href = '../index.html'; }, { once:true });
           a.play().catch(function(){ location.href = '../index.html'; });
@@ -762,6 +975,264 @@ function showExitAndReturn(){
 })();
 </script>
 
-  
+<!-- Share overrides (Bullwinkle-v1.105): ensure correct URLs, use anchors for proper share objects -->
+<script>
+(function kzakShareOverride098a(){
+  function ready(fn){
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once:true });
+    else fn();
+  }
+  function abs(u){
+    try{
+      const p = (typeof window.pathToUrl === 'function') ? window.pathToUrl(u) : u;
+      return new URL(p, location.href).href;
+    }catch{ return u; }
+  }
+  function stationUrl(){
+    try{ const u = new URL(location.href); u.searchParams.set('t', (typeof idx==='number')? idx : 0); u.hash=''; return u.toString(); }
+    catch{ return location.href; }
+  }
+  function trackUrl(){
+    try{
+      const list = Array.isArray(window.LIST) ? window.LIST
+                 : (Array.isArray(window.PLAYLIST) ? window.PLAYLIST : []);
+      const k = (typeof window.idx === 'number') ? window.idx : -1;
+      const tr = (k>=0 && k<list.length) ? list[k] : null;
+      const src = tr && (tr.src || tr.file || tr.url || tr.path);
+      return src ? abs(src) : '';
+    }catch{ return ''; }
+  }
+  function swapButtonForAnchor(btn, computeHref){
+    if (!btn) return null;
+    const a = document.createElement('a');
+    a.id = btn.id || '';
+    a.className = btn.className || '';
+    a.textContent = btn.textContent || 'Share';
+    a.setAttribute('role','button');
+    a.href = computeHref() || '#';
+    if (btn.parentNode) btn.parentNode.replaceChild(a, btn);
+    ['pointerdown','touchstart','focus'].forEach(ev => a.addEventListener(ev, ()=>{ try{ a.href = computeHref() || '#'; }catch{} }, {passive:true}));
+    a.addEventListener('click', function(ev){
+      try{
+        const url = computeHref();
+        if (!url) return;
+        a.href = url;
+        if (navigator.share){
+          ev.preventDefault();
+          const list = Array.isArray(window.LIST) ? window.LIST : [];
+          const t = (typeof idx==='number' && list[idx]) ? list[idx] : {};
+          const title = (t && t.title) ? t.title : (document.title || 'KZAK');
+          navigator.share({ title, url }).catch(()=>{ location.href = url; });
+        }
+      }catch{ }
+    }, {capture:true});
+    return a;
+  }
+  ready(function(){
+    var sb = document.getElementById('shareBtn') || document.querySelector('[data-role="share"]');
+    swapButtonForAnchor(sb, stationUrl);
+    var tb = document.getElementById('shareTrackBtn') || document.querySelector('[data-role="share-track"]');
+    swapButtonForAnchor(tb, trackUrl);
+  });
+})();
+</script>
+
+
+
+<script>
+/* === KZAK Patch v105: Share buttons + deep-linking + stable asset paths === */
+(function () {
+  try {
+    const RELEASE = "Bullwinkle-v1.105";
+    const fileName = (location.pathname.split("/").pop() || "index-105.html");
+    const baseDir  = location.pathname.endsWith("/") ? location.pathname : location.pathname.replace(/[^\/]+$/, "");
+    const abs = (p) => {
+      p = (p || "").toString();
+      if (p.startsWith("./")) p = p.slice(2);
+      if (p.startsWith("/")) p = p.slice(1);
+      return `${baseDir}${p}`;
+    };
+
+    const FALLBACK_DATA_URI =
+      "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
+    function safeSetImg(img, src) {
+      if (!img) return;
+      img.onerror = () => { img.onerror = null; img.src = FALLBACK_DATA_URI; };
+      img.src = abs(src);
+    }
+    window.kzakAsset = abs;
+    window.kzakSafeImg = safeSetImg;
+
+    const deepIdx = (() => {
+      const m = location.search.match(/[?&]t=(\d+)/);
+      return m ? parseInt(m[1], 10) : null;
+    })();
+    if (deepIdx !== null && Number.isFinite(deepIdx)) {
+      document.documentElement.setAttribute("data-deeplink-track", String(deepIdx));
+      window.__KZAK_DEEPLINK_TRACK = deepIdx;
+    }
+
+    function detectCurrentTrackIndex() {
+      if (typeof window.currentTrackIndex === "number") return window.currentTrackIndex;
+      if (typeof window.__KZAK_CURRENT_TRACK === "number") return window.__KZAK_CURRENT_TRACK;
+      const labels = Array.from(document.querySelectorAll("*"))
+        .map(el => el.textContent || "")
+        .filter(t => /TRACK\s*\d+\s*\/\s*\d+/i.test(t));
+      for (const t of labels) {
+        const m = t.match(/TRACK\s*(\d+)\s*\/\s*\d+/i);
+        if (m) return Math.max(1, parseInt(m[1], 10)) - 1;
+      }
+      const active = document.querySelector('[data-idx].active, .playlist .active, [aria-current="true"]');
+      if (active) {
+        const idx = active.getAttribute("data-idx");
+        if (idx && !Number.isNaN(+idx)) return +idx;
+      }
+      return 0;
+    }
+
+    async function shareStation(ev) {
+      if (ev) ev.preventDefault();
+      const url = `${location.origin}${baseDir}${fileName}`;
+      const payload = {
+        title: "KZAK • Frasier-Style Fun Radio",
+        text: "152-song playlist • No talking. Join the session:",
+        url
+      };
+      if (navigator.share) {
+        try { await navigator.share(payload); return; } catch (_) {}
+      }
+      try { await navigator.clipboard.writeText(url); toast("Station link copied!"); }
+      catch { alert(url); }
+    }
+
+          }
+      try { await navigator.clipboard.writeText(url); toast("Track link copied!"); }
+      catch { alert(url); }
+    }
+
+    function toast(msg) {
+      const t = document.createElement("div");
+      t.textContent = msg;
+      t.style.cssText = "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:8px 12px;background:#1f2937;color:#e5e7eb;border:1px solid #374151;border-radius:10px;font:12px/1.2 system-ui, -apple-system, Segoe UI;z-index:99999;opacity:0;transition:opacity .2s ease";
+      document.body.appendChild(t);
+      requestAnimationFrame(() => { t.style.opacity = "1"; });
+      setTimeout(() => { t.style.opacity = "0"; setTimeout(() => t.remove(), 250); }, 1600);
+    }
+
+    function bindShares() {
+      const btnStation = document.querySelector("#btnShareStation, button[data-share='station']")
+                        || Array.from(document.querySelectorAll("button, a")).find(b => (b.textContent||"").trim() === "Share");
+      const btnTrack   = document.querySelector("#btnShareTrack, button[data-share='track']")
+                        || Array.from(document.querySelectorAll("button, a")).find(b => (b.textContent||"").trim() === "Share Track");
+      if (btnStation) { btnStation.onclick = shareStation; btnStation.addEventListener("click", shareStation, {capture:true}); }
+      if (btnTrack)   { btnTrack.onclick = shareTrack;   btnTrack.addEventListener("click", shareTrack, {capture:true}); }
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindShares);
+    else bindShares();
+
+    (function () {
+      const el = document.createElement('div');
+      el.style.cssText = 'position:fixed;right:12px;bottom:12px;background:rgba(0,0,0,.6);color:#e6e9ef;padding:6px 10px;border-radius:10px;font-size:12px;border:1px solid #22324d;z-index:99999;pointer-events:none;';
+      const stamp = new Date().toLocaleString(undefined, {hour12:true});
+      el.textContent = `Release: ${RELEASE} — ${stamp} — ${fileName}`;
+      document.addEventListener('DOMContentLoaded', () => document.body.appendChild(el));
+    })();
+
+    window.__KZAK_SHARE_STATION = shareStation;
+    window.__KZAK_SHARE_TRACK = shareTrack;
+  } catch (err) {
+    console.error("KZAK v105 patch failed:", err);
+  }
+})();
+</script>
+
+<script>
+// ---- KZAK Runtime Patch v108 ----
+(function(){
+  try {
+    // Remove *any* previous release badges to avoid doubles
+    document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
+
+    // Remove any residue again just in case
+document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
+// Add a single release badge
+    var tag = 'Bullwinkle-v1.108';
+    var el = document.createElement('div');
+    el.id = 'release-badge';
+    el.className = '__release_badge';
+    el.style.cssText = 'position:fixed;right:12px;bottom:12px;background:rgba(0,0,0,.6);color:#e6e9ef;padding:6px 10px;border-radius:10px;font-size:12px;border:1px solid #22324d;z-index:99999;pointer-events:none;';
+    var dt = new Date();
+    var stamp = dt.toLocaleString(undefined, { hour12:true });
+    el.textContent = 'Release: ' + tag + ' — ' + stamp + ' — ' + (location.pathname.split('/').pop() || 'index.html');
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(el); });
+
+    // Remove any UI that says "Share Track"
+    function removeShareTrackUI(){
+      var candidates = Array.from(document.querySelectorAll('button, a, [role="button"]'));
+      candidates.forEach(function(n){
+        if (/\bshare\s*track\b/i.test(n.textContent || '')) {
+          n.remove();
+        }
+      });
+      // In case menu-based, also nuke items in menus
+      document.querySelectorAll('*').forEach(function(n){
+        var t = (n.textContent || '').trim();
+        if (t && /\bshare\s*track\b/i.test(t) && (n.tagName==='LI' || n.getAttribute('role')==='menuitem')) {
+          n.remove();
+        }
+      });
+      // Neutralize any leftover handlers
+      window.shareTrack = function(){ return false; };
+    }
+    document.addEventListener('DOMContentLoaded', removeShareTrackUI);
+
+    // Fix Return to Lobby: play FrasierExit.mp4 (in this folder) then navigate up a level
+    function wireReturnToLobby(){
+      var ret = Array.from(document.querySelectorAll('a,button,[role="button"]'))
+        .find(function(el){ return /\breturn\s+to\s+lobby\b/i.test(el.textContent || ''); });
+      if(!ret) return;
+      // Ensure only wired once
+      if (ret.__kzak_wired) return;
+      ret.__kzak_wired = true;
+
+      ret.addEventListener('click', function(ev){
+        try{ ev.preventDefault(); }catch(_){}
+        // Create hidden video for mp4 playback
+        var vid = document.createElement('video');
+        vid.src = 'FrasierExit.mp4';
+        vid.preload = 'auto';
+        vid.style.cssText = 'position:fixed;left:-9999px;width:1px;height:1px;opacity:0;';
+        document.body.appendChild(vid);
+
+        var navigated = false;
+        function goLobby(){
+          if (navigated) return;
+          navigated = true;
+          // Navigate to parent index.html
+          var up = location.pathname.replace(/\/[^\/]*$/, '/..');
+          // Resolve .. safely
+          var url = new URL(up, location.href);
+          // Prefer explicit index.html
+          url.pathname = url.pathname.replace(/\/?$/, '/') + 'index.html';
+          location.href = url.href;
+        }
+
+        vid.addEventListener('ended', goLobby);
+        vid.addEventListener('error', goLobby);
+        // Fallback safety after 12s in case file fails to play
+        setTimeout(goLobby, 12000);
+
+        var p = vid.play && vid.play();
+        if (p && p.catch) { p.catch(function(){ goLobby(); }); }
+      }, { passive:false });
+    }
+    document.addEventListener('DOMContentLoaded', wireReturnToLobby);
+
+  } catch(e){
+    console.warn('KZAK v108 runtime patch error:', e);
+  }
+})();
+</script>
 </body>
 </html>
