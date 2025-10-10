@@ -1,24 +1,6 @@
- <!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
-<script>
-// Remove any legacy or duplicate "Release: Bullwinkle-v1.*" badges
-(function removeLegacyBadges(){
-  try{
-    // remove our known ones first
-    document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
-    // remove any element whose innerText starts with "Release: Bullwinkle-v1"
-    const all = Array.from(document.querySelectorAll('body *'));
-    for (const el of all){
-      const t = (el.innerText || '').trim();
-      if (/^Release:\s*Bullwinkle-v1\./.test(t)) {
-        el.remove();
-      }
-    }
-  }catch(e){}
-})();
-</script>
-
 <!-- KZAK media-path shim v1.103 -->
 <script>
 (function(){
@@ -118,21 +100,11 @@
     } else {
       swapFrasier();
     }
-    function bumpVersionTag(){
-      try {
-        var nodes = document.querySelectorAll('body *');
-        nodes.forEach(function(n){
-          if(n.childNodes && n.childNodes.length === 1 && n.firstChild.nodeType === 3){
-            var t = n.textContent;
-            if(t && /Release:\s*Bullwinkle-v1\.\d+/.test(t)){
-              n.textContent = t.replace(/Bullwinkle-v1\.\d+/, 'Bullwinkle-v1.105');
-            }
+    function bumpVersionTag(){}
           }
         });
       } catch(e){}
     }
-    setTimeout(bumpVersionTag, 800);
-    setTimeout(bumpVersionTag, 2500);
   } catch(err){
     console.warn('Media shim init error', err);
   }
@@ -249,40 +221,6 @@
   <script src="playlist-heavy.classic.js?v=081"></script>
   <script src="playlist-mellow.classic.js?v=081"></script>
   <script src="playlist-rock.classic.js?v=081"></script>
-
-<script>
-(function(){
-  const LS_LAST_IDX = 'kzak:lastIndex';
-
-  // Read t= from URL or fallback to localStorage, clamped to list length later
-  window.__kzakGetStartIndex = function(listLen){
-    let fromUrl = null;
-    try{
-      const m = location.search.match(/[?&]t=(\d+)/);
-      if (m) fromUrl = parseInt(m[1], 10);
-    }catch(e){}
-    if (Number.isFinite(fromUrl)) return Math.max(0, Math.min(listLen-1, fromUrl|0));
-    let fromLS = null;
-    try{
-      const s = localStorage.getItem(LS_LAST_IDX);
-      if (s != null) fromLS = parseInt(s, 10);
-    }catch(e){}
-    if (Number.isFinite(fromLS)) return Math.max(0, Math.min(listLen-1, fromLS|0));
-    return 0;
-  };
-
-  // Hook to persist (?t=) and localStorage on every load() call
-  window.__kzakPersistIndex = function(idx){
-    try{
-      const u = new URL(location.href);
-      u.searchParams.set('t', idx);
-      history.replaceState({}, '', u);
-    }catch(e){}
-    try{ localStorage.setItem(LS_LAST_IDX, String(idx)); }catch(e){}
-  };
-})();
-</script>
-
 </head>
 <body>
 <!-- Welcome overlay -->
@@ -396,7 +334,7 @@
 
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
 <audio id="breakAudio" preload="auto"></audio>
-<audio id="introAudio" preload="auto" src="KZAK-Welcome.mp3"></audio>
+<audio id="introAudio" preload="auto"></audio>
 
 <script>
 const ROCK   = (window.PLAYLIST_ROCK   || []).map(x => ({...x, genre:'Middle Ground Rock'}));
@@ -490,8 +428,6 @@ async function firstReachable(urls){
 }
 async function load(i, autoplay=false){
   idx = (i + LIST.length) % LIST.length;
-  
-  try{ window.__kzakPersistIndex && window.__kzakPersistIndex(idx); }catch(e){}
   const tr = LIST[idx];
   titleEl.textContent = tr.title;
   genreNow.textContent = 'Genre: ' + (tr.genre || '—');
@@ -688,8 +624,7 @@ toLobby.addEventListener('click', () => {
 
 updateCounts();
 buildList();
-try{ var bootIdx = (window.__kzakGetStartIndex? window.__kzakGetStartIndex(LIST.length): 0); }catch(e){ var bootIdx = 0; }
-load(bootIdx, false);
+load(0, false);
 </script>
 
 <!-- Media Session (Lock Screen + CarPlay) support -->
@@ -781,9 +716,7 @@ load(bootIdx, false);
 <div id="exitOverlay" class="overlay" aria-hidden="true" style="display:none">
   <video id="exitVideo" playsinline preload="auto"
          style="max-width:min(100vw,1200px);max-height:100vh;width:100%;
-                border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000;">
-    <source src="FrasierExit.mp4" type="video/mp4" />
-  </video>
+                border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000;"></video>
   <div class="overlay-ui" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:1rem 1.25rem;pointer-events:none;">
     <div style="color:#e6e9ef;opacity:.85;text-shadow:0 2px 14px rgba(0,0,0,.7);">Leaving the Radio Room…</div>
     <button id="skipExit" class="btn" style="pointer-events:auto;">Skip</button>
@@ -909,7 +842,7 @@ function showExitAndReturn(){
 })();
 </script>
 
-<!-- ABOUT / Release Stamp (Bullwinkle-v1.105) -->
+<!-- ABOUT / Release Stamp (Bullwinkle-v1.110) -->
 <style>
   #kzakTestBox{position:fixed;right:10px;bottom:10px;z-index:9999;
     font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
@@ -975,7 +908,7 @@ function showExitAndReturn(){
 })();
 </script>
 
-<!-- Share overrides (Bullwinkle-v1.105): ensure correct URLs, use anchors for proper share objects -->
+<!-- Share overrides (Bullwinkle-v1.110): ensure correct URLs, use anchors for proper share objects -->
 <script>
 (function kzakShareOverride098a(){
   function ready(fn){
@@ -1043,7 +976,7 @@ function showExitAndReturn(){
 /* === KZAK Patch v105: Share buttons + deep-linking + stable asset paths === */
 (function () {
   try {
-    const RELEASE = "Bullwinkle-v1.105";
+    const RELEASE = "Bullwinkle-v1.110";
     const fileName = (location.pathname.split("/").pop() || "index-105.html");
     const baseDir  = location.pathname.endsWith("/") ? location.pathname : location.pathname.replace(/[^\/]+$/, "");
     const abs = (p) => {
@@ -1105,7 +1038,18 @@ function showExitAndReturn(){
       catch { alert(url); }
     }
 
-          }
+    async function shareTrack(ev) {
+      if (ev) ev.preventDefault();
+      const idx = detectCurrentTrackIndex();
+      const url = `${location.origin}${baseDir}${fileName}?t=${idx}`;
+      const payload = {
+        title: "Now playing on KZAK",
+        text: "Listen to this exact track:",
+        url
+      };
+      if (navigator.share) {
+        try { await navigator.share(payload); return; } catch (_) {}
+      }
       try { await navigator.clipboard.writeText(url); toast("Track link copied!"); }
       catch { alert(url); }
     }
@@ -1154,10 +1098,8 @@ function showExitAndReturn(){
     // Remove *any* previous release badges to avoid doubles
     document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
 
-    // Remove any residue again just in case
-document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
-// Add a single release badge
-    var tag = 'Bullwinkle-v1.108';
+    // Add a single release badge
+    var tag = 'Bullwinkle-v1.110';
     var el = document.createElement('div');
     el.id = 'release-badge';
     el.className = '__release_badge';
@@ -1234,5 +1176,127 @@ document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.r
   }
 })();
 </script>
+
+<!-- KZAK v1.110 runtime shim -->
+<script>
+(function(){
+  try{
+    // ---------- Path resolver ----------
+    function pathToUrl(p){
+      if (!p) return p;
+      if (/^(https?:)?\/\//i.test(p)) return p;
+      const enc = p.split('/').map(seg => encodeURIComponent(seg)).join('/');
+      // repo root (/<repo>/)
+      const parts = location.pathname.split('/').filter(Boolean);
+      const repo = parts.length ? '/' + parts[0] + '/' : '/';
+      const repoAbs = location.origin + repo;
+      // current directory
+      const currentAbs = location.href.replace(/[^\/\?#]+(\?.*)?$/, '');
+      if (enc.startsWith('Media/'))       return repoAbs + enc;
+      if (enc.startsWith('MediaBreaks/')) return repoAbs + enc;
+      return new URL(enc, currentAbs).toString();
+    }
+    window.kzakPathToUrl = pathToUrl;
+
+    // ---------- Deep-link boot & persist ----------
+    const getDeepIdx = () => {
+      const m = location.search.match(/[?&]t=(\d+)/);
+      return m ? parseInt(m[1],10)|0 : null;
+    };
+    const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+
+    function detectCurrentTrackIndex() {
+      if (typeof window.currentTrackIndex === "number") return window.currentTrackIndex;
+      if (typeof window.__KZAK_CURRENT_TRACK === "number") return window.__KZAK_CURRENT_TRACK;
+      const active = document.querySelector('[data-idx].active, [aria-current="true"], .playlist .active');
+      if (active) {
+        const v = active.getAttribute('data-idx');
+        if (v != null && !Number.isNaN(+v)) return +v;
+      }
+      return null;
+    }
+
+    let lastIdx = -1;
+    function persistIdx(idx){
+      if (idx == null || idx === lastIdx) return;
+      lastIdx = idx;
+      try{
+        const u = new URL(location.href);
+        u.searchParams.set('t', idx);
+        history.replaceState({}, '', u);
+      }catch(e){}
+      try{ localStorage.setItem('kzak:lastIndex', String(idx)); }catch(e){}
+    }
+
+    // track detection polling + DOM observer
+    const mo = new MutationObserver(() => { const i = detectCurrentTrackIndex(); if (i != null) persistIdx(i); });
+    mo.observe(document.documentElement, {subtree:true, childList:true, attributes:true});
+    setInterval(() => { const i = detectCurrentTrackIndex(); if (i != null) persistIdx(i); }, 1000);
+
+    // Apply deep link after UI mounts (retry up to ~3s)
+    (function applyDeep(i=0){
+      const want = getDeepIdx();
+      if (want == null || i>30) return;
+      const el = document.querySelector(`[data-idx="${want}"]`);
+      if (el){ el.click(); return; }
+      setTimeout(() => applyDeep(i+1), 100);
+    })();
+
+    // ---------- Exit to Lobby behavior ----------
+    document.addEventListener('click', (ev) => {
+      const t = ev.target;
+      if (!t) return;
+      const label = (t.textContent||'').toLowerCase();
+      if (/\breturn\s+to\s+lobby\b/.test(label)){
+        ev.preventDefault();
+        try{ (document.getElementById('audio')||{}).pause?.(); }catch{}
+        try{ (document.getElementById('breakAudio')||{}).pause?.(); }catch{}
+        const overlay = document.getElementById('exitOverlay');
+        const video = document.getElementById('exitVideo');
+        const nav = () => { window.location.href = '../index.html'; };
+        if (overlay && video){
+          overlay.style.display = 'grid';
+          try{
+            video.src = pathToUrl('FrasierExit.mp4');
+            video.load();
+            setTimeout(nav, 12000);
+            video.addEventListener('error', nav, {once:true});
+            video.addEventListener('ended', nav, {once:true});
+            video.play().catch(nav);
+          }catch(e){ nav(); }
+        } else { nav(); }
+      }
+    }, true);
+
+    // ---------- Welcome button plays Welcome.mp3 from THIS folder ----------
+    document.addEventListener('click', (ev) => {
+      const t = ev.target;
+      if (!t) return;
+      const label = (t.textContent||'').toLowerCase();
+      if (/\bwelcome\b/.test(label) && !/\breturn\s+to\s+lobby\b/.test(label)){
+        const intro = document.getElementById('introAudio');
+        if (!intro) return;
+        try{
+          intro.pause();
+          intro.currentTime = 0;
+        }catch{}
+        intro.src = pathToUrl('Welcome.mp3');
+        intro.load();
+        intro.play().catch(()=>{});
+      }
+    }, true);
+
+    // ---------- Single release badge cleanup ----------
+    try{
+      document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
+      Array.from(document.querySelectorAll('body *')).forEach(el => {
+        const t=(el.innerText||'').trim(); if(/^Release:\s*Bullwinkle-v1\./.test(t)) el.remove();
+      });
+    }catch(e){}
+
+  }catch(err){ console.warn('v110 shim error', err); }
+})();
+</script>
+
 </body>
 </html>
