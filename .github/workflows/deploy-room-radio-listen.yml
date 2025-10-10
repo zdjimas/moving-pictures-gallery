@@ -4,11 +4,9 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      # Root / lobby
+      # Root / lobby files (adjust as needed)
       - "index.html"
       - "content.css"
-      - "rooms_manifest.js"
-      - "lobby-rooms.js"
       - "assets/**"
       # Any room subsite (including media/art updates)
       - "room-*/**"
@@ -41,11 +39,8 @@ jobs:
           mkdir -p _site
 
           echo "=== 1) Root site ==="
-          [[ -f index.html ]] && cp -v index.html _site/
-          for f in content.css rooms_manifest.js lobby-rooms.js main.css main.js \
-                   RadioMusicListening.jpg Wings.png "Wings For Marie.mp4" IMG_*.jpg; do
-            [[ -f "$f" ]] && cp -v "$f" _site/ || true
-          done
+          [[ -f index.html ]] && install -D -m 0644 index.html _site/index.html || true
+          [[ -f content.css ]] && install -D -m 0644 content.css _site/content.css || true
           if [[ -d assets ]]; then
             find assets -type f -size -200M -print0 | while IFS= read -r -d '' p; do
               install -D -m 0644 "$p" "_site/$p"
@@ -63,8 +58,13 @@ jobs:
 
             # Room-root assets commonly referenced by the page
             for f in frasier.png default.jpg RadioMusicListening.jpg ZachArt.jpeg CJMURPHY.png \
-                     Welcome.mp3 FrasierExit.mp4 radio-room-entry.mp4; do
+                     FrasierExit.mp4 radio-room-entry.mp4; do
               [[ -f "$room/$f" ]] && install -D -m 0644 "$room/$f" "_site/$room/$f"
+            done
+
+            # Include any welcome mp3 variant (Welcome.mp3, KZAK-Welcome.mp3, etc.)
+            for g in "$room"/*Welcome*.mp3; do
+              [[ -f "$g" ]] && install -D -m 0644 "$g" "_site/${g#./}"
             done
 
             # Publish Media and MediaBreaks (audio + images used by playlists), size-capped
@@ -82,6 +82,7 @@ jobs:
 
           echo "=== Files staged for publish ==="
           find _site -type f | sort
+          echo "Artifact size:"
           du -sh _site || true
 
       - name: Upload Pages artifact
