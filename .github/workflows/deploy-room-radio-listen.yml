@@ -1,4 +1,4 @@
-name: Deploy root + rooms to GitHub Pages
+ name: Deploy root + rooms to GitHub Pages
 
 on:
   push:
