@@ -118,7 +118,6 @@
   <meta name="color-scheme" content="dark light">
   
   <style>
-    
     :root{--ink:#e6e9ef;--muted:#9aa4b2;--line:#22324d;--shadow:0 18px 50px rgba(0,0,0,.45)}
     html,body{height:100%;margin:0}
     body{color:var(--ink);background:#0b1220 url('RadioMusicListening.jpg') center/cover fixed no-repeat;
@@ -248,11 +247,6 @@
   };
 })();
 </script>
-
-  <style>
-  #buildBadge { display: none !important; }
-</style>
-
 
 </head>
 <body>
@@ -1526,7 +1520,7 @@ function showExitAndReturn(){
         overlay.appendChild(video);
       }
 
-      // Ensure a bottom-right Skip control exists (use existing if present)
+      // Ensure bottom-right Skip exists (or bind existing)
       var skip = document.getElementById('skipExit');
       if (!skip){
         skip = document.createElement('button');
@@ -1551,12 +1545,12 @@ function showExitAndReturn(){
       const nav = () => { if (navigated) return; navigated = true; location.href = '../index.html'; };
       const clearTimer = () => { if (tNav){ clearTimeout(tNav); tNav = null; } };
 
-      // Nuke any legacy timeouts that might navigate early
+      // Cancel any previously scheduled timeouts (legacy early nav)
       try{ window.__kzak_clear_all_timeouts && window.__kzak_clear_all_timeouts(); }catch(e){}
 
       const { overlay, video, skip } = ensureExitOverlay();
 
-      // Bind Skip (existing or created)
+      // Bind Skip
       if (skip){
         skip.onclick = function(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(e){} clearTimer(); nav(); };
       }
@@ -1596,6 +1590,72 @@ function showExitAndReturn(){
     window.addEventListener('click', intercept, true);
     document.addEventListener('click', intercept, true);
   }catch(err){ console.warn('v1.119 exit overlay error', err); }
+})();
+</script>
+
+<!-- KZAK v1.119a: Build badge default OFF + persistence -->
+<script>
+(function(){
+  try{
+    const KEY = 'kzak:badgeVisible';
+    let last = null;
+
+    function findBadge(){
+      let el = document.getElementById('buildBadge');
+      if (el) return el;
+      const cand = Array.from(document.querySelectorAll('body *')).find(n=>{
+        try{
+          const s = getComputedStyle(n);
+          const txt = (n.textContent||'').trim();
+          return (s.position === 'fixed' || s.position === 'sticky') && /Bullwinkle-v1\.\d+/.test(txt);
+        }catch(e){ return false; }
+      });
+      return cand || null;
+    }
+
+    function applyInitial(badge){
+      if (!badge) return;
+      let stored = null;
+      try { stored = localStorage.getItem(KEY); } catch(e){}
+      const show = (stored === '1'); // default OFF
+      badge.style.display = show ? 'block' : 'none';
+      last = show ? 'block' : 'none';
+    }
+
+    function persistOnChange(badge){
+      if (!badge) return;
+      const mo = new MutationObserver(()=>{
+        try{
+          const disp = getComputedStyle(badge).display;
+          if (disp !== last){
+            last = disp;
+            localStorage.setItem(KEY, disp === 'none' ? '0' : '1');
+          }
+        }catch(e){}
+      });
+      mo.observe(badge, { attributes:true, attributeFilter:['style','class'] });
+
+      setInterval(()=>{
+        try{
+          const disp = getComputedStyle(badge).display;
+          if (disp !== last){
+            last = disp;
+            localStorage.setItem(KEY, disp === 'none' ? '0' : '1');
+          }
+        }catch(e){}
+      }, 800);
+    }
+
+    (function waitBadge(retries=0){
+      const badge = findBadge();
+      if (badge){
+        applyInitial(badge);
+        persistOnChange(badge);
+      } else if (retries < 200){
+        setTimeout(()=>waitBadge(retries+1), 50);
+      }
+    })();
+  }catch(err){ console.warn('v1.119a badge controller error', err); }
 })();
 </script>
 </body>
