@@ -41,10 +41,10 @@ const PLAYLIST_ROCK = [
 ,
 
 {
-    title: "Before Nothing Else Matters",
-    file:  "Media/Before Nothing Else Matters.mp3",
-    img:   "Media/BeforeNothingElseMatters.jpeg",
-    alt:   "Before Nothing Else Matters - Cover artwork",
+    title: "After Nothing Else Matters",
+    file:  "Media/After Nothing Else Matters.mp3",
+    img:   "Media/AfterNothingElseMatters.jpeg",
+    alt:   "After Nothing Else Matters - Cover artwork",
     genre: "Middle Ground Rock",
     story: "A recreation acoustically for the hit from their black album, guess who?"
   }
