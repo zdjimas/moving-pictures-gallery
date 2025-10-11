@@ -761,7 +761,7 @@ const PLAYLIST_ROCK = [
   },
   {
     title: "Out of Reach",
-    file:  "Media/Out of Reach.jpeg",
+    file:  "Media/Out of Reach.mp3",
     img:   "Media/OutOfReach.jpeg",
     image: "Media/OutOfReach.jpeg",
     alt:   "Cover art for Out of Reach",
