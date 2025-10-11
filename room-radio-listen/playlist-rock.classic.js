@@ -1,5 +1,68 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
+ 
+  
+  {
+    title: "Pigs On My Wing Part Zed",
+    file:  "Media/Pigs On My Wing - Part Zed.mp3",
+    img:   "Media/PigWing2.jpeg",
+    alt:   "default artwork",
+    genre: "Middle Ground Rock",
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+  }
+,
+  {
+    title: "Xanadu Rediscovered",
+    file:  "Media/Xanadu Rediscovered.mp3",
+    img:   "Media/XanaduRediscovered.jpeg",
+    alt:   "Xanadu Rediscovered - cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A Cool recreation from a recreation of the band who brought you Anthem"
+  }
+,
+{
+    title: "A New Discovery in 2112",
+    file:  "Media/A New Discovery in 2112.mp3",
+    img:   "Media/ANew DiscoveryIn2112.jpeg",
+    alt:   "A New Discovery in 2112 - cover artwork",
+    genre: "Middle Ground Rock",
+    story: "See if you can recognize this melody on acoustic guitar."
+  }
+,
+  {
+    title: "Pigs On My Wing Part Zed",
+    file:  "Media/Pigs On My Wing - Part Zed.mp3",
+    img:   "Media/PigWing2.jpeg",
+    alt:   "default artwork",
+    genre: "Middle Ground Rock",
+    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+  }
+,
+  {
+    title: "Red Sector A-holes",
+    file:  "Media/Red Sector A-holes.mp3",
+    img:   "Media/RedSectorA-holes.jpeg",
+    alt:   "Red Sector A-holes - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "Another fine recreation originally played by three guys from Toronto"
+  }
+,
+
+{
+    title: "Before Nothing Else Matters",
+    file:  "Media/Before Nothing Else Matters.mp3",
+    img:   "Media/BeforeNothingElseMatters.jpeg",
+    alt:   "Before Nothing Else Matters - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A recreation acoustically for the hit from their black album, guess who?"
+  }
+,
+
+
+  
+  
+  
+  
   {
     title: "Alternative Once in my Lifetime",
     file:  "Media/Alternative Once in my Lifetime.mp3",
@@ -137,15 +200,7 @@ const PLAYLIST_ROCK = [
     story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   }
 ,
-  {
-    title: "Pigs On My Wing Part Zed",
-    file:  "Media/Pigs On My Wing - Part Zed.mp3",
-    img:   "Media/PigWing2.jpeg",
-    alt:   "default artwork",
-    genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
-  }
-,
+  
   {
     title: "Precious Time Rescued",
     file:  "Media/Our Precious Time Rescued .mp3",
