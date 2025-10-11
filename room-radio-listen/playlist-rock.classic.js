@@ -220,7 +220,7 @@ const PLAYLIST_ROCK = [
 ,
   {
     title: "People and Places Past",
-    file:  "Media/People and Places Past .mp3",
+    file:  "Media/People and Places Past.mp3",
     img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
     alt:   "Cover art for KZAK",
     genre: "Middle Ground Rock",
