@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
 <head>
 <!-- KZAK media-path shim v1.103 -->
@@ -221,6 +221,33 @@
   <script src="playlist-heavy.classic.js?v=081"></script>
   <script src="playlist-mellow.classic.js?v=081"></script>
   <script src="playlist-rock.classic.js?v=081"></script>
+
+<!-- KZAK v1.112 helpers -->
+<script>
+(function(){
+  const LS_KEY = 'kzak:lastIndex';
+  window.__kzakGetStartIndex = function(len){
+    try{
+      const m = location.search.match(/[?&]t=(\d+)/);
+      if (m){ const v = Math.max(0, Math.min(len-1, parseInt(m[1],10)|0)); return v; }
+    }catch(e){}
+    try{
+      const s = localStorage.getItem(LS_KEY);
+      if (s != null){ const v = parseInt(s,10); if (Number.isFinite(v)) return Math.max(0, Math.min(len-1, v)); }
+    }catch(e){}
+    return 0;
+  };
+  window.__kzakPersistIndex = function(idx){
+    try{
+      const u = new URL(location.href);
+      u.searchParams.set('t', idx);
+      history.replaceState({}, '', u);
+    }catch(e){}
+    try{ localStorage.setItem(LS_KEY, String(idx)); }catch(e){}
+  };
+})();
+</script>
+
 </head>
 <body>
 <!-- Welcome overlay -->
@@ -334,7 +361,7 @@
 
 <audio id="audio" preload="none" crossorigin="anonymous"></audio>
 <audio id="breakAudio" preload="auto"></audio>
-<audio id="introAudio" preload="auto"></audio>
+<audio id="introAudio" preload="auto" src="KZAK-Welcome.mp3"></audio>
 
 <script>
 const ROCK   = (window.PLAYLIST_ROCK   || []).map(x => ({...x, genre:'Middle Ground Rock'}));
@@ -427,6 +454,7 @@ async function firstReachable(urls){
   return null;
 }
 async function load(i, autoplay=false){
+  try{ window.__kzakPersistIndex && window.__kzakPersistIndex(((i%LIST.length)+LIST.length)%LIST.length); }catch(e){}
   idx = (i + LIST.length) % LIST.length;
   const tr = LIST[idx];
   titleEl.textContent = tr.title;
@@ -545,8 +573,9 @@ document.getElementById('genreBar').addEventListener('click', e => {
   LIST = byGenre(g);
   updateCounts();
   buildList();
-  idx = 0;
-  load(0, false);
+  var __boot = (window.__kzakGetStartIndex? window.__kzakGetStartIndex(LIST.length):0);
+  idx = __boot;
+  load(__boot, false);
 });
 
 function shareStation(){
@@ -624,7 +653,8 @@ toLobby.addEventListener('click', () => {
 
 updateCounts();
 buildList();
-load(0, false);
+var __boot = (window.__kzakGetStartIndex? window.__kzakGetStartIndex(LIST.length):0);
+load(__boot, false);
 </script>
 
 <!-- Media Session (Lock Screen + CarPlay) support -->
@@ -716,7 +746,9 @@ load(0, false);
 <div id="exitOverlay" class="overlay" aria-hidden="true" style="display:none">
   <video id="exitVideo" playsinline preload="auto"
          style="max-width:min(100vw,1200px);max-height:100vh;width:100%;
-                border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000;"></video>
+                border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6);background:#000;">
+    <source src="FrasierExit.mp4" type="video/mp4" />
+  </video>
   <div class="overlay-ui" style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:1rem 1.25rem;pointer-events:none;">
     <div style="color:#e6e9ef;opacity:.85;text-shadow:0 2px 14px rgba(0,0,0,.7);">Leaving the Radio Room…</div>
     <button id="skipExit" class="btn" style="pointer-events:auto;">Skip</button>
@@ -842,7 +874,7 @@ function showExitAndReturn(){
 })();
 </script>
 
-<!-- ABOUT / Release Stamp (Bullwinkle-v1.110) -->
+<!-- ABOUT / Release Stamp (Bullwinkle-v1.118) -->
 <style>
   #kzakTestBox{position:fixed;right:10px;bottom:10px;z-index:9999;
     font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
@@ -908,7 +940,7 @@ function showExitAndReturn(){
 })();
 </script>
 
-<!-- Share overrides (Bullwinkle-v1.110): ensure correct URLs, use anchors for proper share objects -->
+<!-- Share overrides (Bullwinkle-v1.118): ensure correct URLs, use anchors for proper share objects -->
 <script>
 (function kzakShareOverride098a(){
   function ready(fn){
@@ -976,7 +1008,7 @@ function showExitAndReturn(){
 /* === KZAK Patch v105: Share buttons + deep-linking + stable asset paths === */
 (function () {
   try {
-    const RELEASE = "Bullwinkle-v1.110";
+    const RELEASE = "Bullwinkle-v1.118";
     const fileName = (location.pathname.split("/").pop() || "index-105.html");
     const baseDir  = location.pathname.endsWith("/") ? location.pathname : location.pathname.replace(/[^\/]+$/, "");
     const abs = (p) => {
@@ -1091,212 +1123,410 @@ function showExitAndReturn(){
 })();
 </script>
 
-<script>
-// ---- KZAK Runtime Patch v108 ----
-(function(){
-  try {
-    // Remove *any* previous release badges to avoid doubles
-    document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
 
-    // Add a single release badge
-    var tag = 'Bullwinkle-v1.110';
-    var el = document.createElement('div');
-    el.id = 'release-badge';
-    el.className = '__release_badge';
-    el.style.cssText = 'position:fixed;right:12px;bottom:12px;background:rgba(0,0,0,.6);color:#e6e9ef;padding:6px 10px;border-radius:10px;font-size:12px;border:1px solid #22324d;z-index:99999;pointer-events:none;';
-    var dt = new Date();
-    var stamp = dt.toLocaleString(undefined, { hour12:true });
-    el.textContent = 'Release: ' + tag + ' — ' + stamp + ' — ' + (location.pathname.split('/').pop() || 'index.html');
-    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(el); });
 
-    // Remove any UI that says "Share Track"
-    function removeShareTrackUI(){
-      var candidates = Array.from(document.querySelectorAll('button, a, [role="button"]'));
-      candidates.forEach(function(n){
-        if (/\bshare\s*track\b/i.test(n.textContent || '')) {
-          n.remove();
-        }
-      });
-      // In case menu-based, also nuke items in menus
-      document.querySelectorAll('*').forEach(function(n){
-        var t = (n.textContent || '').trim();
-        if (t && /\bshare\s*track\b/i.test(t) && (n.tagName==='LI' || n.getAttribute('role')==='menuitem')) {
-          n.remove();
-        }
-      });
-      // Neutralize any leftover handlers
-      window.shareTrack = function(){ return false; };
-    }
-    document.addEventListener('DOMContentLoaded', removeShareTrackUI);
-
-    // Fix Return to Lobby: play FrasierExit.mp4 (in this folder) then navigate up a level
-    function wireReturnToLobby(){
-      var ret = Array.from(document.querySelectorAll('a,button,[role="button"]'))
-        .find(function(el){ return /\breturn\s+to\s+lobby\b/i.test(el.textContent || ''); });
-      if(!ret) return;
-      // Ensure only wired once
-      if (ret.__kzak_wired) return;
-      ret.__kzak_wired = true;
-
-      ret.addEventListener('click', function(ev){
-        try{ ev.preventDefault(); }catch(_){}
-        // Create hidden video for mp4 playback
-        var vid = document.createElement('video');
-        vid.src = 'FrasierExit.mp4';
-        vid.preload = 'auto';
-        vid.style.cssText = 'position:fixed;left:-9999px;width:1px;height:1px;opacity:0;';
-        document.body.appendChild(vid);
-
-        var navigated = false;
-        function goLobby(){
-          if (navigated) return;
-          navigated = true;
-          // Navigate to parent index.html
-          var up = location.pathname.replace(/\/[^\/]*$/, '/..');
-          // Resolve .. safely
-          var url = new URL(up, location.href);
-          // Prefer explicit index.html
-          url.pathname = url.pathname.replace(/\/?$/, '/') + 'index.html';
-          location.href = url.href;
-        }
-
-        vid.addEventListener('ended', goLobby);
-        vid.addEventListener('error', goLobby);
-        // Fallback safety after 12s in case file fails to play
-        setTimeout(goLobby, 12000);
-
-        var p = vid.play && vid.play();
-        if (p && p.catch) { p.catch(function(){ goLobby(); }); }
-      }, { passive:false });
-    }
-    document.addEventListener('DOMContentLoaded', wireReturnToLobby);
-
-  } catch(e){
-    console.warn('KZAK v108 runtime patch error:', e);
-  }
-})();
-</script>
-
-<!-- KZAK v1.110 runtime shim -->
 <script>
 (function(){
   try{
-    // ---------- Path resolver ----------
-    function pathToUrl(p){
-      if (!p) return p;
-      if (/^(https?:)?\/\//i.test(p)) return p;
-      const enc = p.split('/').map(seg => encodeURIComponent(seg)).join('/');
-      // repo root (/<repo>/)
-      const parts = location.pathname.split('/').filter(Boolean);
-      const repo = parts.length ? '/' + parts[0] + '/' : '/';
-      const repoAbs = location.origin + repo;
-      // current directory
-      const currentAbs = location.href.replace(/[^\/\?#]+(\?.*)?$/, '');
-      if (enc.startsWith('Media/'))       return repoAbs + enc;
-      if (enc.startsWith('MediaBreaks/')) return repoAbs + enc;
-      return new URL(enc, currentAbs).toString();
-    }
-    window.kzakPathToUrl = pathToUrl;
-
-    // ---------- Deep-link boot & persist ----------
-    const getDeepIdx = () => {
-      const m = location.search.match(/[?&]t=(\d+)/);
-      return m ? parseInt(m[1],10)|0 : null;
-    };
-    const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
-
-    function detectCurrentTrackIndex() {
-      if (typeof window.currentTrackIndex === "number") return window.currentTrackIndex;
-      if (typeof window.__KZAK_CURRENT_TRACK === "number") return window.__KZAK_CURRENT_TRACK;
-      const active = document.querySelector('[data-idx].active, [aria-current="true"], .playlist .active');
-      if (active) {
-        const v = active.getAttribute('data-idx');
-        if (v != null && !Number.isNaN(+v)) return +v;
-      }
+    function detectIdx(){
+      try{ if (typeof window.idx==='number') return window.idx; }catch(e){}
+      const el = document.querySelector('[data-idx].active, .playlist [data-idx][aria-current="true"], .playlist .active[data-idx]');
+      if (el){ const v = +el.getAttribute('data-idx'); if (!Number.isNaN(v)) return v; }
       return null;
     }
-
-    let lastIdx = -1;
-    function persistIdx(idx){
-      if (idx == null || idx === lastIdx) return;
-      lastIdx = idx;
-      try{
-        const u = new URL(location.href);
-        u.searchParams.set('t', idx);
-        history.replaceState({}, '', u);
-      }catch(e){}
-      try{ localStorage.setItem('kzak:lastIndex', String(idx)); }catch(e){}
+    function persistNow(){
+      const v = detectIdx();
+      if (v!=null && window.__kzakPersistIndex) window.__kzakPersistIndex(v);
     }
-
-    // track detection polling + DOM observer
-    const mo = new MutationObserver(() => { const i = detectCurrentTrackIndex(); if (i != null) persistIdx(i); });
+    const a = document.getElementById('audio') || document.querySelector('audio');
+    if (a){ ['playing','loadedmetadata','canplay'].forEach(ev=>a.addEventListener(ev, persistNow, {passive:true})); }
+    const mo = new MutationObserver(persistNow);
     mo.observe(document.documentElement, {subtree:true, childList:true, attributes:true});
-    setInterval(() => { const i = detectCurrentTrackIndex(); if (i != null) persistIdx(i); }, 1000);
-
-    // Apply deep link after UI mounts (retry up to ~3s)
-    (function applyDeep(i=0){
-      const want = getDeepIdx();
-      if (want == null || i>30) return;
-      const el = document.querySelector(`[data-idx="${want}"]`);
-      if (el){ el.click(); return; }
-      setTimeout(() => applyDeep(i+1), 100);
-    })();
-
-    // ---------- Exit to Lobby behavior ----------
-    document.addEventListener('click', (ev) => {
-      const t = ev.target;
-      if (!t) return;
-      const label = (t.textContent||'').toLowerCase();
-      if (/\breturn\s+to\s+lobby\b/.test(label)){
-        ev.preventDefault();
-        try{ (document.getElementById('audio')||{}).pause?.(); }catch{}
-        try{ (document.getElementById('breakAudio')||{}).pause?.(); }catch{}
-        const overlay = document.getElementById('exitOverlay');
-        const video = document.getElementById('exitVideo');
-        const nav = () => { window.location.href = '../index.html'; };
-        if (overlay && video){
-          overlay.style.display = 'grid';
-          try{
-            video.src = pathToUrl('FrasierExit.mp4');
-            video.load();
-            setTimeout(nav, 12000);
-            video.addEventListener('error', nav, {once:true});
-            video.addEventListener('ended', nav, {once:true});
-            video.play().catch(nav);
-          }catch(e){ nav(); }
-        } else { nav(); }
-      }
-    }, true);
-
-    // ---------- Welcome button plays Welcome.mp3 from THIS folder ----------
-    document.addEventListener('click', (ev) => {
-      const t = ev.target;
-      if (!t) return;
-      const label = (t.textContent||'').toLowerCase();
-      if (/\bwelcome\b/.test(label) && !/\breturn\s+to\s+lobby\b/.test(label)){
-        const intro = document.getElementById('introAudio');
-        if (!intro) return;
-        try{
-          intro.pause();
-          intro.currentTime = 0;
-        }catch{}
-        intro.src = pathToUrl('Welcome.mp3');
-        intro.load();
-        intro.play().catch(()=>{});
-      }
-    }, true);
-
-    // ---------- Single release badge cleanup ----------
-    try{
-      document.querySelectorAll('#release-badge, .__release_badge').forEach(el => el.remove());
-      Array.from(document.querySelectorAll('body *')).forEach(el => {
-        const t=(el.innerText||'').trim(); if(/^Release:\s*Bullwinkle-v1\./.test(t)) el.remove();
-      });
-    }catch(e){}
-
-  }catch(err){ console.warn('v110 shim error', err); }
+    setInterval(persistNow, 1000);
+    setTimeout(persistNow, 1500);
+  }catch(e){}
 })();
 </script>
 
+
+
+
+
+<script>
+(function(){
+  try{
+    function playWelcome(){
+      const intro = document.getElementById('introAudio');
+      if (!intro) return;
+      try{ intro.pause(); intro.currentTime=0; }catch{}
+      const candidates=['KZAK-Welcome.mp3','Welcome.mp3'];
+      (async function pick(i=0){
+        if (i>=candidates.length) return;
+        const f=candidates[i];
+        try{
+          const r=await fetch(f,{cache:'no-store'});
+          if (r&&r.ok){ intro.src=f; intro.load(); try{await intro.play();}catch(e){}; return; }
+        }catch(e){}
+        pick(i+1);
+      })();
+    }
+    document.addEventListener('click', function(ev){
+      let el=ev.target, label=(el&&el.textContent||'').toLowerCase();
+      let hops=0; while(el && hops++<3 && (!label || !label.trim())){ el=el.parentElement; label=(el&&el.textContent||'').toLowerCase(); }
+      if (label && /\bwelcome\b/.test(label) && !/\breturn\s+to\s+lobby\b/.test(label)){ playWelcome(); }
+    }, true);
+  }catch(err){ console.warn('v1.112 welcome err', err); }
+})();
+</script>
+
+
+<script>
+(function(){
+  function purgeBadges(){
+    try{
+      document.querySelectorAll('#release-badge, .__release_badge, .release-badge').forEach(el=>el.remove());
+      Array.from(document.querySelectorAll('body *')).forEach(el=>{
+        const t=(el.innerText||'').trim();
+        if(/^Release:\s*Bullwinkle-v1\./.test(t)) el.remove();
+      });
+    }catch(e){}
+  }
+  purgeBadges(); setTimeout(purgeBadges,200); setTimeout(purgeBadges,800);
+  document.addEventListener('click', (ev)=>{
+    const t=(ev.target&&ev.target.textContent||'').toLowerCase();
+    if(/\babout\b/.test(t)) setTimeout(purgeBadges,50);
+  }, true);
+})();
+</script>
+
+
+<!-- KZAK v1.113: About toggle + single badge -->
+<script>
+(function(){
+  try{
+    const TAG = (typeof tag === 'string' ? tag : 'Bullwinkle-v1.118');
+    const ID  = 'kzak_version_badge';
+
+    function ensureBadge(){
+      let el = document.getElementById(ID);
+      if (!el){
+        el = document.createElement('div');
+        el.id = ID;
+        el.setAttribute('role','status');
+        el.style.cssText = [
+          'position:fixed','right:12px','bottom:12px','z-index:99998',
+          'font:12px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial',
+          'color:#eee','background:rgba(0,0,0,.72)','padding:8px 10px',
+          'border-radius:10px','backdrop-filter:saturate(120%) blur(2px)',
+          'box-shadow:0 8px 28px rgba(0,0,0,.35)'
+        ].join(';');
+        el.textContent = 'Version: ' + TAG + ' — ' + (document.title || '') + ' — ' + (location.pathname.split('/').pop()||'index.html');
+        document.body.appendChild(el);
+      }
+      return el;
+    }
+
+    function toggleBadge(){
+      const el = ensureBadge();
+      el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+    }
+
+    // Public handles (in case the page wants to call them later)
+    window.__kzakEnsureBadge  = ensureBadge;
+    window.__kzakToggleBadge  = toggleBadge;
+
+    // Create once on first load (visible by default)
+    document.addEventListener('DOMContentLoaded', ensureBadge);
+
+    // Delegate: clicking any element with text "about" toggles the badge
+    document.addEventListener('click', function(ev){
+      let el = ev.target;
+      let t = (el && el.textContent || '').toLowerCase();
+      let hop = 0;
+      while (el && hop++ < 3 && (!t || !t.trim())){
+        el = el.parentElement;
+        t = (el && el.textContent || '').toLowerCase();
+      }
+      if (t && /\babout\b/.test(t)){
+        // Prevent legacy purgers from racing by forcing our element back after toggle
+        setTimeout(ensureBadge, 60);
+        toggleBadge();
+      }
+    }, true);
+
+    // Keep only one: if any legacy badges exist, remove them (but NEVER our badge)
+    function purgeLegacy(){
+      try{
+        document.querySelectorAll('#release-badge, .__release_badge, .release-badge').forEach(function(n){ if(n.id !== ID) n.remove(); });
+        Array.from(document.querySelectorAll('body *')).forEach(function(n){
+          if (n.id === ID) return;
+          const txt = (n.innerText||'').trim();
+          if (/^Release:\s*Bullwinkle-v1\./.test(txt)) n.remove();
+        });
+      }catch(e){}
+    }
+    purgeLegacy();
+    setTimeout(purgeLegacy, 200);
+    setTimeout(purgeLegacy, 800);
+
+  }catch(err){ console.warn('v1.113 about toggle error', err); }
+})();
+</script>
+
+
+<!-- KZAK v1.114: Exit overlay uses dynamic fallback (~duration+3s) -->
+<script>
+(function(){
+  try{
+    function ensureExitOverlay(){
+      var overlay = document.getElementById('exitOverlay');
+      if (!overlay){
+        overlay = document.createElement('div');
+        overlay.id = 'exitOverlay';
+        overlay.style.cssText = 'position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.85);z-index:99999';
+        document.body.appendChild(overlay);
+      }
+      var video = document.getElementById('exitVideo');
+      if (!video){
+        video = document.createElement('video');
+        video.id = 'exitVideo';
+        video.setAttribute('playsinline',''); video.setAttribute('preload','auto'); video.setAttribute('webkit-playsinline','');
+        video.style.cssText = 'max-width:min(100vw,1200px);max-height:100vh;width:100%;background:#000;border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6)';
+        overlay.appendChild(video);
+      }
+      return {overlay, video};
+    }
+    function pauseAll(){
+      try{ Array.from(document.querySelectorAll('audio')).forEach(a=>{try{a.pause(); a.muted=true;}catch{}});}catch{}
+      try{ if (window.audio && window.audio.pause){ window.audio.pause(); window.audio.muted=true; } }catch{}
+      try{ if (window.breakAudio && window.breakAudio.pause){ window.breakAudio.pause(); window.breakAudio.muted=true; } }catch{}
+    }
+    function playExitThenNav(){
+      var tNav = null;
+      var {overlay, video} = ensureExitOverlay();
+      overlay.style.display='grid';
+      try{ video.src='FrasierExit.mp4'; video.load(); }catch{}
+      let navigated=false;
+      const nav=()=>{ if(navigated) return; navigated=true; location.href='../index.html'; };
+      const clearTimer=()=>{ if (tNav){ clearTimeout(tNav); tNav=null; } };
+
+      video.addEventListener('loadedmetadata', ()=>{
+        clearTimer();
+        var dur = (isFinite(video.duration) && video.duration>0) ? video.duration : 35;
+        var ms  = Math.min(120, Math.round(dur + 3)) * 1000;
+        tNav = setTimeout(nav, ms);
+      }, {once:true});
+
+      video.addEventListener('playing', ()=>{
+        if (!tNav){
+          var dur = (isFinite(video.duration) && video.duration>0) ? video.duration : 35;
+          var ms  = Math.min(120, Math.round(dur + 3)) * 1000;
+          tNav = setTimeout(nav, ms);
+        }
+      }, {once:true});
+
+      video.addEventListener('ended', ()=>{ clearTimer(); nav(); }, {once:true});
+      video.addEventListener('error', ()=>{ clearTimer(); nav(); }, {once:true});
+
+      try{
+        const p = video.play();
+        if (p && p.catch) p.catch(()=>{
+          if (!tNav){ tNav = setTimeout(nav, 38000); }
+        });
+      }catch{
+        if (!tNav){ tNav = setTimeout(nav, 38000); }
+      }
+    }
+
+    document.addEventListener('click', function(ev){
+      let el = ev.target, label=(el&&el.textContent||'').toLowerCase();
+      let hops=0; while(el && hops++<3 && (!label || !label.trim())){ el=el.parentElement; label=(el&&el.textContent||'').toLowerCase(); }
+      if (label && /\breturn\s+to\s+lobby\b/.test(label)){
+        ev.preventDefault();
+        pauseAll();
+        playExitThenNav();
+      }
+    }, true);
+  }catch(err){ console.warn('v1.114 exit overlay error', err); }
+})();
+</script>
+
+
+<!-- KZAK v1.117: Exit overlay with fixed 37s fallback (legacy handler removed) -->
+<script>
+(function(){
+  try{
+    const FALLBACK_MS = 37000; // 37 seconds
+
+    function ensureExitOverlay(){
+      var overlay = document.getElementById('exitOverlay');
+      if (!overlay){
+        overlay = document.createElement('div');
+        overlay.id = 'exitOverlay';
+        overlay.style.cssText = 'position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.85);z-index:99999';
+        document.body.appendChild(overlay);
+      }
+      var video = document.getElementById('exitVideo');
+      if (!video){
+        video = document.createElement('video');
+        video.id = 'exitVideo';
+        video.setAttribute('playsinline','');
+        video.setAttribute('preload','auto');
+        video.style.cssText = 'max-width:min(100vw,1200px);max-height:100vh;width:100%;background:#000;border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6)';
+        overlay.appendChild(video);
+      }
+      return { overlay, video };
+    }
+
+    function pauseAll(){
+      try{ Array.from(document.querySelectorAll('audio')).forEach(a=>{ try{ a.pause(); a.muted = true; }catch(e){} }); }catch(e){}
+      try{ if (window.audio && typeof window.audio.pause==='function'){ window.audio.pause(); window.audio.muted=true; } }catch(e){}
+      try{ if (window.breakAudio && typeof window.breakAudio.pause==='function'){ window.breakAudio.pause(); window.breakAudio.muted=true; } }catch(e){}
+    }
+
+    function playExitThenNav(){
+      let tNav = null, navigated = false;
+      const nav = () => { if (navigated) return; navigated = true; location.href = '../index.html'; };
+      const clearTimer = () => { if (tNav){ clearTimeout(tNav); tNav = null; } };
+
+      const { overlay, video } = ensureExitOverlay();
+      overlay.style.display = 'grid';
+      try { video.src = 'FrasierExit.mp4'; video.load(); } catch(e){}
+
+      // Single fixed fallback to 37s; no other timers.
+      tNav = setTimeout(nav, FALLBACK_MS);
+
+      video.addEventListener('ended', () => { clearTimer(); nav(); }, { once:true });
+      video.addEventListener('error', () => { clearTimer(); nav(); }, { once:true });
+
+      try {
+        const p = video.play();
+        if (p && p.catch) p.catch(()=>{/* fallback already set */});
+      } catch(e) { /* fallback already set */ }
+    }
+
+    // Bind Return to Lobby
+    document.addEventListener('click', function(ev){
+      let el = ev.target;
+      let txt = (el && el.textContent || '').toLowerCase();
+      let hops = 0;
+      while (el && hops++ < 3 && (!txt || !txt.trim())) {
+        el = el.parentElement;
+        txt = (el && el.textContent || '').toLowerCase();
+      }
+      if (txt && /\breturn\s+to\s+lobby\b/.test(txt)){
+        ev.preventDefault();
+        ev.stopPropagation();
+        ev.stopImmediatePropagation();
+        pauseAll();
+        playExitThenNav();
+      }
+    }, true);
+  }catch(err){ console.warn('v1.117 exit overlay error', err); }
+})();
+</script>
+
+<!-- KZAK v1.118: Exit overlay with 37s fallback + global timeout sweeper to prevent early nav -->
+<script>
+(function(){
+  try{
+    // 0) Monkey-patch setTimeout to track pending timers so we can cancel legacy nav timeouts.
+    if (!window.__kzak_timeout_ids){
+      window.__kzak_timeout_ids = new Set();
+      const __origSetTimeout = window.setTimeout;
+      const __origClearTimeout = window.clearTimeout;
+      window.setTimeout = function(fn, ms){
+        const id = __origSetTimeout(fn, ms);
+        try{ window.__kzak_timeout_ids.add(id); }catch(e){}
+        return id;
+      };
+      window.clearTimeout = function(id){
+        try{ window.__kzak_timeout_ids.delete(id); }catch(e){}
+        return __origClearTimeout(id);
+      };
+      window.__kzak_clear_all_timeouts = function(){
+        try{
+          for (const id of Array.from(window.__kzak_timeout_ids)) {
+            try{ __origClearTimeout(id); }catch(e){}
+            try{ window.__kzak_timeout_ids.delete(id); }catch(e){}
+          }
+        }catch(e){}
+      };
+    }
+
+    const FALLBACK_MS = 37000;
+
+    function ensureExitOverlay(){
+      var overlay = document.getElementById('exitOverlay');
+      if (!overlay){
+        overlay = document.createElement('div');
+        overlay.id = 'exitOverlay';
+        overlay.style.cssText = 'position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.85);z-index:99999';
+        document.body.appendChild(overlay);
+      }
+      var video = document.getElementById('exitVideo');
+      if (!video){
+        video = document.createElement('video');
+        video.id = 'exitVideo';
+        video.setAttribute('playsinline','');
+        video.setAttribute('preload','auto');
+        video.style.cssText = 'max-width:min(100vw,1200px);max-height:100vh;width:100%;background:#000;border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.6)';
+        overlay.appendChild(video);
+      }
+      return { overlay, video };
+    }
+
+    function pauseAll(){
+      try{ Array.from(document.querySelectorAll('audio')).forEach(a=>{ try{ a.pause(); a.muted = true; }catch(e){} }); }catch(e){}
+      try{ if (window.audio && typeof window.audio.pause==='function'){ window.audio.pause(); window.audio.muted=true; } }catch(e){}
+      try{ if (window.breakAudio && typeof window.breakAudio.pause==='function'){ window.breakAudio.pause(); window.breakAudio.muted=true; } }catch(e){}
+    }
+
+    function playExitThenNav(){
+      let tNav = null, navigated = false;
+      const nav = () => { if (navigated) return; navigated = true; location.href = '../index.html'; };
+      const clearTimer = () => { if (tNav){ clearTimeout(tNav); tNav = null; } };
+
+      // Hard cancel any previously scheduled timeouts (including legacy 10–14s nav).
+      try{ window.__kzak_clear_all_timeouts && window.__kzak_clear_all_timeouts(); }catch(e){}
+
+      const { overlay, video } = ensureExitOverlay();
+      overlay.style.display = 'grid';
+      try { video.src = 'FrasierExit.mp4'; video.load(); } catch(e){}
+
+      // Our single fallback
+      tNav = setTimeout(nav, FALLBACK_MS);
+
+      video.addEventListener('ended', () => { clearTimer(); nav(); }, { once:true });
+      video.addEventListener('error', () => { clearTimer(); nav(); }, { once:true });
+
+      try {
+        const p = video.play();
+        if (p && p.catch) p.catch(()=>{/* fallback already set */});
+      } catch(e) { /* fallback already set */ }
+    }
+
+    // Intercept the click as early as possible on both window and document in capture phase
+    function intercept(ev){
+      let el = ev.target;
+      let txt = (el && el.textContent || '').toLowerCase();
+      let hops = 0;
+      while (el && hops++ < 3 && (!txt || !txt.trim())) {
+        el = el.parentElement;
+        txt = (el && el.textContent || '').toLowerCase();
+      }
+      if (txt && /\breturn\s+to\s+lobby\b/.test(txt)){
+        ev.preventDefault();
+        ev.stopPropagation();
+        ev.stopImmediatePropagation();
+        pauseAll();
+        playExitThenNav();
+      }
+    }
+    window.addEventListener('click', intercept, true);
+    document.addEventListener('click', intercept, true);
+  }catch(err){ console.warn('v1.118 exit overlay error', err); }
+})();
+</script>
 </body>
 </html>
