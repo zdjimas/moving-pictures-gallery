@@ -382,5 +382,15 @@ const PLAYLIST_MELLOW = [
     
     story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   }
+,
+  {
+    title: "The Sweetest Days",
+    file:  "Media/The Sweetest Days.mp3",
+    img:   "Media/TheSweetestDays.jpeg",
+    image: "Media/TheSweetestDays.jpeg",
+    alt:   "Cover art for The Sweetest Days",
+    genre: "Mellow Tunes",
+    story: "Another creation from zdjimas archives of AI with human influenced prompted music."
+  }
 ];
 if (typeof window !== 'undefined') window.PLAYLIST_MELLOW = PLAYLIST_MELLOW;

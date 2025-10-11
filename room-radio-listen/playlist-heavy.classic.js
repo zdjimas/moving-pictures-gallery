@@ -390,5 +390,78 @@ const PLAYLIST_HEAVY = [
     
     story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   }
+,
+  {
+    title: "Aenema Released",
+    file:  "Media/Aenema Released.mp3",
+    img:   "Media/AenemaReleased.jpeg",
+    image: "Media/AenemaReleased.jpeg",
+    alt:   "Cover art for Aenema Released",
+    genre: "Heavy and Metal",
+    story: "A great recreation of a song based on the theory of Carl Jung as spoken by Maynard Keenan James."
+  },
+  {
+    title: "Swamp Songs",
+    file:  "Media/Swamp Songs.mp3",
+    img:   "Media/SwampSong.jpeg",
+    image: "Media/SwampSong.jpeg",
+    alt:   "Cover art for Swamp Songs",
+    genre: "Heavy and Metal",
+    story: "Another recreation of a raw song from one of my favorite bands which is a tool."
+  },
+  {
+    title: "Descending Lower",
+    file:  "Media/Descending Lower.mp3",
+    img:   "Media/DescendingLower.jpeg",
+    image: "Media/DescendingLower.jpeg",
+    alt:   "Cover art for Descending Lower",
+    genre: "Heavy and Metal",
+    story: "A remix of a very cool melody from the band that use a blank to fix things."
+  },
+  {
+    title: "Tools Creative Minds",
+    file:  "Media/Tools Creative Minds.mp3",
+    img:   "Media/ToolsCreativeMinds.jpeg",
+    image: "Media/ToolsCreativeMinds.jpeg",
+    alt:   "Cover art for Tools Creative Minds",
+    genre: "Heavy and Metal",
+    story: "A masterful remix of a whole bunch of tools."
+  },
+  {
+    title: "Maynard’s Trip",
+    file:  "Media/Maynard’s Trip.mp3",
+    img:   "Media/MaynardsTrip.jpeg",
+    image: "Media/MaynardsTrip.jpeg",
+    alt:   "Cover art for Maynard’s Trip",
+    genre: "Heavy and Metal",
+    story: "Imagine a vinyard in Jerome AZ."
+  },
+  {
+    title: "Kashmir Covered",
+    file:  "Media/Kashmir Covered.mp3",
+    img:   "Media/KashmirCovered.jpeg",
+    image: "Media/KashmirCovered.jpeg",
+    alt:   "Cover art for Kashmir Covered",
+    genre: "Heavy and Metal",
+    story: "A well loved physical grafitti track rejuvinated."
+  },
+  {
+    title: "Sober Again",
+    file:  "Media/Sober Again.mp3",
+    img:   "Media/SoberAgain.jpeg",
+    image: "Media/SoberAgain.jpeg",
+    alt:   "Cover art for KZAK",
+    genre: "Heavy and Metal",
+    story: "A trademark song from the same band that fixes things with their ... Blank..."
+  },
+  {
+    title: "Stinkyfist",
+    file:  "Media/Stinkyfist.mp3",
+    img:   "Media/Stinkyfist.jpeg",
+    image: "Media/Stinkyfist.jpeg",
+    alt:   "Cover art for Stinkyfist",
+    genre: "Heavy and Metal",
+    story: "Another trademark song from the Aenema Album remaked and reconstructed."
+  }
 ];
 if (typeof window !== 'undefined') window.PLAYLIST_HEAVY = PLAYLIST_HEAVY;

@@ -686,5 +686,114 @@ const PLAYLIST_ROCK = [
     genre: "Middle Ground Rock",
     story: "A great tune recreated from one of the leading members solo work from the Eagles."
   }
+,
+  {
+    title: "Sorrow Instrumental",
+    file:  "Media/Sorrow  Instrumental.mp3",
+    img:   "Media/SorrowInstrumental.jpeg",
+    image: "Media/SorrowInstrumental.jpeg",
+    alt:   "Cover art for Sorrow Instrumental",
+    genre: "Middle Ground Rock",
+    story: "A great remix of a David Gilmour classic."
+  },
+  {
+    title: "Echoes of the Abyss",
+    file:  "Media/Echoes of the Abyss.mp3",
+    img:   "Media/EchoesOfTheAbyss.jpeg",
+    image: "Media/EchoesOfTheAbyss.jpeg",
+    alt:   "Cover art for Echoes Of The Abyss",
+    genre: "Middle Ground Rock",
+    story: "A new creation prompted by zdjimas, check it out."
+  },
+  {
+    title: "Shattered Horizons",
+    file:  "Media/Shattered Horizons.mp3",
+    img:   "Media/ShatteredHorizons.jpeg",
+    image: "Media/ShatteredHorizons.jpeg",
+    alt:   "Cover art for Shattered Horizons",
+    genre: "Middle Ground Rock",
+    story: "Another creation from zdjimas from his suno.ai collection."
+  },
+  {
+    title: "California Vibes",
+    file:  "Media/California Vibes.mp3",
+    img:   "Media/CaliforniaVibes.jpeg",
+    image: "Media/CaliforniaVibes.jpeg",
+    alt:   "Cover art for California Vibes",
+    genre: "Middle Ground Rock",
+    story: "Another great creation from zdjimas, cool west coast grooves."
+  },
+  {
+    title: "TheMessage-Lords Of The Ring",
+    file:  "Media/TheMessage-LordsOfTheRing.mp3",
+    img:   "Media/TheMessage-LordsOfTheRings.png",
+    image: "Media/TheMessage-LordsOfTheRings.png",
+    alt:   "Cover art for The Message-Lords Of The Rings",
+    genre: "Middle Ground Rock",
+    story: "An original from the creators of these songs, Styx.  Something I listened to over and over at 12.  Check it out."
+  },
+  {
+    title: "Techno Descending",
+    file:  "Media/Techno Descending.mp3",
+    img:   "Media/TechnoDescending.jpeg",
+    image: "Media/TechnoDescending.jpeg",
+    alt:   "Cover art for Techno Descending",
+    genre: "Middle Ground Rock",
+    story: "A techno Trance version of a great Tool song.  Amazing what it does to the beats."
+  },
+  {
+    title: "Diabolical",
+    file:  "Media/Diabolical.mp3",
+    img:   "Media/Diabolical.jpeg",
+    image: "Media/Diabolical.jpeg",
+    alt:   "Cover art for Diabolical",
+    genre: "Middle Ground Rock",
+    story: "A neat creation from zdjimas."
+  },
+  {
+    title: "Comfort in being Numb",
+    file:  "Media/Comfort in being Numb.mp3",
+    img:   "Media/ComfortInBeingNumb.jpeg",
+    image: "Media/ComfortInBeingNumb.jpeg",
+    alt:   "Cover art for Comfort in being Numb",
+    genre: "Middle Ground Rock",
+    story: "A re-creation of a well loved favorite for those building walls."
+  },
+  {
+    title: "Out of Reach",
+    file:  "Media/Out of Reach.jpeg",
+    img:   "Media/OutOfReach.jpeg",
+    image: "Media/OutOfReach.jpeg",
+    alt:   "Cover art for Out of Reach",
+    genre: "Middle Ground Rock",
+    story: "A very mellow song from A theater we dream of."
+  },
+  {
+    title: "Vacant",
+    file:  "Media/Vacant.mp3",
+    img:   "Media/Vacant.jpeg",
+    image: "Media/Vacant.jpeg",
+    alt:   "Cover art for Vacant",
+    genre: "Middle Ground Rock",
+    story: "A cool short from theaters dreaming."
+  },
+  {
+    title: "Finally Free Instrumental",
+    file:  "Media/Finally Free Instrumental.mp3",
+    img:   "Media/FinallyFreeInstrumental.jpeg",
+    image: "Media/FinallyFreeInstrumental.jpeg",
+    alt:   "Cover art for Finally Free Instrumental",
+    genre: "Middle Ground Rock",
+    story: "Remade from a Scene from a Memory."
+  },
+  {
+    title: "My Lords Ring",
+    file:  "Media/My Lords Ring.mp3",
+    img:   "Media/MyLordsRing.jpeg",
+    image: "Media/MyLordsRing.jpeg",
+    alt:   "Cover art for My Lords Ring",
+    genre: "Middle Ground Rock",
+    story: "From the 1970s band that was like Dream Theater, hint.  Pickup Stix."
+  }
 ];
 if (typeof window !== 'undefined') window.PLAYLIST_ROCK = PLAYLIST_ROCK;
