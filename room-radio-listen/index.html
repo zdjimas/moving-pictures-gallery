@@ -1520,7 +1520,7 @@ function showExitAndReturn(){
         overlay.appendChild(video);
       }
 
-      // Ensure a bottom-right Skip control exists (use existing if present)
+      // Ensure bottom-right Skip exists (or bind existing)
       var skip = document.getElementById('skipExit');
       if (!skip){
         skip = document.createElement('button');
@@ -1545,12 +1545,12 @@ function showExitAndReturn(){
       const nav = () => { if (navigated) return; navigated = true; location.href = '../index.html'; };
       const clearTimer = () => { if (tNav){ clearTimeout(tNav); tNav = null; } };
 
-      // Nuke any legacy timeouts that might navigate early
+      // Cancel any previously scheduled timeouts (legacy early nav)
       try{ window.__kzak_clear_all_timeouts && window.__kzak_clear_all_timeouts(); }catch(e){}
 
       const { overlay, video, skip } = ensureExitOverlay();
 
-      // Bind Skip (existing or created)
+      // Bind Skip
       if (skip){
         skip.onclick = function(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(e){} clearTimer(); nav(); };
       }
@@ -1590,6 +1590,152 @@ function showExitAndReturn(){
     window.addEventListener('click', intercept, true);
     document.addEventListener('click', intercept, true);
   }catch(err){ console.warn('v1.119 exit overlay error', err); }
+})();
+</script>
+
+<!-- KZAK v1.119a: Build badge default OFF + persistence -->
+<script>
+(function(){
+  try{
+    const KEY = 'kzak:badgeVisible';
+    let last = null;
+
+    function findBadge(){
+      let el = document.getElementById('buildBadge');
+      if (el) return el;
+      const cand = Array.from(document.querySelectorAll('body *')).find(n=>{
+        try{
+          const s = getComputedStyle(n);
+          const txt = (n.textContent||'').trim();
+          return (s.position === 'fixed' || s.position === 'sticky') && /Bullwinkle-v1\.\d+/.test(txt);
+        }catch(e){ return false; }
+      });
+      return cand || null;
+    }
+
+    function applyInitial(badge){
+      if (!badge) return;
+      let stored = null;
+      try { stored = localStorage.getItem(KEY); } catch(e){}
+      const show = (stored === '1'); // default OFF
+      badge.style.display = show ? 'block' : 'none';
+      last = show ? 'block' : 'none';
+    }
+
+    function persistOnChange(badge){
+      if (!badge) return;
+      const mo = new MutationObserver(()=>{
+        try{
+          const disp = getComputedStyle(badge).display;
+          if (disp !== last){
+            last = disp;
+            localStorage.setItem(KEY, disp === 'none' ? '0' : '1');
+          }
+        }catch(e){}
+      });
+      mo.observe(badge, { attributes:true, attributeFilter:['style','class'] });
+
+      setInterval(()=>{
+        try{
+          const disp = getComputedStyle(badge).display;
+          if (disp !== last){
+            last = disp;
+            localStorage.setItem(KEY, disp === 'none' ? '0' : '1');
+          }
+        }catch(e){}
+      }, 800);
+    }
+
+    (function waitBadge(retries=0){
+      const badge = findBadge();
+      if (badge){
+        applyInitial(badge);
+        persistOnChange(badge);
+      } else if (retries < 200){
+        setTimeout(()=>waitBadge(retries+1), 50);
+      }
+    })();
+  }catch(err){ console.warn('v1.119a badge controller error', err); }
+})();
+</script>
+
+<!-- KZAK v1.120 badge controller (but keep page version string "Bullwinkle-v1.119" elsewhere) -->
+<script>
+(function(){
+  try{
+    const KEY = 'kzak:badgeVisible';
+    const VER = 'Bullwinkle-v1.120'; // visual text only (page logic remains 119)
+    function killOldBadges(){
+      try{
+        // Remove any existing build badges
+        document.querySelectorAll('#buildBadge,[data-build-badge]').forEach(n=>n.remove());
+        // Also remove any fixed elements that only show a Bullwinkle string (legacy)
+        Array.from(document.querySelectorAll('body *')).forEach(n=>{
+          try{
+            const s = getComputedStyle(n);
+            const txt = (n.textContent||'').trim();
+            if ((s.position==='fixed' || s.position==='sticky') && /Bullwinkle-v1\.\d+/.test(txt)) n.remove();
+          }catch(e){}
+        });
+      }catch(e){}
+    }
+    function makeBadge(){
+      const el = document.createElement('div');
+      el.id = 'buildBadge';
+      el.setAttribute('data-build-badge','');
+      el.style.cssText = 'position:fixed;right:18px;bottom:12px;z-index:999999;background:rgba(0,0,0,.78);border:1px solid rgba(255,255,255,.15);padding:8px 12px;border-radius:10px;font:12px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:#eee;box-shadow:0 10px 30px rgba(0,0,0,.4)';
+      const ts = new Date().toLocaleString();
+      el.textContent = VER + ' — ' + ts;
+      document.body.appendChild(el);
+      return el;
+    }
+    function setVisible(el, show){
+      el.style.display = show ? 'block' : 'none';
+      try{ localStorage.setItem(KEY, show ? '1' : '0'); }catch(e){}
+    }
+    function initialVisible(){
+      try{
+        const v = localStorage.getItem(KEY);
+        if (v === '1') return true;
+      }catch(e){}
+      return false; // default OFF
+    }
+    function bindAboutToggle(el){
+      // Capture click anywhere and check for an element that reads "ABOUT"
+      function isAboutClick(target){
+        let t = target, hops = 0;
+        while (t && hops++ < 4){
+          const txt = (t.textContent||'').trim().toLowerCase();
+          if (txt === 'about') return true;
+          t = t.parentElement;
+        }
+        return false;
+      }
+      function onClick(ev){
+        if (isAboutClick(ev.target)){
+          ev.preventDefault();
+          ev.stopPropagation();
+          const show = getComputedStyle(el).display === 'none';
+          setVisible(el, show);
+        }
+      }
+      window.addEventListener('click', onClick, true);
+      document.addEventListener('click', onClick, true);
+    }
+
+    // Wait for DOM, then replace any legacy badge with our minimal one.
+    function init(){
+      killOldBadges();
+      const badge = makeBadge();
+      setVisible(badge, initialVisible());
+      bindAboutToggle(badge);
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  }catch(err){ console.warn('badge controller error', err); }
 })();
 </script>
 </body>
