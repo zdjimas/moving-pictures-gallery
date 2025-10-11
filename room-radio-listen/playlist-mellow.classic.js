@@ -1,5 +1,47 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_MELLOW = [
+
+ {
+  title: "A Black Star in 2025",
+  file:  "Media/A Black Star in 2025.mp3",
+  image: "Media/ABlackStarIn2025.jpeg",
+  alt:   "A Black Star in 2025 - Cover Art",
+    genre: "Mellow Tunes",
+    
+  story: `From the master Yngwie Malmsteen, a revisit to his acoustic works.   `
+},
+
+  {
+  title: "The Trees in Spain",
+  file:  "Media/The Trees in Spain.mp3",
+  image: "Media/TheTreesInSpain.jpeg",
+  alt:   "The Trees in Spain - Cover Art",
+    genre: "Mellow Tunes",
+    
+  story: `The bands name who created this is what we do when we are in a hurry...  This is a version remix you may hear in Spain.   `
+},
+
+  {
+  title: "Before Nothing Else Matters",
+  file:  "Media/Before Nothing Else Matters.mp3",
+  image: "Media/BeforeNothingElseMatters.jpeg",
+  alt:   "Before Nothing Else Matters - Cover Art",
+    genre: "Mellow Tunes",
+    
+  story: `This is a well known melody from a black album recreated acoustically.   `
+},
+
+
+
+
+
+
+
+
+
+
+
+
  
   {
   title: "You Don't Need A Gun - Sitar Version",
