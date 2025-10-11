@@ -457,7 +457,7 @@ const PLAYLIST_HEAVY = [
   {
     title: "Stinkyfist",
     file:  "Media/Stinkyfist.mp3",
-    img:   "Media/Stinkyfist.jpeg",
+    img:   "Media/StinkyFist.jpeg",
     image: "Media/Stinkyfist.jpeg",
     alt:   "Cover art for Stinkyfist",
     genre: "Heavy and Metal",
