@@ -1305,6 +1305,18 @@ function showExitAndReturn(){
       var tNav = null;
       var {overlay, video} = ensureExitOverlay();
       overlay.style.display='grid';
+      // Bind existing bottom-right Skip button
+      (function(){
+        var skipBtn = document.getElementById('skipExit');
+        if (skipBtn){
+          skipBtn.onclick = function(ev){
+            try{ ev.preventDefault(); ev.stopPropagation(); }catch(e){}
+            try{ clearTimer(); }catch(e){}
+            try{ (typeof nav === 'function') && nav(); }catch(e){}
+          };
+        }
+      })();
+
       try{ video.src='FrasierExit.mp4'; video.load(); }catch{}
       let navigated=false;
       const nav=()=>{ if(navigated) return; navigated=true; location.href='../index.html'; };
@@ -1492,33 +1504,13 @@ function showExitAndReturn(){
 
       const { overlay, video } = ensureExitOverlay();
       overlay.style.display = 'grid';
-      // --- Skip control (button + keyboard + backdrop click) ---
-      let skip = document.getElementById('exitSkip');
-      if (!skip) {
-        skip = document.createElement('button');
-        skip.id = 'exitSkip';
-        skip.textContent = 'Skip';
-        skip.type = 'button';
-        skip.style.cssText = [
-          'position:fixed','bottom:20px','left:20px','z-index:100000',
-          'padding:10px 14px','font:14px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial',
-          'color:#111','background:#ffd85a','border:0','border-radius:10px',
-          'cursor:pointer','box-shadow:0 6px 18px rgba(0,0,0,.35)'
-        ].join(';');
-        overlay.appendChild(skip);
-      }
+
       // Click to skip
       skip.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); clearTimer(); nav(); };
 
       // Keyboard: Escape to skip
       const onKey = (ev) => { if (ev.key === 'Escape' || ev.key === 'Esc') { clearTimer(); nav(); } };
-      window.addEventListener('keydown', onKey, { once: true });
-
       // Optional: clicking the dark backdrop (not the video) also skips
-      overlay.addEventListener('click', function(ev){
-        if (ev.target === overlay) { clearTimer(); nav(); }
-      }, { once: true });
-
       try { video.src = 'FrasierExit.mp4'; video.load(); } catch(e){}
 
       // Our single fallback
