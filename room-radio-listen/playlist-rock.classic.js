@@ -167,7 +167,7 @@ const PLAYLIST_ROCK = [
   {
     title: "The Grander Illusion Ending Take 3",
     file:  "Media/The Grander Illusion Ending  take 3.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/TheMessage-LordsOfTheRing.png",
     alt:   "Cover art for KZAK",
     genre: "Middle Ground Rock",
     story: "One of the best songs from this group,  I love this melody and was a great hang out melody to party with as a teen in the 80s."
@@ -175,8 +175,8 @@ const PLAYLIST_ROCK = [
 ,
   {
     title: "The Grander Illusion Ending",
-    file:  "Media/The Grander Illusion Ending  - Final Take .mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    file:  "Media/The Grander Illusion Ending  - Final Take.mp3",
+    img:   "Media/TheMessage-LordsOfTheRing.png",
     alt:   "Cover art for KZAK",
     genre: "Middle Ground Rock",
     story: "One of the best songs from this group,  I love this melody and was a great hang out melody to party with as a teen in the 80s."
