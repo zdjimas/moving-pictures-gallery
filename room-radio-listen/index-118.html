@@ -1403,7 +1403,31 @@ function showExitAndReturn(){
 
       const { overlay, video } = ensureExitOverlay();
       overlay.style.display = 'grid';
+
+      // Robust autoplay: ensure the video actually starts
+      try {
+        video.muted = false;
+        try { video.currentTime = 0; } catch(e) {}
+        const __tryPlay = () => { try { const pr = video.play(); if (pr && pr.catch) pr.catch(()=>{}); } catch(e) {} };
+        __tryPlay();
+        video.addEventListener('loadedmetadata', __tryPlay, { passive: true });
+        video.addEventListener('canplay', __tryPlay, { once: true, passive: true });
+      } catch(e) {}
+
       try { video.src = 'FrasierExit.mp4'; video.load(); } catch(e){}
+
+      // Rebind existing bottom-right Skip button
+      (function(){
+        var skipBtn = document.getElementById('skipExit');
+        if (skipBtn){
+          skipBtn.onclick = function(ev){
+            try{ ev.preventDefault(); ev.stopPropagation(); }catch(e){}
+            try{ clearTimer(); }catch(e){}
+            try{ (typeof nav === 'function') && nav(); }catch(e){}
+          };
+        }
+      })();
+
 
       // Single fixed fallback to 37s; no other timers.
       tNav = setTimeout(nav, FALLBACK_MS);
