@@ -5,7 +5,16 @@ on:
     branches: [ "main" ]
     paths:
       - "index.html"
+      - "inline-fallback.html"
       - "content.css"
+      - "rooms_manifest.js"
+      - "lobby-rooms.js"
+      - "*.jpg"
+      - "*.jpeg"
+      - "*.png"
+      - "*.webp"
+      - "*.mp4"
+      - "*.mp3"
       - "assets/**"
       - "room-*/**"
       - ".github/workflows/deploy-room-radio-listen.yml"
@@ -37,7 +46,19 @@ jobs:
 
           echo "=== 1) Root site ==="
           [[ -f index.html ]] && install -D -m 0644 index.html _site/index.html || true
+          [[ -f inline-fallback.html ]] && install -D -m 0644 inline-fallback.html _site/inline-fallback.html || true
           [[ -f content.css ]] && install -D -m 0644 content.css _site/content.css || true
+          [[ -f rooms_manifest.js ]] && install -D -m 0644 rooms_manifest.js _site/rooms_manifest.js || true
+          [[ -f lobby-rooms.js ]] && install -D -m 0644 lobby-rooms.js _site/lobby-rooms.js || true
+
+          # Root media used by lobby tiles/posters/clips
+          for ext in jpg jpeg png webp mp4 mp3; do
+            for f in *.$ext; do
+              [[ -f "$f" ]] && [[ $(stat -c%s "$f") -lt 209715200 ]] && install -D -m 0644 "$f" "_site/$f"
+            done
+          done
+
+          # assets/ folder if present
           if [[ -d assets ]]; then
             find assets -type f -size -200M -print0 | while IFS= read -r -d '' p; do
               install -D -m 0644 "$p" "_site/$p"
@@ -50,29 +71,34 @@ jobs:
             echo "--- Staging $room ---"
 
             # HTML / CSS / JS at room root
-            find "$room" -maxdepth 1 -type f \( -name "index*.html" -o -name "*.css" -o -name "*.js" \) -size -200M -print0               | while IFS= read -r -d '' p; do install -D -m 0644 "$p" "_site/$p"; done
+            find "$room" -maxdepth 1 -type f \( -name "index*.html" -o -name "*.css" -o -name "*.js" \) -size -200M -print0 \
+              | while IFS= read -r -d '' p; do install -D -m 0644 "$p" "_site/$p"; done
 
             # Room-root assets
-            for f in frasier.png default.jpg RadioMusicListening.jpg ZachArt.jpeg CJMURPHY.png                      FrasierExit.mp4 radio-room-entry.mp4; do
+            for f in frasier.png default.jpg RadioMusicListening.jpg ZachArt.jpeg CJMURPHY.png FrasierExit.mp4 radio-room-entry.mp4; do
               [[ -f "$room/$f" ]] && install -D -m 0644 "$room/$f" "_site/$room/$f"
             done
 
-            # Welcome audio (any *Welcome*.mp3) — covers Welcome.mp3 and KZAK-Welcome.mp3
+            # Welcome audio (covers Welcome.mp3 and KZAK-Welcome.mp3)
             for g in "$room"/*Welcome*.mp3; do
               [[ -f "$g" ]] && install -D -m 0644 "$g" "_site/${g#./}"
             done
 
-            # Bio pages (HTML + images) under room/Bio/
+            # Bio pages (HTML + images)
             if [[ -d "$room/Bio" ]]; then
               find "$room/Bio" -type f -size -200M -print0 | while IFS= read -r -d '' p; do
                 install -D -m 0644 "$p" "_site/$p"
               done
             fi
 
-            # Media and MediaBreaks
+            # Media and MediaBreaks (audio, video, art)
             for sub in Media MediaBreaks; do
               if [[ -d "$room/$sub" ]]; then
-                find "$room/$sub" -type f                      \( -iname "*.mp3" -o -iname "*.m4a" -o -iname "*.wav" -o -iname "*.ogg" -o -iname "*.flac"                         -o -iname "*.mp4" -o -iname "*.m4v" -o -iname "*.webm"                         -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \)                      -size -200M -print0                   | while IFS= read -r -d '' p; do install -D -m 0644 "$p" "_site/$p"; done
+                find "$room/$sub" -type f \
+                  \( -iname "*.mp3" -o -iname "*.m4a" -o -iname "*.wav" -o -iname "*.ogg" -o -iname "*.flac" \
+                   -o -iname "*.mp4" -o -iname "*.m4v" -o -iname "*.webm" \
+                   -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) \
+                  -size -200M -print0 | while IFS= read -r -d '' p; do install -D -m 0644 "$p" "_site/$p"; done
               fi
             done
           done
