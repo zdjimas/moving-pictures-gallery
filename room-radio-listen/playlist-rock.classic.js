@@ -184,9 +184,9 @@ const PLAYLIST_ROCK = [
 ,
   {
     title: "Another Man In the Arizona Wilderness",
-    file:  "Media/Another Man in the Arizona Wilderness .mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Cover art for KZAK",
+    file:  "Media/Another Man in the Arizona Wilderness.mp3",
+    img:   "Media/TheMessage-LordsOfTheRing.png",
+    alt:   "Cover art for The Lord of the Rings",
     genre: "Middle Ground Rock",
     story: "The lyrics are so strong and inspring from the group of genius members who I call the earliest progressive music band like later Dream Theater.."
   }
