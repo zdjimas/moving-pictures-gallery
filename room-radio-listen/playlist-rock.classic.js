@@ -29,15 +29,7 @@ const PLAYLIST_ROCK = [
     story: "See if you can recognize this melody on acoustic guitar."
   }
 ,
-  {
-    title: "Pigs On My Wing Part Zed",
-    file:  "Media/Pigs On My Wing - Part Zed.mp3",
-    img:   "Media/PigWing2.jpeg",
-    alt:   "default artwork",
-    genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
-  }
-,
+  
   {
     title: "Red Sector A-holes",
     file:  "Media/Red Sector A-holes.mp3",
