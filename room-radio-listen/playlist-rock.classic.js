@@ -23,7 +23,7 @@ const PLAYLIST_ROCK = [
 {
     title: "A New Discovery in 2112",
     file:  "Media/A New Discovery in 2112.mp3",
-    img:   "Media/ANew Discoveryin2112.jpeg",
+    img:   "Media/ANewDiscoveryin2112.jpeg",
     alt:   "A New Discovery in 2112 - cover artwork",
     genre: "Middle Ground Rock",
     story: "See if you can recognize this melody on acoustic guitar."
