@@ -1,7 +1,25 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
  
-  
+  {
+    title: "Portrait (He Knew) Instrumental",
+    file:  "Media/Portrait (He Knew) Instrumental.mp3",
+    img:   "Media/Portrait-HeKnew.jpeg",
+    alt:   "Portrait - He Knew - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A great song from Kansas, recreated as instrumental only, enjoy the progressive rythms and sounds.  Another great influencer for later bands."
+  }
+,
+  {
+    title: "A Butterfly from Queen",
+    file:  "Media/A Butterfly from Queen.mp3",
+    img:   "Media/AButterflyFromQueen.jpeg",
+    alt:   "A Butterfly from Queen - cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A Demo tape dug up from the internet archives of one of the lost and forgotton song from Queen"
+  }
+,
+ 
   {
     title: "Pigs On My Wing Part Zed",
     file:  "Media/Pigs On My Wing - Part Zed.mp3",
