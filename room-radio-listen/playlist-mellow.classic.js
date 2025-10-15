@@ -2,6 +2,58 @@
 const PLAYLIST_MELLOW = [
 
 
+{
+  title: "Remembering My Hollow Years",
+  file:  "Media/Remembering My Hollow Years .mp3",
+  image: "Media/RememberingMyHollowYears.jpeg",
+  alt:   "Remembering My Hollow Years - Cover Art",
+    genre: "Mellow Tunes",
+    
+  story: `A remake of a really great mellow song from those who bring you the falling to infinity album.   `
+},
+
+  {
+  title: "Our New Instrumental World",
+  file:  "Media/Our New Instrumental World.mp3",
+  image: "Media/OurNewInstrumentalWorld.jpeg",
+  alt:   "Our New Instrumental World - Cover Art",
+    genre: "Mellow Tunes",
+    
+  story: `An instrumental of one if the best songs from the album called The Astonishing.  `
+},
+
+{
+  title: "Anna Lee Re-demonstrated",
+  file:  "Media/Anna Lee Re-demonstrated.mp3",
+  image: "Media/AnnaLeeRe-demonstrated.jpeg",
+  alt:   "Anna Lee Re-demonstrated - Cover Art",
+    genre: "Mellow Tunes",
+    
+  story: `From an early demo of the falling into infinity album, redone with female vocals. `
+},
+
+{
+  title: "Through Her Eyes Demo",
+  file:  "Media/Through Her Eyes Demo.mp3",
+  image: "Media/AllDeadAgain.jpeg",
+  alt:   "Through Her Eyes Demo - Cover Art",
+    genre: "Mellow Tunes",
+    
+  story: `An original demo from Dream Theater preparing the album Scenes from a Memory   `
+},
+
+  {
+  title: "Coming Home - An Acoustic Experience",
+  file:  "Media/Coming Home - An Acoustic Experience.mp3",
+  image: "Media/Coming Home - AnAcousticExperience.jpeg",
+  alt:   "Coming Home - An Acoustic Experience- Cover Art",
+    genre: "Mellow Tunes",
+    
+  story: `A great song performed by Zak Wilde when working with Ozzy Osborne.   `
+},
+
+
+
 
 {
   title: "All Dead Again",
