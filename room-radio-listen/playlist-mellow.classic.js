@@ -45,7 +45,7 @@ const PLAYLIST_MELLOW = [
   {
   title: "Coming Home - An Acoustic Experience",
   file:  "Media/Coming Home - An Acoustic Experience.mp3",
-  image: "Media/Coming Home - AnAcousticExperience.jpeg",
+  image: "Media/ComingHomeAnAcousticExperience.jpeg",
   alt:   "Coming Home - An Acoustic Experience- Cover Art",
     genre: "Mellow Tunes",
     
