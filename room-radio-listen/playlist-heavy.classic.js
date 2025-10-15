@@ -1,5 +1,28 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_HEAVY = [
+
+
+{
+    title: "Having A Sheer Heart Attack",
+    file:  "Media/Having A Sheer Heart Attack.mp3",
+    img:   "Media/HavingASheerHeartAttack.jpeg",
+    alt:   "Having A Sheer Heart Attack - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A not so remembered song from Queens news of the world,  instrumental version, very punky."
+  },
+
+ {
+    title: "While Hogs Die",
+    file:  "Media/While Hogs Die.mp3",
+    img:   "Media/WhileHogsDie.jpeg",
+    alt:   "While Hogs Die - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A heavy original from bolony_togna, aka Bolotone, aka Resussitation,  find him on youtube as @bolony_togna895"
+  },
+
+
  
 
 {
