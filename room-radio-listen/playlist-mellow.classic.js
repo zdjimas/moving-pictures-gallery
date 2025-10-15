@@ -1,6 +1,39 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_MELLOW = [
 
+
+
+{
+  title: "All Dead Again",
+  file:  "Media/All Dead Again.mp3",
+  image: "Media/AllDeadAgain.jpeg",
+  alt:   "All Dead Again- Cover Art",
+    genre: "Mellow Tunes",
+    
+  story: `From a demo tape on before its release, an acoustic remix of a song from news of the world album, guess the artist?   `
+},
+
+  {
+  title: "316 A Van Halen Cover",
+  file:  "Media/316 A Van Halen Cover.mp3",
+  image: "Media/316AVanHalenCover.jpeg",
+  alt:   "316 A Van Halen Cover - Cover Art",
+    genre: "Mellow Tunes",
+    
+  story: `bolony_togna, a creator of music on youtube redid this mellow Van Hale melody, RIP Eddie.   `
+},
+
+{
+  title: "Another ballad of Curtis Loew",
+  file:  "Media/Another ballad of Curtis Loew.mp3",
+  image: "Media/AnotherBalladOfCurtisLoew.jpeg",
+  alt:   "Another ballad of Curtis Loew - Cover Art",
+    genre: "Mellow Tunes",
+    
+  story: `A cool remix of a favorite from the band that thinks Alabama is a sweet home.   `
+},
+
+ 
  {
   title: "A Black Star in 2025",
   file:  "Media/A Black Star in 2025.mp3",
