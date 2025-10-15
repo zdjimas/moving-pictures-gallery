@@ -9,18 +9,24 @@ on:
       - "content.css"
       - "rooms_manifest.js"
       - "lobby-rooms.js"
-      - "Bio/**"
-      - "Media/**"
-      - "MediaBreaks/**"
-      - "room-*/**"
       - "*.jpg"
       - "*.jpeg"
       - "*.png"
       - "*.webp"
       - "*.mp4"
+      - "*.mp3"
+      - "assets/**"
+      - "room-*/**"
+      - ".github/workflows/deploy-room-radio-listen.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: pages
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
@@ -38,47 +44,48 @@ jobs:
           rm -rf _site
           mkdir -p _site
 
-          # --- 1) Root site files (HTML/CSS/JS + common assets) ---
-          for f in index.html inline-fallback.html content.css rooms_manifest.js lobby-rooms.js; do
-            if [[ -f "$f" ]]; then
-              install -D -m 0644 "$f" "_site/$f"
-            fi
+          echo "=== 1) Root site ==="
+          [[ -f index.html ]] && install -D -m 0644 index.html _site/index.html || true
+          [[ -f inline-fallback.html ]] && install -D -m 0644 inline-fallback.html _site/inline-fallback.html || true
+          [[ -f content.css ]] && install -D -m 0644 content.css _site/content.css || true
+          [[ -f rooms_manifest.js ]] && install -D -m 0644 rooms_manifest.js _site/rooms_manifest.js || true
+          [[ -f lobby-rooms.js ]] && install -D -m 0644 lobby-rooms.js _site/lobby-rooms.js || true
+
+          # Root media beside index.html (images/video/audio) <200 MB each
+          for ext in jpg jpeg png webp mp4 mp3; do
+            for f in *.$ext; do
+              [[ -f "$f" ]] && [[ $(stat -c%s "$f") -lt 209715200 ]] && install -D -m 0644 "$f" "_site/$f"
+            done
           done
 
-          # Copy any top-level images/videos you keep beside index.html
-          find . -maxdepth 1 -type f \
-            \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" -o -iname "*.gif" -o -iname "*.mp4" \) \
-            -size -200M -print0 | while IFS= read -r -d '' p; do
-              p="${p#./}"
-              install -D -m 0644 "$p" "_site/$p"
-            done
-
-          # --- 2) Bio pages (HTML + images) ---
-          if [[ -d Bio ]]; then
-            # HTML
-            find Bio -type f \( -iname "*.html" -o -iname "*.htm" \) -size -200M -print0 | while IFS= read -r -d '' p; do
-              install -D -m 0644 "$p" "_site/$p"
-            done
-            # Images
-            find Bio -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" -o -iname "*.gif" \) \
-              -size -200M -print0 | while IFS= read -r -d '' p; do
+          # assets/ (optional)
+          if [[ -d assets ]]; then
+            find assets -type f -size -200M -print0 | while IFS= read -r -d '' p; do
               install -D -m 0644 "$p" "_site/$p"
             done
           fi
 
-          # --- 3) Rooms: HTML/CSS/JS & ANY images (outside Media/MediaBreaks) ---
+          echo "=== 2) All room-* subsites ==="
           for room in room-*; do
             [[ -d "$room" ]] || continue
+            echo "--- Staging $room ---"
 
-            # Copy common room-root assets
-            find "$room" -maxdepth 1 -type f \
-              \( -iname "*.html" -o -iname "*.htm" -o -iname "*.css" -o -iname "*.js" -o -iname "*.mp4" \) \
-              -size -200M -print0 | while IFS= read -r -d '' p; do
-              install -D -m 0644 "$p" "_site/$p"
+            # Room root: HTML/CSS/JS
+            find "$room" -maxdepth 1 -type f \( -name "index*.html" -o -name "*.css" -o -name "*.js" \) -size -200M -print0 \
+              | while IFS= read -r -d '' p; do install -D -m 0644 "$p" "_site/$p"; done
+
+            # Known room-root assets you’ve used historically
+            for f in frasier.png default.jpg RadioMusicListening.jpg ZachArt.jpeg CJMURPHY.png FrasierExit.mp4 radio-room-entry.mp4; do
+              [[ -f "$room/$f" ]] && install -D -m 0644 "$room/$f" "_site/$room/$f"
             done
 
-            # Copy ANY images anywhere under the room (posters, img/, images/, thumbs/, etc.)
-            # but skip Media/ and MediaBreaks/ (handled in section 4).
+            # Welcome audio (Welcome.mp3 / KZAK-Welcome.mp3)
+            for g in "$room"/*Welcome*.mp3; do
+              [[ -f "$g" ]] && install -D -m 0644 "$g" "_site/${g#./}"
+            done
+
+            # Publish ANY images under the room (img/, images/, posters/, thumbs/, etc.),
+            # but skip Media/ and MediaBreaks (handled separately below)
             find "$room" -type f \
               \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" -o -iname "*.gif" \) \
               -size -200M \
@@ -86,32 +93,30 @@ jobs:
               -print0 | while IFS= read -r -d '' p; do
               install -D -m 0644 "$p" "_site/$p"
             done
-          done
 
-          # --- 4) Media and MediaBreaks trees (as before) ---
-          for tree in Media MediaBreaks; do
-            if [[ -d "$tree" ]]; then
-              # Images / covers
-              find "$tree" -type f \
-                \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" -o -iname "*.gif" \) \
-                -size -200M -print0 | while IFS= read -r -d '' p; do
-                install -D -m 0644 "$p" "_site/$p"
-              done
-
-              # Audio / video (if you stage any small clips here)
-              find "$tree" -type f \
-                \( -iname "*.mp3" -o -iname "*.m4a" -o -iname "*.wav" -o -iname "*.flac" -o -iname "*.mp4" \) \
-                -size -200M -print0 | while IFS= read -r -d '' p; do
-                install -D -m 0644 "$p" "_site/$p"
-              done
-
-              # Text metadata (optional)
-              find "$tree" -type f \( -iname "*.txt" -o -iname "*.json" -o -iname "*.xml" \) \
-                -size -200M -print0 | while IFS= read -r -d '' p; do
+            # Optional: Bio subfolder within a room
+            if [[ -d "$room/Bio" ]]; then
+              find "$room/Bio" -type f -size -200M -print0 | while IFS= read -r -d '' p; do
                 install -D -m 0644 "$p" "_site/$p"
               done
             fi
+
+            # Media and MediaBreaks (images/audio/video/metadata) <200 MB each
+            for sub in Media MediaBreaks; do
+              if [[ -d "$room/$sub" ]]; then
+                find "$room/$sub" -type f \
+                  \( -iname "*.mp3" -o -iname "*.m4a" -o -iname "*.wav" -o -iname "*.ogg" -o -iname "*.flac" \
+                   -o -iname "*.mp4" -o -iname "*.m4v" -o -iname "*.webm" \
+                   -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \
+                   -o -iname "*.txt" -o -iname "*.json" -o -iname "*.xml" \) \
+                  -size -200M -print0 | while IFS= read -r -d '' p; do install -D -m 0644 "$p" "_site/$p"; done
+              fi
+            done
           done
+
+          echo "=== Files staged for publish ==="
+          find _site -type f | sort
+          du -sh _site || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -126,10 +131,7 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.pages_deploy.outputs.page_url }}
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
-
-      - id: deployment
+      - id: pages_deploy
         uses: actions/deploy-pages@v4
