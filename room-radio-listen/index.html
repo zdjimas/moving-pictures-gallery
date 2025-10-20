@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
 <head>
 <!-- KZAK media-path shim v1.103 -->
@@ -576,6 +576,7 @@ document.getElementById('genreBar').addEventListener('click', e => {
   var __boot = (window.__kzakGetStartIndex? window.__kzakGetStartIndex(LIST.length):0);
   idx = __boot;
   load(__boot, false);
+idx = __boot;
 });
 
 function shareStation(){
@@ -591,9 +592,43 @@ shareBtn.addEventListener('click', shareStation);
 shareTrackBtn.addEventListener('click', () => shareStation());
 
 let BREAKS = [
-  "MediaBreaks/Radio-Id-Two.mp3","MediaBreaks/Radio-Id-Five.mp3","MediaBreaks/Snappy3.mp3","MediaBreaks/Snappy8.mp3",
-  "MediaBreaks/Radio-ID-Six.mp3","MediaBreaks/Radio-ID-Seven.mp3","MediaBreaks/Snappy17.mp3","MediaBreaks/Snappy11.mp3",
-  "MediaBreaks/Radio-Id-Ad-workforce1.mp3","MediaBreaks/Radio-Id-Ad-workforce2.mp3"
+  "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
+  "MediaBreaks/AmyYourelisteningtoK-ZACHt.mp3",
+  "MediaBreaks/Radio-ID-Seven.mp3",
+  "MediaBreaks/Radio-ID-Six.mp3",
+  "MediaBreaks/Radio-Id-Ad-workforce1.mp3",
+  "MediaBreaks/Radio-Id-Ad-workforce2.mp3",
+  "MediaBreaks/Radio-Id-Five.mp3",
+  "MediaBreaks/Radio-Id-Four.mp3",
+  "MediaBreaks/Radio-Id-One.mp3",
+  "MediaBreaks/Radio-Id-Three.mp3",
+  "MediaBreaks/Radio-Id-Two.mp3",
+  "MediaBreaks/Snappy1.mp3",
+  "MediaBreaks/Snappy2.mp3",
+  "MediaBreaks/Snappy3.mp3",
+  "MediaBreaks/Snappy4.mp3",
+  "MediaBreaks/snappy5.mp3",
+  "MediaBreaks/Snappy6.mp3",
+  "MediaBreaks/Snappy7.mp3",
+  "MediaBreaks/Snappy8.mp3",
+  "MediaBreaks/Snappy9.mp3",
+  "MediaBreaks/Snappy10.mp3",
+  "MediaBreaks/Snappy11.mp3",
+  "MediaBreaks/Snappy12.mp3",
+  "MediaBreaks/Snappy13.mp3",
+  "MediaBreaks/Snappy14.mp3",
+  "MediaBreaks/Snappy15.mp3",
+  "MediaBreaks/Snappy16.mp3",
+  "MediaBreaks/Snappy17.mp3",
+  "MediaBreaks/Snappy18.mp3",
+  "MediaBreaks/Snappy19.mp3",
+  "MediaBreaks/Snappy20.mp3",
+  "MediaBreaks/Snappy21.mp3",
+  "MediaBreaks/Snappy22.mp3",
+  "MediaBreaks/Snappy23.mp3",
+  "MediaBreaks/en-US-Journey-D-K_ZACH___where_the_f.wav",
+  "MediaBreaks/en-US-Journey-DYouaretunedintoK-Z-A-Kb.mp3",
+  "MediaBreaks/en-US-News-NThisisK-Z-A-Kbringingyou.mp3"
 ];
 let lastBreakIdx = -1;
 function pickBreak(){
@@ -617,7 +652,7 @@ async function playBreakThen(fnAfter){
   try{ audio.pause(); }catch{}
   const pick = pickBreak();
   if (!pick){ fnAfter && fnAfter(); return; }
-  breakAudio.src = pick;
+  breakAudio.src = window.pathToUrl(pick);
   try{
     await breakAudio.play();
     breakAudio.addEventListener('ended', ()=>{ fnAfter && fnAfter(); }, {once:true});
@@ -654,6 +689,7 @@ toLobby.addEventListener('click', () => {
 updateCounts();
 buildList();
 var __boot = (window.__kzakGetStartIndex? window.__kzakGetStartIndex(LIST.length):0);
+idx = __boot;
 load(__boot, false);
 </script>
 
@@ -1664,7 +1700,7 @@ function showExitAndReturn(){
 (function(){
   try{
     const KEY = 'kzak:badgeVisible';
-    const VER = 'Bullwinkle-v1.120'; // visual text only (page logic remains 119)
+    const VER = 'Bullwinkle-v1.120.2'; // visual text only (page logic remains 119)
     function killOldBadges(){
       try{
         // Remove any existing build badges
