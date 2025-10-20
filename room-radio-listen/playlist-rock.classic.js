@@ -1,5 +1,40 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
+
+{
+    title: "A Topaz from Journey",
+    file:  "Media/A Topaz from Journey.mp3",
+    img:   "Media/ATopazFromJourney.jpeg",
+    alt:   "A Topaz from Journey - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A Song from the 1970s demo days of Journey which has a cool fusion jazz instrumental feeling, great and groovy sounds."
+  }
+,{
+    title: "Are You Feeling That Way Too",
+    file:  "Media/Are You Feeling That Way Too.mp3",
+    img:   "Media/AreYouFeelingThatWayToo.jpeg",
+    alt:   "Are You Feeling That Way Too- Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A well known melody from the guys from San Francisco who brought you songs about the city by the bay."
+  }
+,{
+    title: "Let the Journey Take You Back",
+    file:  "Media/Let the Journey Take You Back.mp3",
+    img:   "Media/Portrait-HeKnew.jpeg",
+    alt:   "Let the Journey Take You Back - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "Another unreleased Demo from the 70s by Journey."
+  }
+,{
+    title: "La Do Da Journey",
+    file:  "Media/La Do Da Journey  .mp3",
+    img:   "Media/LaDoDaJourney.jpeg",
+    alt:   "La Do Da Journey - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "Another unreleased Early Demo from Journey which is groovy and cool."
+  }
+,
+
  
   {
     title: "Portrait (He Knew) Instrumental",
