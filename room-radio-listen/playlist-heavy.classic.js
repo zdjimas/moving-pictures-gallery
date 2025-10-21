@@ -2,6 +2,43 @@
 const PLAYLIST_HEAVY = [
 
 
+    {
+    title: "Screaming In Digital Silence",
+    file:  "Media/Screaming In Digital Silence.mp3",
+    img:   "Media/ScreamingInDigitalSilence.jpeg",
+    alt:   "Screaming In Digital Silence - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A Powerful song built from Queensryche but purely instrumental and Heavy."
+  },
+    {
+    title: "A Falling Star",
+    file:  "Media/A Falling Star .mp3",
+    img:   "Media/AFallingStar.jpeg",
+    alt:   "A Falling Star  - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A Demo from the Scorpions recreated into something cool."
+  },
+    {
+    title: "A Zoo at Madison Square Garden",
+    file:  "Media/A Zoo at Madison Square Garden.mp3",
+    img:   "Media/AZooatMadisonSquareGarden.jpeg",
+    alt:   "A Zoo at Madison Square Garden - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A well remembered song singing about 42nd street while touring in Manhattan, coverted from a band with a long stinger."
+  },
+    {
+    title: "Screaming In Italian Digital",
+    file:  "Media/Screaming In Italian Digital.mp3",
+    img:   "Media/ScreamingInItalianDigital.jpeg",
+    alt:   "Screaming In Italian Digital - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A Powerful song built from Queensryche, sung in Italian."
+  },
+
 {
     title: "Having A Sheer Heart Attack",
     file:  "Media/Having A Sheer Heart Attack.mp3",
