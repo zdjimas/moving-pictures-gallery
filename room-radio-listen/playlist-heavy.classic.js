@@ -308,10 +308,9 @@ const PLAYLIST_HEAVY = [
   {
     title: "Bolotone Metal Edition",
     file:  "Media/Bolotone Metal Edition (Remastered).mp3",
-    img:   "BolotoneMetalEdition.jpeg",
+    img:   "Media/BolotoneMetalEdition.jpeg",
     alt:   "Bolotone Metal Edition  — default artwork",
     genre: "Heavy and Metal",
-    
     story: "Bolotone aka. @bolony_togna895 on Youtube, a masterful musician where KZAK helps his music come to life."
   },
 
@@ -447,7 +446,7 @@ const PLAYLIST_HEAVY = [
     title: "10,000 Days",
     file:  "Media/X11 10,000 Days Live (Cover ZZ) (Remastered).mp3",
     img:   "Media/10KDays.jpeg",
-    alt:   " 10,000 Days — default artwork",
+    alt:   "10,000 Days — default artwork",
     genre: "Heavy and Metal",
     story: "The song that named the album from 1996 by this loved progressive metal band."
   },
