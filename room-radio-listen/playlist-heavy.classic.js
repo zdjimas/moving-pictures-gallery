@@ -224,263 +224,241 @@ const PLAYLIST_HEAVY = [
   },
 
   {
-    title: "01 Vicarious (Remix) 1",
+    title: "Vicarious Remixed ",
     file:  "Media/01 Vicarious (Remix) 1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "01 Vicarious (Remix) 1 — default artwork",
+    img:   "Media/Vicarious.jpeg",
+    alt:   "Vicarious Remixed — default artwork",
     genre: "Heavy and Metal",
     
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A remix of the Tool Song from Fear Inoculum."
   },
 
   {
-    title: "01. The Grudge (Remastered)",
+    title: "Remastering My Grudge",
     file:  "Media/01. The Grudge (Remastered).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "01. The Grudge (Remastered) — default artwork",
+    img:   "Media/RemasteringMyGrudge.png",
+    alt:   "Remastering My Grudge — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another masterpiece from the band that represents what it means to be Tool."
   },
 
   {
-    title: "08 Rosetta Stoned (Cover) take 1",
+    title: "Rosetta is Stoned",
     file:  "Media/08 Rosetta Stoned (Cover) take 1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "08 Rosetta Stoned (Cover) take 1 — default artwork",
+    img:   "Media/RosettaIsStoned.jpeg",
+    alt:   "Rosetta is Stoned — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Rosetta is Stoned is a remix of the great song from Tool, with an AI twist for KZAK listeners only!"
   },
 
   {
-    title: "10 Right In Two (Remastered) (Cover) (1)",
+    title: "Cut Right In Two",
     file:  "Media/10 Right In Two (Remastered) (Cover) (1).mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/CutRightInTwo.jpeg",
     alt:   "10 Right In Two (Remastered) (Cover) (1) — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From the 100000 days album, a slow moving masterpiece for KZAK listeners who Love Tool."
   },
 
   {
-    title: "10 Right In Two (Remastered) (Cover)",
+    title: "Split Right In Two",
     file:  "Media/10 Right In Two (Remastered) (Cover).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "10 Right In Two (Remastered) (Cover) — default artwork",
+    img:   "Media/SplitRightInTwo.jpeg",
+    alt:   "Split Right In Two — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another Remix of the song mentioning Monkeys from 10000 days."
   },
 
   {
-    title: "11. Pushit (Cover) v2",
+    title: "Pushit Now",
     file:  "Media/11. Pushit (Cover) v2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "11. Pushit (Cover) v2 — default artwork",
+    img:   "Media/PushitNow.jpeg",
+    alt:   "Pushit Now — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Pushit is a great driving beat from Tools Aenema Album, reborn as a new view for KZAK."
   },
 
   {
     title: "46 & 3",
     file:  "Media/46 & 3.mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/46And3.jpeg",
     alt:   "46 & 3 — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "46 & 3 is a remix of the similar name from the Aenema Album by you know who recreated for KZAK listeners."
   },
 
   {
     title: "A Spec of a Blue Dot",
     file:  "Media/A Spec of a Blue Dot.mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/ASpeckOfABlueDot.jpeg",
     alt:   "A Spec of a Blue Dot — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From an Album called Distance Over Time, a Melody reborn from Space landing on Planet KZAK."
   },
 
   {
-    title: "As I Am (Instrumental Demo 2003) (cover zz2)",
+    title: "As I Am Now",
     file:  "Media/As I Am (Instrumental Demo 2003) (cover zz2).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "As I Am (Instrumental Demo 2003) (cover zz2) — default artwork",
+    img:   "Media/AsIAmNow.jpeg",
+    alt:   "As I Am Now — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A song from Train of Thought Album redone for KZAK Listeners who appreciate this genius of this album."
   },
 
   {
-    title: "Bolotone Metal Edition (Remastered)",
+    title: "Bolotone Metal Edition",
     file:  "Media/Bolotone Metal Edition (Remastered).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Bolotone Metal Edition (Remastered) — default artwork",
+    img:   "BolotoneMetalEdition.jpeg",
+    alt:   "Bolotone Metal Edition  — default artwork",
     genre: "Heavy and Metal",
     
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Bolotone aka. @bolony_togna895 on Youtube, a masterful musician where KZAK helps his music come to life."
   },
 
   {
-    title: "Cover of Tool - 7empest 1",
+    title: "7empest",
     file:  "Media/Cover of Tool  - 7empest 1.mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/7empest.jpeg",
     alt:   "Cover of Tool - 7empest 1 — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A deep cover of one of the best from the album Fear Inoculum built for our new listeners on KZAK."
   },
 
   {
-    title: "Cover of Tool - 7empest 2",
+    title: "Recovered 7empest",
     file:  "Media/Cover of Tool  - 7empest 2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Cover of Tool - 7empest 2 — default artwork",
+    img:   "Media/Recovered7empest.jpeg",
+    alt:   "Recovered 7empest — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Recovered 7empest is another remix of this song from Tool, enjoy."
   },
 
   {
-    title: "Cover. The Grudge (v2)",
+    title: "Covering The Grudge",
     file:  "Media/Cover. The Grudge (v2).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Cover. The Grudge (v2) — default artwork",
-    genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    img:   "Media/CoveringTheGrudge.jpeg",
+    alt:   "Covering The Grudge — default artwork",
+    genre: "Heavy and Metal",   
+    story: "Yet another Covering of the Grudge that is quite heavy and heart pounding to hear."
   },
 
   {
-    title: "Fear Inoculum (Cover) v1",
+    title: "Covering Fear Inoculum",
     file:  "Media/Fear Inoculum (Cover) v1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Fear Inoculum (Cover) v1 — default artwork",
+    img:   "Media/CoveringFearInoculum.jpeg",
+    alt:   "Covering Fear Inoculum — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Covering The Grudge is another remix from Lateralus album's opening song now on KZAK."
   },
 
   {
     title: "Fear Inoculum - Hip Beat Remix",
     file:  "Media/Fear Inoculum - Hip Beat Remix.mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/CoveringFearInoculum.jpeg",
     alt:   "Fear Inoculum - Hip Beat Remix — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A hip version of Fear Inoculum."
   },
 
   {
     title: "Fear Inoculum - Intro remix",
     file:  "Media/Fear Inoculum - Intro remix.mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/CoveringFearInoculum.jpeg",
     alt:   "Fear Inoculum - Intro remix — default artwork",
-    genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    genre: "Heavy and Metal", 
+    story: "The intro cover with all the beats and rythm of this great opening to Too;'s most recent concerts."
   },
 
   {
-    title: "Flood an AI Tool Cover",
+    title: "Flood",
     file:  "Media/Flood an AI Tool Cover.mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/Flood.png",
     alt:   "Flood an AI Tool Cover — default artwork",
     genre: "Heavy and Metal",
     
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Flood is a great recreation of the early Tool Song remixed for KZAK Listener Enjoyment!"
   },
 
   {
-    title: "Hiding the Pot (1)",
+    title: "Hiding the Pot",
     file:  "Media/Hiding the Pot (1).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Hiding the Pot (1) — default artwork",
+    img:   "HidingThePot.jpeg",
+    alt:   "Hiding the Pot — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Hiding the Pot is what many teens used to do,  not very well when stoned."
   },
 
   {
     title: "Home Again..",
     file:  "Media/Home Again..mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/HomeAgain.jpeg",
     alt:   "Home Again.. — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From Scenes From A Memory, Home has been renovated for KZAK."
   },
 
   {
-    title: "My Broken Illusion (1)",
+    title: "My Broken Illusion",
     file:  "Media/My Broken Illusion (1).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "My Broken Illusion (1) — default artwork",
+    img:   "Media/MyBrokenIllusion.jpeg",
+    alt:   "My Broken Illusion — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Breaking All Illusions restructured for KZAK."
   },
 
   {
     title: "Rosetta must be Stoned",
     file:  "Media/Rosetta must be Stoned.mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/RosettaIsStoned.jpeg",
     alt:   "Rosetta must be Stoned — default artwork",
-    genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    genre: "Heavy and Metal", 
+    story: "Another Fine Creation from the 10000 days album."
   },
 
   {
-    title: "S2N an AI Cover of Dream Theater (Remix)",
+    title: "S2N an AI Cover of Dream Theater",
     file:  "Media/S2N an AI Cover of Dream Theater (Remix).mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/S2N.jpeg",
     alt:   "S2N an AI Cover of Dream Theater (Remix) — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A Dream Theater Song that sounds very similar to Rush, recreated for KZAK Listening Enjoyment."
   },
 
   {
-    title: "Schism (Cover)v1",
+    title: "Schism",
     file:  "Media/Schism (Cover)v1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Schism (Cover)v1 — default artwork",
+    img:   "Media/Schism.jpeg",
+    alt:   "Schism — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From early Tool, Another Great song regenerated for KZAK."
   },
 
   {
     title: "The Greatest Debate Ever",
     file:  "Media/The Greatest Debate Ever.mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/TheGreatestDebateEver.png",
     alt:   "The Greatest Debate Ever — default artwork",
     genre: "Heavy and Metal",
     
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "The Great Debate is re-debated into this new creation for KZAK. "
   },
 
   {
-    title: "X11 10,000 Days Live (Cover ZZ) (Remastered)",
+    title: "10,000 Days",
     file:  "Media/X11 10,000 Days Live (Cover ZZ) (Remastered).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "X11 10,000 Days Live (Cover ZZ) (Remastered) — default artwork",
+    img:   "Media/10KDays.jpeg",
+    alt:   " 10,000 Days — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "The song that named the album from 1996 by this loved progressive metal band."
   },
 
   {
-    title: "ozzy osbourne diary of a madman rare live (Remix)",
+    title: "Diary of a Madman Revisited",
     file:  "Media/ozzy osbourne diary of a madman rare live (Remix).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "ozzy osbourne diary of a madman rare live (Remix) — default artwork",
+    img:   "Media/DiaryOfAMadmanRevisited.jpeg",
+    alt:   "Diary of a Madman Revisited — default artwork",
     genre: "Heavy and Metal",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "To honor Ozzy and Randy in one radical recreation for KZAK."
   }
 ,
   {
