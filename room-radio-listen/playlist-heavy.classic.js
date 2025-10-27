@@ -1,6 +1,44 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_HEAVY = [
 
+{
+    title: "Sanatorium",
+    file:  "Media/Sanatorium.mp3",
+    img:   "Media/Sanatorium.jpeg",
+    alt:   "Sanatorium - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A Recreation of a well known song from the San Francisco based Metal Group with Metal in their name"
+  },
+    {
+    title: "The State of Empire",
+    file:  "Media/The State of Empire.mp3",
+    img:   "Media/TheStateOfEmpire.jpeg",
+    alt:   "The State of Empire - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "Empire was a song I loved to play off the album of the same name rebuilt for KZAK listeners."
+  },
+    {
+    title: "An Italian Sister Named Mary,
+    file:  "Media/An Italian Sister Named Mary.mp3",
+    img:   "Media/AnItalianSisterNamedMary.jpeg",
+    alt:   "An Italian Sister Named Mary - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "A recreation spoken in Italian of a dark melody originally created by Queensryche."
+  },
+    {
+    title: "An Instrumental Sister Named Mary",
+    file:  "Media/An Instrumental Sister Named Mary.mp3",
+    img:   "Media/AnInstrumentalSisterNamedMary.jpeg",
+    alt:   "An Instrumental Sister Named Mary - artwork",
+    genre: "Heavy and Metal",
+    
+    story: "Recreated an instrumental version of the melody from the album Operation Mindcrime."
+  },
+
+    
 
     {
     title: "Screaming In Digital Silence",
