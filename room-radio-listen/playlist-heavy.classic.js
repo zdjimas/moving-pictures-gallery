@@ -55,7 +55,7 @@ const PLAYLIST_HEAVY = [
     {
     title: "A Zoo at Madison Square Garden",
     file:  "Media/A Zoo at Madison Square Garden.mp3",
-    img:   "Media/AZooatMadisonSquareGarden.jpeg",
+    img:   "Media/AZooAtMadisonSquareGarden.jpeg",
     alt:   "A Zoo at Madison Square Garden - artwork",
     genre: "Heavy and Metal",
     
