@@ -2,14 +2,77 @@
 const PLAYLIST_ROCK = [
 
 {
+    title: "An Invincible Cover",
+    file:  "Media/An Invincible Cover.mp3",
+    img:   "Media/AnInvincibleCover.jpeg",
+    alt:   "An Invincible Cover - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A recreation of a well known song from Fear Inoculum."
+  },
+
+{
+    title: "Eclipse of the Mind",
+    file:  "Media/Eclipse of the Mind.mp3",
+    img:   "Media/EclipseOfTheMind.jpeg",
+    alt:   "Eclipse of the Mind- Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A unique original prompt creation by the creator, zdjimas, available also on suno.ai."
+  },
+{
+    title: "Mister Crowley",
+    file:  "Media/Mister Crowley.mp3",
+    img:   "Media/MisterCrowley.jpeg",
+    alt:   "Mister Crowley - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "From the debut album by Ozzy and Randy Rhodes, a tribute recreation to this masterpiece."
+  },
+
+{
+    title: "The Resurrection of a Madman",
+    file:  "Media/The Resurrection of a Madman.mp3",
+    img:   "Media/TheResurrectionOfAMadman.jpeg",
+    alt:   "The Resurrection of a Madman - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "From Diary of A Madman,  the prompted recreation of this masterpiece as instrumentally rendered."
+  },
+{
+    title: "The  Modern Count of Tuscany",
+    file:  "Media/The  Modern Count of Tuscany  (Remastered).mp3",
+    img:   "Media/TheModernCountOfTuscany.jpeg",
+    alt:   "The Modern Count Of Tuscany - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A replica of the Dream Theater melody about a trip to Tuscany and meeting the Count."
+  },
+
+{
+    title: "A Farewell to Kings Instrumental",
+    file:  "Media/A Farewell to Kings Instrumental.mp3",
+    img:   "Media/AFarewellToKings.jpeg",
+    alt:   "A Farewell to Kings - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A Song from the 1970s by Rush that is rendered here as a recreation for all KZAK listeners."
+  },
+{
+    title: "Diary of a Flamenco Guitarist",
+    file:  "Media/Diary of a Flamenco Guitarist.mp3",
+    img:   "Media/DiaryOfAFlamencoGuitarist.jpeg",
+    alt:   "Diary of a Flamenco Guitarist- Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "Diary of a Madman recreated for Flamenco style."
+  },
+ 
+
+    
+{
     title: "A Topaz from Journey",
     file:  "Media/A Topaz from Journey.mp3",
     img:   "Media/ATopazFromJourney.jpeg",
     alt:   "A Topaz from Journey - Cover artwork",
     genre: "Middle Ground Rock",
     story: "A Song from the 1970s demo days of Journey which has a cool fusion jazz instrumental feeling, great and groovy sounds."
-  }
-,{
+  },
+
+{
     title: "Are You Feeling That Way Too",
     file:  "Media/Are You Feeling That Way Too.mp3",
     img:   "Media/AreYouFeelingThatWayToo.jpeg",
