@@ -26,7 +26,23 @@ const PLAYLIST_ROCK = [
     genre: "Middle Ground Rock",
     story: "From the debut album by Ozzy and Randy Rhodes, a tribute recreation to this masterpiece."
   },
-
+{
+    title: "Everyones Justice for All",
+    file:  "Media/Everyones Justice for All.mp3",
+    img:   "Media/EveryonesJusticeForAll.jpeg",
+    alt:   "Everyones Justice for All - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "An instrumental recreation of the Metallica early works, acoustic only."
+  },
+    {
+    title: "A Temple of the King",
+    file:  "Media/A Temple of the King.mp3",
+    img:   "Media/ATempleOfTheKing.jpeg",
+    alt:   "A Temple of the King - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "Richie Blackmore created this song after leaving Deep Purple to start Rainbow, its an instrumental remix for KZAK."
+  },
+    
 {
     title: "The Resurrection of a Madman",
     file:  "Media/The Resurrection of a Madman.mp3",
