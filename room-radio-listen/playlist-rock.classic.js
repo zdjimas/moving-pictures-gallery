@@ -60,7 +60,14 @@ const PLAYLIST_ROCK = [
     genre: "Middle Ground Rock",
     story: "Diary of a Madman recreated for Flamenco style."
   },
- 
+{
+    title: "Prelude to Hemispheres",
+    file:  "Media/Prelude to Hemispheres.mp3",
+    img:   "Media/PreludeToHemispheres.jpeg",
+    alt:   "Prelude to Hemispheres - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "The opening song from the album of the same name from Rush recreated exclusively for KZAK listeners."
+  }, 
 
     
 {
