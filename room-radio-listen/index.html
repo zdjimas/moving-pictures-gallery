@@ -414,6 +414,44 @@ let isLoop = false;
 let isShuffle = false;
 let breaksEnabled = true;
 
+// Fisher-Yates shuffle state
+let shuffledPlaylist = [];
+let shufflePosition = 0;
+
+// Fisher-Yates shuffle algorithm for non-repeating random playback
+function createShuffledPlaylist() {
+  // Create array of indices [0, 1, 2, ..., LIST.length-1]
+  shuffledPlaylist = Array.from({ length: LIST.length }, (_, i) => i);
+  
+  // Fisher-Yates shuffle
+  for (let i = shuffledPlaylist.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledPlaylist[i], shuffledPlaylist[j]] = [shuffledPlaylist[j], shuffledPlaylist[i]];
+  }
+  
+  shufflePosition = 0;
+}
+
+function getNextShuffleIndex() {
+  if (shufflePosition >= shuffledPlaylist.length) {
+    // We've played through the entire shuffled list, create a new one
+    createShuffledPlaylist();
+  }
+  const nextIdx = shuffledPlaylist[shufflePosition];
+  shufflePosition++;
+  return nextIdx;
+}
+
+function getPrevShuffleIndex() {
+  if (shufflePosition <= 1) {
+    // At the beginning, wrap to end
+    shufflePosition = shuffledPlaylist.length;
+  } else {
+    shufflePosition -= 2; // Go back 2 because we increment in getNextShuffleIndex
+  }
+  return getNextShuffleIndex();
+}
+
 function updateCounts(){
   tmax.textContent = LIST.length;
   tcount.textContent = LIST.length;
@@ -509,7 +547,7 @@ function pickRandomIndexDifferentFrom(current, listLen){
 }
 function next(){
   if (isShuffle){
-    const i = pickRandomIndexDifferentFrom(idx, LIST.length);
+    const i = getNextShuffleIndex();
     load(i, true);
   } else {
     load(idx + 1, true);
@@ -517,7 +555,7 @@ function next(){
 }
 function prev(){
   if (isShuffle){
-    const i = pickRandomIndexDifferentFrom(idx, LIST.length);
+    const i = getPrevShuffleIndex();
     load(i, true);
   } else {
     load(idx - 1, true);
@@ -558,6 +596,9 @@ loopBtn.addEventListener('click', () => {
 shuffleBtn.addEventListener('click', () => {
   isShuffle = !isShuffle;
   shuffleBtn.textContent = isShuffle ? '🔀 Shuffle: On' : '🔀 Shuffle';
+  if (isShuffle) {
+    createShuffledPlaylist();
+  }
 });
 seek.addEventListener('input', e => {
   if (!isFinite(audio.duration)) return;
@@ -576,7 +617,11 @@ document.getElementById('genreBar').addEventListener('click', e => {
   var __boot = (window.__kzakGetStartIndex? window.__kzakGetStartIndex(LIST.length):0);
   idx = __boot;
   load(__boot, false);
-idx = __boot;
+  idx = __boot;
+  // Reset shuffle playlist when genre changes
+  if (isShuffle) {
+    createShuffledPlaylist();
+  }
 });
 
 function shareStation(){
@@ -1700,7 +1745,7 @@ function showExitAndReturn(){
 (function(){
   try{
     const KEY = 'kzak:badgeVisible';
-    const VER = 'Bullwinkle-v1.120.2'; // visual text only (page logic remains 119)
+    const VER = 'Bullwinkle-v1.120.3'; // visual text only (page logic remains 119)
     function killOldBadges(){
       try{
         // Remove any existing build badges
