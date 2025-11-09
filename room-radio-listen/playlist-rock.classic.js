@@ -147,7 +147,7 @@ const PLAYLIST_ROCK = [
     img:   "Media/PigWing2.jpeg",
     alt:   "default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A great remix of an original ending to the album Animals from the 1970s"
   }
 ,
   {
@@ -328,14 +328,14 @@ const PLAYLIST_ROCK = [
     img:   "Media/JailBreak.jpeg",
     alt:   "JailBreak artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A recreation of the song made famous by AC/DC in their early days with Bon Scott"
   }
 ,
   
   {
     title: "Precious Time Rescued",
     file:  "Media/Our Precious Time Rescued .mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/PreciousTimeRescued.jpeg",
     alt:   "Cover art for KZAK",
     genre: "Middle Ground Rock",
     story: "I love this great melody that Has been recooked with a new recipe. This song follows Poeple and Places on the original vinyl."
@@ -344,8 +344,8 @@ const PLAYLIST_ROCK = [
   {
     title: "Beyond The Realms of Death Again",
     file:  "Media/Beyond Realms of Death take 3.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Cover art for KZAK",
+    img:   "Media/BeyondTheRealmsOfDeath.jpeg",
+    alt:   "Beyond the Realms of Death again - Cover Art",
     genre: "Middle Ground Rock",
     story: "This is a great song that I listened to when I was in my later teens, one of my favorite melodies and songs from a great set of artists.."
   }
@@ -380,8 +380,8 @@ const PLAYLIST_ROCK = [
   {
     title: "A Wilderness Do-over Please",
     file:  "Media/A Wilderness Do-over Please.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Cover art for KZAK",
+    img:   "Media/AWildernessDoOverPlease.jpeg",
+    alt:   "Wilderness Do Over - Cover art",
     genre: "Middle Ground Rock",
     story: "The lyrics are so strong and inspring from the group of genius members who I call the earliest progressive music band like later Dream Theater.."
   }
@@ -389,7 +389,7 @@ const PLAYLIST_ROCK = [
   {
     title: "Silent Sucidity Silenced",
     file:  "Media/Silent Lucidity Silenced .mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/SilentLuciditySilenced.jpeg",
     alt:   "Cover art for KZAK",
     genre: "Middle Ground Rock",
     story: "The lyrics for this original composition are amazing, one of their best songs performed and reperformed as Queensryche."
@@ -398,7 +398,7 @@ const PLAYLIST_ROCK = [
   {
     title: "People and Places Future",
     file:  "Media/People and Places Future.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/PeopleAndPlacesFuture.jpeg",
     alt:   "Cover art for KZAK",
     genre: "Middle Ground Rock",
     story: "Rick Perry and Neal Schon are terrific creators of this great melody that Has been recooked with a new recipe.."
@@ -407,7 +407,7 @@ const PLAYLIST_ROCK = [
   {
     title: "People and Places Past",
     file:  "Media/People and Places Past.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/PeopleAndPlacesFuture.jpeg",
     alt:   "Cover art for KZAK",
     genre: "Middle Ground Rock",
     story: "Rick Perry and Neal Schon are terrific creators of this great melody that Has been recooked with a new recipe.."
@@ -416,82 +416,82 @@ const PLAYLIST_ROCK = [
   {
     title: "My Suite Madam Bleu (Take 2)",
     file:  "Media/My Suite Madam Bleu take 2.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/MySuiteMadamBleuTake2.jpeg",
     alt:   "Cover art for Suite Madam Bleu — Take 2",
     genre: "Middle Ground Rock",
-    story: "Under Construction."
+    story: "This is a recreation from the early works of Styx which has not changed much in lyric meanings decades later in 2025."
   }
 ,
   {
     title: "My Suite Madame Bleu (Take 3)",
     file:  "Media/My Suite Madame Bleu Take 3.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/MySuiteMadamBleuTake2.jpeg",
     alt:   "Cover art for Suite Madame Bleu — Take 3",
     genre: "Middle Ground Rock",
-    story: "Under Construction."
+    story: "This is a recreation from the early works of Styx which has not changed much in lyric meanings decades later in 2025."
   }
 ,
   {
     title: "My America?",
     file:  "Media/My America?.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/MyAmerica.jpeg",
     alt:   "Cover art for My America?",
     genre: "Middle Ground Rock",
-    story: "Under Construction."
+    story: "Listen carefully to this song created by Styx which lyrics have new meaning today in 2025."
   }
 ,
   {
-    title: "01. Sheep (cover)5",
+    title: "Sheep Cover Take 5",
     file:  "Media/01. Sheep (cover)5.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "01. Sheep (cover)5 — default artwork",
+    img:   "Media/Sheep.jpeg",
+    alt:   "Sheep Cover Take 5 — Cover artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another remix from the Animals Album"
   }
 ,
   {
-    title: "03. Dogs (Cover) X2 tripper",
+    title: "Dogs X2 tripper",
     file:  "Media/03. Dogs (Cover) X2 tripper.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "03. Dogs (Cover) X2 tripper — default artwork",
+    img:   "Media/Dogs.jpeg",
+    alt:   "Dogs X2 tripper — Cover artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A cover from the Animals Album, one of many exclusively on KZAK."
   }
 ,
   {
-    title: "03. Dogs (Remix)",
+    title: "Dogs (Remix)",
     file:  "Media/03. Dogs (Remix).mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "03. Dogs (Remix) — default artwork",
+    img:   "Media/Dogs.jpeg",
+    alt:   "Dogs (Remix) — Cover artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A cover from the Animals Album, one of many exclusively on KZAK."
   }
 ,
   {
-    title: "05. Pigs (Three Different Ones) (Techno Tran)",
+    title: "Pigs (Three Different Ones) (Techno Tran)",
     file:  "Media/05. Pigs (Three Different Ones) (Techno Tran).mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "05. Pigs (Three Different Ones) (Techno Tran) — default artwork",
+    img:   "Media/Pigs.jpeg",
+    alt:   "Pigs (Three Different Ones) (Techno Tran) — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another KZAK remix creation for Pigs on Animals Album from 70s."
   }
 ,
   {
-    title: "06 Another Brick In The Wall p2 2 (Cover ZZ) v2",
+    title: "Another Brick In The Wall part 2",
     file:  "Media/06 Another Brick In The Wall p2 2 (Cover ZZ) v2.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "06 Another Brick In The Wall p2 2 (Cover ZZ) v2 — default artwork",
+    img:   "Media/AnotherBrickInTheWall.jpeg",
+    alt:   "Another Brick In The Wall — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "One of the Floyd Boyz Best from the Wall."
   }
 ,
   {
-    title: "07 Goodbye Blue Sky (cover zz) 2",
+    title: "Goodbye Blue Skies",
     file:  "Media/07 Goodbye Blue Sky (cover zz) 2.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/AnotherBrickInTheWall.jpeg",
     alt:   "07 Goodbye Blue Sky (cover zz) 2 — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "One of the Floyd Boyz Best from the Wall."
   }
 ,
   {
@@ -500,68 +500,68 @@ const PLAYLIST_ROCK = [
     img:   "Media/PigWing1.jpeg",
     alt:   "default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another KZAK remix creation for Pigs on Animals Album from 70s."
   }
 ,
   {
-    title: "10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix)",
+    title: "Shine On You Crazy Diamond (Parts 6-9) Take 1",
     file:  "Media/10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix).mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/ShineOnYouCrazyDiamond.jpeg",
     alt:   "10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix) — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A great cover of from the album with a burning man shaking hands."
   }
 ,
   {
-    title: "10. Shine On You Crazy Diamond (Parts 6-9) (cover)",
+    title: "Shine On You Crazy Diamond (Parts 6-9) Take 2",
     file:  "Media/10. Shine On You Crazy Diamond (Parts 6-9) (cover).mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/ShineOnYouCrazyDiamond.jpeg",
     alt:   "10. Shine On You Crazy Diamond (Parts 6-9) (cover) — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A great cover of from the album with a burning man shaking hands."
   }
 ,
   {
-    title: "14 - Any Colour You Like (Live 1972)",
+    title: "Any Colour You Like (Live 1972)",
     file:  "Media/14 - Any Colour You Like (Live 1972).mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "14 - Any Colour You Like (Live 1972) — default artwork",
+    img:   "Media/AnyColourYouLike.jpeg",
+    alt:   "Any Colour You Like (Live 1972) — KZAK Cover artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A well known tune from the side of the moon not lighted."
   }
 ,
   {
-    title: "1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix)",
+    title: "Midnight In Manhattan",
     file:  "Media/1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix).mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix) — default artwork",
+    img:   "Media/MidnightInManhattan.jpeg",
+    alt:   "Midnight In Manhattan — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A Jazzy feelgood remix creation from zdjimas that feels like a night in NYC."
   }
 ,
   {
     title: "A Demo in Time of Dying",
     file:  "Media/A Demo in Time of Dying.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/ADemoInTimeOfDying.jpeg",
     alt:   "A Demo in Time of Dying — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A great melody from Jimmy Paige."
   }
 ,
   {
     title: "A Demo of Poor Tom",
     file:  "Media/A Demo of Poor Tom.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/ADemoInTimeOfDying.jpeg",
     alt:   "A Demo of Poor Tom — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A great melody from Jimmy Paige."
   }
 ,
   {
     title: "If You Want Blood Later",
     file:  "Media/If You Want Blood Later .mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Cover art for KZAK",
+    img:   "Media/IfYouWantBlood.jpeg",
+    alt:   "If you want blood Later - Cover art for KZAK",
     genre: "Middle Ground Rock",
     story: "One of the best music ever created from this band and the great singer Bon Scott, This song is in so many great movie scenes too."
   }
@@ -569,127 +569,127 @@ const PLAYLIST_ROCK = [
   {
     title: "A Modern Lord of the Rings",
     file:  "Media/A Modern Lord of the Rings.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/AModernLordOfRings.jpeg",
     alt:   "A Modern Lord of the Rings — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From early works of Styx, an AI recreation of this great song, not the movie."
   }
 ,
   {
     title: "All that glitters is gold remains",
     file:  "Media/All that glitters is gold remains.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/AllThatGlittersIsGold.jpeg",
     alt:   "All that glitters is gold remains — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another masterpiece from Jimmy Paige and company."
   }
 ,
   {
     title: "Another Dogs Cover - Really?",
     file:  "Media/Another Dogs Cover - Really?.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Another Dogs Cover - Really? — default artwork",
+    img:   "Media/Dogs.jpeg",
+    alt:   "Another Dogs Cover - Really? — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From the Animals Album, another one remixed."
   }
 ,
   {
     title: "Ballad of a Bleak Future",
     file:  "Media/Ballad of a Bleak Future.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/BalladOfABleakFuture.jpeg",
     alt:   "Ballad of a Bleak Future — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Created from the works of Bolotone with new twist."
   }
 ,
   {
     title: "Barn Jam Friends",
     file:  "Media/Barn Jam Friends.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/BarnJamFriends.jpeg",
     alt:   "Barn Jam Friends — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From Led Zep early days turned into a jam session."
   }
 ,
   {
     title: "Bend the clock - 70s Barn Jam Edition",
     file:  "Media/Bend the clock - 70s Barn Jam Edition.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Bend the clock - 70s Barn Jam Edition — default artwork",
+    img:   "Media/BendTheClock.jpeg",
+    alt:   "Bend the clock - 70s Barn Jam Edition — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A recreation of the Petrucci song in a barn jam setting."
   }
 ,
   {
     title: "Beyond My Understanding",
     file:  "Media/Beyond My Understanding.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Beyond My Understanding — default artwork",
+    img:   "Media/BeyondMyUnderstanding.jpeg",
+    alt:   "Beyond My Understanding — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A creation by zdjimas also available on the suno channel."
   }
 ,
   {
     title: "Bolotone Desert Trip Edition",
     file:  "Media/Bolotone Desert Trip Edition.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/Bolotone.jpeg",
     alt:   "Bolotone Desert Trip Edition — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A recreation from the works of Bolotone."
   }
 ,
   {
     title: "Bolotone's Intro",
     file:  "Media/Bolotone's Intro.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/Bolotone.jpeg",
     alt:   "Bolotone's Intro — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A recreation from the works of Bolotone."
   }
 ,
   {
-    title: "Breathe - (an AI pink floyd cover)",
+    title: "Breathe - an AI pink floyd cover",
     file:  "Media/Breathe - (an AI pink floyd cover).mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Breathe - (an AI pink floyd cover) — default artwork",
+    img:   "Media/Breath.jpeg",
+    alt:   "Breathe - an AI pink floyd cover— KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From the Darkest side of the mooon, a KZAK recreation."
   }
 ,
   {
     title: "Covering my Eyes",
     file:  "Media/Covering my Eyes.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/CoveringMyEyes.jpeg",
     alt:   "Covering my Eyes — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A recreation of early works from Dream Theater exlusively for KZAK."
   }
 ,
   {
     title: "Dogs (Remix)",
     file:  "Media/Dogs (Remix).mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/Dogs.jpeg",
     alt:   "Dogs (Remix) — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another remix from the Animals Album."
   }
 ,
   {
     title: "Dogs Cover 2 Funky",
     file:  "Media/Dogs Cover 2 Funky.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/Dogs.jpeg",
     alt:   "Dogs Cover 2 Funky — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another remix from the Animals Album."
   }
 ,
   {
     title: "Friends in FrontierLand",
     file:  "Media/Friends in FrontierLand.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Friends in FrontierLand — default artwork",
+    img:   "Media/FriendsInFrontierLand.jpeg",
+    alt:   "Friends in FrontierLand — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From the works of Led Zeppelin with a Disneyland twist."
   }
 ,
   {
