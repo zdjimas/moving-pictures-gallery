@@ -289,7 +289,7 @@ const PLAYLIST_ROCK = [
   {
     title: "Voices In My Head",
     file:  "Media/Voices in my head.mp3",
-    img:   "Media/VoiceHead.jpeg",
+    img:   "Media/VoicesHead.jpeg",
     alt:   "Voices In My Head - artwork",
     genre: "Middle Ground Rock",
     story: "A great Tune by the first band I ever saw in concert at the age of 10, hint... Their Trix are Cheap"
