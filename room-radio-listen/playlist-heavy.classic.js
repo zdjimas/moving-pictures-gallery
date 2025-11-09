@@ -381,7 +381,7 @@ const PLAYLIST_HEAVY = [
   {
     title: "Hiding the Pot",
     file:  "Media/Hiding the Pot (1).mp3",
-    img:   "HidingThePot.jpeg",
+    img:   "Media/HidingThePot.jpeg",
     alt:   "Hiding the Pot — default artwork",
     genre: "Heavy and Metal",
     story: "Hiding the Pot is what many teens used to do,  not very well when stoned."
