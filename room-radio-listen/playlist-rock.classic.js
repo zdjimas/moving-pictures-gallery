@@ -695,172 +695,172 @@ const PLAYLIST_ROCK = [
   {
     title: "My Own Pieces of Eight",
     file:  "Media/My Own Pieces of Eight.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "My Own Pieces of Eight — default artwork",
+    img:   "Media/MyOwnPiecesOfEight.jpeg",
+    alt:   "My Own Pieces of Eight — KZAK Cover artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another remix recreation of a song matching the album name."
   }
 ,
   {
     title: "New Beginnings",
     file:  "Media/New Beginnings.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/NewBeginnings.jpeg",
     alt:   "New Beginnings — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A great recreation instrumental from one of the melodies available on the album the Astonishing."
   }
 ,
   {
-    title: "Orchestra for Wings For Marie (Cover) take 7",
+    title: "Orchestra does Wings For Marie",
     file:  "Media/Orchestra for Wings For Marie (Cover) take 7.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Orchestra for Wings For Marie (Cover) take 7 — default artwork",
+    img:   "Media/OrchestraWingsForMarie.jpeg",
+    alt:   "Orchestra does Wings For Marie — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "An orchestra working with the song Wings for Marie from Tool, a KZAK exclusive."
   }
 ,
   {
     title: "Rain Song Replayed",
     file:  "Media/Rain Song Replayed.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Rain Song Replayed — default artwork",
+    img:   "Media/RainSongReplayed.jpeg",
+    alt:   "Rain Song Replayed — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A Led Zeppilin Favorite instrumental version for calm meditation and thought."
   }
 ,
   {
     title: "Running from Waiting Worms",
     file:  "Media/Running from Waiting Worms.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Running from Waiting Worms — default artwork",
+    img:   "Media/RunningFromWaitingWorms.jpeg",
+    alt:   "Running from Waiting Worms — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A ballad mixing Run Like Hell and Waiting for the Worms from the Wall, Another KZAK Exclusive, enjoy. "
   }
 ,
   {
-    title: "Shine On (Cover) 5 (Remastered)",
+    title: "Shine On Crazy Diamonds",
     file:  "Media/Shine On (Cover) 5 (Remastered).mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Shine On (Cover) 5 (Remastered) — default artwork",
+    img:   "Media/ShineOnCrazyDiamond.jpeg",
+    alt:   "Shine On Crazy Diamonds - KZAK Cover Art",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From the Floyd, instrumental version of the song on the album wish you were here."
   }
 ,
   {
-    title: "Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z))",
+    title: "Shine On You Crazy Diamond - Lap steel guitar Edition",
     file:  "Media/Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)).mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)) — default artwork",
+    img:   "Media/ShineOnCrazyDiamond.jpeg",
+    alt:   "Shine On You Crazy Diamond - Lap steel guitar Edition — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another From Floyd with screaming steel slide lap guitar focus."
   }
 ,
   {
     title: "Surrounded by Friends",
     file:  "Media/Surrounded by Friends.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Surrounded by Friends — default artwork",
+    img:   "Media/SurroundedByFriends.jpeg",
+    alt:   "Surrounded by Friends — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From Dream Theater, the solo from the live version recreated for cool vibes. See if you hear Mother in here."
   }
 ,
   {
-    title: "TechnoTrance The Pot V1",
+    title: "TechnoTrance of The Pot",
     file:  "Media/TechnoTrance The Pot V1.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "TechnoTrance The Pot V1 — default artwork",
+    img:   "Media/TechnoTrancePot.jpeg",
+    alt:   "TechnoTrance Of The Pot — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A cool techno dance version of the Pot from Tool, betcha didnt see that comming.."
   }
 ,
   {
-    title: "TechnoTrance The Pot V2",
+    title: "TechnoTrance of The Pot V2",
     file:  "Media/TechnoTrance The Pot V2.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "TechnoTrance The Pot V2 — default artwork",
+    img:   "Media/TechnoTrancePot.jpeg",
+    alt:   "TechnoTrance Of The Pot V2 — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A second cool techno dance version of the Pot from Tool, betcha still didnt see that comming.."
   }
 ,
   {
-    title: "The Modern Count of Tuscany (Remastered)",
+    title: "The Modern Count of Tuscany",
     file:  "Media/The Modern Count of Tuscany (Remastered).mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "The Modern Count of Tuscany (Remastered) — default artwork",
+    img:   "Media/TheModernCountOfTuscany.jpeg",
+    alt:   "The Modern Count of Tuscany  — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "The middle of the song from Dream Theater, recreated with a modern twist, even techno."
   }
 ,
   {
     title: "The Canelo-Crawford Event Round 1",
     file:  "Media/The Canelo-Crawford Event Round 1.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "The Canelo-Crawford Event Round 1 — default artwork",
+    img:   "Media/TheCanelo-CrawfordEvent.jpeg",
+    alt:   "The Canelo-Crawford Event Round 1 — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "The first recreation of a between event show featuring Danny Carey and Adam Jones."
   }
 ,
   {
-    title: "The Canelo-Crawford Event",
+    title: "The Canelo-Crawford Event - Final Round",
     file:  "Media/The Canelo-Crawford Event.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
+    img:   "Media/TheCanelo-CrawfordEvent.jpeg",
     alt:   "The Canelo-Crawford Event — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "The final recreation of a between event show featuring Danny Carey and Adam Jones."
   }
 ,
   {
-    title: "The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix)",
+    title: "The Ones Who Help to Set the Sun",
     file:  "Media/The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix).mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix) — default artwork",
+    img:   "Media/TheOnesWhoHelpSetTheSun.jpeg",
+    alt:   "The Ones Who Help to Set the Sun — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From early early Dream Theater, a recreation of a ballad not so well known but just a great as other works."
   }
 ,
   {
     title: "The Recovering Barstool Warrior",
     file:  "Media/The Recovering Barstool Warrior.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "The Recovering Barstool Warrior — default artwork",
+    img:   "Media/TheRecoveringBarstoolWarrior.jpeg",
+    alt:   "The Recovering Barstool Warrior — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From Distance Over Time Album, an instrumental remix of an amazing melody by these master musicians."
   }
 ,
   {
     title: "The Strangest of Days",
     file:  "Media/The Strangest of Days.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "The Strangest of Days — default artwork",
+    img:   "Media/TheStrangestOfDays.jpeg",
+    alt:   "The Strangest of Days — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "We cant forget the pioneers of progressive rock, RIP Jim Morrison."
   }
 ,
   {
     title: "Trippin like Hell",
     file:  "Media/Trippin like Hell.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Trippin like Hell — default artwork",
+    img:   "Media/TrippinLikeHell.jpeg",
+    alt:   "Trippin like Hell — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "What Run Like Hell may sound like in a college dorm in 1983 if you catch the drift.."
   }
 ,
   {
-    title: "When Pigs and Sheep Mate IV..",
+    title: "When Pigs and Sheep Mate",
     file:  "Media/When Pigs and Sheep Mate IV..mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "When Pigs and Sheep Mate IV.. — default artwork",
+    img:   "Media/WhenPigsAndSheepMate.jpeg",
+    alt:   "When Pigs and Sheep Mate IV. — default artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From the Animals Album but imagine what mixing Pigs and Sheep may sound like."
   }
 ,
   {
-    title: "Wings For Marie (Part 1) (Techno Trance Remix) v2",
+    title: "Wings For Marie Techno",
     file:  "Media/Wings For Marie (Part 1) (Techno Trance Remix) v2.mp3",
-    img:   (typeof DEFAULT_IMG!=="undefined"?DEFAULT_IMG:""),
-    alt:   "Wings For Marie (Part 1) (Techno Trance Remix) v2 — default artwork",
+    img:   "Media/WingsForMarieTechno.jpeg",
+    alt:   "Wings For Marie Techno — KZAK artwork",
     genre: "Middle Ground Rock",
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From 10000 days, taking it and converting it into a techno beat, pretty cool."
   }
 ,
   {
