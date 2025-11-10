@@ -118,15 +118,6 @@ const PLAYLIST_MELLOW = [
 
 
 
-
-
-
-
-
-
-
-
-
  
   {
   title: "You Don't Need A Gun - Sitar Version",
@@ -181,223 +172,201 @@ const PLAYLIST_MELLOW = [
   },
 
   {
-    title: "08 4 Degrees (Cover)2",
+    title: "4 Degrees",
     file:  "Media/08 4 Degrees (Cover)2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "08 4 Degrees (Cover)2 — default artwork",
+    img:   "Media/4Degrees.jpeg",
+    alt:   "4 Degrees — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A tool song turned into something really cool."
   },
 
   {
-    title: "08 4 Degrees (Cover)v1",
+    title: "4 Degrees Take 2",
     file:  "Media/08 4 Degrees (Cover)v1.mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/4Degrees.jpeg",
     alt:   "08 4 Degrees (Cover)v1 — default artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another recreation of 4 degrees for relaxation and enjoyment"
   },
 
   {
-    title: "11. Reflection (Cover) V2",
+    title: "Reflection",
     file:  "Media/11. Reflection (Cover) V2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "11. Reflection (Cover) V2 — default artwork",
+    img:   "Media/Reflection.jpeg",
+    alt:   "Reflection — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another recreation from an earlier tool song."
   },
 
   {
     title: "A Classical Aspect of X ",
     file:  "Media/A Classical Aspect of X .mp3",
-    img:   DEFAULT_IMG,
-    alt:   "A Classical Aspect of X  — default artwork",
+    img:   "Media/AClassicalAspectOfX.jpeg",
+    alt:   "A Classical Aspect of X  — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "What the X Factor song from The Astonishing would sound like if in Symphony Hall."
   },
 
   {
     title: "A Madman Plays Seville",
     file:  "Media/A Madman Plays Seville.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "A Madman Plays Seville — default artwork",
+    img:   "Media/AMadmanPlays.jpeg",
+    alt:   "A Madman Plays Seville — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Taking the opening for Diary of a Madman and seeing what it may become in Sevelle Spain."
   },
 
   {
     title: "All that glitters is gold Acoustic Blend",
     file:  "Media/All that glitters is gold Acoustic Blend.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "All that glitters is gold Acoustic Blend — default artwork",
+    img:   "Media/AllThatGlittersIsGold.jpeg",
+    alt:   "All that glitters is gold Acoustic Blend — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "An early demo from Jimmy Page and Led Zeppelin converted into something sweet acoustically."
   },
 
   {
     title: "All that glitters is gold",
     file:  "Media/All that glitters is gold.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "All that glitters is gold — default artwork",
+     img:   "Media/AllThatGlittersIsGold.jpeg",
+    alt:   "All that glitters is gold — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "An remix of early demo from Jimmy Page and Led Zeppelin converted into something sweet."
   },
 
   {
     title: "Continuum - an Octavarium Remix and Cover",
     file:  "Media/Continuum - an Octavarium Remix and Cover.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Continuum - an Octavarium Remix and Cover — default artwork",
+    img:   "Media/Continuum.jpeg",
+    alt:   "Continuum - an Octavarium Remix and Cover — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Taking the opening of Octavarium and turning it into something neat and mellow."
   },
 
   {
-    title: "Cover Of Wings For Marie (Part 1) v1",
+    title: "Cover Of Wings For Marie",
     file:  "Media/Cover Of Wings For Marie (Part 1) v1.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Cover Of Wings For Marie (Part 1) v1 — default artwork",
+    img:   "Media/CoverOfWings.jpeg",
+    alt:   "Cover Of Wings For Marie  — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another Mellow Remix of Wings for Marie from 10000 days"
   },
 
   {
-    title: "Cover Wings For Marie (Part 1) (Spanish acoustic ) (1)",
+    title: "Cover Wings For Marie - Spanish acoustic",
     file:  "Media/Cover Wings For Marie (Part 1) (Spanish acoustic ) (1).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Cover Wings For Marie (Part 1) (Spanish acoustic ) (1) — default artwork",
+    img:   "Media/CoverOfWings.jpeg",
+    alt:   "Cover Wings For Marie - Spanish acoustic — default artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Wings for Marie in Spanish Acoustic Guitar Style"
   },
 
   {
-    title: "Cover of Wings For Marie (Part 1) v2",
+    title: "Cover of Wings For Marie Take 2",
     file:  "Media/Cover of Wings For Marie (Part 1) v2.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Cover of Wings For Marie (Part 1) v2 — default artwork",
+    img:   "Media/CoverOfWings.jpeg",
+    alt:   "Cover of Wings For Marie Take 2 — default artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Wings For Marie recreated once again for another take."
   },
 
   {
     title: "Culling Voices Gathered in Flocks",
     file:  "Media/Culling Voices Gathered in Flocks.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Culling Voices Gathered in Flocks — default artwork",
+    img:   "Media/CullingVoices.jpeg",
+    alt:   "Culling Voices Gathered in Flocks — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From the Album Fear Innoculum, a mellow beat recreated for KZAK listeners."
   },
 
   {
     title: "Culling Voices Gathering Alone",
     file:  "Media/Culling Voices Gathering Alone.mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/CullingVoices.jpeg",
     alt:   "Culling Voices Gathering Alone — default artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From the Album Fear Innoculum, another mellow beat for KZAK listeners."
   },
 
   {
-    title: "Degrees (Cover)3 (Spanish guitar quartet)",
+    title: "Degrees by a Spanish guitar quartet",
     file:  "Media/Degrees (Cover)3 (Spanish guitar quartet).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Degrees (Cover)3 (Spanish guitar quartet) — default artwork",
+    img:   "Media/Degrees.jpeg",
+    alt:   "Degrees by a Spanish guitar quartet — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "What tool sounds like in acoustic quartet."
   },
 
   {
-    title: "Degrees as Spanish guitar quartet",
+    title: "Degrees as Spanish guitar quartet take 2",
     file:  "Media/Degrees as Spanish guitar quartet.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Degrees as Spanish guitar quartet — default artwork",
+    img:   "Media/Degrees.jpeg",
+    alt:   "Degrees as Spanish guitar quartet — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "What tool sounds like in acoustic quartet."
   },
 
   {
     title: "Labyrinths of Coral Caves ",
     file:  "Media/Labyrinths of Coral Caves .mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Labyrinths of Coral Caves  — default artwork",
+    img:   "Media/LabyrinthsOfCoralCaves.jpeg",
+    alt:   "Labyrinths of Coral Caves  — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From the Floyd Boyz, early album called Meddle, Song called Echoes recreated for KZAK listeners."
   },
 
   {
     title: "Leaving You",
     file:  "Media/Leaving You.mp3",
-    img:   DEFAULT_IMG,
+    img:   "Media/LeavingYou.jpeg",
     alt:   "Leaving You — default artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "An instrumental recreation by zdjimas from the first Led Zeppilin Album great."
   },
 
   {
     title: "More Guitars at Luna Park",
     file:  "Media/More Guitars at Luna Park.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "More Guitars at Luna Park — default artwork",
+    img:   "Media/MoreGuitarsAtLunaPark.jpeg",
+    alt:   "More Guitars at Luna Park — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "From the John Petrucci solo at Luna Park, rebuilt for cool relaxing sounds."
   },
 
   {
     title: "Octavarium en Quartet",
     file:  "Media/Octavarium en Quartet.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Octavarium en Quartet — default artwork",
+    img:   "Media/Octavarium.jpeg",
+    alt:   "Octavarium en Quartet — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another kind of remake of the song with the same album name."
   },
 
   {
     title: "Our Waiting for Sleep, an instrumental",
     file:  "Media/Our Waiting for Sleep, an instrumental.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Our Waiting for Sleep, an instrumental — default artwork",
+    img:   "Media/OurWaitingForSleep.jpeg",
+    alt:   "Our Waiting for Sleep, an instrumental — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A dream theater classic redone as an instrumental meditative melody for KZAK listeners."
   },
 
   {
-    title: "Pigs three different ones Solo (Cover)2b",
+    title: "Pigs three different ones take 4",
     file:  "Media/Pigs three different ones Solo (Cover)2b.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Pigs three different ones Solo (Cover)2b — default artwork",
+    img:   "Media/PigsThree.jpeg",
+    alt:   "Pigs three different ones Take 4 — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another KZAK remix of Pigs from Animals."
   },
 
   {
     title: "Surfacing Tensions",
     file:  "Media/Surfacing Tensions.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Surfacing Tensions — default artwork",
+    img:   "Media/SurfacingTensions.jpeg",
+    alt:   "Surfacing Tensions — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A unreleased demo of a great melody from the band Yes, acoustic and mellow."
   },
 
   {
@@ -406,8 +375,7 @@ const PLAYLIST_MELLOW = [
     img:   "Media/EmbracingCircle.png",
     alt:   "The Embracing Circle Cover- Take One — default artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another remix of part of the song illumination theory."
   },
 
   {
@@ -426,8 +394,8 @@ const PLAYLIST_MELLOW = [
     img:   "Media/EmbracingCircle.png",
     alt:   "The Embracing Circle Cover - Take Two — default artwork",
     genre: "Mellow Tunes",
+     story: "A Wonderful String Arrangement As Part of the bigger picture of an illumination theory."
     
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
   },
 
   {
@@ -436,8 +404,7 @@ const PLAYLIST_MELLOW = [
     img:   "Media/EmbracingCircle.png",
     alt:   "The Embracing Circle Cover - Take Five — default artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+     story: "A Wonderful String Arrangement As Part of the bigger picture of an illumination theory."
   },
 
   {
@@ -446,68 +413,61 @@ const PLAYLIST_MELLOW = [
     img:   "Media/EmbracingCircle.png",
     alt:   "The Embracing Circle Cover - Take Three — default artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+     story: "A Wonderful String Arrangement As Part of the bigger picture of an illumination theory."
   },
 
   {
     title: "The Madman Plays in Cancun",
     file:  "Media/The Madman Plays in Cancun.mp3",
-    img:   DEFAULT_IMG,
+     img:   "Media/AMadmanPlays.jpeg",
     alt:   "The Madman Plays in Cancun — default artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "Another view of the Madman playing in Cancun this time."
   },
 
   {
-    title: "The Spirit Carries On (Live Rehearsal 2) (Remix)",
+    title: "The Spirit Carries On Further",
     file:  "Media/The Spirit Carries On (Live Rehearsal 2) (Remix).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "The Spirit Carries On (Live Rehearsal 2) (Remix) — default artwork",
+    img:   "Media/TheSpiritCarriesOn.jpeg",
+    alt:   "The Spirit Carries On Further — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A recreation of the original demo tape from Scenes from A Memory Album."
   },
 
   {
     title: "The X Aspect Symphony Remix",
     file:  "Media/The X Aspect Symphony Remix.mp3",
-    img:   DEFAULT_IMG,
+     img:   "Media/AClassicalAspectOfX.jpeg",
     alt:   "The X Aspect Symphony Remix — default artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "The X Aspect recreated with a Symphony Orchestra."
   },
 
   {
     title: "The X Aspect shortened",
     file:  "Media/The X Aspect shortened.mp3",
-    img:   DEFAULT_IMG,
+     img:   "Media/AClassicalAspectOfX.jpeg",
     alt:   "The X Aspect shortened — default artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A short version of the X Aspect."
   },
 
   {
-    title: "TheHumblingRiver = a Cover",
+    title: "The Humbling River Revisited",
     file:  "Media/TheHumblingRiver = a Cover.mp3",
-    img:   DEFAULT_IMG,
-    alt:   "TheHumblingRiver = a Cover — default artwork",
+    img:   "Media/HumblingRiver.jpeg",
+    alt:   "The Humbling River Revisited — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A Maynard creation with Pucifer that is mellow and western like those who live in Jerome AZ."
   },
 
   {
-    title: "Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ)",
+    title: "A Tool - No Quarter",
     file:  "Media/Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ).mp3",
-    img:   DEFAULT_IMG,
-    alt:   "Tool - No Quarter (FULL HD) (Remastered) (Cover ZZ) — default artwork",
+    img:   "Media/NoQuarter.jpeg",
+    alt:   "A Tool - No Quarter — KZAK artwork",
     genre: "Mellow Tunes",
-    
-    story: (typeof DEFAULT_STORY!=="undefined"?DEFAULT_STORY:"")
+    story: "A remix of the cover Tool did of a famous song from Led Zeppelin."
   }
 ,
   {
