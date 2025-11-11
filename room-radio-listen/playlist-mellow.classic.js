@@ -3,6 +3,16 @@ const PLAYLIST_MELLOW = [
 
 
 {
+  title: "Very Different Strings",
+  file:  "Media/Very Different Strings.mp3",
+  image: "Media/VeryDifferentStrings.jpeg",
+  alt:   "Very Different Strings - KZAK Cover Art",
+    genre: "Mellow Tunes",
+  story: `A recreation from the Album Permanent Waves by three guys from Toronto.   `
+},
+
+  
+{
   title: "Remembering My Hollow Years",
   file:  "Media/Remembering My Hollow Years .mp3",
   image: "Media/RememberingMyHollowYears.jpeg",
@@ -22,6 +32,18 @@ const PLAYLIST_MELLOW = [
   story: `An instrumental of one if the best songs from the album called The Astonishing.  `
 },
 
+
+{
+  title: "Natural Sciences",
+  file:  "Media/Natural Sciences.mp3",
+  image: "Media/NaturalSciences.jpeg",
+  alt:   "Natural Sciences - KZAK Cover Art",
+    genre: "Mellow Tunes",
+  story: `A remake of another great song from Permanent Waves done instrumentally.    `
+},
+
+
+  
 {
   title: "Anna Lee Re-demonstrated",
   file:  "Media/Anna Lee Re-demonstrated.mp3",
