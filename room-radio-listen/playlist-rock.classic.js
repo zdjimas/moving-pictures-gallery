@@ -1,6 +1,65 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
 
+
+{
+    title: "Natural Science Reflections",
+    file:  "Media/Natural Science Reflections.mp3",
+    img:   "Media/NaturalScienceReflections.jpeg",
+    alt:   "Natural Science Reflections - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "From the 1970s album Permanent Waves, a KZAK recreation from three guys from Toronto."
+  },
+    {
+    title: "Moonlight Acoustic,
+    file:  "Media/Moonlight Acoustic.mp3",
+    img:   "Media/MoonlightAcoustic.jpeg",
+    alt:   "Moonlight Acoustic - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A recreation of a well known song from Fear Inoculum."
+  },
+    {
+    title: "She Sells Sanctuary Plots",
+    file:  "Media/She Sells Sanctuary Plots.mp3",
+    img:   "Media/SheSellsSanctuaryPlots.jpeg",
+    alt:   "She Sells Sanctuary Plots - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A tune from the Cult, recreated as a KZAK exclusive for listeners."
+  },
+    {
+    title: "You Don't Need A Gun - New Wave Edition",
+    file:  "Media/You Don't Need A Gun - New-wave Edition.mp3",
+    img:   "Media/YouDontNeedAGunNewWave.jpeg",
+    alt:   "You Don't Need A Gun - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A recreation of a well loved melody from Billy Idol."
+  },
+    {
+    title: "An Invincible Cover",
+    file:  "Media/An Invincible Cover.mp3",
+    img:   "Media/AnInvincibleCover.jpeg",
+    alt:   "An Invincible Cover - Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A recreation of a well known song from Fear Inoculum."
+  },
+    {
+    title: "The Love Removal Machine from the Manor",
+    file:  "Media/The Love Removal Machine from the Manor.mp3",
+    img:   "Media/TheLoveRemovalMachine.jpeg",
+    alt:   "The Love Removal Machine from the Manor - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "Another recreation from the hit by the cure."
+  },
+    {
+    title: "Moonlight Instrumental",
+    file:  "Media/Moonlight Instrumental.mp3",
+    img:   "Media/AnInvincibleCover.jpeg",
+    alt:   "Moonlight Instrumental - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A mellow recreation from the stones the never stop rolling."
+  },
+    
+    
 {
     title: "An Invincible Cover",
     file:  "Media/An Invincible Cover.mp3",
