@@ -10,8 +10,21 @@ const PLAYLIST_ROCK = [
     genre: "Middle Ground Rock",
     story: "From the 1970s album Permanent Waves, a KZAK recreation from three guys from Toronto."
   },
+
+
+{
+    title: "Billys Flesh For Fantasy",
+    file:  "Media/Billys Flesh For Fantasy.mp3",
+    img:   "Media/BillysFleshForFantasy.jpeg",
+    alt:   "Billys Flesh For Fantasy- KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "An original hit from Billy Idol performed live in Nevada."
+  },
+
+
+    
     {
-    title: "Moonlight Acoustic,
+    title: "Moonlight Acoustic",
     file:  "Media/Moonlight Acoustic.mp3",
     img:   "Media/MoonlightAcoustic.jpeg",
     alt:   "Moonlight Acoustic - KZAK Cover artwork",
