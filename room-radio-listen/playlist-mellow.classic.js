@@ -1,7 +1,16 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_MELLOW = [
 
+{
+  title: "Acoustic Jacob's Ladder",
+  file:  "Media/Acoustic Jacob's Ladder .mp3",
+  image: "Media/AcousticJacobsLadder.jpeg",
+  alt:   "Acoustic Jacob's Ladder - KZAK Cover Art",
+    genre: "Mellow Tunes",
+  story: `Another acoustic rendering from side 1 of the Album Permanent Waves by three guys from Toronto.   `
+},
 
+  
 {
   title: "Very Different Strings",
   file:  "Media/Very Different Strings.mp3",
@@ -28,11 +37,20 @@ const PLAYLIST_MELLOW = [
   image: "Media/OurNewInstrumentalWorld.jpeg",
   alt:   "Our New Instrumental World - Cover Art",
     genre: "Mellow Tunes",
-    
   story: `An instrumental of one if the best songs from the album called The Astonishing.  `
 },
 
 
+{
+  title: "Climbing Jacobs Ladder",
+  file:  "Media/Climbing Jacobs Ladder.mp3",
+  image: "Media/ClimbingJacobsLadder.jpeg",
+  alt:   "Climbing Jacobs Ladder - KZAK Cover Art",
+    genre: "Mellow Tunes",
+  story: `An instrumental version of the great song from Permanent Waves Side 1.  `
+},
+
+  
 {
   title: "Natural Sciences",
   file:  "Media/Natural Sciences.mp3",
