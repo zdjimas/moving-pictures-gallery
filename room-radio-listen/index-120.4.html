@@ -300,7 +300,7 @@
     <div class="btn" id="muteBtn">🔇 Mute</div>
     <div class="btn" id="breaksBtn">📻 Station Breaks: On</div>
     <div class="btn" id="breakTestBtn">🧪 Force Break</div>
-    <div class="btn" id="shareTrackBtn">📤 Share Track</div>
+    <button id="shareTrackBtn" class="btn">📤 Share Track</button>
   </div>
 
   <div class="player">
@@ -372,9 +372,7 @@ function byGenre(name){
   if (name==='Mellow Tunes')       return MELLOW.slice();
   return [...ROCK, ...HEAVY, ...MELLOW];
 }
-window.byGenre = byGenre; // Expose for shareTrack function
 let LIST = byGenre('ALL');
-window.LIST = LIST; // Expose for share functions
 
 const audio = document.getElementById('audio');
 const breakAudio = document.getElementById('breakAudio');
@@ -394,7 +392,7 @@ const loopBtn    = document.getElementById('loopBtn');
 const muteBtn    = document.getElementById('muteBtn');
 const breaksBtn  = document.getElementById('breaksBtn');
 const breakTestBtn = document.getElementById('breakTestBtn');
-// const shareBtn   = document.getElementById('shareBtn'); // Removed - using only Share Track now
+// const shareBtn   = document.getElementById('shareBtn'); // Removed - only using Share Track now
 const shareTrackBtn = document.getElementById('shareTrackBtn');
 const toLobby = document.getElementById('toLobby');
 
@@ -495,7 +493,6 @@ async function firstReachable(urls){
 async function load(i, autoplay=false){
   try{ window.__kzakPersistIndex && window.__kzakPersistIndex(((i%LIST.length)+LIST.length)%LIST.length); }catch(e){}
   idx = (i + LIST.length) % LIST.length;
-  window.idx = idx; // Expose current index for share functions
   const tr = LIST[idx];
   titleEl.textContent = tr.title;
   genreNow.textContent = 'Genre: ' + (tr.genre || '—');
@@ -614,7 +611,6 @@ document.getElementById('genreBar').addEventListener('click', e => {
   [...e.currentTarget.children].forEach(b => b.classList.toggle('active', b===btn));
   const g = btn.dataset.genre;
   LIST = byGenre(g);
-  window.LIST = LIST; // Expose for share functions
   updateCounts();
   buildList();
   var __boot = (window.__kzakGetStartIndex? window.__kzakGetStartIndex(LIST.length):0);
@@ -627,7 +623,62 @@ document.getElementById('genreBar').addEventListener('click', e => {
   }
 });
 
-// shareStation function removed - using only Share Track now
+// Share Track - shares direct MP3 file URL
+async function shareTrack(){
+  try{
+    // Get the audio element to access the actual MP3 file
+    const audio = document.getElementById('audio');
+    if (!audio || !audio.src) {
+      alert('No track currently loaded');
+      return;
+    }
+    
+    // Get current track info
+    const tr = LIST[idx];
+    const trackTitle = tr ? tr.title : 'Track';
+    
+    // Get the direct MP3 URL from audio element
+    let mp3Url = audio.src;
+    
+    // Add version query parameters
+    try {
+      const urlObj = new URL(mp3Url);
+      urlObj.searchParams.append('v', `seq-${idx + 1}`);
+      urlObj.searchParams.append('v', 'Bullwinkle-v1-120-4');
+      mp3Url = urlObj.toString();
+    } catch(e) {
+      // If URL parsing fails, use original
+    }
+    
+    // Share with track title and direct MP3 link
+    const payload = {
+      title: trackTitle,
+      text: 'Listen to this track on KZAK',
+      url: mp3Url
+    };
+    
+    if (navigator.share) {
+      try {
+        await navigator.share(payload);
+        return;
+      } catch(e) {}
+    }
+    
+    // Fallback to clipboard
+    try {
+      await navigator.clipboard.writeText(mp3Url);
+      // Show toast notification
+      const toast = document.createElement('div');
+      toast.textContent = 'Track link copied!';
+      toast.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 14px;background:#111a2e;border:1px solid #22324d;border-radius:12px;z-index:9999;color:#e6e9ef;font-size:14px';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    } catch {
+      prompt('Copy this MP3 link:', mp3Url);
+    }
+  }catch(e){}
+}
+shareTrackBtn.addEventListener('click', shareTrack);
 
 let BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
@@ -1129,57 +1180,35 @@ function showExitAndReturn(){
       return 0;
     }
 
-    // shareStation function removed - using only Share Track now
+    async function shareStation(ev) {
+      if (ev) ev.preventDefault();
+      const url = `${location.origin}${baseDir}${fileName}`;
+      const payload = {
+        title: "KZAK • Frasier-Style Fun Radio",
+        text: "152-song playlist • No talking. Join the session:",
+        url
+      };
+      if (navigator.share) {
+        try { await navigator.share(payload); return; } catch (_) {}
+      }
+      try { await navigator.clipboard.writeText(url); toast("Station link copied!"); }
+      catch { alert(url); }
+    }
 
     async function shareTrack(ev) {
       if (ev) ev.preventDefault();
-      
-      // Get the audio element to access the actual MP3 URL
-      const audio = document.getElementById('audio');
-      if (!audio || !audio.src) {
-        toast("No track currently loaded");
-        return;
-      }
-      
-      // Get current track index and info
-      let k = detectCurrentTrackIndex();
-      if (typeof window.idx !== 'undefined') k = window.idx;
-      const tr = (window.LIST && window.LIST[k]) ? window.LIST[k] : null;
-      const trackTitle = tr ? tr.title : 'Track';
-      
-      // Get the direct MP3 URL from the audio element
-      let mp3Url = audio.src;
-      
-      // Add version query parameters to the MP3 URL
-      try {
-        const urlObj = new URL(mp3Url);
-        urlObj.searchParams.append('v', `seq-${k + 1}`);
-        urlObj.searchParams.append('v', 'Bullwinkle-v1-120-4');
-        mp3Url = urlObj.toString();
-      } catch (e) {
-        // If URL parsing fails, use the original
-      }
-      
-      // Share payload with track title and direct MP3 link
+      const idx = detectCurrentTrackIndex();
+      const url = `${location.origin}${baseDir}${fileName}?t=${idx}`;
       const payload = {
-        title: trackTitle,
-        text: 'Listen to this track on KZAK',
-        url: mp3Url  // Direct MP3 URL, not HTML page
+        title: "Now playing on KZAK",
+        text: "Listen to this exact track:",
+        url
       };
-      
       if (navigator.share) {
-        try { 
-          await navigator.share(payload); 
-          return; 
-        } catch (e) {}
+        try { await navigator.share(payload); return; } catch (_) {}
       }
-      
-      try { 
-        await navigator.clipboard.writeText(mp3Url); 
-        toast('Track link copied!'); 
-      } catch { 
-        prompt('Copy this MP3 link:', mp3Url); 
-      }
+      try { await navigator.clipboard.writeText(url); toast("Track link copied!"); }
+      catch { alert(url); }
     }
 
     function toast(msg) {
@@ -1192,10 +1221,12 @@ function showExitAndReturn(){
     }
 
     function bindShares() {
-      // Only bind Share Track button (Share Station button removed)
-      const btnTrack = document.querySelector("#shareTrackBtn, button[data-share='track'], div[data-share='track']")
-                        || Array.from(document.querySelectorAll("button, a, div.btn")).find(b => (b.textContent||"").trim() === "Share Track");
-      if (btnTrack) { btnTrack.onclick = shareTrack; btnTrack.addEventListener("click", shareTrack, {capture:true}); }
+      const btnStation = document.querySelector("#btnShareStation, button[data-share='station']")
+                        || Array.from(document.querySelectorAll("button, a")).find(b => (b.textContent||"").trim() === "Share");
+      const btnTrack   = document.querySelector("#btnShareTrack, button[data-share='track']")
+                        || Array.from(document.querySelectorAll("button, a")).find(b => (b.textContent||"").trim() === "Share Track");
+      if (btnStation) { btnStation.onclick = shareStation; btnStation.addEventListener("click", shareStation, {capture:true}); }
+      if (btnTrack)   { btnTrack.onclick = shareTrack;   btnTrack.addEventListener("click", shareTrack, {capture:true}); }
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindShares);
