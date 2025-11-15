@@ -1,6 +1,16 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
 
+{
+    title: "Abacab Revisited",
+    file:  "Media/Abacab Revisited.mp3",
+    img:   "Media/AbacabRevisited.jpeg",
+    alt:   "Abacab Revisited- KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "From the 1970s album Three Sides Live an opening song, a KZAK recreation by three guys from the UK."
+  },
+
+    
 
 {
     title: "Natural Science Reflections",
@@ -31,6 +41,17 @@ const PLAYLIST_ROCK = [
     genre: "Middle Ground Rock",
     story: "A recreation of a well known song from Fear Inoculum."
   },
+
+{
+    title: "A Burning Rope",
+    file:  "Media/A Burning Rope.mp3",
+    img:   "Media/ABurningRope.jpeg",
+    alt:   "A Burning Rope - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "From the 1970s album and then there were three..., a KZAK recreation from three guys from the UK."
+  },
+
+    
     {
     title: "She Sells Sanctuary Plots",
     file:  "Media/She Sells Sanctuary Plots.mp3",
@@ -47,6 +68,18 @@ const PLAYLIST_ROCK = [
     genre: "Middle Ground Rock",
     story: "A recreation of a well loved melody from Billy Idol."
   },
+
+
+ {
+    title: "A Medley In A Cage",
+    file:  "Media/A Medley In A Cage.mp3",
+    img:   "Media/AMedleyInACage.jpeg",
+    alt:   "A Medley In A Cage- Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A restructure mastery of a Medley from a band where the singer is the drummer."
+  },
+
+    
     {
     title: "An Invincible Cover",
     file:  "Media/An Invincible Cover.mp3",
@@ -56,6 +89,16 @@ const PLAYLIST_ROCK = [
     story: "A recreation of a well known song from Fear Inoculum."
   },
     {
+    title: "Recreating Firth Of Fifth",
+    file:  "Media/Recreating Firth Of Fifth.mp3",
+    img:   "Media/RecreatingFirthOfFifth.jpeg",
+    alt:   "Recreating Firth Of Fifth - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "Another recreation from the older group of Genesis, another progressive masterpiece."
+  },
+
+
+ {
     title: "The Love Removal Machine from the Manor",
     file:  "Media/The Love Removal Machine from the Manor.mp3",
     img:   "Media/TheLoveRemovalMachine.jpeg",
@@ -63,6 +106,9 @@ const PLAYLIST_ROCK = [
     genre: "Middle Ground Rock",
     story: "Another recreation from the hit by the cure."
   },
+
+
+    
     {
     title: "Moonlight Instrumental",
     file:  "Media/Moonlight Instrumental.mp3",
