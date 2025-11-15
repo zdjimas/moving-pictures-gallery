@@ -633,8 +633,8 @@ function shareStation(){
     return navigator.clipboard.writeText(link);
   }catch{}
 }
-shareBtn.addEventListener('click', shareStation);
-shareTrackBtn.addEventListener('click', () => shareStation());
+// Share button handlers moved to bindShares() function later in code (lines ~1179-1189)
+// to properly support both shareStation and shareTrack functions
 
 let BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
@@ -768,7 +768,7 @@ load(__boot, false);
       navigator.mediaSession.metadata = new MediaMetadata({
         title: tr.title || 'Untitled',
         artist: tr.artist || 'KZAK',
-        album: tr.genre || 'KZAK',
+        album: tr.story || tr.genre || 'KZAK',  // Show story if available, fallback to genre
         artwork: art
       });
       document.title = (tr.title || 'KZAK') + ' • KZAK';
