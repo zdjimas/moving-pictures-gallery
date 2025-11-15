@@ -2,6 +2,33 @@
 const PLAYLIST_ROCK = [
 
 {
+    title: "Dukes Travels and Ending",
+    file:  "Media/Dukes Travels and Ending.mp3",
+    img:   "Media/DukesTravelsAndEnding.jpeg",
+    alt:   "Dukes Travels and Ending - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A recreation of the first and last songs off the album Duke by the progressive rock genius of Genesis."
+  },
+    {
+    title: "We Need A Million",
+    file:  "Media/We Need A Million.mp3",
+    img:   "Media/WeNeedAMillion.jpeg",
+    alt:   "We Need A Million - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A recreation of a the opening of the melody they need a million, recreated exclusively for KZAK listeners."
+  },
+    {
+    title: "In A Heathaze",
+    file:  "Media/In A Heathaze.mp3",
+    img:   "Media/InAHeathhaze.jpeg",
+    alt:   "In A Heathaze - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A great recreation from the song found in Duke."
+  },
+    
+
+    
+{
     title: "Another Civil War",
     file:  "Media/Another Civil War.mp3",
     img:   "Media/AnotherCivilWar.jpeg",
