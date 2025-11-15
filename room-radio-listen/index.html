@@ -1357,8 +1357,23 @@ function showExitAndReturn(){
       try{ const p=video.play(); if(p&&p.catch) p.catch(()=>{});}catch{}
     }
     document.addEventListener('click', function(ev){
-      let el = ev.target, label=(el&&el.textContent||'').toLowerCase();
-      let hops=0; while(el && hops++<3 && (!label || !label.trim())){ el=el.parentElement; label=(el&&el.textContent||'').toLowerCase(); }
+      let el = ev.target;
+      
+      // Only proceed if clicking on or near a clickable element
+      let clickable = el;
+      let hops = 0;
+      while (clickable && hops++ < 3) {
+        if (clickable.tagName === 'BUTTON' || clickable.tagName === 'A' || clickable.getAttribute('role') === 'button') {
+          break;
+        }
+        clickable = clickable.parentElement;
+      }
+      
+      // If we didn't find a clickable element, ignore this click
+      if (!clickable || hops >= 3) return;
+      
+      // Now check the text content of the clickable element only
+      let label = (clickable.textContent || '').trim().toLowerCase();
       if (label && /\breturn\s+to\s+lobby\b/.test(label)){
         ev.preventDefault();
         pauseAll();
@@ -1557,8 +1572,23 @@ function showExitAndReturn(){
     }
 
     document.addEventListener('click', function(ev){
-      let el = ev.target, label=(el&&el.textContent||'').toLowerCase();
-      let hops=0; while(el && hops++<3 && (!label || !label.trim())){ el=el.parentElement; label=(el&&el.textContent||'').toLowerCase(); }
+      let el = ev.target;
+      
+      // Only proceed if clicking on or near a clickable element
+      let clickable = el;
+      let hops = 0;
+      while (clickable && hops++ < 3) {
+        if (clickable.tagName === 'BUTTON' || clickable.tagName === 'A' || clickable.getAttribute('role') === 'button') {
+          break;
+        }
+        clickable = clickable.parentElement;
+      }
+      
+      // If we didn't find a clickable element, ignore this click
+      if (!clickable || hops >= 3) return;
+      
+      // Now check the text content of the clickable element only
+      let label = (clickable.textContent || '').trim().toLowerCase();
       if (label && /\breturn\s+to\s+lobby\b/.test(label)){
         ev.preventDefault();
         pauseAll();
@@ -1663,9 +1693,22 @@ function showExitAndReturn(){
     // Intercept Return to Lobby clicks in the capture phase
     function intercept(ev){
       let el = ev.target;
-      let txt = (el && el.textContent || '').toLowerCase();
+      
+      // Only proceed if clicking on or near a clickable element (button, anchor, etc.)
+      let clickable = el;
       let hops = 0;
-      while (el && hops++ < 3 && (!txt || !txt.trim())) { el = el.parentElement; txt = (el && el.textContent || '').toLowerCase(); }
+      while (clickable && hops++ < 3) {
+        if (clickable.tagName === 'BUTTON' || clickable.tagName === 'A' || clickable.getAttribute('role') === 'button') {
+          break;
+        }
+        clickable = clickable.parentElement;
+      }
+      
+      // If we didn't find a clickable element, ignore this click
+      if (!clickable || hops >= 3) return;
+      
+      // Now check the text content of the clickable element only
+      let txt = (clickable.textContent || '').trim().toLowerCase();
       if (txt && /\breturn\s+to\s+lobby\b/.test(txt)){
         ev.preventDefault();
         ev.stopPropagation();
@@ -1751,7 +1794,7 @@ function showExitAndReturn(){
 (function(){
   try{
     const KEY = 'kzak:badgeVisible';
-    const VER = 'Bullwinkle-v1.120.4'; // visual text only (page logic remains 119)
+    const VER = 'Bullwinkle-v1.120.5'; // Fixed share button persistence + MP3 sharing + story field in CarPlay + background click bug
     function killOldBadges(){
       try{
         // Remove any existing build badges
