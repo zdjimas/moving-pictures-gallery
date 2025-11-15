@@ -300,7 +300,6 @@
     <div class="btn" id="muteBtn">🔇 Mute</div>
     <div class="btn" id="breaksBtn">📻 Station Breaks: On</div>
     <div class="btn" id="breakTestBtn">🧪 Force Break</div>
-    <button id="shareBtn" class="btn">🔗 Share</button>
     <button id="shareTrackBtn" class="btn">📤 Share Track</button>
   </div>
 
@@ -395,7 +394,7 @@ const loopBtn    = document.getElementById('loopBtn');
 const muteBtn    = document.getElementById('muteBtn');
 const breaksBtn  = document.getElementById('breaksBtn');
 const breakTestBtn = document.getElementById('breakTestBtn');
-const shareBtn   = document.getElementById('shareBtn');
+// const shareBtn   = document.getElementById('shareBtn'); // Removed - using only Share Track now
 const shareTrackBtn = document.getElementById('shareTrackBtn');
 const toLobby = document.getElementById('toLobby');
 
@@ -628,17 +627,7 @@ document.getElementById('genreBar').addEventListener('click', e => {
   }
 });
 
-function shareStation(){
-  try{
-    const u = new URL(location.href);
-    u.searchParams.set('t', idx);
-    const link = u.toString();
-    if (navigator.share) return navigator.share({title:'KZAK station', text:'Listen with me', url: link});
-    return navigator.clipboard.writeText(link);
-  }catch{}
-}
-// Share button handlers moved to bindShares() function later in code (lines ~1179-1189)
-// to properly support both shareStation and shareTrack functions
+// shareStation function removed - using only Share Track now
 
 let BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
@@ -1140,42 +1129,42 @@ function showExitAndReturn(){
       return 0;
     }
 
-    async function shareStation(ev) {
-      if (ev) ev.preventDefault();
-      const url = `${location.origin}${baseDir}${fileName}`;
-      const payload = {
-        title: "KZAK • Frasier-Style Fun Radio",
-        text: "152-song playlist • No talking. Join the session:",
-        url
-      };
-      if (navigator.share) {
-        try { await navigator.share(payload); return; } catch (_) {}
-      }
-      try { await navigator.clipboard.writeText(url); toast("Station link copied!"); }
-      catch { alert(url); }
-    }
+    // shareStation function removed - using only Share Track now
 
     async function shareTrack(ev) {
       if (ev) ev.preventDefault();
       
-      // Get current track index
+      // Get the audio element to access the actual MP3 URL
+      const audio = document.getElementById('audio');
+      if (!audio || !audio.src) {
+        toast("No track currently loaded");
+        return;
+      }
+      
+      // Get current track index and info
       let k = detectCurrentTrackIndex();
       if (typeof window.idx !== 'undefined') k = window.idx;
-      
-      // Build URL with track parameter
-      const u = new URL(location.href);
-      u.searchParams.set('t', k);
-      const link = u.toString();
-      
-      // Get track info
       const tr = (window.LIST && window.LIST[k]) ? window.LIST[k] : null;
       const trackTitle = tr ? tr.title : 'Track';
       
-      // Share payload with track title
+      // Get the direct MP3 URL from the audio element
+      let mp3Url = audio.src;
+      
+      // Add version query parameters to the MP3 URL
+      try {
+        const urlObj = new URL(mp3Url);
+        urlObj.searchParams.append('v', `seq-${k + 1}`);
+        urlObj.searchParams.append('v', 'Bullwinkle-v1-120-4');
+        mp3Url = urlObj.toString();
+      } catch (e) {
+        // If URL parsing fails, use the original
+      }
+      
+      // Share payload with track title and direct MP3 link
       const payload = {
         title: trackTitle,
-        text: 'Check this track on KZAK',
-        url: link
+        text: 'Listen to this track on KZAK',
+        url: mp3Url  // Direct MP3 URL, not HTML page
       };
       
       if (navigator.share) {
@@ -1186,10 +1175,10 @@ function showExitAndReturn(){
       }
       
       try { 
-        await navigator.clipboard.writeText(link); 
+        await navigator.clipboard.writeText(mp3Url); 
         toast('Track link copied!'); 
       } catch { 
-        prompt('Copy link:', link); 
+        prompt('Copy this MP3 link:', mp3Url); 
       }
     }
 
@@ -1203,12 +1192,10 @@ function showExitAndReturn(){
     }
 
     function bindShares() {
-      const btnStation = document.querySelector("#btnShareStation, button[data-share='station']")
-                        || Array.from(document.querySelectorAll("button, a")).find(b => (b.textContent||"").trim() === "Share");
-      const btnTrack   = document.querySelector("#btnShareTrack, button[data-share='track']")
+      // Only bind Share Track button (Share Station button removed)
+      const btnTrack = document.querySelector("#shareTrackBtn, button[data-share='track']")
                         || Array.from(document.querySelectorAll("button, a")).find(b => (b.textContent||"").trim() === "Share Track");
-      if (btnStation) { btnStation.onclick = shareStation; btnStation.addEventListener("click", shareStation, {capture:true}); }
-      if (btnTrack)   { btnTrack.onclick = shareTrack;   btnTrack.addEventListener("click", shareTrack, {capture:true}); }
+      if (btnTrack) { btnTrack.onclick = shareTrack; btnTrack.addEventListener("click", shareTrack, {capture:true}); }
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindShares);
