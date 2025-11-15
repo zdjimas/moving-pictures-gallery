@@ -1158,37 +1158,40 @@ function showExitAndReturn(){
     async function shareTrack(ev) {
       if (ev) ev.preventDefault();
       
-      // Get current track from the filtered list
-      let currentIdx = detectCurrentTrackIndex();
-      if (typeof window.idx !== 'undefined') currentIdx = window.idx;
-      
-      const currentTrack = window.LIST ? window.LIST[currentIdx] : null;
-      if (!currentTrack) {
-        toast("Unable to share track");
+      // Get the current audio element
+      const audio = document.getElementById('audio');
+      if (!audio || !audio.src) {
+        toast("No track currently loaded");
         return;
       }
       
-      // Find this track's index in the master ALL list
-      const masterList = window.byGenre ? window.byGenre('ALL') : [];
-      let masterIdx = masterList.findIndex(track => 
-        track.file === currentTrack.file || 
-        (track.title === currentTrack.title && track.artist === currentTrack.artist)
-      );
+      // Get current track info
+      let currentIdx = detectCurrentTrackIndex();
+      if (typeof window.idx !== 'undefined') currentIdx = window.idx;
+      const currentTrack = window.LIST ? window.LIST[currentIdx] : null;
       
-      // Fallback to current index if not found (shouldn't happen)
-      if (masterIdx === -1) masterIdx = currentIdx;
+      // Build the direct MP3 URL with version parameters
+      let trackUrl = audio.src;
       
-      const url = `${location.origin}${baseDir}${fileName}?t=${masterIdx}`;
+      // Add version query parameters
+      const urlObj = new URL(trackUrl);
+      urlObj.searchParams.append('v', `seq-${currentIdx + 1}`);
+      urlObj.searchParams.append('v', 'Bullwinkle-v1.120.3');
+      
+      const finalUrl = urlObj.toString();
+      
+      const trackTitle = currentTrack ? currentTrack.title : 'Track';
       const payload = {
-        title: `Now playing on KZAK: ${currentTrack.title || 'Track'}`,
-        text: `Listen to this track: ${currentTrack.title || 'Unknown'}`,
-        url
+        title: `🎵 ${trackTitle}`,
+        text: `Listen to this track on KZAK:`,
+        url: finalUrl
       };
+      
       if (navigator.share) {
         try { await navigator.share(payload); return; } catch (_) {}
       }
-      try { await navigator.clipboard.writeText(url); toast("Track link copied!"); }
-      catch { alert(url); }
+      try { await navigator.clipboard.writeText(finalUrl); toast(`Track link copied!`); }
+      catch { alert(finalUrl); }
     }
 
     function toast(msg) {
