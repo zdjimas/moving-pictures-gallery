@@ -1118,12 +1118,8 @@ function showExitAndReturn(){
     }, {capture:true});
     return a;
   }
-  ready(function(){
-    var sb = document.getElementById('shareBtn') || document.querySelector('[data-role="share"]');
-    swapButtonForAnchor(sb, stationUrl);
-    var tb = document.getElementById('shareTrackBtn') || document.querySelector('[data-role="share-track"]');
-    swapButtonForAnchor(tb, trackUrl);
-  });
+  // Share button swap code removed - using direct shareTrack() function instead
+  // The swapButtonForAnchor was removing the button and causing rendering issues
 })();
 </script>
 
