@@ -373,7 +373,9 @@ function byGenre(name){
   if (name==='Mellow Tunes')       return MELLOW.slice();
   return [...ROCK, ...HEAVY, ...MELLOW];
 }
+window.byGenre = byGenre; // Expose for shareTrack function
 let LIST = byGenre('ALL');
+window.LIST = LIST; // Expose for share functions
 
 const audio = document.getElementById('audio');
 const breakAudio = document.getElementById('breakAudio');
@@ -494,6 +496,7 @@ async function firstReachable(urls){
 async function load(i, autoplay=false){
   try{ window.__kzakPersistIndex && window.__kzakPersistIndex(((i%LIST.length)+LIST.length)%LIST.length); }catch(e){}
   idx = (i + LIST.length) % LIST.length;
+  window.idx = idx; // Expose current index for share functions
   const tr = LIST[idx];
   titleEl.textContent = tr.title;
   genreNow.textContent = 'Genre: ' + (tr.genre || '—');
@@ -612,6 +615,7 @@ document.getElementById('genreBar').addEventListener('click', e => {
   [...e.currentTarget.children].forEach(b => b.classList.toggle('active', b===btn));
   const g = btn.dataset.genre;
   LIST = byGenre(g);
+  window.LIST = LIST; // Expose for share functions
   updateCounts();
   buildList();
   var __boot = (window.__kzakGetStartIndex? window.__kzakGetStartIndex(LIST.length):0);
@@ -1153,11 +1157,31 @@ function showExitAndReturn(){
 
     async function shareTrack(ev) {
       if (ev) ev.preventDefault();
-      const idx = detectCurrentTrackIndex();
-      const url = `${location.origin}${baseDir}${fileName}?t=${idx}`;
+      
+      // Get current track from the filtered list
+      let currentIdx = detectCurrentTrackIndex();
+      if (typeof window.idx !== 'undefined') currentIdx = window.idx;
+      
+      const currentTrack = window.LIST ? window.LIST[currentIdx] : null;
+      if (!currentTrack) {
+        toast("Unable to share track");
+        return;
+      }
+      
+      // Find this track's index in the master ALL list
+      const masterList = window.byGenre ? window.byGenre('ALL') : [];
+      let masterIdx = masterList.findIndex(track => 
+        track.file === currentTrack.file || 
+        (track.title === currentTrack.title && track.artist === currentTrack.artist)
+      );
+      
+      // Fallback to current index if not found (shouldn't happen)
+      if (masterIdx === -1) masterIdx = currentIdx;
+      
+      const url = `${location.origin}${baseDir}${fileName}?t=${masterIdx}`;
       const payload = {
-        title: "Now playing on KZAK",
-        text: "Listen to this exact track:",
+        title: `Now playing on KZAK: ${currentTrack.title || 'Track'}`,
+        text: `Listen to this track: ${currentTrack.title || 'Unknown'}`,
         url
       };
       if (navigator.share) {
