@@ -300,8 +300,7 @@
     <div class="btn" id="muteBtn">🔇 Mute</div>
     <div class="btn" id="breaksBtn">📻 Station Breaks: On</div>
     <div class="btn" id="breakTestBtn">🧪 Force Break</div>
-    <button id="shareBtn" class="btn">🔗 Share</button>
-    <button id="shareTrackBtn" class="btn">📤 Share Track</button>
+    <button id="shareTrackBtn" class="btn">📤 Share</button>
   </div>
 
   <div class="player">
@@ -393,7 +392,7 @@ const loopBtn    = document.getElementById('loopBtn');
 const muteBtn    = document.getElementById('muteBtn');
 const breaksBtn  = document.getElementById('breaksBtn');
 const breakTestBtn = document.getElementById('breakTestBtn');
-const shareBtn   = document.getElementById('shareBtn');
+// const shareBtn removed - only using Share Track button now
 const shareTrackBtn = document.getElementById('shareTrackBtn');
 const toLobby = document.getElementById('toLobby');
 
@@ -624,17 +623,8 @@ document.getElementById('genreBar').addEventListener('click', e => {
   }
 });
 
-function shareStation(){
-  try{
-    const u = new URL(location.href);
-    u.searchParams.set('t', idx);
-    const link = u.toString();
-    if (navigator.share) return navigator.share({title:'KZAK station', text:'Listen with me', url: link});
-    return navigator.clipboard.writeText(link);
-  }catch{}
-}
-shareBtn.addEventListener('click', shareStation);
-shareTrackBtn.addEventListener('click', () => shareStation());
+// Share functionality is handled by swapButtonForAnchor in the later script section
+// which converts the button to an anchor with the trackUrl() as href
 
 let BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
@@ -768,7 +758,7 @@ load(__boot, false);
       navigator.mediaSession.metadata = new MediaMetadata({
         title: tr.title || 'Untitled',
         artist: tr.artist || 'KZAK',
-        album: tr.genre || 'KZAK',
+        album: tr.story || tr.genre || 'KZAK',  // Show story if available, fallback to genre
         artwork: art
       });
       document.title = (tr.title || 'KZAK') + ' • KZAK';
@@ -904,7 +894,7 @@ function showExitAndReturn(){
     const t = track || currentTrack() || {};
     const title  = t.title || 'KZAK';
     const artist = t.artist || 'KZAK • Frasier-Style Free Radio';
-    const album  = 'KZAK';
+    const album  = t.story || t.genre || 'KZAK';  // Show story if available, fallback to genre
     const artSrc = abs(t.image || t.img || 'default.jpg');
     try{
       ms.metadata = new MediaMetadata({
@@ -1040,12 +1030,14 @@ function showExitAndReturn(){
   }
   function trackUrl(){
     try{
-      const list = Array.isArray(window.LIST) ? window.LIST
-                 : (Array.isArray(window.PLAYLIST) ? window.PLAYLIST : []);
-      const k = (typeof window.idx === 'number') ? window.idx : -1;
-      const tr = (k>=0 && k<list.length) ? list[k] : null;
-      const src = tr && (tr.src || tr.file || tr.url || tr.path);
-      return src ? abs(src) : '';
+      // Get the actual playing audio element
+      const audioEl = document.getElementById('audio');
+      if (!audioEl || !audioEl.src) {
+        return '';
+      }
+      
+      // Return the current MP3 file URL
+      return audioEl.src;
     }catch{ return ''; }
   }
   function swapButtonForAnchor(btn, computeHref){
@@ -1075,8 +1067,7 @@ function showExitAndReturn(){
     return a;
   }
   ready(function(){
-    var sb = document.getElementById('shareBtn') || document.querySelector('[data-role="share"]');
-    swapButtonForAnchor(sb, stationUrl);
+    // Only swap Share Track button (Share Station button removed)
     var tb = document.getElementById('shareTrackBtn') || document.querySelector('[data-role="share-track"]');
     swapButtonForAnchor(tb, trackUrl);
   });
@@ -1153,17 +1144,32 @@ function showExitAndReturn(){
 
     async function shareTrack(ev) {
       if (ev) ev.preventDefault();
-      const idx = detectCurrentTrackIndex();
-      const url = `${location.origin}${baseDir}${fileName}?t=${idx}`;
+      
+      // Get the actual MP3 file URL from the audio element
+      const audioEl = document.getElementById('audio');
+      if (!audioEl || !audioEl.src) {
+        toast("No track playing!");
+        return;
+      }
+      
+      // Get track info
+      const list = Array.isArray(window.LIST) ? window.LIST : (Array.isArray(window.PLAYLIST) ? window.PLAYLIST : []);
+      const k = (typeof window.idx === 'number') ? window.idx : -1;
+      const track = (k >= 0 && k < list.length) ? list[k] : null;
+      const title = track && track.title ? track.title : "KZAK Track";
+      
+      // Use the actual MP3 file URL
+      const url = audioEl.src;
+      
       const payload = {
-        title: "Now playing on KZAK",
-        text: "Listen to this exact track:",
+        title: title,
+        text: "Listen to this track on KZAK:",
         url
       };
       if (navigator.share) {
         try { await navigator.share(payload); return; } catch (_) {}
       }
-      try { await navigator.clipboard.writeText(url); toast("Track link copied!"); }
+      try { await navigator.clipboard.writeText(url); toast("MP3 link copied!"); }
       catch { alert(url); }
     }
 
@@ -1222,25 +1228,25 @@ function showExitAndReturn(){
     el.textContent = 'Release: ' + tag + ' — ' + stamp + ' — ' + (location.pathname.split('/').pop() || 'index.html');
     document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(el); });
 
-    // Remove any UI that says "Share Track"
-    function removeShareTrackUI(){
-      var candidates = Array.from(document.querySelectorAll('button, a, [role="button"]'));
-      candidates.forEach(function(n){
-        if (/\bshare\s*track\b/i.test(n.textContent || '')) {
-          n.remove();
-        }
-      });
-      // In case menu-based, also nuke items in menus
-      document.querySelectorAll('*').forEach(function(n){
-        var t = (n.textContent || '').trim();
-        if (t && /\bshare\s*track\b/i.test(t) && (n.tagName==='LI' || n.getAttribute('role')==='menuitem')) {
-          n.remove();
-        }
-      });
-      // Neutralize any leftover handlers
-      window.shareTrack = function(){ return false; };
-    }
-    document.addEventListener('DOMContentLoaded', removeShareTrackUI);
+    // Share Track UI removal DISABLED - we want to keep the Share button working
+    // function removeShareTrackUI(){
+    //   var candidates = Array.from(document.querySelectorAll('button, a, [role="button"]'));
+    //   candidates.forEach(function(n){
+    //     if (/\bshare\s*track\b/i.test(n.textContent || '')) {
+    //       n.remove();
+    //     }
+    //   });
+    //   // In case menu-based, also nuke items in menus
+    //   document.querySelectorAll('*').forEach(function(n){
+    //     var t = (n.textContent || '').trim();
+    //     if (t && /\bshare\s*track\b/i.test(t) && (n.tagName==='LI' || n.getAttribute('role')==='menuitem')) {
+    //       n.remove();
+    //     }
+    //   });
+    //   // Neutralize any leftover handlers
+    //   window.shareTrack = function(){ return false; };
+    // }
+    // document.addEventListener('DOMContentLoaded', removeShareTrackUI);
 
     // Fix Return to Lobby: play FrasierExit.mp4 (in this folder) then navigate up a level
     function wireReturnToLobby(){
@@ -1745,7 +1751,7 @@ function showExitAndReturn(){
 (function(){
   try{
     const KEY = 'kzak:badgeVisible';
-    const VER = 'Bullwinkle-v1.120.3'; // visual text only (page logic remains 119)
+    const VER = 'Bullwinkle-v1.120.4'; // visual text only (page logic remains 119)
     function killOldBadges(){
       try{
         // Remove any existing build badges
