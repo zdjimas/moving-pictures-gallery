@@ -392,7 +392,7 @@ const loopBtn    = document.getElementById('loopBtn');
 const muteBtn    = document.getElementById('muteBtn');
 const breaksBtn  = document.getElementById('breaksBtn');
 const breakTestBtn = document.getElementById('breakTestBtn');
-// const shareBtn   = document.getElementById('shareBtn'); // Removed - only using Share Track now
+// const shareBtn removed - only using Share Track button now
 const shareTrackBtn = document.getElementById('shareTrackBtn');
 const toLobby = document.getElementById('toLobby');
 
@@ -623,62 +623,8 @@ document.getElementById('genreBar').addEventListener('click', e => {
   }
 });
 
-// Share Track - shares direct MP3 file URL
-async function shareTrack(){
-  try{
-    // Get the audio element to access the actual MP3 file
-    const audio = document.getElementById('audio');
-    if (!audio || !audio.src) {
-      alert('No track currently loaded');
-      return;
-    }
-    
-    // Get current track info
-    const tr = LIST[idx];
-    const trackTitle = tr ? tr.title : 'Track';
-    
-    // Get the direct MP3 URL from audio element
-    let mp3Url = audio.src;
-    
-    // Add version query parameters
-    try {
-      const urlObj = new URL(mp3Url);
-      urlObj.searchParams.append('v', `seq-${idx + 1}`);
-      urlObj.searchParams.append('v', 'Bullwinkle-v1-120-4');
-      mp3Url = urlObj.toString();
-    } catch(e) {
-      // If URL parsing fails, use original
-    }
-    
-    // Share with track title and direct MP3 link
-    const payload = {
-      title: trackTitle,
-      text: 'Listen to this track on KZAK',
-      url: mp3Url
-    };
-    
-    if (navigator.share) {
-      try {
-        await navigator.share(payload);
-        return;
-      } catch(e) {}
-    }
-    
-    // Fallback to clipboard
-    try {
-      await navigator.clipboard.writeText(mp3Url);
-      // Show toast notification
-      const toast = document.createElement('div');
-      toast.textContent = 'Track link copied!';
-      toast.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 14px;background:#111a2e;border:1px solid #22324d;border-radius:12px;z-index:9999;color:#e6e9ef;font-size:14px';
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 2000);
-    } catch {
-      prompt('Copy this MP3 link:', mp3Url);
-    }
-  }catch(e){}
-}
-shareTrackBtn.addEventListener('click', shareTrack);
+// Share functionality is handled by swapButtonForAnchor in the later script section
+// which converts the button to an anchor with the trackUrl() as href
 
 let BREAKS = [
   "MediaBreaks/AishaPatelYouarelisteningtoK-Z-A-K.wav",
@@ -1089,7 +1035,22 @@ function showExitAndReturn(){
       const k = (typeof window.idx === 'number') ? window.idx : -1;
       const tr = (k>=0 && k<list.length) ? list[k] : null;
       const src = tr && (tr.src || tr.file || tr.url || tr.path);
-      return src ? abs(src) : '';
+      if (!src) return '';
+      
+      // Get absolute URL
+      let url = abs(src);
+      
+      // Add version query parameters
+      try {
+        const urlObj = new URL(url);
+        urlObj.searchParams.append('v', `seq-${k + 1}`);
+        urlObj.searchParams.append('v', 'Bullwinkle-v1-120-4');
+        url = urlObj.toString();
+      } catch(e) {
+        // If URL parsing fails, use original
+      }
+      
+      return url;
     }catch{ return ''; }
   }
   function swapButtonForAnchor(btn, computeHref){
@@ -1118,8 +1079,11 @@ function showExitAndReturn(){
     }, {capture:true});
     return a;
   }
-  // Share button swap code removed - using direct shareTrack() function instead
-  // The swapButtonForAnchor was removing the button and causing rendering issues
+  ready(function(){
+    // Only swap Share Track button (Share Station button removed)
+    var tb = document.getElementById('shareTrackBtn') || document.querySelector('[data-role="share-track"]');
+    swapButtonForAnchor(tb, trackUrl);
+  });
 })();
 </script>
 
