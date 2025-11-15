@@ -2,6 +2,46 @@
 const PLAYLIST_ROCK = [
 
 {
+    title: "Another Civil War",
+    file:  "Media/Another Civil War.mp3",
+    img:   "Media/AnotherCivilWar.jpeg",
+    alt:   "Another Civil War - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A recreation of a song from those guys with the singer who carries a rose."
+  },
+{
+    title: "Having Patience",
+    file:  "Media/Having Patience.mp3",
+    img:   "Media/HavingPatience.jpeg",
+    alt:   "Having Patience - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "An Acoustic only version of what we all need to do better, have patience."
+  },
+{
+    title: "Estranged  by a Piano",
+    file:  "Media/Estranged  by a Piano.mp3",
+    img:   "Media/EstrangedByAPiano.jpeg",
+    alt:   "Abacab Revisited- KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A memorable melody recreation by KZAK from the band that plays with guns."
+  },
+{
+    title: "Coldest of November Rains",
+    file:  "Media/Coldest of November Rains.mp3",
+    img:   "Media/ColdestOfNovemberRains.jpeg",
+    alt:   "Coldest of November Rains - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "Another great song from the reble band from the 80s recreated for KZAK listeners."
+  },
+
+
+
+
+
+
+
+    
+{
     title: "Abacab Revisited",
     file:  "Media/Abacab Revisited.mp3",
     img:   "Media/AbacabRevisited.jpeg",
@@ -30,7 +70,6 @@ const PLAYLIST_ROCK = [
     genre: "Middle Ground Rock",
     story: "An original hit from Billy Idol performed live in Nevada."
   },
-
 
     
     {
