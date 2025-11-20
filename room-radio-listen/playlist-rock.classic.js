@@ -1,6 +1,42 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
 
+
+{
+    title: "Many Many Too Many ",
+    file:  "Media/Many Many Too Many .mp3",
+    img:   "Media/ManyManyTooMany.jpeg",
+    alt:   "Many Many Too Many - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A instrumental remix of a song from Genesis."
+  },
+    {
+    title: "The Garden Of Dead Roses",
+    file:  "Media/The Garden Of Dead Roses.mp3",
+    img:   "Media/TheGardenOfDeadRoses.jpeg",
+    alt:   "The Garden Of Dead Roses - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A great hidden remix from the man with the top hat."
+  },
+    {
+    title: "Alexander is the Greatest",
+    file:  "Media/Alexander is the Greatest.mp3",
+    img:   "Media/AlexanderIsTheGreatest.jpeg",
+    alt:   "Alexander is the Greatest - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK special of a great cover of an Iron Maiden song."
+  },
+    {
+    title: "Lost on Acacia Avenue",
+    file:  "Media/Lost on Acacia Avenue.mp3",
+    img:   "Media/DukesTravelsAndEnding.jpeg",
+    alt:   "Lost on Acacia Avenue - KZAK Cover artwork",
+    genre: "Middle Ground Rock",
+    story: "Another great instrumental of a song from Number of the Beast."
+  },
+
+
+    
 {
     title: "Dukes Travels and Ending",
     file:  "Media/Dukes Travels and Ending.mp3",
