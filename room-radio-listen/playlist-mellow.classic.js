@@ -1,6 +1,16 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_MELLOW = [
 
+
+  {
+  title: "Fear the Dark Acoustically",
+  file:  "Media/Fear the Dark Acoustically.mp3",
+  image: "Media/FearTheDarkAcoustically.jpeg",
+  alt:   "Fear the Dark Acoustically - KZAK Cover Art",
+    genre: "Mellow Tunes",
+  story: `An Iron Maiden Favorite done with mellow acoustic and calming vibes.  `
+},
+  
 {
   title: "Acoustic Jacob's Ladder",
   file:  "Media/Acoustic Jacob's Ladder .mp3",
