@@ -2,6 +2,32 @@
 const PLAYLIST_HEAVY = [
 
 {
+    title: "Dreamers and Deceivers",
+    file:  "Media/Dreamers and Deceivers.mp3",
+    img:   "Media/DreamersAndDeceivers.jpeg",
+    alt:   "Dreamers and Deceivers - KZAK artwork",
+    genre: "Heavy and Metal",
+    story: "An Instrumental Cover of a great early song from Judas Priest"
+  },
+    {
+    title: "Instrumental Fear of the Dark",
+    file:  "Media/Instrumental Fear of the Dark.mp3",
+    img:   "Media/InstrumentalFearOfTheDark.png",
+    alt:   "Instrumental Fear of the Dark - KZAK Cover artwork",
+    genre: "Heavy and Metal",
+    story: "A KZAK resurrection of a well song Iron Maiden song in Concert."
+  },
+    {
+    title: "Instrumental Sentinal",
+    file:  "Media/Instrumental Sentinal.mp3",
+    img:   "Media/InstrumentalSentinal.jpeg",
+    alt:   "Instrumental Sentinal - KZAK Cover artwork",
+    genre: "Heavy and Metal",
+    story: "A complex instrumental version of the Sentinal from Defenders of the Faith Album."
+  },
+    
+    
+{
     title: "Sanatorium",
     file:  "Media/Sanatorium.mp3",
     img:   "Media/Sanatorium.jpeg",
