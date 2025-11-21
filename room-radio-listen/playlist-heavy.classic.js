@@ -20,7 +20,7 @@ const PLAYLIST_HEAVY = [
     {
     title: "Instrumental Sentinal",
     file:  "Media/Instrumental Sentinal.mp3",
-    img:   "Media/InstrumentalSentinal.jpeg",
+    img:   "Media/InstrumentalSentinal.png",
     alt:   "Instrumental Sentinal - KZAK Cover artwork",
     genre: "Heavy and Metal",
     story: "A complex instrumental version of the Sentinal from Defenders of the Faith Album."
