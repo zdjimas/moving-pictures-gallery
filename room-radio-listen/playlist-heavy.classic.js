@@ -1,7 +1,18 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_HEAVY = [
 
-{
+
+    {
+    title: "PetrucciF-AI-ED (petrucified) Take 1",
+    file:  "Media/PetrucciF-AI-ed take 1.mp3",
+    img:   "Media/PetruucifAIedTake1.jpeg",
+    alt:   "Petrucified Take 1- KZAK artwork",
+    genre: "Heavy and Metal",
+    story: "An Instrumental Cover remix of an instrumental demonstration session by John Petrucci"
+  },
+     
+    
+    {
     title: "Dreamers and Deceivers",
     file:  "Media/Dreamers and Deceivers.mp3",
     img:   "Media/DreamersAndDeceivers.jpeg",
@@ -117,7 +128,14 @@ const PLAYLIST_HEAVY = [
     story: "A heavy original from bolony_togna, aka Bolotone, aka Resussitation,  find him on youtube as @bolony_togna895"
   },
 
-
+{
+    title: "PetrucciF-AI-ED (petrucified) Take 2",
+    file:  "Media/PetrucciF-AI-ed take 2.mp3",
+    img:   "Media/PetruucifAIedTake2.jpeg",
+    alt:   "Petrucified Take 2- KZAK artwork",
+    genre: "Heavy and Metal",
+    story: "An Instrumental Cover remix 2 of an instrumental demonstration session by John Petrucci"
+  },
  
 
 {
