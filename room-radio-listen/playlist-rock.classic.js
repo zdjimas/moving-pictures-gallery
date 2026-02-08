@@ -1,6 +1,15 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
 
+    {
+    title: "Petrucci Mellow-D (Melody)",
+    file:  "Media/Petrucci Mellow-D.mp3",
+    img:   "Media/PetrucciMellowD.jpeg",
+    alt:   "Petrucci Mellow-D - KZAK artwork",
+    genre: "Heavy and Metal",
+    story: "An Instrumental Original recording demonstration session by John Petrucci"
+  },
+     
 
 {
     title: "Many Many Too Many ",
