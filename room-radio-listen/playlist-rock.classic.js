@@ -1,12 +1,19 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
-
+{
+    title: "My Midlife Crisis",
+    file:  "Media/My Midlife Crisis.mp3",
+    img:   "Media/MyMidlifeCrisis.jpeg",
+    alt:   "My Midlife Crisis - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A remake of a great grungy song from Faith No More"
+  },
     {
     title: "Petrucci Mellow-D (Melody)",
     file:  "Media/Petrucci Mellow-D.mp3",
     img:   "Media/PetrucciMellowD.jpeg",
     alt:   "Petrucci Mellow-D - KZAK artwork",
-    genre: "Heavy and Metal",
+    genre: "Middle Ground Rock",
     story: "An Instrumental Original recording demonstration session by John Petrucci"
   },
      
