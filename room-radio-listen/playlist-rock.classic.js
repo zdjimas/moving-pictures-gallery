@@ -3,7 +3,7 @@ const PLAYLIST_ROCK = [
 {
     title: "My Midlife Crisis",
     file:  "Media/My Midlife Crisis.mp3",
-    img:   "Media/MyMidlifeCrisis.jpeg",
+    img:   "Media/MyMidlifeCrisis.jpg",
     alt:   "My Midlife Crisis - KZAK artwork",
     genre: "Middle Ground Rock",
     story: "A remake of a great grungy song from Faith No More"
