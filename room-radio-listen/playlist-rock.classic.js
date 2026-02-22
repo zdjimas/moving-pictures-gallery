@@ -4,14 +4,14 @@ const PLAYLIST_ROCK = [
     {
     title: "Walking On The Desert Moon",
     file:  "Media/Walking On The Desert Moon.mp3",
-    img:   "Media/WalkingOnTheDesert Moon.jpeg",
+    img:   "Media/WalkingOnTheDesertMoon.jpeg",
     alt:   "Walking On The Desert Moon - KZAK artwork",
     genre: "Middle Ground Rock",
     story: "A KZAK AI remake of a well known Police Song"
   },
     {
     title: "Jane Said What?",
-    file:  "Media/Jane Said What.mp3",
+    file:  "Media/Jane Said What_.mp3",
     img:   "Media/JaneSaidWhat.jpg",
     alt:   "Jane Said What? - KZAK artwork",
     genre: "Middle Ground Rock",
