@@ -1,7 +1,14 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_HEAVY = [
 
-
+{
+    title: "Synchronicity III - an AI Metal Remix",
+    file:  "Media/Synchronicity III - an AI Metal Remix.mp3",
+    img:   "Media/Synchronicity3.jpeg",
+    alt:   "Synchronicity III - an AI Metal Remix - KZAK artwork",
+    genre: "Heavy and Metal",
+    story: "A KZAK exclusive creative conversion remix of a cover of the well known Police Song "
+  },
     {
     title: "PetrucciF-AI-ED (petrucified) Take 1",
     file:  "Media/PetrucciF-AI-ed take 1.mp3",
