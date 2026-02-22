@@ -4,7 +4,7 @@ const PLAYLIST_HEAVY = [
 {
     title: "Synchronicity III - an AI Metal Remix",
     file:  "Media/Synchronicity III - an AI Metal Remix.mp3",
-    img:   "Media/Synchronicity3.jpeg",
+    img:   "Media/Synchronicity3.jpg",
     alt:   "Synchronicity III - an AI Metal Remix - KZAK artwork",
     genre: "Heavy and Metal",
     story: "A KZAK exclusive creative conversion remix of a cover of the well known Police Song "
@@ -138,7 +138,7 @@ const PLAYLIST_HEAVY = [
 {
     title: "PetrucciF-AI-ED (petrucified) Take 2",
     file:  "Media/PetrucciF-AI-ed take 2.mp3",
-    img:   "Media/PetruucifAIedTake2.jpeg",
+    img:   "Media/PetruucifAIedTake1.jpeg",
     alt:   "Petrucified Take 2- KZAK artwork",
     genre: "Heavy and Metal",
     story: "An Instrumental Cover remix 2 of an instrumental demonstration session by John Petrucci"
