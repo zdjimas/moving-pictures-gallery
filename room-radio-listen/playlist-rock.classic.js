@@ -1,6 +1,25 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
-{
+
+    {
+    title: "Walking On The Desert Moon",
+    file:  "Media/Walking On The Desert Moon.mp3",
+    img:   "Media/WalkingOnTheDesert Moon.jpeg",
+    alt:   "Walking On The Desert Moon - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK AI remake of a well known Police Song"
+  },
+    {
+    title: "Jane Said What?",
+    file:  "Media/Jane Said What.mp3",
+    img:   "Media/JaneSaidWhat.jpg",
+    alt:   "Jane Said What? - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A hip remake of a great hit from Jane's Addiction"
+  },
+    
+    
+    {
     title: "My Midlife Crisis",
     file:  "Media/My Midlife Crisis.mp3",
     img:   "Media/MyMidlifeCrisis.jpg",
