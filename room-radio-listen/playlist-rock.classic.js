@@ -1,6 +1,13 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
-
+{
+    title: "Your First Lesson In Synchronicity",
+    file:  "Media/Your First Lesson In Synchronicity.mp3",
+    img:   "Media/YourFirstLessonAtSynchronicity.jpeg",
+    alt:   "Your First Lesson In Synchronicity - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "An original KZAK AI remix of a well loved Police Song"
+  },
     {
     title: "Walking On The Desert Moon",
     file:  "Media/Walking On The Desert Moon.mp3",
@@ -70,7 +77,14 @@ const PLAYLIST_ROCK = [
     story: "Another great instrumental of a song from Number of the Beast."
   },
 
-
+{
+    title: "Techno Synchronicity",
+    file:  "Media/Techno Synchronicity.mp3",
+    img:   "Media/TechnoSynchronicity.jpeg",
+    alt:   "Techno Synchronicity - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK AI Techno Remake of this beloved Police Song"
+  },
     
 {
     title: "Dukes Travels and Ending",
