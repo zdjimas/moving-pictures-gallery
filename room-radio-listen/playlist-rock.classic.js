@@ -1,6 +1,15 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
 {
+    title: "A Quadrophenia Instrumental",
+    file:  "Media/A Quadrophenia Instrumental.mp3",
+    img:   "Media/AQuadropheniaInstrumental.jpeg",
+    alt:   "A Quadrophenia Instrumental - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "An original KZAK AI recreation of the creator's favorite Song and Album from The Who"
+  },
+    
+    {
     title: "Your First Lesson In Synchronicity",
     file:  "Media/Your First Lesson In Synchronicity.mp3",
     img:   "Media/YourFirstLessonAtSynchronicity.jpeg",
