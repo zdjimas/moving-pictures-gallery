@@ -2,7 +2,7 @@
 const PLAYLIST_ROCK = [
 
     {
-    title: "For My Brothers In Arms,
+    title: "For My Brothers In Arms",
     file:  "Media/For My Brothers In Arms.mp3",
     img:   "Media/ForMyBrothersInArms.jpeg",
     alt:   "For My Brothers In Arms - KZAK artwork",
