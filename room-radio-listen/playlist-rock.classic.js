@@ -1,6 +1,34 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
-{
+
+    {
+    title: "For My Brothers In Arms,
+    file:  "Media/For My Brothers In Arms.mp3",
+    img:   "Media/ForMyBrothersInArms.jpeg",
+    alt:   "For My Brothers In Arms - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "An original KZAK AI recreation of a well loved Dire Straits Song"
+  },
+    {
+    title: "Instrumental Werewolves in  London",
+    file:  "Media/Instrumental Werewolves in  London.mp3",
+    img:   "Media/InstrumentalWerewolvesInLondon.jpeg",
+    alt:   "Instrumental Werewolves in  London - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK AI recreation of a famous Warren Zevon Song"
+  },
+    
+    {
+    title: "Sultans are Swinging",
+    file:  "Media/Sultans are Swinging.mp3",
+    img:   "Media/SultansAreSwinging.jpeg",
+    alt:   "Sultans are Swinging - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK AI recreation of another song from Dire Straits"
+  },
+    
+    
+    {
     title: "A Quadrophenia Instrumental",
     file:  "Media/A Quadrophenia Instrumental.mp3",
     img:   "Media/AQuadropheniaInstrumental.jpeg",
