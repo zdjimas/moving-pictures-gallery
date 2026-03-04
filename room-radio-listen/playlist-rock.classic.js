@@ -39,10 +39,10 @@ const PLAYLIST_ROCK = [
   },
     
     {
-    title: "A  Zombie with Dragula",
-    file:  "Media/A  Zombie with Dragulay.mp3",
+    title: "A Zombie with Dragula",
+    file:  "Media/A Zombie with Dragula.mp3",
     img:   "Media/AZombieWithDragula.jpeg",
-    alt:   "A  Zombie with Dragula - KZAK artwork",
+    alt:   "A Zombie with Dragula - KZAK artwork",
     genre: "Middle Ground Rock",
     story: "An original KZAK cut of a song remixed for the Matrix"
   },
