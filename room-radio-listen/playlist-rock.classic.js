@@ -1,6 +1,51 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
 
+    
+    {
+    title: "Im A Bad Seed",
+    file:  "Media/Im A Bad Seed.mp3",
+    img:   "Media/ImABadSeed.jpeg",
+    alt:   "Im A Bad Seed - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A well loved Metallica recreation on KZAK"
+  },
+    {
+    title: "A Super Tramp at School",
+    file:  "Media/A Super Tramp at School.mp3",
+    img:   "Media/ASuperTrampAtSchool.jpeg",
+    alt:   "A Super Tramp at School - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK AI recreation a Supertramp Deep Track"
+  },
+    
+    {
+    title: "My Third Unforgiven Remix",
+    file:  "Media/My Third Unforgiven Remix.mp3",
+    img:   "Media/MyThirdUnforgivenRemix.jpeg",
+    alt:   "My Third Unforgiven Remix - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK recreation of a well loved Metallica Ballad"
+  },
+    
+    
+    {
+    title: "Love the One Within",
+    file:  "Media/Love the One Within.mp3",
+    img:   "Media/LoveTheOneWithin.jpeg",
+    alt:   "Love the One Within - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK AI creation of CSNY 70s classic"
+  },
+    
+    {
+    title: "A  Zombie with Dragula",
+    file:  "Media/A  Zombie with Dragulay.mp3",
+    img:   "Media/AZombieWithDragula.jpeg",
+    alt:   "A  Zombie with Dragula - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "An original KZAK cut of a song remixed for the Matrix"
+  },
     {
     title: "For My Brothers In Arms",
     file:  "Media/For My Brothers In Arms.mp3",
