@@ -1,6 +1,25 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
 
+    {
+    title: "Who’s Sparkling?",
+    file:  "Media/Who’s Sparkling.mp3",
+    img:   "Media/WhosSparkling.jpeg",
+    alt:   "Who’s Sparkling? - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A zdjimas original creation exclusively on KZAK."
+  },
+
+    {
+    title: "Who’s Sparks?",
+    file:  "Media/Who’s Sparks.mp3",
+    img:   "Media/WhosSparks.jpeg",
+    alt:   "Who’s Sparks? - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A terrific recreation of a song from the album Tommy."
+  },
+
+
     
     {
     title: "Im A Bad Seed",
@@ -768,7 +787,7 @@ const PLAYLIST_ROCK = [
     title: "My Suite Madam Bleu (Take 2)",
     file:  "Media/My Suite Madam Bleu take 2.mp3",
     img:   "Media/MySuiteMadamBleuTake2.jpeg",
-    alt:   "Cover art for Suite Madam Bleu — Take 2",
+    alt:   "Cover art for Suite Madam Bleu â Take 2",
     genre: "Middle Ground Rock",
     story: "This is a recreation from the early works of Styx which has not changed much in lyric meanings decades later in 2025."
   }
@@ -777,7 +796,7 @@ const PLAYLIST_ROCK = [
     title: "My Suite Madame Bleu (Take 3)",
     file:  "Media/My Suite Madame Bleu Take 3.mp3",
     img:   "Media/MySuiteMadamBleuTake2.jpeg",
-    alt:   "Cover art for Suite Madame Bleu — Take 3",
+    alt:   "Cover art for Suite Madame Bleu â Take 3",
     genre: "Middle Ground Rock",
     story: "This is a recreation from the early works of Styx which has not changed much in lyric meanings decades later in 2025."
   }
@@ -795,7 +814,7 @@ const PLAYLIST_ROCK = [
     title: "Sheep Cover Take 5",
     file:  "Media/01. Sheep (cover)5.mp3",
     img:   "Media/Sheep.jpeg",
-    alt:   "Sheep Cover Take 5 — Cover artwork",
+    alt:   "Sheep Cover Take 5 â Cover artwork",
     genre: "Middle Ground Rock",
     story: "Another remix from the Animals Album"
   }
@@ -804,7 +823,7 @@ const PLAYLIST_ROCK = [
     title: "Dogs X2 tripper",
     file:  "Media/03. Dogs (Cover) X2 tripper.mp3",
     img:   "Media/Dogs.jpeg",
-    alt:   "Dogs X2 tripper — Cover artwork",
+    alt:   "Dogs X2 tripper â Cover artwork",
     genre: "Middle Ground Rock",
     story: "A cover from the Animals Album, one of many exclusively on KZAK."
   }
@@ -813,7 +832,7 @@ const PLAYLIST_ROCK = [
     title: "Dogs (Remix)",
     file:  "Media/03. Dogs (Remix).mp3",
     img:   "Media/Dogs.jpeg",
-    alt:   "Dogs (Remix) — Cover artwork",
+    alt:   "Dogs (Remix) â Cover artwork",
     genre: "Middle Ground Rock",
     story: "A cover from the Animals Album, one of many exclusively on KZAK."
   }
@@ -822,7 +841,7 @@ const PLAYLIST_ROCK = [
     title: "Pigs (Three Different Ones) (Techno Tran)",
     file:  "Media/05. Pigs (Three Different Ones) (Techno Tran).mp3",
     img:   "Media/Pigs.jpeg",
-    alt:   "Pigs (Three Different Ones) (Techno Tran) — KZAK artwork",
+    alt:   "Pigs (Three Different Ones) (Techno Tran) â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "Another KZAK remix creation for Pigs on Animals Album from 70s."
   }
@@ -831,7 +850,7 @@ const PLAYLIST_ROCK = [
     title: "Another Brick In The Wall part 2",
     file:  "Media/06 Another Brick In The Wall p2 2 (Cover ZZ) v2.mp3",
     img:   "Media/AnotherBrickInTheWall.jpeg",
-    alt:   "Another Brick In The Wall — KZAK artwork",
+    alt:   "Another Brick In The Wall â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "One of the Floyd Boyz Best from the Wall."
   }
@@ -840,7 +859,7 @@ const PLAYLIST_ROCK = [
     title: "Goodbye Blue Skies",
     file:  "Media/07 Goodbye Blue Sky (cover zz) 2.mp3",
     img:   "Media/AnotherBrickInTheWall.jpeg",
-    alt:   "07 Goodbye Blue Sky (cover zz) 2 — default artwork",
+    alt:   "07 Goodbye Blue Sky (cover zz) 2 â default artwork",
     genre: "Middle Ground Rock",
     story: "One of the Floyd Boyz Best from the Wall."
   }
@@ -858,7 +877,7 @@ const PLAYLIST_ROCK = [
     title: "Shine On You Crazy Diamond (Parts 6-9) Take 1",
     file:  "Media/10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix).mp3",
     img:   "Media/ShineOnYouCrazyDiamond.jpeg",
-    alt:   "10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix) — default artwork",
+    alt:   "10. Shine On You Crazy Diamond (Parts 6-9) (cover) (Remix) â default artwork",
     genre: "Middle Ground Rock",
     story: "A great cover of from the album with a burning man shaking hands."
   }
@@ -867,7 +886,7 @@ const PLAYLIST_ROCK = [
     title: "Shine On You Crazy Diamond (Parts 6-9) Take 2",
     file:  "Media/10. Shine On You Crazy Diamond (Parts 6-9) (cover).mp3",
     img:   "Media/ShineOnYouCrazyDiamond.jpeg",
-    alt:   "10. Shine On You Crazy Diamond (Parts 6-9) (cover) — default artwork",
+    alt:   "10. Shine On You Crazy Diamond (Parts 6-9) (cover) â default artwork",
     genre: "Middle Ground Rock",
     story: "A great cover of from the album with a burning man shaking hands."
   }
@@ -876,7 +895,7 @@ const PLAYLIST_ROCK = [
     title: "Any Colour You Like (Live 1972)",
     file:  "Media/14 - Any Colour You Like (Live 1972).mp3",
     img:   "Media/AnyColourYouLike.jpeg",
-    alt:   "Any Colour You Like (Live 1972) — KZAK Cover artwork",
+    alt:   "Any Colour You Like (Live 1972) â KZAK Cover artwork",
     genre: "Middle Ground Rock",
     story: "A well known tune from the side of the moon not lighted."
   }
@@ -885,7 +904,7 @@ const PLAYLIST_ROCK = [
     title: "Midnight In Manhattan",
     file:  "Media/1984-06-18 - Piano Resolo - 107 Keyboard Solo (Remix).mp3",
     img:   "Media/MidnightInManhattan.jpeg",
-    alt:   "Midnight In Manhattan — default artwork",
+    alt:   "Midnight In Manhattan â default artwork",
     genre: "Middle Ground Rock",
     story: "A Jazzy feelgood remix creation from zdjimas that feels like a night in NYC."
   }
@@ -894,7 +913,7 @@ const PLAYLIST_ROCK = [
     title: "A Demo in Time of Dying",
     file:  "Media/A Demo in Time of Dying.mp3",
     img:   "Media/ADemoInTimeOfDying.jpeg",
-    alt:   "A Demo in Time of Dying — default artwork",
+    alt:   "A Demo in Time of Dying â default artwork",
     genre: "Middle Ground Rock",
     story: "A great melody from Jimmy Paige."
   }
@@ -903,7 +922,7 @@ const PLAYLIST_ROCK = [
     title: "A Demo of Poor Tom",
     file:  "Media/A Demo of Poor Tom.mp3",
     img:   "Media/ADemoInTimeOfDying.jpeg",
-    alt:   "A Demo of Poor Tom — default artwork",
+    alt:   "A Demo of Poor Tom â default artwork",
     genre: "Middle Ground Rock",
     story: "A great melody from Jimmy Paige."
   }
@@ -921,7 +940,7 @@ const PLAYLIST_ROCK = [
     title: "A Modern Lord of the Rings",
     file:  "Media/A Modern Lord of the Rings.mp3",
     img:   "Media/AModernLordOfRings.jpeg",
-    alt:   "A Modern Lord of the Rings — default artwork",
+    alt:   "A Modern Lord of the Rings â default artwork",
     genre: "Middle Ground Rock",
     story: "From early works of Styx, an AI recreation of this great song, not the movie."
   }
@@ -930,7 +949,7 @@ const PLAYLIST_ROCK = [
     title: "All that glitters is gold remains",
     file:  "Media/All that glitters is gold remains.mp3",
     img:   "Media/AllThatGlittersIsGold.jpeg",
-    alt:   "All that glitters is gold remains — default artwork",
+    alt:   "All that glitters is gold remains â default artwork",
     genre: "Middle Ground Rock",
     story: "Another masterpiece from Jimmy Paige and company."
   }
@@ -939,7 +958,7 @@ const PLAYLIST_ROCK = [
     title: "Another Dogs Cover - Really?",
     file:  "Media/Another Dogs Cover - Really?.mp3",
     img:   "Media/Dogs.jpeg",
-    alt:   "Another Dogs Cover - Really? — KZAK artwork",
+    alt:   "Another Dogs Cover - Really? â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "From the Animals Album, another one remixed."
   }
@@ -948,7 +967,7 @@ const PLAYLIST_ROCK = [
     title: "Ballad of a Bleak Future",
     file:  "Media/Ballad of a Bleak Future.mp3",
     img:   "Media/BalladOfABleakFuture.jpeg",
-    alt:   "Ballad of a Bleak Future — default artwork",
+    alt:   "Ballad of a Bleak Future â default artwork",
     genre: "Middle Ground Rock",
     story: "Created from the works of Bolotone with new twist."
   }
@@ -957,7 +976,7 @@ const PLAYLIST_ROCK = [
     title: "Barn Jam Friends",
     file:  "Media/Barn Jam Friends.mp3",
     img:   "Media/BarnJamFriends.jpeg",
-    alt:   "Barn Jam Friends — default artwork",
+    alt:   "Barn Jam Friends â default artwork",
     genre: "Middle Ground Rock",
     story: "From Led Zep early days turned into a jam session."
   }
@@ -966,7 +985,7 @@ const PLAYLIST_ROCK = [
     title: "Bend the clock - 70s Barn Jam Edition",
     file:  "Media/Bend the clock - 70s Barn Jam Edition.mp3",
     img:   "Media/BendTheClock.jpeg",
-    alt:   "Bend the clock - 70s Barn Jam Edition — KZAK artwork",
+    alt:   "Bend the clock - 70s Barn Jam Edition â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "A recreation of the Petrucci song in a barn jam setting."
   }
@@ -975,7 +994,7 @@ const PLAYLIST_ROCK = [
     title: "Beyond My Understanding",
     file:  "Media/Beyond My Understanding.mp3",
     img:   "Media/BeyondMyUnderstanding.jpeg",
-    alt:   "Beyond My Understanding — KZAK artwork",
+    alt:   "Beyond My Understanding â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "A creation by zdjimas also available on the suno channel."
   }
@@ -984,7 +1003,7 @@ const PLAYLIST_ROCK = [
     title: "Bolotone Desert Trip Edition",
     file:  "Media/Bolotone Desert Trip Edition.mp3",
     img:   "Media/Bolotone.jpeg",
-    alt:   "Bolotone Desert Trip Edition — default artwork",
+    alt:   "Bolotone Desert Trip Edition â default artwork",
     genre: "Middle Ground Rock",
     story: "A recreation from the works of Bolotone."
   }
@@ -993,7 +1012,7 @@ const PLAYLIST_ROCK = [
     title: "Bolotone's Intro",
     file:  "Media/Bolotone's Intro.mp3",
     img:   "Media/Bolotone.jpeg",
-    alt:   "Bolotone's Intro — default artwork",
+    alt:   "Bolotone's Intro â default artwork",
     genre: "Middle Ground Rock",
     story: "A recreation from the works of Bolotone."
   }
@@ -1002,7 +1021,7 @@ const PLAYLIST_ROCK = [
     title: "Breathe - an AI pink floyd cover",
     file:  "Media/Breathe - (an AI pink floyd cover).mp3",
     img:   "Media/Breath.jpeg",
-    alt:   "Breathe - an AI pink floyd cover— KZAK artwork",
+    alt:   "Breathe - an AI pink floyd coverâ KZAK artwork",
     genre: "Middle Ground Rock",
     story: "From the Darkest side of the mooon, a KZAK recreation."
   }
@@ -1011,7 +1030,7 @@ const PLAYLIST_ROCK = [
     title: "Covering my Eyes",
     file:  "Media/Covering my Eyes.mp3",
     img:   "Media/CoveringMyEyes.jpeg",
-    alt:   "Covering my Eyes — default artwork",
+    alt:   "Covering my Eyes â default artwork",
     genre: "Middle Ground Rock",
     story: "A recreation of early works from Dream Theater exlusively for KZAK."
   }
@@ -1020,7 +1039,7 @@ const PLAYLIST_ROCK = [
     title: "Dogs (Remix)",
     file:  "Media/Dogs (Remix).mp3",
     img:   "Media/Dogs.jpeg",
-    alt:   "Dogs (Remix) — default artwork",
+    alt:   "Dogs (Remix) â default artwork",
     genre: "Middle Ground Rock",
     story: "Another remix from the Animals Album."
   }
@@ -1029,7 +1048,7 @@ const PLAYLIST_ROCK = [
     title: "Dogs Cover 2 Funky",
     file:  "Media/Dogs Cover 2 Funky.mp3",
     img:   "Media/Dogs.jpeg",
-    alt:   "Dogs Cover 2 Funky — default artwork",
+    alt:   "Dogs Cover 2 Funky â default artwork",
     genre: "Middle Ground Rock",
     story: "Another remix from the Animals Album."
   }
@@ -1038,7 +1057,7 @@ const PLAYLIST_ROCK = [
     title: "Friends in FrontierLand",
     file:  "Media/Friends in FrontierLand.mp3",
     img:   "Media/FriendsInFrontierLand.jpeg",
-    alt:   "Friends in FrontierLand — KZAK artwork",
+    alt:   "Friends in FrontierLand â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "From the works of Led Zeppelin with a Disneyland twist."
   }
@@ -1047,7 +1066,7 @@ const PLAYLIST_ROCK = [
     title: "My Own Pieces of Eight",
     file:  "Media/My Own Pieces of Eight.mp3",
     img:   "Media/MyOwnPiecesOfEight.jpeg",
-    alt:   "My Own Pieces of Eight — KZAK Cover artwork",
+    alt:   "My Own Pieces of Eight â KZAK Cover artwork",
     genre: "Middle Ground Rock",
     story: "Another remix recreation of a song matching the album name."
   }
@@ -1056,7 +1075,7 @@ const PLAYLIST_ROCK = [
     title: "New Beginnings",
     file:  "Media/New Beginnings.mp3",
     img:   "Media/NewBeginnings.jpeg",
-    alt:   "New Beginnings — default artwork",
+    alt:   "New Beginnings â default artwork",
     genre: "Middle Ground Rock",
     story: "A great recreation instrumental from one of the melodies available on the album the Astonishing."
   }
@@ -1065,7 +1084,7 @@ const PLAYLIST_ROCK = [
     title: "Orchestra does Wings For Marie",
     file:  "Media/Orchestra for Wings For Marie (Cover) take 7.mp3",
     img:   "Media/OrchestraWingsForMarie.jpeg",
-    alt:   "Orchestra does Wings For Marie — KZAK artwork",
+    alt:   "Orchestra does Wings For Marie â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "An orchestra working with the song Wings for Marie from Tool, a KZAK exclusive."
   }
@@ -1074,7 +1093,7 @@ const PLAYLIST_ROCK = [
     title: "Rain Song Replayed",
     file:  "Media/Rain Song Replayed.mp3",
     img:   "Media/RainSongReplayed.jpeg",
-    alt:   "Rain Song Replayed — KZAK artwork",
+    alt:   "Rain Song Replayed â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "A Led Zeppilin Favorite instrumental version for calm meditation and thought."
   }
@@ -1083,7 +1102,7 @@ const PLAYLIST_ROCK = [
     title: "Running from Waiting Worms",
     file:  "Media/Running from Waiting Worms.mp3",
     img:   "Media/RunningFromWaitingWorms.jpeg",
-    alt:   "Running from Waiting Worms — KZAK artwork",
+    alt:   "Running from Waiting Worms â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "A ballad mixing Run Like Hell and Waiting for the Worms from the Wall, Another KZAK Exclusive, enjoy. "
   }
@@ -1101,7 +1120,7 @@ const PLAYLIST_ROCK = [
     title: "Shine On You Crazy Diamond - Lap steel guitar Edition",
     file:  "Media/Shine On You Crazy Diamond - Lap steel guitar Edition (Cover Z2Z)).mp3",
     img:   "Media/ShineOnCrazyDiamond.jpeg",
-    alt:   "Shine On You Crazy Diamond - Lap steel guitar Edition — KZAK artwork",
+    alt:   "Shine On You Crazy Diamond - Lap steel guitar Edition â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "Another From Floyd with screaming steel slide lap guitar focus."
   }
@@ -1110,7 +1129,7 @@ const PLAYLIST_ROCK = [
     title: "Surrounded by Friends",
     file:  "Media/Surrounded by Friends.mp3",
     img:   "Media/SurroundedByFriends.jpeg",
-    alt:   "Surrounded by Friends — KZAK artwork",
+    alt:   "Surrounded by Friends â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "From Dream Theater, the solo from the live version recreated for cool vibes. See if you hear Mother in here."
   }
@@ -1119,7 +1138,7 @@ const PLAYLIST_ROCK = [
     title: "TechnoTrance of The Pot",
     file:  "Media/TechnoTrance The Pot V1.mp3",
     img:   "Media/TechnoTrancePot.jpeg",
-    alt:   "TechnoTrance Of The Pot — default artwork",
+    alt:   "TechnoTrance Of The Pot â default artwork",
     genre: "Middle Ground Rock",
     story: "A cool techno dance version of the Pot from Tool, betcha didnt see that comming.."
   }
@@ -1128,7 +1147,7 @@ const PLAYLIST_ROCK = [
     title: "TechnoTrance of The Pot V2",
     file:  "Media/TechnoTrance The Pot V2.mp3",
     img:   "Media/TechnoTrancePot.jpeg",
-    alt:   "TechnoTrance Of The Pot V2 — KZAK artwork",
+    alt:   "TechnoTrance Of The Pot V2 â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "A second cool techno dance version of the Pot from Tool, betcha still didnt see that comming.."
   }
@@ -1137,7 +1156,7 @@ const PLAYLIST_ROCK = [
     title: "The Modern Count of Tuscany",
     file:  "Media/The Modern Count of Tuscany (Remastered).mp3",
     img:   "Media/TheModernCountOfTuscany.jpeg",
-    alt:   "The Modern Count of Tuscany  — KZAK artwork",
+    alt:   "The Modern Count of Tuscany  â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "The middle of the song from Dream Theater, recreated with a modern twist, even techno."
   }
@@ -1146,7 +1165,7 @@ const PLAYLIST_ROCK = [
     title: "The Canelo-Crawford Event Round 1",
     file:  "Media/The Canelo-Crawford Event Round 1.mp3",
     img:   "Media/TheCanelo-CrawfordEvent.jpeg",
-    alt:   "The Canelo-Crawford Event Round 1 — KZAK artwork",
+    alt:   "The Canelo-Crawford Event Round 1 â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "The first recreation of a between event show featuring Danny Carey and Adam Jones."
   }
@@ -1155,7 +1174,7 @@ const PLAYLIST_ROCK = [
     title: "The Canelo-Crawford Event - Final Round",
     file:  "Media/The Canelo-Crawford Event.mp3",
     img:   "Media/TheCanelo-CrawfordEvent.jpeg",
-    alt:   "The Canelo-Crawford Event — default artwork",
+    alt:   "The Canelo-Crawford Event â default artwork",
     genre: "Middle Ground Rock",
     story: "The final recreation of a between event show featuring Danny Carey and Adam Jones."
   }
@@ -1164,7 +1183,7 @@ const PLAYLIST_ROCK = [
     title: "The Ones Who Help to Set the Sun",
     file:  "Media/The Ones Who Help to Set the Sun (Cover ZZ 4 Demo) (Remix).mp3",
     img:   "Media/TheOnesWhoHelpSetTheSun.jpeg",
-    alt:   "The Ones Who Help to Set the Sun — KZAK artwork",
+    alt:   "The Ones Who Help to Set the Sun â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "From early early Dream Theater, a recreation of a ballad not so well known but just a great as other works."
   }
@@ -1173,7 +1192,7 @@ const PLAYLIST_ROCK = [
     title: "The Recovering Barstool Warrior",
     file:  "Media/The Recovering Barstool Warrior.mp3",
     img:   "Media/TheRecoveringBarstoolWarrior.jpeg",
-    alt:   "The Recovering Barstool Warrior — KZAK artwork",
+    alt:   "The Recovering Barstool Warrior â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "From Distance Over Time Album, an instrumental remix of an amazing melody by these master musicians."
   }
@@ -1182,7 +1201,7 @@ const PLAYLIST_ROCK = [
     title: "The Strangest of Days",
     file:  "Media/The Strangest of Days.mp3",
     img:   "Media/TheStrangestOfDays.jpeg",
-    alt:   "The Strangest of Days — KZAK artwork",
+    alt:   "The Strangest of Days â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "We cant forget the pioneers of progressive rock, RIP Jim Morrison."
   }
@@ -1191,7 +1210,7 @@ const PLAYLIST_ROCK = [
     title: "Trippin like Hell",
     file:  "Media/Trippin like Hell.mp3",
     img:   "Media/TrippinLikeHell.jpeg",
-    alt:   "Trippin like Hell — KZAK artwork",
+    alt:   "Trippin like Hell â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "What Run Like Hell may sound like in a college dorm in 1983 if you catch the drift.."
   }
@@ -1200,7 +1219,7 @@ const PLAYLIST_ROCK = [
     title: "When Pigs and Sheep Mate",
     file:  "Media/When Pigs and Sheep Mate IV..mp3",
     img:   "Media/WhenPigsAndSheepMate.jpeg",
-    alt:   "When Pigs and Sheep Mate IV. — default artwork",
+    alt:   "When Pigs and Sheep Mate IV. â default artwork",
     genre: "Middle Ground Rock",
     story: "From the Animals Album but imagine what mixing Pigs and Sheep may sound like."
   }
@@ -1209,7 +1228,7 @@ const PLAYLIST_ROCK = [
     title: "Wings For Marie Techno",
     file:  "Media/Wings For Marie (Part 1) (Techno Trance Remix) v2.mp3",
     img:   "Media/WingsForMarieTechno.jpeg",
-    alt:   "Wings For Marie Techno — KZAK artwork",
+    alt:   "Wings For Marie Techno â KZAK artwork",
     genre: "Middle Ground Rock",
     story: "From 10000 days, taking it and converting it into a techno beat, pretty cool."
   }
