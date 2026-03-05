@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Who’s Sparks?",
+    file:  "Media/Who’s Sparks.mp3",
+    img:   "Media/WhosSparks.jpeg",
+    alt:   "Who’s Sparks? - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK exclusive of a great song from the Album Tommy."
+  },
+
+
+    {
     title: "Who’s Sparkling?",
     file:  "Media/Who’s Sparkling.mp3",
     img:   "Media/WhosSparkling.jpeg",
