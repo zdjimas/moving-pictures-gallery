@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KZAK Radio — Studio Upload Console</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --amber: #f5a623;
+    --amber-dim: #c07d10;
+    --amber-glow: rgba(245,166,35,0.18);
+    --red: #e84040;
+    --green: #39d98a;
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #181818;
+    --border: #2a2a2a;
+    --border-lit: #3d3d3d;
+    --text: #d4c9b0;
+    --text-dim: #7a7060;
+    --font-display: 'Orbitron', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-body: 'Barlow', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(245,166,35,0.07) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px);
+  }
+
+  /* ── HEADER ── */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    background: linear-gradient(180deg, #0f0f0f 0%, var(--bg) 100%);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    height: 72px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .logo-bug {
+    width: 44px; height: 44px;
+    background: var(--amber);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 13px;
+    color: #000;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(245,166,35,0.4);
+  }
+  .header-title {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+    text-transform: uppercase;
+  }
+  .header-sub {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+  .on-air {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+  }
+  .on-air-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+
+  /* ── MAIN LAYOUT ── */
+  .main { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* ── SECTION BLOCKS ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  .panel-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .panel-num {
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #000;
+    background: var(--amber);
+    width: 20px; height: 20px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+  .panel-body { padding: 1.25rem; }
+
+  /* ── FORM CONTROLS ── */
+  label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+  }
+  input[type="text"], input[type="password"], select, textarea {
+    width: 100%;
+    background: #0d0d0d;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--amber-dim);
+    box-shadow: 0 0 0 3px var(--amber-glow);
+  }
+  textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23f5a623' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2rem;
+    cursor: pointer;
+  }
+  select option { background: #1a1a1a; }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .field-row.trio { grid-template-columns: 1fr 1fr 1fr; }
+  .field { margin-bottom: 1rem; }
+  .field:last-child { margin-bottom: 0; }
+
+  /* ── CONNECT ROW ── */
+  .connect-row { display: flex; gap: 0.75rem; align-items: flex-end; }
+  .connect-row .field { flex: 1; margin: 0; }
+  .status-chip {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .status-chip.ok { border-color: var(--green); color: var(--green); }
+  .status-chip.err { border-color: var(--red); color: var(--red); }
+  .status-chip-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 0.65rem 1.25rem;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-amber {
+    background: var(--amber);
+    color: #000;
+    box-shadow: 0 0 16px rgba(245,166,35,0.3);
+  }
+  .btn-amber:hover { background: #ffc04a; box-shadow: 0 0 24px rgba(245,166,35,0.5); }
+  .btn-amber:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border-lit);
+    color: var(--text-dim);
+  }
+  .btn-ghost:hover { border-color: var(--amber-dim); color: var(--amber); }
+  .btn-danger {
+    background: transparent;
+    border: 1px solid #3d1a1a;
+    color: #c44;
+    font-size: 0.6rem;
+    padding: 0.4rem 0.7rem;
+  }
+  .btn-danger:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── FILE DROP ZONE ── */
+  .drop-zone {
+    border: 1.5px dashed var(--border-lit);
+    border-radius: 8px;
+    padding: 1.1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    background: #0d0d0d;
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--amber-dim);
+    background: rgba(245,166,35,0.04);
+  }
+  .drop-zone input[type="file"] {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .drop-zone-icon { font-size: 1.4rem; margin-bottom: 0.3rem; }
+  .drop-zone-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+  .drop-zone-file {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--amber);
+    margin-top: 0.3rem;
+    word-break: break-all;
+  }
+  .drop-zone.has-file { border-color: var(--amber-dim); }
+  .drop-zone.has-file .drop-zone-icon { display: none; }
+
+  /* ── SONG CARD ── */
+  .song-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .song-card:hover { border-color: var(--border-lit); }
+  .song-card-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.7rem 1rem;
+    background: #131313;
+    border-bottom: 1px solid var(--border);
+  }
+  .song-num {
+    font-family: var(--font-display);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 0.15em;
+  }
+  .song-card-body { padding: 1rem; }
+
+  /* ── JS PREVIEW ── */
+  .js-preview {
+    background: #080808;
+    border: 1px solid #1e1e1e;
+    border-radius: 6px;
+    padding: 0.9rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    line-height: 1.7;
+    color: #888;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin-top: 1rem;
+  }
+  .js-preview .kw { color: #569cd6; }
+  .js-preview .str { color: #ce9178; }
+  .js-preview .key { color: #9cdcfe; }
+
+  /* ── PROGRESS ── */
+  .progress-block { display: none; }
+  .progress-block.active { display: block; }
+  .progress-step {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+  .progress-step:last-child { border-bottom: none; }
+  .step-icon { width: 18px; text-align: center; font-size: 0.8rem; flex-shrink: 0; }
+  .step-icon.spin { animation: spin 1s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .step-text { flex: 1; }
+  .step-size { color: var(--text-dim); font-size: 0.65rem; }
+  .step-ok { color: var(--green); }
+  .step-err { color: var(--red); }
+  .step-pending { color: #444; }
+
+  .progress-bar-wrap {
+    background: #111;
+    border-radius: 4px;
+    height: 4px;
+    margin-top: 1rem;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.4s ease;
+    box-shadow: 0 0 8px var(--amber);
+  }
+
+  .result-banner {
+    display: none;
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.6;
+  }
+  .result-banner.success {
+    display: block;
+    background: rgba(57,217,138,0.07);
+    border: 1px solid rgba(57,217,138,0.3);
+    color: var(--green);
+  }
+  .result-banner.error {
+    display: block;
+    background: rgba(232,64,64,0.07);
+    border: 1px solid rgba(232,64,64,0.3);
+    color: var(--red);
+  }
+
+  /* ── ADD SONG BTN ROW ── */
+  .add-row { display: flex; justify-content: center; margin-top: 0.5rem; }
+
+  /* ── WARNINGS ── */
+  .hint {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    margin-top: 0.4rem;
+    line-height: 1.5;
+  }
+  .hint a { color: var(--amber-dim); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.25rem 0;
+  }
+
+  /* ── COMMIT BUTTON ── */
+  .commit-section {
+    display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .btn-commit {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: var(--amber);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 2.5rem;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(245,166,35,0.35), 0 4px 16px rgba(0,0,0,0.5);
+    transition: all 0.2s;
+  }
+  .btn-commit:hover { background: #ffc04a; box-shadow: 0 0 50px rgba(245,166,35,0.55); transform: translateY(-1px); }
+  .btn-commit:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
+  .commit-caption {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 640px) {
+    .field-row { grid-template-columns: 1fr; }
+    .field-row.trio { grid-template-columns: 1fr; }
+    .connect-row { flex-direction: column; align-items: stretch; }
+    .header-sub { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <div class="logo-bug">KZAK</div>
+  <div>
+    <div class="header-title">Studio Upload Console</div>
+    <div class="header-sub">moving-pictures-gallery · room-radio-listen · main</div>
+  </div>
+  <div class="on-air">
+    <div class="on-air-dot"></div>
+    <span>LIVE</span>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- ── PANEL 1: AUTH ── -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-num">1</div>
+      <div class="panel-title">GitHub Authentication</div>
+      <div id="authStatus" class="status-chip" style="margin-left:auto;">
+        <div class="status-chip-dot"></div> NOT CONNECTED
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="connect-row">
+        <div class="field">
+          <label>Personal Access Token (PAT)</label>
+          <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+        </div>
+        <button class="btn btn-amber" onclick="connectGitHub()">Connect</button>
+      </div>
+      <p class="hint" style="margin-top:0.6rem;">
+        Need a token? Go to <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a> → 
+        set expiration → check <strong style="color:var(--text);">repo</strong> scope → Generate → paste above.<br>
+        Your token is never stored — it lives in this browser tab only.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── PANEL 2: PLAYLIST ── -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-num">2</div>
+      <div class="panel-title">Select Playlist / Genre</div>
+    </div>
+    <div class="panel-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Genre Playlist</label>
+          <select id="genreSelect" onchange="onGenreChange()">
+            <option value="rock">🎸  Rock Classic  →  playlist-rock.classic.js</option>
+            <option value="heavy">🔥  Heavy  →  playlist-heavy.classic.js</option>
+            <option value="mellow">🌊  Mellow  →  playlist-mellow.classic.js</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Genre Label (used in JS block)</label>
+          <input type="text" id="genreLabel" value="Middle Ground Rock">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL 3: SONGS ── -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-num">3</div>
+      <div class="panel-title">Song Entries — up to 3 tracks</div>
+    </div>
+    <div class="panel-body">
+      <div id="songCards"></div>
+      <div class="add-row">
+        <button class="btn btn-ghost" onclick="addSongCard()" id="addBtn">＋ Add Another Song</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL 4: COMMIT ── -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-num">4</div>
+      <div class="panel-title">Upload &amp; Commit to GitHub</div>
+    </div>
+    <div class="panel-body">
+
+      <div class="progress-block" id="progressBlock">
+        <div id="progressSteps"></div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+      </div>
+
+      <div class="result-banner" id="resultBanner"></div>
+
+      <div class="commit-section">
+        <button class="btn-commit" id="commitBtn" onclick="runCommit()" disabled>
+          ⬆ Upload All &amp; Commit
+        </button>
+        <div class="commit-caption" id="commitCaption">Connect GitHub and add at least one song to begin</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════════════════
+const OWNER  = 'zdjimas';
+const REPO   = 'moving-pictures-gallery';
+const BRANCH = 'main';
+const MEDIA_PATH = 'room-radio-listen/Media';
+
+const PLAYLIST_MAP = {
+  rock:  { file: 'room-radio-listen/playlist-rock.classic.js',   varName: 'PLAYLIST_ROCK',   defaultGenre: 'Middle Ground Rock' },
+  heavy: { file: 'room-radio-listen/playlist-heavy.classic.js',  varName: 'PLAYLIST_HEAVY',  defaultGenre: 'Heavy Rock' },
+  mellow:{ file: 'room-radio-listen/playlist-mellow.classic.js', varName: 'PLAYLIST_MELLOW', defaultGenre: 'Mellow Classic' },
+};
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let pat = '';
+let githubUser = '';
+let songCards = [];
+let cardCounter = 0;
+
+// ═══════════════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════════════
+async function connectGitHub() {
+  const tokenInput = document.getElementById('patInput');
+  const token = tokenInput.value.trim();
+  if (!token) { alert('Please enter your GitHub Personal Access Token.'); return; }
+
+  const status = document.getElementById('authStatus');
+  status.className = 'status-chip';
+  status.innerHTML = '<div class="status-chip-dot"></div> CHECKING...';
+
+  try {
+    const res = await fetch('https://api.github.com/user', {
+      headers: { Authorization: `Bearer ${token}`, 'X-GitHub-Api-Version': '2022-11-28' }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    pat = token;
+    githubUser = data.login;
+    status.className = 'status-chip ok';
+    status.innerHTML = `<div class="status-chip-dot"></div> ${githubUser.toUpperCase()}`;
+    checkCommitReady();
+  } catch(e) {
+    status.className = 'status-chip err';
+    status.innerHTML = '<div class="status-chip-dot"></div> AUTH FAILED';
+    alert('Authentication failed. Check your token and try again.\n' + e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  GENRE CHANGE
+// ═══════════════════════════════════════════════════════
+function onGenreChange() {
+  const val = document.getElementById('genreSelect').value;
+  document.getElementById('genreLabel').value = PLAYLIST_MAP[val].defaultGenre;
+  refreshAllPreviews();
+}
+
+// ═══════════════════════════════════════════════════════
+//  SONG CARDS
+// ═══════════════════════════════════════════════════════
+function addSongCard() {
+  if (songCards.length >= 3) return;
+  const id = ++cardCounter;
+  songCards.push({ id, mp3File: null, imgFile: null });
+
+  const container = document.getElementById('songCards');
+  const div = document.createElement('div');
+  div.className = 'song-card';
+  div.id = `card-${id}`;
+  div.innerHTML = `
+    <div class="song-card-header">
+      <span class="song-num">TRACK ${songCards.length}</span>
+      <span style="flex:1;font-family:var(--font-mono);font-size:0.7rem;color:var(--text-dim)" id="cardLabel-${id}">— no files selected —</span>
+      <button class="btn btn-danger" onclick="removeSongCard(${id})">✕ Remove</button>
+    </div>
+    <div class="song-card-body">
+      <div class="field-row">
+        <div class="field">
+          <label>MP3 File</label>
+          <div class="drop-zone" id="mp3Zone-${id}" ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,${id},'mp3')">
+            <input type="file" accept=".mp3" onchange="onFileChange(event,${id},'mp3')">
+            <div class="drop-zone-icon">🎵</div>
+            <div class="drop-zone-label">Click or drag .mp3 here</div>
+            <div class="drop-zone-file" id="mp3Name-${id}"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Image File</label>
+          <div class="drop-zone" id="imgZone-${id}" ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,${id},'img')">
+            <input type="file" accept=".jpg,.jpeg,.png" onchange="onFileChange(event,${id},'img')">
+            <div class="drop-zone-icon">🖼</div>
+            <div class="drop-zone-label">Click or drag .jpg / .jpeg / .png here</div>
+            <div class="drop-zone-file" id="imgName-${id}"></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Song Title</label>
+          <input type="text" id="title-${id}" placeholder="Auto-filled from MP3 filename" oninput="refreshPreview(${id})">
+        </div>
+      </div>
+      <div class="field">
+        <label>Story — What this song means to you</label>
+        <textarea id="story-${id}" placeholder="e.g. A KZAK AI recreation of a well loved Pink Floyd classic" oninput="refreshPreview(${id})"></textarea>
+      </div>
+      <div class="js-preview" id="preview-${id}"><span style="color:#444">// JS block preview will appear here once files are selected</span></div>
+    </div>
+  `;
+  container.appendChild(div);
+  if (songCards.length >= 3) document.getElementById('addBtn').style.display = 'none';
+  checkCommitReady();
+}
+
+function removeSongCard(id) {
+  songCards = songCards.filter(c => c.id !== id);
+  document.getElementById(`card-${id}`).remove();
+  // Re-label remaining cards
+  document.querySelectorAll('.song-num').forEach((el, i) => { el.textContent = `TRACK ${i+1}`; });
+  document.getElementById('addBtn').style.display = 'flex';
+  checkCommitReady();
+}
+
+// ═══════════════════════════════════════════════════════
+//  FILE HANDLING
+// ═══════════════════════════════════════════════════════
+function onDragOver(e, el) { e.preventDefault(); el.classList.add('dragover'); }
+function onDragLeave(el)    { el.classList.remove('dragover'); }
+function onDrop(e, id, type) {
+  e.preventDefault();
+  const zone = document.getElementById(type === 'mp3' ? `mp3Zone-${id}` : `imgZone-${id}`);
+  zone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) applyFile(id, type, file);
+}
+function onFileChange(e, id, type) {
+  const file = e.target.files[0];
+  if (file) applyFile(id, type, file);
+}
+
+function applyFile(id, type, file) {
+  const card = songCards.find(c => c.id === id);
+  if (!card) return;
+  if (type === 'mp3') {
+    card.mp3File = file;
+    const zone = document.getElementById(`mp3Zone-${id}`);
+    zone.classList.add('has-file');
+    document.getElementById(`mp3Name-${id}`).textContent = file.name;
+    // Auto-fill title
+    const titleInput = document.getElementById(`title-${id}`);
+    if (!titleInput.value) {
+      titleInput.value = file.name.replace(/\.mp3$/i, '');
+    }
+    updateCardLabel(id);
+  } else {
+    card.imgFile = file;
+    const zone = document.getElementById(`imgZone-${id}`);
+    zone.classList.add('has-file');
+    document.getElementById(`imgName-${id}`).textContent = file.name;
+  }
+  refreshPreview(id);
+  checkCommitReady();
+}
+
+function updateCardLabel(id) {
+  const card = songCards.find(c => c.id === id);
+  const label = document.getElementById(`cardLabel-${id}`);
+  if (!label) return;
+  if (card && card.mp3File) {
+    label.textContent = card.mp3File.name;
+    label.style.color = 'var(--amber)';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  JS PREVIEW
+// ═══════════════════════════════════════════════════════
+function refreshPreview(id) {
+  const card = songCards.find(c => c.id === id);
+  const preview = document.getElementById(`preview-${id}`);
+  if (!preview) return;
+  const title  = (document.getElementById(`title-${id}`)?.value || '').trim();
+  const story  = (document.getElementById(`story-${id}`)?.value || '').trim();
+  const genre  = document.getElementById('genreLabel')?.value.trim() || '';
+  const mp3    = card?.mp3File?.name || 'Song Name.mp3';
+  const img    = card?.imgFile?.name || 'Image.jpeg';
+  const alt    = title ? `${title} - KZAK artwork` : `Song Title - KZAK artwork`;
+
+  preview.innerHTML = buildPreviewHTML({ title: title||'Song Title', mp3, img, alt, genre, story: story||'Your story here' });
+}
+
+function refreshAllPreviews() {
+  songCards.forEach(c => refreshPreview(c.id));
+}
+
+function buildPreviewHTML({title, mp3, img, alt, genre, story}) {
+  const e = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  return `<span class="kw">  {</span>
+  <span class="key">    title</span>: <span class="str">"${e(title)}"</span>,
+  <span class="key">    file</span>:  <span class="str">"Media/${e(mp3)}"</span>,
+  <span class="key">    img</span>:   <span class="str">"Media/${e(img)}"</span>,
+  <span class="key">    alt</span>:   <span class="str">"${e(alt)}"</span>,
+  <span class="key">    genre</span>: <span class="str">"${e(genre)}"</span>,
+  <span class="key">    story</span>: <span class="str">"${e(story)}"</span>
+<span class="kw">  },</span>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  COMMIT READINESS CHECK
+// ═══════════════════════════════════════════════════════
+function checkCommitReady() {
+  const btn = document.getElementById('commitBtn');
+  const caption = document.getElementById('commitCaption');
+  const ready = songCards.length > 0 && pat &&
+    songCards.every(c => c.mp3File && c.imgFile);
+
+  const notAuthd = !pat;
+  const noSongs  = songCards.length === 0;
+  const missingFiles = songCards.some(c => !c.mp3File || !c.imgFile);
+
+  if (notAuthd)       caption.textContent = 'Connect GitHub first (step 1)';
+  else if (noSongs)   caption.textContent = 'Add at least one song (step 3)';
+  else if (missingFiles) caption.textContent = 'Each song needs both an MP3 and an image file';
+  else {
+    const n = songCards.length;
+    const totalFiles = n * 2 + 1;
+    caption.textContent = `Will upload ${n * 2} media file${n>1?'s':''} + update playlist JS → ${totalFiles} total GitHub commits`;
+  }
+  btn.disabled = !ready;
+}
+
+// ═══════════════════════════════════════════════════════
+//  GITHUB API HELPERS
+// ═══════════════════════════════════════════════════════
+function ghHeaders() {
+  return {
+    'Authorization': `Bearer ${pat}`,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'Content-Type': 'application/json'
+  };
+}
+
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function getFileSHA(path) {
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(path)}?ref=${BRANCH}`;
+  const res = await fetch(url, { headers: ghHeaders() });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to get SHA for ${path}: HTTP ${res.status}`);
+  const data = await res.json();
+  return { sha: data.sha, content: data.content };
+}
+
+async function uploadFile(path, base64Content, sha, commitMessage) {
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(path)}`;
+  const body = { message: commitMessage, content: base64Content, branch: BRANCH };
+  if (sha) body.sha = sha;
+  const res = await fetch(url, { method: 'PUT', headers: ghHeaders(), body: JSON.stringify(body) });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+// ═══════════════════════════════════════════════════════
+//  BUILD JS BLOCK TEXT
+// ═══════════════════════════════════════════════════════
+function buildJSBlock(card, genre) {
+  const title = document.getElementById(`title-${card.id}`)?.value.trim() || card.mp3File.name.replace(/\.mp3$/i,'');
+  const story = document.getElementById(`story-${card.id}`)?.value.trim() || '';
+  const mp3   = card.mp3File.name;
+  const img   = card.imgFile.name;
+  return `
+    {
+    title: "${title}",
+    file:  "Media/${mp3}",
+    img:   "Media/${img}",
+    alt:   "${title} - KZAK artwork",
+    genre: "${genre}",
+    story: "${story}"
+  },`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  PROGRESS UI
+// ═══════════════════════════════════════════════════════
+let steps = [];
+let stepEls = {};
+
+function initProgress(stepDefs) {
+  steps = stepDefs;
+  const block = document.getElementById('progressBlock');
+  const stepsDiv = document.getElementById('progressSteps');
+  block.classList.add('active');
+  stepsDiv.innerHTML = '';
+  stepEls = {};
+  steps.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'progress-step';
+    div.innerHTML = `
+      <div class="step-icon step-pending" id="stepIcon-${i}">○</div>
+      <div class="step-text" id="stepText-${i}">${s.label}</div>
+      <div class="step-size" id="stepSize-${i}">${s.size || ''}</div>
+    `;
+    stepsDiv.appendChild(div);
+    stepEls[i] = div;
+  });
+  setProgress(0);
+}
+
+function setStepRunning(i) {
+  document.getElementById(`stepIcon-${i}`).innerHTML = '⟳';
+  document.getElementById(`stepIcon-${i}`).className = 'step-icon spin';
+}
+function setStepDone(i) {
+  document.getElementById(`stepIcon-${i}`).innerHTML = '✓';
+  document.getElementById(`stepIcon-${i}`).className = 'step-icon step-ok';
+  setProgress(Math.round(((i+1) / steps.length) * 100));
+}
+function setStepError(i, msg) {
+  document.getElementById(`stepIcon-${i}`).innerHTML = '✕';
+  document.getElementById(`stepIcon-${i}`).className = 'step-icon step-err';
+  document.getElementById(`stepText-${i}`).innerHTML += ` <span style="color:var(--red)">— ${msg}</span>`;
+}
+function setProgress(pct) {
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+function showResult(success, html) {
+  const el = document.getElementById('resultBanner');
+  el.className = 'result-banner ' + (success ? 'success' : 'error');
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+//  MAIN COMMIT FLOW
+// ═══════════════════════════════════════════════════════
+async function runCommit() {
+  const btn = document.getElementById('commitBtn');
+  btn.disabled = true;
+  document.getElementById('resultBanner').className = 'result-banner';
+
+  const genre    = document.getElementById('genreLabel').value.trim();
+  const genreKey = document.getElementById('genreSelect').value;
+  const playlist = PLAYLIST_MAP[genreKey];
+  const readySongs = songCards.filter(c => c.mp3File && c.imgFile);
+
+  // Build step list
+  const stepDefs = [];
+  readySongs.forEach(c => {
+    stepDefs.push({ label: `Upload  ${c.mp3File.name}`, size: formatBytes(c.mp3File.size), card: c, type: 'mp3' });
+    stepDefs.push({ label: `Upload  ${c.imgFile.name}`, size: formatBytes(c.imgFile.size), card: c, type: 'img' });
+  });
+  stepDefs.push({ label: `Read current  ${playlist.file.split('/').pop()}`, type: 'read-playlist' });
+  stepDefs.push({ label: `Commit updated  ${playlist.file.split('/').pop()}`, type: 'write-playlist' });
+
+  initProgress(stepDefs);
+
+  let stepIdx = 0;
+  let playlistSHA = null;
+  let playlistContent = null;
+
+  try {
+    // Upload each media file sequentially
+    for (const c of readySongs) {
+      // MP3
+      setStepRunning(stepIdx);
+      const mp3b64  = await fileToBase64(c.mp3File);
+      const mp3path = `${MEDIA_PATH}/${c.mp3File.name}`;
+      const mp3sha  = await getFileSHA(mp3path);
+      await uploadFile(mp3path, mp3b64, mp3sha?.sha, `KZAK: Add ${c.mp3File.name} via Studio Console`);
+      setStepDone(stepIdx++);
+
+      // Image
+      setStepRunning(stepIdx);
+      const imgb64  = await fileToBase64(c.imgFile);
+      const imgpath = `${MEDIA_PATH}/${c.imgFile.name}`;
+      const imgsha  = await getFileSHA(imgpath);
+      await uploadFile(imgpath, imgb64, imgsha?.sha, `KZAK: Add ${c.imgFile.name} via Studio Console`);
+      setStepDone(stepIdx++);
+    }
+
+    // Read playlist
+    setStepRunning(stepIdx);
+    const plData = await getFileSHA(playlist.file);
+    if (!plData) throw new Error('Playlist file not found in repo. Check the path.');
+    playlistSHA     = plData.sha;
+    playlistContent = atob(plData.content.replace(/\n/g, ''));
+    setStepDone(stepIdx++);
+
+    // Build new blocks
+    const newBlocks = readySongs.map(c => buildJSBlock(c, genre)).join('\n');
+
+    // Inject at top of array — find the opening bracket of the const array
+    const varName = playlist.varName;
+    const marker  = `const ${varName} = [`;
+    const insertPos = playlistContent.indexOf(marker);
+    if (insertPos === -1) throw new Error(`Could not find "${marker}" in playlist file.`);
+    const afterBracket = insertPos + marker.length;
+    const updatedContent = playlistContent.slice(0, afterBracket) + '\n' + newBlocks + '\n' + playlistContent.slice(afterBracket);
+
+    // Write playlist
+    setStepRunning(stepIdx);
+    const updatedB64 = btoa(unescape(encodeURIComponent(updatedContent)));
+    const songTitles = readySongs.map(c => document.getElementById(`title-${c.id}`)?.value.trim() || c.mp3File.name).join(', ');
+    await uploadFile(playlist.file, updatedB64, playlistSHA, `KZAK: Add [${songTitles}] to ${playlist.file.split('/').pop()}`);
+    setStepDone(stepIdx++);
+    setProgress(100);
+
+    showResult(true, `✓ All ${stepDefs.length} commits completed successfully!<br>
+      Added <strong>${readySongs.length}</strong> song${readySongs.length>1?'s':''} to <strong>${playlist.file.split('/').pop()}</strong><br>
+      Songs will appear at the top of the <strong>${genre}</strong> playlist on your next page load.<br><br>
+      🔗 <a href="https://zdjimas.github.io/moving-pictures-gallery/room-radio-listen/index.html?t=0" target="_blank" style="color:var(--green)">Open KZAK Radio →</a>`);
+
+  } catch(err) {
+    if (stepIdx < stepDefs.length) setStepError(stepIdx, err.message);
+    showResult(false, `✕ Commit failed at step ${stepIdx + 1}: ${err.message}<br>Files already uploaded before this step were committed successfully.<br>Fix the issue and retry — already-uploaded files will be skipped (SHA match).`);
+  }
+
+  btn.disabled = false;
+  checkCommitReady();
+}
+
+// ═══════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════
+function formatBytes(b) {
+  if (b < 1024)       return b + ' B';
+  if (b < 1024*1024)  return (b/1024).toFixed(1) + ' KB';
+  return (b/(1024*1024)).toFixed(1) + ' MB';
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  addSongCard(); // Start with one card ready
+});
+</script>
+</body>
+</html>
