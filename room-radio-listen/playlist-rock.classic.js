@@ -20,14 +20,7 @@ const PLAYLIST_ROCK = [
     story: "A zdjimas original creation exclusively on KZAK."
   },
 
-    {
-    title: "Who’s Sparks?",
-    file:  "Media/Who’s Sparks.mp3",
-    img:   "Media/WhosSparks.jpeg",
-    alt:   "Who’s Sparks? - KZAK artwork",
-    genre: "Middle Ground Rock",
-    story: "A terrific recreation of a song from the album Tommy."
-  },
+    
 
 
     
