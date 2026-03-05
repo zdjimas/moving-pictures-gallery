@@ -1,20 +1,421 @@
+zacharydjimas@zacharys-Mini Songs % pwd
+/Users/zacharydjimas/Documents/Songs
+zacharydjimas@zacharys-Mini Songs % 
+  [Restored Oct 16, 2025 at 8:28:12 AM]
+Last login: Thu Oct 16 08:28:12 on ttys000
+zacharydjimas@zacharys-Mac-mini Songs % avail
+zsh: command not found: avail
+zacharydjimas@zacharys-Mac-mini Songs % cd
+zacharydjimas@zacharys-Mac-mini ~ % cd bin
+zacharydjimas@zacharys-Mac-mini bin % ./avail
+Filesystem                         Size(MB)   Used(MB)  Avail(MB)   Use% Mounted on
+/dev/disk3s1s1                       233752      11483     142259     7% /
+devfs                                     0          0          0   100% /dev
+/dev/disk3s6                         233752       6144     142259     4% /System/Volumes/VM
+/dev/disk3s2                         233752       7376     142259     5% /System/Volumes/Preboot
+/dev/disk3s4                         233752         15     142259     0% /System/Volumes/Update
+/dev/disk1s2                            500          6        483     1% /System/Volumes/xarts
+/dev/disk1s1                            500          6        483     1% /System/Volumes/iSCPreboot
+/dev/disk1s3                            500          1        483     0% /System/Volumes/Hardware
+/dev/disk3s5                         233752      65213     142259    31% /System/Volumes/Data
+map                                       0          0          0     0% 100%
+/dev/disk6s2                         953509     749016     204493    79% /Volumes/BackupMacOS
+zacharydjimas@zacharys-Mac-mini bin % clear
+
+zacharydjimas@zacharys-Mac-mini bin % ./avail
+Filesystem                         Size(MB)   Used(MB)  Avail(MB)   Use% Mounted on
+/dev/disk3s1s1                       233752      11483     142253     7% /
+devfs                                     0          0          0   100% /dev
+/dev/disk3s6                         233752       6144     142253     4% /System/Volumes/VM
+/dev/disk3s2                         233752       7376     142253     5% /System/Volumes/Preboot
+/dev/disk3s4                         233752         15     142253     0% /System/Volumes/Update
+/dev/disk1s2                            500          6        483     1% /System/Volumes/xarts
+/dev/disk1s1                            500          6        483     1% /System/Volumes/iSCPreboot
+/dev/disk1s3                            500          1        483     0% /System/Volumes/Hardware
+/dev/disk3s5                         233752      65218     142253    31% /System/Volumes/Data
+map                                       0          0          0     0% 100%
+/dev/disk6s2                         953509     749016     204493    79% /Volumes/BackupMacOS
+zacharydjimas@zacharys-Mac-mini bin % security find-internet-password -s chat.openai.com
+
+security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.
+zacharydjimas@zacharys-Mac-mini bin % 
+
+
+
+
+
+
+
+  [Restored Nov 14, 2025 at 9:50:43 AM]
+Last login: Fri Nov 14 09:50:43 on ttys000
+Restored session: Fri Nov 14 09:44:28 MST 2025
+zacharydjimas@zacharys-Mini bin % cd
+zacharydjimas@zacharys-Mini ~ % cd bin
+zacharydjimas@zacharys-Mini bin % ls
+avail
+zacharydjimas@zacharys-Mini bin % cd ..
+zacharydjimas@zacharys-Mini ~ % l
+zsh: command not found: l
+zacharydjimas@zacharys-Mini ~ % ls
+Applications	Desktop		Downloads	Movies		Pictures	venvs
+bin		Documents	Library		Music		Public
+zacharydjimas@zacharys-Mini ~ % cd Music
+zacharydjimas@zacharys-Mini Music % ls
+Music
+zacharydjimas@zacharys-Mini Music % cd Music
+zacharydjimas@zacharys-Mini Music % ls
+Media.localized			Music Library.musiclibrary
+zacharydjimas@zacharys-Mini Music % cd ..
+zacharydjimas@zacharys-Mini Music % cd ..
+zacharydjimas@zacharys-Mini ~ % ls 
+Applications	Desktop		Downloads	Movies		Pictures	venvs
+bin		Documents	Library		Music		Public
+zacharydjimas@zacharys-Mini ~ % cd 
+  [Restored Jan 15, 2026 at 6:07:39 AM]
+Last login: Thu Jan 15 06:07:39 on ttys000
+Restored session: Thu Jan 15 06:05:48 MST 2026
+zacharydjimas@zacharys-Mac-mini ~ % 
+  [Restored Jan 22, 2026 at 5:40:46 PM]
+Last login: Thu Jan 22 17:40:46 on ttys000
+Restored session: Thu Jan 22 17:34:16 MST 2026
+zacharydjimas@Mac ~ % 
+  [Restored Feb 26, 2026 at 6:24:29 PM]
+Last login: Thu Feb 26 18:23:30 on console
+Restored session: Thu Feb 26 18:17:36 MST 2026
+zacharydjimas@zacharys-Mini ~ % ls
+Applications		Downloads		nltk_data		VS Code Projects
+bin			Library			Pictures
+Desktop			Movies			Public
+Documents		Music			venvs
+zacharydjimas@zacharys-Mini ~ % cd
+zacharydjimas@zacharys-Mini ~ % ls
+Applications		Downloads		nltk_data		VS Code Projects
+bin			Library			Pictures
+Desktop			Movies			Public
+Documents		Music			venvs
+zacharydjimas@zacharys-Mini ~ % cd Downloads
+zacharydjimas@zacharys-Mini Downloads % ls
+1099_8W15MFR2-2026-01-27.pdf
+1099_8W555019-2026-01-27.pdf
+10HOURSOGO.html
+2025-10-24T15_24_02.460Z-transactions.csv
+2025-10-24T15_24_02.460Z-transactions.csv.zip
+2025-Individual-TOD-7256-Consolidated-Form-1099.pdf
+322011_mb_21_sv copy.pdf
+322011_mb_21_sv Zachary Djimas 13 Feb 2026.pdf
+322011_mb_21_sv.pdf
+804007527-PMP-7th-Edition.pdf
+A  Zombie with Dragula.mp3
+A Super Tramp at School.mp3
+activity.csv
+All Remaining Tax Docs and W2 Zdjimas.pdf
+ASuperTrampAtSchool.jpeg
+avail
+AZombieWithDragula.jpeg
+BMO 1099 for 2025 zdjimas emurray.jpg
+BMO 1099 zdjimas emurray 2025 part 2.jpg
+ChatGPT_Atlas (1).dmg
+ChatGPT_Atlas.dmg
+CJMURPHY.png
+Cover Letter Dylan Murray .pdf
+coverwebsite.jpeg
+Create_CGR_COMMENT_2025-10-22 16_39_27.266.sql
+Create_CGR_ENTRY_TYPE_2025-10-22 18_30_20.716.sql
+Create_CGR_EXERCISE_TYPE_L1_2025-10-22 18_19_10.672.sql
+Create_CGR_EXERCISE_TYPE_L2_2025-10-22 18_15_48.042.sql
+Create_CGR_GAP_2025-10-22 16_07_08.954.sql
+Create_CGR_GAP_EVENT_HISTORY_2025-10-22 16_47_27.228.sql
+Create_CGR_GAP_PRIORITY_2025-10-22 18_35_09.314.sql
+Create_CGR_GAP_RPMS_2025-10-22 18_32_45.597.sql
+Create_CGR_GAP_SOURCE_2025-10-22 18_42_44.325.sql
+Create_CGR_IMPACT_TYPE_2025-10-22 18_21_39.031.sql
+Create_CGR_LINE_OF_BUSINESS_2025-10-22 16_35_31.729.sql
+Create_CGR_RESPONSE_TYPE_2025-10-22 18_26_27.556.sql
+Create_CGR_STATUS_2025-10-22 18_37_19.36.sql
+CTADMIN, LLC Balance Sheet 2026-02-15-19_38.pdf
+CTADMIN, LLC Cash Flow 2026-02-15-19_41.pdf
+CTADMIN, LLC Income by Customer 2026-02-15-19_37.pdf
+CTADMIN, LLC Profit and Loss 2026-02-15-19_38.pdf
+CTADMIN, LLC Sales Tax 2026-02-15-19_36.pdf
+CURRENTBROKENindex.html
+default.jpg
+Default.png
+deploy-room-radio-listen (1).yml
+deploy-room-radio-listen-2.yml
+deploy-room-radio-listen.yml
+DM_Transactions_2025.xlsx
+Dylan Murray Oct 2025.pdf
+expenses_ledger_first_pass.csv
+expenses_monthly_totals.csv
+expenses_summary_by_vendor.csv
+For My Brothers In Arms.mp3
+ForMyBrothersInArms.jpeg
+frasier.png
+FrasierExit (1).mp4
+FrasierExit.mp4
+Gmail - 📦ORDER DELIVERED_ ZPower rechargeable Battery 312 for hearing aids Oticon _ Widex _ Bernafon.pdf
+Goldman Sachs 1099 Int emurray 2025.jpg
+Im A Bad Seed.mp3
+ImABadSeed.jpeg
+IMG_0138.jpeg
+IMG_0138.WEBP
+Inbox
+index (1).html
+index (2).html
+index-096.html
+index-097.html
+index-098 (1).html
+index-098.html
+index-099.html
+index-100.html
+index-101.html
+index-103.html
+index-104 (1).html
+index-104.html
+index-105-fixed.html
+index-105.html
+index-106.html
+index-107.html
+index-108.html
+index-109.html
+index-110.html
+index-111.html
+index-112.html
+index-113.html
+index-114.html
+index-115.html
+index-116.html
+index-118.html
+index-119.html
+index120-2.html
+Instrumental Werewolves in  London.mp3
+InstrumentalWerewolvesInLondon.jpeg
+invite.ics
+kzak-uploader.html
+Last Job Ad 1.mp4
+Last Job Ad 2.mp4
+Last Job Ad 3.mp4
+Letter of Recommendation for James Weverka.pdf
+LNI-Quarterly-Report-03_03_2025-11_33_36.pdf
+Love the One Within.mp3
+LoveTheOneWithin.jpeg
+Mohela.pdf
+My Third Unforgiven Remix.mp3
+MyThirdUnforgivenRemix.jpeg
+Order 1356816 - Receipt - Ulta Lab Tests.pdf
+Order 1356816 - Requisition -  Ulta Lab Tests.pdf
+Order details _ eBay Hearing Aid Batteries.pdf
+ORIG2deploy-room-radio-listen.yml
+ORIGdeploy-room-radio-listen.yml
+playlist-heavy.classic.js
+playlist-mellow.classic.js
+playlist-rock.classic.js
+playlist-rock.js
+pmbok-guide--underneath-the-surface.pdf
+Protect Our Kids 5.mp4
+radio-room-entry.mp4
+RadioMusicListening.jpg
+Resume-Zachary-Djimas-Enterprise Resiliency Leader.pdf
+rs=w_1280,h_853.webp
+Snappy 23.mp3
+Snappy21.mp3
+Snappy22.mp3
+Sultans are Swinging.mp3
+SultansAreSwinging.jpeg
+TaxDocument-Jan 22, 2026.pdf
+The Last Job You'll Ever Hate Ad.mp4
+The_Last_Job_Youll_Ever_Hate.mp3
+UNCLE10-finalworking-index.html
+unnamed.jpg
+ViewFile.pdf
+VSCode-darwin-arm64.dmg
+VSCode-darwin-universal.dmg
+W2 Zdjimas 2025 Wells Fargo.jpg
+Welcome.mp3
+WF 1095 2025 zdjimas.jpg
+Who’s Sparkling.mp3
+Who’s Sparks.mp3
+YearEndSummary_2026.pdf
+ZachArt.jpeg
+zacharydjimas@zacharys-Mini Downloads % ls -ltr
+total 3212888
+-rw-r--r--@ 1 zacharydjimas  staff    1228538 Sep 24 19:41 Snappy22.mp3
+-rw-r--r--@ 1 zacharydjimas  staff    1380283 Sep 24 19:41 Snappy21.mp3
+-rw-r--r--@ 1 zacharydjimas  staff     877790 Sep 24 19:42 Snappy 23.mp3
+-rw-r--r--@ 1 zacharydjimas  staff      67436 Sep 25 09:09 CURRENTBROKENindex.html
+-rw-r--r--@ 1 zacharydjimas  staff      74948 Sep 25 09:11 10HOURSOGO.html
+-rw-r--r--@ 1 zacharydjimas  staff      70326 Sep 25 15:14 UNCLE10-finalworking-index.html
+-rw-------@ 1 zacharydjimas  staff      45334 Oct  2 13:55 IMG_0138.WEBP
+-rw-r--r--@ 1 zacharydjimas  staff      21280 Oct  2 18:19 playlist-rock.js
+-rw-r--r--@ 1 zacharydjimas  staff     148399 Oct  3 14:04 IMG_0138.jpeg
+-rw-r--r--@ 1 zacharydjimas  staff      95426 Oct  3 14:15 rs=w_1280,h_853.webp
+-rw-r--r--@ 1 zacharydjimas  staff     256607 Oct  3 14:18 coverwebsite.jpeg
+-rw-r--r--@ 1 zacharydjimas  staff    6942250 Oct  3 14:30 Last Job Ad 1.mp4
+-rw-r--r--@ 1 zacharydjimas  staff    7081296 Oct  3 14:30 Last Job Ad 2.mp4
+-rw-r--r--@ 1 zacharydjimas  staff    4693976 Oct  3 14:30 The Last Job You'll Ever Hate Ad.mp4
+-rw-r--r--@ 1 zacharydjimas  staff    4978146 Oct  3 14:30 Last Job Ad 3.mp4
+-rw-r--r--@ 1 zacharydjimas  staff      95652 Oct  8 08:17 ViewFile.pdf
+-rw-r--r--@ 1 zacharydjimas  staff       7732 Oct  8 08:30 LNI-Quarterly-Report-03_03_2025-11_33_36.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      34563 Oct  8 09:52 index-096.html
+-rw-r--r--@ 1 zacharydjimas  staff      11999 Oct  8 12:16 playlist-heavy.classic.js
+-rw-r--r--@ 1 zacharydjimas  staff      11676 Oct  8 12:16 playlist-mellow.classic.js
+-rw-r--r--@ 1 zacharydjimas  staff      24711 Oct  8 12:17 playlist-rock.classic.js
+-rw-r--r--@ 1 zacharydjimas  staff        786 Oct  8 13:08 avail
+drwxr-xr-x@ 4 zacharydjimas  staff        128 Oct  8 14:06 Inbox
+-rw-r--r--@ 1 zacharydjimas  staff       2192 Oct  8 14:13 expenses_ledger_first_pass.csv
+-rw-r--r--@ 1 zacharydjimas  staff         72 Oct  8 14:13 expenses_summary_by_vendor.csv
+-rw-r--r--@ 1 zacharydjimas  staff         40 Oct  8 14:14 expenses_monthly_totals.csv
+-rw-r--r--@ 1 zacharydjimas  staff      37366 Oct  8 15:39 index-097.html
+-rw-r--r--@ 1 zacharydjimas  staff      37092 Oct  9 08:50 index-098.html
+-rw-r--r--@ 1 zacharydjimas  staff      38351 Oct  9 12:46 index-098 (1).html
+-rw-r--r--@ 1 zacharydjimas  staff      44588 Oct  9 13:20 index-099.html
+-rw-r--r--@ 1 zacharydjimas  staff      42960 Oct  9 13:31 index-100.html
+-rw-r--r--@ 1 zacharydjimas  staff      42412 Oct  9 13:38 index-101.html
+-rw-r--r--@ 1 zacharydjimas  staff      83756 Oct  9 16:48 Dylan Murray Oct 2025.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      42099 Oct  9 17:09 Cover Letter Dylan Murray .pdf
+-rw-r--r--@ 1 zacharydjimas  staff       5070 Oct  9 17:33 index-104 (1).html
+-rw-r--r--@ 1 zacharydjimas  staff      42554 Oct  9 17:35 index-103.html
+-rw-r--r--@ 1 zacharydjimas  staff      42758 Oct  9 17:49 index-104.html
+-rw-r--r--@ 1 zacharydjimas  staff      47796 Oct  9 18:33 index-105.html
+-rw-r--r--@ 1 zacharydjimas  staff      50377 Oct 10 09:56 index-105-fixed.html
+-rw-r--r--@ 1 zacharydjimas  staff       1631 Oct 10 10:27 ORIGdeploy-room-radio-listen.yml
+-rw-r--r--@ 1 zacharydjimas  staff      23557 Oct 10 10:27 index (1).html
+-rw-r--r--@ 1 zacharydjimas  staff       2764 Oct 10 10:57 ORIG2deploy-room-radio-listen.yml
+-rw-r--r--@ 1 zacharydjimas  staff      48031 Oct 10 11:33 index-106.html
+-rw-r--r--@ 1 zacharydjimas  staff    5129461 Oct 10 12:09 FrasierExit.mp4
+-rw-r--r--@ 1 zacharydjimas  staff     566449 Oct 10 12:12 frasier.png
+-rw-r--r--@ 1 zacharydjimas  staff     986199 Oct 10 12:13 ZachArt.jpeg
+-rw-r--r--@ 1 zacharydjimas  staff      63979 Oct 10 12:13 default.jpg
+-rw-r--r--@ 1 zacharydjimas  staff    1930377 Oct 10 12:14 CJMURPHY.png
+-rw-r--r--@ 1 zacharydjimas  staff    2959143 Oct 10 12:15 RadioMusicListening.jpg
+-rw-r--r--@ 1 zacharydjimas  staff      43592 Oct 10 13:25 index-107.html
+-rw-r--r--@ 1 zacharydjimas  staff   21686981 Oct 10 15:09 radio-room-entry.mp4
+-rw-r--r--@ 1 zacharydjimas  staff     478528 Oct 10 15:26 Welcome.mp3
+-rw-r--r--@ 1 zacharydjimas  staff      55355 Oct 10 15:28 index-110.html
+-rw-r--r--@ 1 zacharydjimas  staff      51752 Oct 10 15:42 index-108.html
+-rw-r--r--@ 1 zacharydjimas  staff      54784 Oct 10 16:19 index-109.html
+-rw-r--r--@ 1 zacharydjimas  staff       3436 Oct 10 16:56 deploy-room-radio-listen.yml
+-rw-r--r--@ 1 zacharydjimas  staff      60013 Oct 10 16:57 index-111.html
+-rw-r--r--@ 1 zacharydjimas  staff      56755 Oct 10 17:36 index-112.html
+-rw-r--r--@ 1 zacharydjimas  staff      59450 Oct 10 17:47 index-113.html
+-rw-r--r--@ 1 zacharydjimas  staff    5129461 Oct 10 17:56 FrasierExit (1).mp4
+-rw-r--r--@ 1 zacharydjimas  staff      23561 Oct 10 18:00 index (2).html
+-rw-r--r--@ 1 zacharydjimas  staff       3436 Oct 10 18:01 deploy-room-radio-listen (1).yml
+-rw-r--r--@ 1 zacharydjimas  staff      62729 Oct 10 18:06 index-114.html
+-rw-r--r--@ 1 zacharydjimas  staff       3075 Oct 10 18:19 index-115.html
+-rw-r--r--@ 1 zacharydjimas  staff      65795 Oct 10 18:50 index-116.html
+-rw-r--r--@ 1 zacharydjimas  staff      65757 Oct 10 23:12 index-118.html
+-rw-r--r--@ 1 zacharydjimas  staff      67941 Oct 10 23:45 index-119.html
+-rw-r--r--@ 1 zacharydjimas  staff      70889 Oct 17 08:06 DM_Transactions_2025.xlsx
+-rw-r--r--@ 1 zacharydjimas  staff       1377 Oct 22 09:08 Create_CGR_GAP_2025-10-22 16_07_08.954.sql
+-rw-r--r--@ 1 zacharydjimas  staff        229 Oct 22 09:35 Create_CGR_LINE_OF_BUSINESS_2025-10-22 16_35_31.729.sql
+-rw-r--r--@ 1 zacharydjimas  staff        435 Oct 22 09:39 Create_CGR_COMMENT_2025-10-22 16_39_27.266.sql
+-rw-r--r--@ 1 zacharydjimas  staff        540 Oct 22 09:47 Create_CGR_GAP_EVENT_HISTORY_2025-10-22 16_47_27.228.sql
+-rw-r--r--@ 1 zacharydjimas  staff       1964 Oct 22 11:11 invite.ics
+-rw-r--r--@ 1 zacharydjimas  staff        229 Oct 22 11:15 Create_CGR_EXERCISE_TYPE_L2_2025-10-22 18_15_48.042.sql
+-rw-r--r--@ 1 zacharydjimas  staff        265 Oct 22 11:19 Create_CGR_EXERCISE_TYPE_L1_2025-10-22 18_19_10.672.sql
+-rw-r--r--@ 1 zacharydjimas  staff        224 Oct 22 11:21 Create_CGR_IMPACT_TYPE_2025-10-22 18_21_39.031.sql
+-rw-r--r--@ 1 zacharydjimas  staff        262 Oct 22 11:26 Create_CGR_RESPONSE_TYPE_2025-10-22 18_26_27.556.sql
+-rw-r--r--@ 1 zacharydjimas  staff        223 Oct 22 11:30 Create_CGR_ENTRY_TYPE_2025-10-22 18_30_20.716.sql
+-rw-r--r--@ 1 zacharydjimas  staff        221 Oct 22 11:32 Create_CGR_GAP_RPMS_2025-10-22 18_32_45.597.sql
+-rw-r--r--@ 1 zacharydjimas  staff        225 Oct 22 11:35 Create_CGR_GAP_PRIORITY_2025-10-22 18_35_09.314.sql
+-rw-r--r--@ 1 zacharydjimas  staff        219 Oct 22 11:37 Create_CGR_STATUS_2025-10-22 18_37_19.36.sql
+-rw-r--r--@ 1 zacharydjimas  staff        218 Oct 22 11:42 Create_CGR_GAP_SOURCE_2025-10-22 18_42_44.325.sql
+-rw-r--r--@ 1 zacharydjimas  staff  230629476 Oct 24 07:04 ChatGPT_Atlas.dmg
+-rw-r--r--@ 1 zacharydjimas  staff    4200118 Oct 24 08:24 2025-10-24T15_24_02.460Z-transactions.csv
+-rw-r--r--@ 1 zacharydjimas  staff     543447 Oct 24 08:29 2025-10-24T15_24_02.460Z-transactions.csv.zip
+-rw-r--r--@ 1 zacharydjimas  staff  230629476 Oct 24 09:31 ChatGPT_Atlas (1).dmg
+-rw-r--r--@ 1 zacharydjimas  staff      54041 Oct 24 13:42 activity.csv
+-rw-r--r--@ 1 zacharydjimas  staff     110951 Nov  3 18:00 Order 1356816 - Requisition -  Ulta Lab Tests.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      38684 Nov  3 18:00 Order 1356816 - Receipt - Ulta Lab Tests.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      73870 Nov  4 12:52 index120-2.html
+-rw-r--r--@ 1 zacharydjimas  staff    1675682 Nov  4 14:40 Default.png
+-rw-r--r--@ 1 zacharydjimas  staff  316020522 Nov 27 10:39 The_Last_Job_Youll_Ever_Hate.mp3
+-rw-r--r--@ 1 zacharydjimas  staff     631668 Dec 10 18:13 Gmail - 📦ORDER DELIVERED_ ZPower rechargeable Battery 312 for hearing aids Oticon _ Widex _ Bernafon.pdf
+-rw-r--r--@ 1 zacharydjimas  staff     168743 Dec 10 18:17 Order details _ eBay Hearing Aid Batteries.pdf
+-rw-r--r--@ 1 zacharydjimas  staff     149412 Dec 23 15:35 Resume-Zachary-Djimas-Enterprise Resiliency Leader.pdf
+-rw-r--r--@ 1 zacharydjimas  staff     412045 Jan  2 08:59 pmbok-guide--underneath-the-surface.pdf
+-rw-r--r--@ 1 zacharydjimas  staff   70955202 Jan  2 09:00 804007527-PMP-7th-Edition.pdf
+-rw-r--r--@ 1 zacharydjimas  staff  233359570 Feb  5 11:18 Protect Our Kids 5.mp4
+-rw-r--r--@ 1 zacharydjimas  staff      51723 Feb  5 18:27 Letter of Recommendation for James Weverka.pdf
+-rw-r--r--@ 1 zacharydjimas  staff     500921 Feb 13 17:22 322011_mb_21_sv copy.pdf
+-rw-r--r--@ 1 zacharydjimas  staff     508749 Feb 13 17:45 322011_mb_21_sv.pdf
+-rw-r--r--@ 1 zacharydjimas  staff     523080 Feb 13 17:46 322011_mb_21_sv Zachary Djimas 13 Feb 2026.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      25330 Feb 15 11:53 1099_8W555019-2026-01-27.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      25331 Feb 15 11:57 1099_8W15MFR2-2026-01-27.pdf
+-rw-r--r--@ 1 zacharydjimas  staff    1095124 Feb 15 12:03 Mohela.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      43179 Feb 15 12:06 2025-Individual-TOD-7256-Consolidated-Form-1099.pdf
+-rw-r--r--@ 1 zacharydjimas  staff    3271390 Feb 15 12:10 YearEndSummary_2026.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      38105 Feb 15 12:14 TaxDocument-Jan 22, 2026.pdf
+-rw-r--r--@ 1 zacharydjimas  staff     626805 Feb 15 12:23 unnamed.jpg
+-rw-r--r--@ 1 zacharydjimas  staff   13179555 Feb 15 12:25 All Remaining Tax Docs and W2 Zdjimas.pdf
+-rw-r--r--@ 1 zacharydjimas  staff     626805 Feb 15 12:26 WF 1095 2025 zdjimas.jpg
+-rw-r--r--@ 1 zacharydjimas  staff     553497 Feb 15 12:27 BMO 1099 for 2025 zdjimas emurray.jpg
+-rw-r--r--@ 1 zacharydjimas  staff     361583 Feb 15 12:31 BMO 1099 zdjimas emurray 2025 part 2.jpg
+-rw-r--r--@ 1 zacharydjimas  staff     705832 Feb 15 12:31 W2 Zdjimas 2025 Wells Fargo.jpg
+-rw-r--r--@ 1 zacharydjimas  staff     511968 Feb 15 12:32 Goldman Sachs 1099 Int emurray 2025.jpg
+-rw-r--r--@ 1 zacharydjimas  staff      23035 Feb 15 12:36 CTADMIN, LLC Sales Tax 2026-02-15-19_36.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      19122 Feb 15 12:37 CTADMIN, LLC Income by Customer 2026-02-15-19_37.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      25403 Feb 15 12:38 CTADMIN, LLC Profit and Loss 2026-02-15-19_38.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      25955 Feb 15 12:38 CTADMIN, LLC Balance Sheet 2026-02-15-19_38.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      26804 Feb 15 12:41 CTADMIN, LLC Cash Flow 2026-02-15-19_41.pdf
+-rw-r--r--@ 1 zacharydjimas  staff      49932 Mar  1 23:05 ForMyBrothersInArms.jpeg
+-rw-r--r--@ 1 zacharydjimas  staff      56388 Mar  1 23:08 SultansAreSwinging.jpeg
+-rw-r--r--@ 1 zacharydjimas  staff    5143308 Mar  1 23:08 Sultans are Swinging.mp3
+-rw-r--r--@ 1 zacharydjimas  staff     103003 Mar  1 23:09 InstrumentalWerewolvesInLondon.jpeg
+-rw-r--r--@ 1 zacharydjimas  staff    5365025 Mar  1 23:09 Instrumental Werewolves in  London.mp3
+-rw-r--r--@ 1 zacharydjimas  staff    5468007 Mar  1 23:10 For My Brothers In Arms.mp3
+-rw-r--r--@ 1 zacharydjimas  staff      84079 Mar  3 18:53 AZombieWithDragula.jpeg
+-rw-r--r--@ 1 zacharydjimas  staff    6038724 Mar  3 18:53 A  Zombie with Dragula.mp3
+-rw-r--r--@ 1 zacharydjimas  staff      57796 Mar  3 18:54 LoveTheOneWithin.jpeg
+-rw-r--r--@ 1 zacharydjimas  staff    3923773 Mar  3 18:54 Love the One Within.mp3
+-rw-r--r--@ 1 zacharydjimas  staff      82999 Mar  3 18:54 ImABadSeed.jpeg
+-rw-r--r--@ 1 zacharydjimas  staff    6724530 Mar  3 18:55 Im A Bad Seed.mp3
+-rw-r--r--@ 1 zacharydjimas  staff     125897 Mar  3 18:55 MyThirdUnforgivenRemix.jpeg
+-rw-r--r--@ 1 zacharydjimas  staff   10802772 Mar  3 18:57 My Third Unforgiven Remix.mp3
+-rw-r--r--@ 1 zacharydjimas  staff      81330 Mar  3 19:04 ASuperTrampAtSchool.jpeg
+-rw-r--r--@ 1 zacharydjimas  staff    5220808 Mar  3 19:25 A Super Tramp at School.mp3
+-rw-r--r--@ 1 zacharydjimas  staff  243973983 Mar  3 19:27 VSCode-darwin-universal.dmg
+-rw-r--r--@ 1 zacharydjimas  staff  143980361 Mar  3 19:27 VSCode-darwin-arm64.dmg
+-rw-r--r--@ 1 zacharydjimas  staff    4959790 Mar  4 18:20 Who’s Sparkling.mp3
+-rw-r--r--@ 1 zacharydjimas  staff    6221433 Mar  4 18:21 Who’s Sparks.mp3
+-rw-r--r--@ 1 zacharydjimas  staff      37715 Mar  4 18:32 kzak-uploader.html
+-rw-r--r--@ 1 zacharydjimas  staff       4947 Mar  4 19:10 deploy-room-radio-listen-2.yml
+zacharydjimas@zacharys-Mini Downloads % vi deploy-room*
+3 files to edit
+
 name: Deploy root + rooms to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
     paths:
       - "index.html"
-      - "inline-fallback.html"
       - "content.css"
-      - "rooms_manifest.js"
-      - "lobby-rooms.js"
-      - "*.jpg"
-      - "*.jpeg"
-      - "*.png"
-      - "*.webp"
-      - "*.mp4"
-      - "*.mp3"
+      - "assets/**"
+      - "room-*/**"
+      - ".github/workflows/deploy-room-radio-listen.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+
+name: Deploy root + rooms to GitHub Pages
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "index.html"
+      - "content.css"
       - "assets/**"
       - "room-*/**"
       - ".github/workflows/deploy-room-radio-listen.yml"
@@ -42,96 +443,4 @@ jobs:
           shopt -s nullglob
 
           rm -rf _site
-          mkdir -p _site
-
-          echo "=== 1) Root site ==="
-          [[ -f index.html ]] && install -D -m 0644 index.html _site/index.html || true
-          [[ -f inline-fallback.html ]] && install -D -m 0644 inline-fallback.html _site/inline-fallback.html || true
-          [[ -f content.css ]] && install -D -m 0644 content.css _site/content.css || true
-          [[ -f rooms_manifest.js ]] && install -D -m 0644 rooms_manifest.js _site/rooms_manifest.js || true
-          [[ -f lobby-rooms.js ]] && install -D -m 0644 lobby-rooms.js _site/lobby-rooms.js || true
-
-          # Root media beside index.html (images/video/audio) <200 MB each
-          for ext in jpg jpeg png webp mp4 mp3; do
-            for f in *.$ext; do
-              [[ -f "$f" ]] && [[ $(stat -c%s "$f") -lt 209715200 ]] && install -D -m 0644 "$f" "_site/$f"
-            done
-          done
-
-          # assets/ (optional)
-          if [[ -d assets ]]; then
-            find assets -type f -size -200M -print0 | while IFS= read -r -d '' p; do
-              install -D -m 0644 "$p" "_site/$p"
-            done
-          fi
-
-          echo "=== 2) All room-* subsites ==="
-          for room in room-*; do
-            [[ -d "$room" ]] || continue
-            echo "--- Staging $room ---"
-
-            # Room root: HTML/CSS/JS
-            find "$room" -maxdepth 1 -type f \( -name "index*.html" -o -name "*.css" -o -name "*.js" \) -size -200M -print0 \
-              | while IFS= read -r -d '' p; do install -D -m 0644 "$p" "_site/$p"; done
-
-            # Known room-root assets you’ve used historically
-            for f in frasier.png default.jpg RadioMusicListening.jpg ZachArt.jpeg CJMURPHY.png FrasierExit.mp4 radio-room-entry.mp4; do
-              [[ -f "$room/$f" ]] && install -D -m 0644 "$room/$f" "_site/$room/$f"
-            done
-
-            # Welcome audio (Welcome.mp3 / KZAK-Welcome.mp3)
-            for g in "$room"/*Welcome*.mp3; do
-              [[ -f "$g" ]] && install -D -m 0644 "$g" "_site/${g#./}"
-            done
-
-            # Publish ANY images under the room (img/, images/, posters/, thumbs/, etc.),
-            # but skip Media/ and MediaBreaks (handled separately below)
-            find "$room" -type f \
-              \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" -o -iname "*.gif" \) \
-              -size -200M \
-              -not -path "*/Media/*" -not -path "*/MediaBreaks/*" \
-              -print0 | while IFS= read -r -d '' p; do
-              install -D -m 0644 "$p" "_site/$p"
-            done
-
-            # Optional: Bio subfolder within a room
-            if [[ -d "$room/Bio" ]]; then
-              find "$room/Bio" -type f -size -200M -print0 | while IFS= read -r -d '' p; do
-                install -D -m 0644 "$p" "_site/$p"
-              done
-            fi
-
-            # Media and MediaBreaks (images/audio/video/metadata) <200 MB each
-            for sub in Media MediaBreaks; do
-              if [[ -d "$room/$sub" ]]; then
-                find "$room/$sub" -type f \
-                  \( -iname "*.mp3" -o -iname "*.m4a" -o -iname "*.wav" -o -iname "*.ogg" -o -iname "*.flac" \
-                   -o -iname "*.mp4" -o -iname "*.m4v" -o -iname "*.webm" \
-                   -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \
-                   -o -iname "*.txt" -o -iname "*.json" -o -iname "*.xml" \) \
-                  -size -200M -print0 | while IFS= read -r -d '' p; do install -D -m 0644 "$p" "_site/$p"; done
-              fi
-            done
-          done
-
-          echo "=== Files staged for publish ==="
-          find _site -type f | sort
-          du -sh _site || true
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.pages_deploy.outputs.page_url }}
-    steps:
-      - id: pages_deploy
-        uses: actions/deploy-pages@v4
+                                                                                             
