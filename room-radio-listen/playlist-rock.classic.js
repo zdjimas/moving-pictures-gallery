@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Eminence Fronts",
+    file:  "Media/Eminence Fronts.mp3",
+    img:   "Media/EminenceFronts.jpeg",
+    alt:   "Eminence Fronts - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A great song well known from the Who, recreated for KZAK listeners."
+  },
+
+
+    {
     title: "Cutting My Own Hair",
     file:  "Media/Cutting My Own Hair.mp3",
     img:   "Media/CuttingMyOwnHair.jpeg",
