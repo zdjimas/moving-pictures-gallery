@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Send Me Lawyers Guns And Money",
+    file:  "Media/Send Me Lawyers Guns And Money.mp3",
+    img:   "Media/SendMeLawyersGunsAndMoney.jpeg",
+    alt:   "Send Me Lawyers Guns And Money - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A well loved recreation of a favorite from Mr. Zevon."
+  },
+
+
+    {
     title: "Eminence Fronts",
     file:  "Media/Eminence Fronts.mp3",
     img:   "Media/EminenceFronts.jpeg",
