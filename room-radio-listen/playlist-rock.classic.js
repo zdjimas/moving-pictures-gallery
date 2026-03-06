@@ -2,6 +2,34 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Cutting My Own Hair",
+    file:  "Media/Cutting My Own Hair.mp3",
+    img:   "Media/CuttingMyOwnHair.jpeg",
+    alt:   "Cutting My Own Hair - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A great AI tune from Quadrophenia Album remixed for KZAK."
+  },
+
+    {
+    title: "Whos Drowning?",
+    file:  "Media/Whos Drowning.mp3",
+    img:   "Media/WhosDrowning.jpeg",
+    alt:   "Whos Drowning? - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "Another great recreation from Quadrophenia, the album now a KZAK exclusive remix."
+  },
+
+    {
+    title: "TechnoQuadrophenia",
+    file:  "Media/TechnoQuadrophenia.mp3",
+    img:   "Media/TechnoQuadrophenia.jpeg",
+    alt:   "TechnoQuadrophenia - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A techno style new wave version of Quadrophenia for KZAK listeners to enjoy."
+  },
+
+
+    {
     title: "Who’s Sparks?",
     file:  "Media/Who’s Sparks.mp3",
     img:   "Media/WhosSparks.jpeg",
