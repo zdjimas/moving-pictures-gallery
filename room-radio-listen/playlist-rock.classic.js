@@ -2,6 +2,25 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Im A Bell Boy",
+    file:  "Media/Im A Bell Boy.mp3",
+    img:   "Media/ImABellBoy.jpeg",
+    alt:   "Im A Bell Boy - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "An interesting recreation of a song from Quadrophenia by the Who.  KZAK rocks."
+  },
+
+    {
+    title: "A New Found Rock",
+    file:  "Media/A New Found Rock.mp3",
+    img:   "Media/ANewFoundRock.jpeg",
+    alt:   "A New Found Rock - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "Who Made this famous?  Guess Who?  No, The Who."
+  },
+
+
+    {
     title: "Send Me Lawyers Guns And Money",
     file:  "Media/Send Me Lawyers Guns And Money.mp3",
     img:   "Media/SendMeLawyersGunsAndMoney.jpeg",
