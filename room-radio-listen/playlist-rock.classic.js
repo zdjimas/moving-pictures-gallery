@@ -2,6 +2,25 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Im A Pinball Wizard",
+    file:  "Media/Im A Pinball Wizard.mp3",
+    img:   "Media/ImAPinballWizard.jpeg",
+    alt:   "Im A Pinball Wizard - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK original remix of a well known song by Who?"
+  },
+
+    {
+    title: "A Mute Pinball Wizard",
+    file:  "Media/A Mute Pinball Wizard.mp3",
+    img:   "Media/AMutePinballWizard.jpeg",
+    alt:   "A Mute Pinball Wizard - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "An Instrumental version of a well loved song from the Who."
+  },
+
+
+    {
     title: "Im A Bell Boy",
     file:  "Media/Im A Bell Boy.mp3",
     img:   "Media/ImABellBoy.jpeg",
