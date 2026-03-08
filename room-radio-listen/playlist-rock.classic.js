@@ -1,7 +1,17 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
 
+
     {
+    title: "Existentialism In Milan",
+    file:  "Media/Existentialism In Milan.mp3",
+    img:   "Media/ExistentialismInMilan.jpeg",
+    alt:   "Existentialism In Milan - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK exclusive promoting my friends new deep track station Desert Fox Radio.  check it out at: https://www.mixcloud.com/DesertFox77/desert-fox-radio-smooth-treasures-from-the-desert-ep2/"
+  },
+
+  {
     title: "Im A Pinball Wizard",
     file:  "Media/Im A Pinball Wizard.mp3",
     img:   "Media/ImAPinballWizard.jpeg",
@@ -18,7 +28,6 @@ const PLAYLIST_ROCK = [
     genre: "Middle Ground Rock",
     story: "An Instrumental version of a well loved song from the Who."
   },
-
 
     {
     title: "Im A Bell Boy",
