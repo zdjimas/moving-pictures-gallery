@@ -1,6 +1,16 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_MELLOW = [
 
+    {
+    title: "Dining  Room Existentialism from Milano",
+    file:  "Media/Dining  Room Existentialism from Milano.mp3",
+    img:   "Media/DiningRoomExistentialismFromMilano.jpeg",
+    alt:   "Dining  Room Existentialism from Milano - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A KZAK exclusive remix from a song played on Desert Fox Radio on MixCloud.  Enjoy."
+  },
+
+
 
   {
   title: "Fear the Dark Acoustically",
