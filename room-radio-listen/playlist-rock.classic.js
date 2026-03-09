@@ -1,6 +1,16 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_ROCK = [
 
+    {
+    title: "I am in Love with My Car",
+    file:  "Media/I am in Love with My Car.mp3",
+    img:   "Media/IAmInLoveWithMyCar.jpeg",
+    alt:   "I am in Love with My Car - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK recreation of the demo tape from Queen a day at the races album.  Enjoy this twist."
+  },
+
+
 
     {
     title: "Existentialism In Milan",
