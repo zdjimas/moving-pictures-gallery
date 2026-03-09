@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Zip Skirts",
+    file:  "Media/Zip Skirts.mp3",
+    img:   "Media/ZipSkirts.jpeg",
+    alt:   "Zip Skirts - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A well Loved remix of a song from a member of The Who flying solo."
+  },
+
+
+    {
     title: "Our Death On Two Legs",
     file:  "Media/Our Death On Two Legs.mp3",
     img:   "Media/OurDeathOnTwoLegs.jpeg",
