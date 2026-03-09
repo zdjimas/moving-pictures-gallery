@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Our Death On Two Legs",
+    file:  "Media/Our Death On Two Legs.mp3",
+    img:   "Media/OurDeathOnTwoLegs.jpeg",
+    alt:   "Our Death On Two Legs - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK remix of a wonderful song from a night at the opera."
+  },
+
+
+    {
     title: "I am in Love with My Car",
     file:  "Media/I am in Love with My Car.mp3",
     img:   "Media/IAmInLoveWithMyCar.jpeg",
