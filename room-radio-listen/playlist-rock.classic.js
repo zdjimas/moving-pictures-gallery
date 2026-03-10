@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "My Third Time Being Lucky",
+    file:  "Media/My Third Time Being Lucky.mp3",
+    img:   "Media/MyThirdTimeBeingLucky.jpeg",
+    alt:   "My Third Time Being Lucky - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A smooth Jazzy KZAK recreation of a deep track from Basia."
+  },
+
+
+    {
     title: "Copernicus Letter",
     file:  "Media/Copernicus Letter.mp3",
     img:   "Media/CopernicusLetter.jpeg",
