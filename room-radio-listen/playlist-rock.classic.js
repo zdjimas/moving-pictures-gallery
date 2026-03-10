@@ -2,6 +2,25 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Nicola Conte Foto Vita",
+    file:  "Media/Nicola Conte Foto Vita.mp3",
+    img:   "Media/NicolaConteFotoVita.jpeg",
+    alt:   "Nicola Conte Foto Vita - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK exclusive created from a playlist item from Desert Fox Radio."
+  },
+
+    {
+    title: "A Half A Village",
+    file:  "Media/A Half A Village.mp3",
+    img:   "Media/HalfAVillage.jpeg",
+    alt:   "A Half A Village - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A terrific remix of a live performance from Basia in 2023, jazzy and hip."
+  },
+
+
+    {
     title: "Music Must Keep Changing",
     file:  "Media/Music Must Keep Changing.mp3",
     img:   "Media/TheMusicKeepsChanging.JPG",
