@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Copernicus Letter",
+    file:  "Media/Copernicus Letter.mp3",
+    img:   "Media/CopernicusLetter.jpeg",
+    alt:   "Copernicus Letter - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "Another cool KZAK exclusive remix of a well loved song that made Basia Famous in London, Warsaw and New York."
+  },
+
+
+    {
     title: "Nicola Conte Foto Vita",
     file:  "Media/Nicola Conte Foto Vita.mp3",
     img:   "Media/NicolaConteFotoVita.jpeg",
