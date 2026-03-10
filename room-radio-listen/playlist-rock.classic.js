@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Music Must Keep Changing",
+    file:  "Media/Music Must Keep Changing.mp3",
+    img:   "Media/TheMusicKeepsChanging.JPG",
+    alt:   "Music Must Keep Changing - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "KZAK recreations of a favorite song from The Who’s Next Album"
+  },
+
+
+    {
     title: "Zip Skirts",
     file:  "Media/Zip Skirts.mp3",
     img:   "Media/ZipSkirts.jpeg",
