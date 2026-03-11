@@ -2,6 +2,25 @@
 const PLAYLIST_MELLOW = [
 
     {
+    title: "The Silent Yearning",
+    file:  "Media/The Silent Yearning.mp3",
+    img:   "Media/TheSilentYearning.jpeg",
+    alt:   "The Silent Yearning - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A KZAK Basia Recreation you will enjoy."
+  },
+
+    {
+    title: "The Yearning",
+    file:  "Media/The Yearning.mp3",
+    img:   "Media/TheYearning.jpeg",
+    alt:   "The Yearning - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "KZAK exclusive Basia recreation this one with Lyrics and voices."
+  },
+
+
+    {
     title: "My Third Time Being Lucky with Voices",
     file:  "Media/My Third Time Being Lucky with Voices.mp3",
     img:   "Media/MyThirdTimeBeingLuckyWithVoices.jpeg",
