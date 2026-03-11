@@ -2,6 +2,16 @@
 const PLAYLIST_MELLOW = [
 
     {
+    title: "My Third Time Being Lucky with Voices",
+    file:  "Media/My Third Time Being Lucky with Voices.mp3",
+    img:   "Media/MyThirdTimeBeingLuckyWithVoices.jpeg",
+    alt:   "My Third Time Being Lucky with Voices - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "Another KZAK recreation of a Basia Song."
+  },
+
+
+    {
     title: "Dining  Room Existentialism from Milano",
     file:  "Media/Dining  Room Existentialism from Milano.mp3",
     img:   "Media/DiningRoomExistentialismFromMilano.jpeg",
