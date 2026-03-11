@@ -2,6 +2,25 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Caught Smoking in Boston",
+    file:  "Media/Caught Smoking in Boston.mp3",
+    img:   "Media/CaughtSmokingInBoston.jpeg",
+    alt:   "Caught Smoking in Boston - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A recreation of a well loved song from Boston."
+  },
+
+    {
+    title: "Hitching A Ride To Boston",
+    file:  "Media/Hitching A Ride To Boston.mp3",
+    img:   "Media/HitchingARideToBoston.jpeg",
+    alt:   "Hitching A Ride To Boston - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "KZAK remix of a great song played in Boston"
+  },
+
+
+    {
     title: "My Third Time Being Lucky",
     file:  "Media/My Third Time Being Lucky.mp3",
     img:   "Media/MyThirdTimeBeingLucky.jpeg",
