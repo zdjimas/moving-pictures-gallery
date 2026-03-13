@@ -2,6 +2,25 @@
 const PLAYLIST_MELLOW = [
 
     {
+    title: "Astrud  Tonight",
+    file:  "Media/Astrud  Tonight.mp3",
+    img:   "Media/AstrudTonight.jpeg",
+    alt:   "Astrud  Tonight - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A beloved Basia Remix from 1988 live performance on the Tonight Show with Carson,  KZAK Jazz Classics."
+  },
+
+    {
+    title: "Astrud  Instrumental",
+    file:  "Media/Astrud  Instrumental.mp3",
+    img:   "Media/AstrudInstrumental.jpeg",
+    alt:   "Astrud  Instrumental - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A beloved Basia Instrumental version from 1988 live performance on the Tonight Show with Carson,  KZAK Jazz Classics."
+  },
+
+
+    {
     title: "Malago Suarez Remix Dance Part 1",
     file:  "Media/Malago Suarez Remix Dance Part 1.mp3",
     img:   "Media/MalagoSuarezRemixDancePart1.jpeg",
