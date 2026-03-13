@@ -2,6 +2,25 @@
 const PLAYLIST_MELLOW = [
 
     {
+    title: "Malago Suarez Remix Dance Part 1",
+    file:  "Media/Malago Suarez Remix Dance Part 1.mp3",
+    img:   "Media/MalagoSuarezRemixDancePart1.jpeg",
+    alt:   "Malago Suarez Remix Dance Part 1 - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A cool KZAK hip remix dance song."
+  },
+
+    {
+    title: "Malago Suarez Remix Dance Part 2",
+    file:  "Media/Malago Suarez Remix Dance Part 2.mp3",
+    img:   "Media/MalagoSuarezRemixDancePart2.jpeg",
+    alt:   "Malago Suarez Remix Dance Part 2 - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A second cool KZAK hip remix dance song."
+  },
+
+
+    {
     title: "The Silent Yearning",
     file:  "Media/The Silent Yearning.mp3",
     img:   "Media/TheSilentYearning.jpeg",
