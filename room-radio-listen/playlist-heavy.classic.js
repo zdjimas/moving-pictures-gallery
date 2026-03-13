@@ -1,6 +1,34 @@
 // Classic (global) playlist file. No ES module exports.
 const PLAYLIST_HEAVY = [
 
+    {
+    title: "Stranglehold of a Tool",
+    file:  "Media/Stranglehold of a Tool.mp3",
+    img:   "Media/StrangleholdOfATool.jpeg",
+    alt:   "Stranglehold of a Tool - KZAK artwork",
+    genre: "Heavy Rock",
+    story: "A cool remix of a Tool Song cover of a Ted Nugent Song from the 70s."
+  },
+
+    {
+    title: "Strangleholding my Tool",
+    file:  "Media/Strangleholding my Tool.mp3",
+    img:   "Media/StrangleholdingMyTool.jpeg",
+    alt:   "Strangleholding my Tool - KZAK artwork",
+    genre: "Heavy Rock",
+    story: "Another cool remix of a Tool Song cover of a Ted Nugent Song from the 70s."
+  },
+
+    {
+    title: "Metal Gods Living",
+    file:  "Media/Metal Gods Living.mp3",
+    img:   "Media/MetalGodsLiving.png",
+    alt:   "Metal Gods Living - KZAK artwork",
+    genre: "Heavy Rock",
+    story: "A recreation of a well known song from British Steel Album by Judas Priest."
+  },
+
+
 {
     title: "Synchronicity III - an AI Metal Remix",
     file:  "Media/Synchronicity III - an AI Metal Remix.mp3",
