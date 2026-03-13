@@ -2,6 +2,25 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Finding that I am One",
+    file:  "Media/Finding that I am One.mp3",
+    img:   "Media/FindingThatIAmOne.jpeg",
+    alt:   "Finding that I am One - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A classic Who song from Quadrophenia remixed for KZAK."
+  },
+
+    {
+    title: "It’s Not In My Head",
+    file:  "Media/It’s Not In My Head.mp3",
+    img:   "Media/ItsNotInMyHead.jpeg",
+    alt:   "It’s Not In My Head - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "Another classic Who song from Quadrophenia remixed exclusively for KZAK Listeners.  Enjoy."
+  },
+
+
+    {
     title: "Caught Smoking in Boston",
     file:  "Media/Caught Smoking in Boston.mp3",
     img:   "Media/CaughtSmokingInBoston.jpeg",
