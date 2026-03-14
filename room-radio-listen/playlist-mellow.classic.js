@@ -2,6 +2,34 @@
 const PLAYLIST_MELLOW = [
 
     {
+    title: "Corcovado Reprise",
+    file:  "Media/Corcovado Reprise.mp3",
+    img:   "Media/CorcovadoReprise.jpeg",
+    alt:   "Corcovado Reprise - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "Another KZAK remix of cuban dance music you'll love."
+  },
+
+    {
+    title: "Blaming it on the Summer",
+    file:  "Media/Blaming it on the Summer.mp3",
+    img:   "Media/BlamingItOnTheSummer.jpeg",
+    alt:   "Blaming it on the Summer - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "Basia remix done in the KZAK AI recreation style,  enjoy."
+  },
+
+    {
+    title: "Corcovado",
+    file:  "Media/Corcovado.mp3",
+    img:   "Media/Corcovado.jpeg",
+    alt:   "Corcovado - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "And one more KZAK AI style remix of cuban dance music you'll really love."
+  },
+
+
+    {
     title: "Astrud  Tonight",
     file:  "Media/Astrud  Tonight.mp3",
     img:   "Media/AstrudTonight.jpeg",
