@@ -2,6 +2,16 @@
 const PLAYLIST_MELLOW = [
 
     {
+    title: "Riding Out The Storm",
+    file:  "Media/Riding Out The Storm.mp3",
+    img:   "Media/RidingOutTheStorm.jpeg",
+    alt:   "Riding Out The Storm - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A spectacular recreation in modern jazz format of the well loved Doors song for KZAK listeners enjoyment."
+  },
+
+
+    {
     title: "Corcovado Reprise",
     file:  "Media/Corcovado Reprise.mp3",
     img:   "Media/CorcovadoReprise.jpeg",
