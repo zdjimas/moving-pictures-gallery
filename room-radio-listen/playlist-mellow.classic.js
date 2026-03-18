@@ -2,6 +2,16 @@
 const PLAYLIST_MELLOW = [
 
     {
+    title: "It's Easy For Me",
+    file:  "Media/It's Easy For Me Too Copy You.mp3",
+    img:   "Media/ItsEasyForMe.jpeg",
+    alt:   "It's Easy For Me - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A KZAK exclusive instrumental remix of a song just another band out of Boston."
+  },
+
+
+    {
     title: "Riding Out The Storm",
     file:  "Media/Riding Out The Storm.mp3",
     img:   "Media/RidingOutTheStorm.jpeg",
