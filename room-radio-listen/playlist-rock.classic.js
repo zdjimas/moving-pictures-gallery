@@ -2,6 +2,25 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Not Looking Back",
+    file:  "Media/Not Looking Back.mp3",
+    img:   "Media/NotLookingBack.jpeg",
+    alt:   "Not Looking Back - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A great cover of a song from dont look back album in KZAK style!"
+  },
+
+    {
+    title: "The Man I'll Never Be",
+    file:  "Media/The Man I'll Never Be.mp3",
+    img:   "Media/TheManIllNeverBe.jpeg",
+    alt:   "The Man I'll Never Be - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A favorite of the KZAK creators from just another band out of Boston."
+  },
+
+
+    {
     title: "Finding that I am One",
     file:  "Media/Finding that I am One.mp3",
     img:   "Media/FindingThatIAmOne.jpeg",
