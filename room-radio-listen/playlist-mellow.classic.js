@@ -2,6 +2,34 @@
 const PLAYLIST_MELLOW = [
 
     {
+    title: "Acoustically Drunk On Love",
+    file:  "Media/Acoustically Drunk On Love.mp3",
+    img:   "Media/AcousticallyDrunkOnLove.jpeg",
+    alt:   "Acoustically Drunk On Love - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A well loved song and recreation from the late 80s and 90s Basia Dance era."
+  },
+
+    {
+    title: "I’m Running for Cover",
+    file:  "Media/I’m Running for Cover.mp3",
+    img:   "Media/ImRunningForCover.jpeg",
+    alt:   "I’m Running for Cover - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A well loved song and recreation from the late 80s and 90s Basia Dance era."
+  },
+
+    {
+    title: "Freezing my Thaw",
+    file:  "Media/Freezing my Thaw.mp3",
+    img:   "Media/FreezingMyThaw.jpeg",
+    alt:   "Freezing my Thaw - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A well loved song and recreation from the late 80s and 90s Basia Dance era."
+  },
+
+
+    {
     title: "It's Easy For Me",
     file:  "Media/It's Easy For Me Too Copy You.mp3",
     img:   "Media/ItsEasyForMe.jpeg",
