@@ -2,6 +2,25 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Hand Me Down My World",
+    file:  "Media/Hand Me Down My World.mp3",
+    img:   "Media/HandMeDownMyWorld.jpeg",
+    alt:   "Hand Me Down My World - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A terrific recreation of a well loved song from the Guess Who."
+  },
+
+    {
+    title: "These Sixties Eyes",
+    file:  "Media/These Sixties Eyes.mp3",
+    img:   "Media/TheseSixtiesEyes.jpeg",
+    alt:   "These Sixties Eyes - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "Another KZAK recreation of a well loved song from the Guess Who."
+  },
+
+
+    {
     title: "Not Looking Back",
     file:  "Media/Not Looking Back.mp3",
     img:   "Media/NotLookingBack.jpeg",
