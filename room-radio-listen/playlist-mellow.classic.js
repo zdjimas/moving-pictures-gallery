@@ -2,6 +2,34 @@
 const PLAYLIST_MELLOW = [
 
     {
+    title: "Smoothest of Operators",
+    file:  "Media/Smoothest of Operators.mp3",
+    img:   "Media/SmoothestOfOperators.jpeg",
+    alt:   "Smoothest of Operators - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A well loved jazz favorite recreated for KZAK listeners."
+  },
+
+    {
+    title: "Not An Ordinary Love",
+    file:  "Media/Not An Ordinary Love.mp3",
+    img:   "Media/NotAnOrdinaryLove.jpeg",
+    alt:   "Not An Ordinary Love - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A well loved jazz favorite recreated for KZAK listeners."
+  },
+
+    {
+    title: "Cherish Your Day",
+    file:  "Media/Cherish Your Day.mp3",
+    img:   "Media/CherishYourDay.jpeg",
+    alt:   "Cherish Your Day - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A well loved jazz favorite recreated for KZAK listeners."
+  },
+
+
+    {
     title: "Acoustically Drunk On Love",
     file:  "Media/Acoustically Drunk On Love.mp3",
     img:   "Media/AcousticallyDrunkOnLove.jpeg",
