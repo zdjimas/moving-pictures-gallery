@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Another Blue Dream Flight",
+    file:  "Media/Another Blue Dream Flight.mp3",
+    img:   "Media/AnotherBlueDreamFlight.jpeg",
+    alt:   "Another Blue Dream Flight - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK exclusive of a beautiful melody honoring one of the greatest guitarists in the world who is touring again in 2026."
+  },
+
+
+    {
     title: "Hand Me Down My World",
     file:  "Media/Hand Me Down My World.mp3",
     img:   "Media/HandMeDownMyWorld.jpeg",
