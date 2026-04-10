@@ -2,6 +2,34 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "That Forgotten Part",
+    file:  "Media/That Forgotten Part.mp3",
+    img:   "Media/ThatForgottenPart.jpeg",
+    alt:   "That Forgotten Part - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK exclusive of another great tune from Joe turing with Steve."
+  },
+
+    {
+    title: "The Ugly Fly",
+    file:  "Media/The Ugly Fly.mp3",
+    img:   "Media/TheUglyFly.jpeg",
+    alt:   "The Ugly Fly - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK recreation of a song about a fly, see if you can guess who first played it."
+  },
+
+    {
+    title: "Scramble On",
+    file:  "Media/Scramble On.mp3",
+    img:   "Media/ScrambleOn.jpeg",
+    alt:   "Scramble On - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A well remembered 1970s melody recreated in 2026 with a modern mix of country, pop and folk."
+  },
+
+
+    {
     title: "Another Blue Dream Flight",
     file:  "Media/Another Blue Dream Flight.mp3",
     img:   "Media/AnotherBlueDreamFlight.jpeg",
