@@ -2,6 +2,34 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Scramble On",
+    file:  "Media/Scramble On.mp3",
+    img:   "Media/ScrambleOn.jpeg",
+    alt:   "Scramble On - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK recreation of a well loved song from Robert Plant"
+  },
+
+    {
+    title: "Is this a Crime_",
+    file:  "Media/Is this a Crime_.mp3",
+    img:   "Media/IsThisACrime.jpeg",
+    alt:   "Is this a Crime_ - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK exclusive remix of a well loved 90s jazz song."
+  },
+
+    {
+    title: "That Forgotten Part",
+    file:  "Media/That Forgotten Part.mp3",
+    img:   "Media/ThatForgottenPart.jpeg",
+    alt:   "That Forgotten Part - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "KZAK replica of a well loved Satriani tune."
+  },
+
+
+    {
     title: "That Forgotten Part",
     file:  "Media/That Forgotten Part.mp3",
     img:   "Media/ThatForgottenPart.jpeg",
