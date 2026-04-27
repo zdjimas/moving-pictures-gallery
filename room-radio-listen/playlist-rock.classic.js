@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "My Villa in Strangiato",
+    file:  "Media/My Villa in Strangiato.mp3",
+    img:   "Media/MyVillaInStrangiato.jpeg",
+    alt:   "My Villa in Strangiato - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK Exclusive of a well loved song from three guys from Toronto."
+  },
+
+
+    {
     title: "Scramble On",
     file:  "Media/Scramble On.mp3",
     img:   "Media/ScrambleOn.jpeg",
