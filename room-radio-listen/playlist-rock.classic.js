@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Xanadu 2026",
+    file:  "Media/Xanadu 2026.mp3",
+    img:   "Media/Xanadu2026.jpeg",
+    alt:   "Xanadu 2026 - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK exclusive recreation of a well loved song from Rush made in the 1970s."
+  },
+
+
+    {
     title: "My Villa in Strangiato",
     file:  "Media/My Villa in Strangiato.mp3",
     img:   "Media/MyVillaInStrangiato.jpeg",
