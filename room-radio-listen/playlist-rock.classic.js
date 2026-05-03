@@ -2,6 +2,15 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Love Is Blind",
+    file:  "Media/LOVE IS BLIND.mp3",
+    img:   "Media/LoveIsBlind.jpeg",
+    alt:   "Love Is Blind - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK exclusive recreation of a well love U2 song from Achtung Baby Album, a favorite of CJ Murphy."
+  },
+
+    {
     title: "Xanadu 2026",
     file:  "Media/Xanadu 2026.mp3",
     img:   "Media/Xanadu2026.jpeg",
@@ -9,7 +18,6 @@ const PLAYLIST_ROCK = [
     genre: "Middle Ground Rock",
     story: "A KZAK exclusive recreation of a well loved song from Rush made in the 1970s."
   },
-
 
     {
     title: "My Villa in Strangiato",
