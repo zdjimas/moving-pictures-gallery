@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "LOVE IS BLIND",
+    file:  "Media/LOVE IS BLIND.mp3",
+    img:   "Media/LoveIsBlind.jpeg",
+    alt:   "LOVE IS BLIND - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A terrific creation of the melody influenced by Love is Blindness from U2's Achtung Baby Album.  One of CJ Murphy's favorite songs from this artist."
+  },
+
+
+    {
     title: "Love Is Blind",
     file:  "Media/LOVE IS BLIND.mp3",
     img:   "Media/LoveIsBlind.jpeg",
