@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "A Tart Lemon",
+    file:  "Media/A Tart Lemon.mp3",
+    img:   "Media/ATartLemon.jpeg",
+    alt:   "A Tart Lemon - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "Another KZAK exclusive from zdjimas on Suno.ai. A well loved melody from Achtung Baby Album, a bit tarter than the original.  Good mellow dance groove.  Lemon Twist!"
+  },
+
+
+    {
     title: "LOVE IS BLIND",
     file:  "Media/LOVE IS BLIND.mp3",
     img:   "Media/LoveIsBlind.jpeg",
