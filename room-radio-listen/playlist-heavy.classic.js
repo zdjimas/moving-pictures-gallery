@@ -2,6 +2,16 @@
 const PLAYLIST_HEAVY = [
 
     {
+    title: "The Courage of Morpheus",
+    file:  "Media/The Courage of Morpheus.mp3",
+    img:   "Media/Morpheus.jpeg",
+    alt:   "The Courage of Morpheus - KZAK artwork",
+    genre: "Heavy Rock",
+    story: "Metal and Strings are leveraged in this great recreation of an opening album song from one of CJ Murphy's favorite bands. a KZAK exclusive for listeners."
+  },
+
+
+    {
     title: "Stranglehold of a Tool",
     file:  "Media/Stranglehold of a Tool.mp3",
     img:   "Media/StrangleholdOfATool.jpeg",
