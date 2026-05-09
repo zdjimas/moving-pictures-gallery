@@ -2,6 +2,16 @@
 const PLAYLIST_MELLOW = [
 
     {
+    title: "The Emotions of Morpheus",
+    file:  "Media/The Emotions of Morpheus.mp3",
+    img:   "Media/Morpheus.jpeg",
+    alt:   "The Emotions of Morpheus - KZAK artwork",
+    genre: "Mellow Classic",
+    story: "A brilliant symphonic orchestra remix of a newer song from our friends at Dream Theater.  KZAK founders love Dream Theater, check them out if you don't know their music.  Progressive with every kind of influence of bands from Genesis, to Rush, to Pink Floyd, to Metallica."
+  },
+
+
+    {
     title: "Smoothest of Operators",
     file:  "Media/Smoothest of Operators.mp3",
     img:   "Media/SmoothestOfOperators.jpeg",
