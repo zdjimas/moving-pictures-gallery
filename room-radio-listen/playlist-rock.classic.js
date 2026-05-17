@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "My orchestra’s false awakening",
+    file:  "Media/My orchestra’s false awakening.mp3",
+    img:   "Media/MyOrchestrasFalseAwakening.jpeg",
+    alt:   "My orchestra’s false awakening - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A KZAK exclusive, remixing the opening song from the Black Album of Dream Theater, but with a symphony and progressive rock mix, and a bit of Omen style voices."
+  },
+
+
+    {
     title: "A Tart Lemon",
     file:  "Media/A Tart Lemon.mp3",
     img:   "Media/ATartLemon.jpeg",
