@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Six Degrees of a Turbulant Remix",
+    file:  "Media/Six Degrees of a Turbulant Remix.mp3",
+    img:   "Media/SixDegreesOfATurbulantRemix.jpeg",
+    alt:   "Six Degrees of a Turbulant Remix - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A recreation of a well loved Instrumental opening from CJ Murphy's favorite band."
+  },
+
+
+    {
     title: "My orchestra’s false awakening",
     file:  "Media/My orchestra’s false awakening.mp3",
     img:   "Media/MyOrchestrasFalseAwakening.jpeg",
