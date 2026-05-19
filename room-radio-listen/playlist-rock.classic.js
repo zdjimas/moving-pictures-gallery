@@ -2,6 +2,25 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Another One Of Those Days Pt. 1",
+    file:  "Media/Another One Of Those Days Pt. 1.mp3",
+    img:   "Media/AnotherOneOfThoseDays.jpeg",
+    alt:   "Another One Of Those Days Pt. 1 - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A great remix of a song from the Meddle album in 1970 or so..."
+  },
+
+    {
+    title: "A Dystopian Opening Act of Orchestral Love",
+    file:  "Media/A Dystopian Opening Act of Orchestral Love.mp3",
+    img:   "Media/ADystopianOpeningActOfOrchestralLove.jpeg",
+    alt:   "A Dystopian Opening Act of Orchestral Love - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "The opening act of a double album from the theater of a band of dreams.."
+  },
+
+
+    {
     title: "Six Degrees of a Turbulant Remix",
     file:  "Media/Six Degrees of a Turbulant Remix.mp3",
     img:   "Media/SixDegreesOfATurbulantRemix.jpeg",
