@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "An Epic Choral Kiss Goodnight",
+    file:  "Media/An Epic Choral Kiss Goodnight.mp3",
+    img:   "Media/AnEpicChoralKissGoodnight.jpeg",
+    alt:   "An Epic Choral Kiss Goodnight - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A great classical style remix of a song from Six Degrees of Inner Turbulence."
+  },
+
+
+    {
     title: "Another One Of Those Days Pt. 1",
     file:  "Media/Another One Of Those Days Pt. 1.mp3",
     img:   "Media/AnotherOneOfThoseDays.jpeg",
