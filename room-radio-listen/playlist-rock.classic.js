@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "Backed by and Angel",
+    file:  "Media/Backed by and Angel.mp3",
+    img:   "Media/BackedByAnAngel.jpeg",
+    alt:   "Backed by and Angel - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A cool remix of a well known melody opening from Dream Theater, done in a progressive metal remake style."
+  },
+
+
+    {
     title: "An Epic Choral Kiss Goodnight",
     file:  "Media/An Epic Choral Kiss Goodnight.mp3",
     img:   "Media/AnEpicChoralKissGoodnight.jpeg",
