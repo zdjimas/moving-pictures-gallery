@@ -2,6 +2,16 @@
 const PLAYLIST_ROCK = [
 
     {
+    title: "An Apparatus of Tools",
+    file:  "Media/An Apparatus of Tools.mp3",
+    img:   "Media/AnApparatusOfTools.jpeg",
+    alt:   "An Apparatus of Tools - KZAK artwork",
+    genre: "Middle Ground Rock",
+    story: "A creation of progressive metal inspired by the apparatus called tool."
+  },
+
+
+    {
     title: "Backed by and Angel",
     file:  "Media/Backed by and Angel.mp3",
     img:   "Media/BackedByAnAngel.jpeg",
